@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">yourPISD</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_section1">New Entries</string>
+    <string name="title_section2">Grade Summary</string>
+    <string name="title_section3">Section 3</string>
+    <string name="teacher_name">TEACHER</string>
+    <string name="daily">Daily Grades:</string>
+    <string name="major">Major Evaluations:</string>
+    <string name="title_activity_class_swipe">ClassSwipe</string>
+    
+</resources>
