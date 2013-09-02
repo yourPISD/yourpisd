@@ -19,8 +19,8 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -35,6 +35,7 @@ import android.widget.TextView;
 
 import com.sunstreaks.mypisd.net.DataGrabber;
 import com.sunstreaks.mypisd.net.Domain;
+import com.sunstreaks.mypisd.net.PISDException;
 
 /**
  * Activity which displays a login screen to the user, offering registration as
@@ -77,7 +78,6 @@ public class LoginActivity extends Activity {
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.activity_login);
-
 		// Set up the Spinner.
 		List<String> SpinnerArray =  new ArrayList<String>();
 		for (Domain d : Domain.values()) {
@@ -94,10 +94,12 @@ public class LoginActivity extends Activity {
 		rememberPassword.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					if (rememberPassword.isChecked())
+					if (rememberPassword.isChecked()) {
 						mRememberPassword = true;
-					else
+					}
+					else {
 						mRememberPassword = false;
+					}
 				}
 				
 			});
@@ -125,12 +127,13 @@ public class LoginActivity extends Activity {
 		SharedPreferences sharedPrefs = this.getPreferences(Context.MODE_PRIVATE);
 		mEmailView.setText(sharedPrefs.getString("email", mEmail));
 		mPasswordView.setText(sharedPrefs.getString("password", ""));
+		mRememberPassword = sharedPrefs.getBoolean("remember_password", false);
+		rememberPassword.setChecked(mRememberPassword);
 		domainSpinner.setSelection(sharedPrefs.getInt("domain", 0));
-		
 		mLoginFormView = findViewById(R.id.login_form);
 		mLoginStatusView = findViewById(R.id.login_status);
 		mLoginStatusMessageView = (TextView) findViewById(R.id.login_status_message);
-
+		
 		findViewById(R.id.sign_in_button).setOnClickListener(
 				new View.OnClickListener() {
 					@Override
@@ -203,12 +206,15 @@ public class LoginActivity extends Activity {
 			SharedPreferences.Editor editor = sharedPrefs.edit();
 			editor.putInt("domain", domainSpinner.getSelectedItemPosition());
 			editor.putString("email", mEmail);
-			if (mRememberPassword) {
-				editor.putBoolean("remember_password", mRememberPassword);
-			}
+			editor.putBoolean("remember_password", mRememberPassword);
+			editor.putString("password", mRememberPassword? mPassword: "");
 			editor.commit();
 			
-			mLoginStatusMessageView.setText(R.string.login_progress_signing_in);
+			// Modified from default.
+			
+			
+
+			//mLoginStatusMessageView.setText(R.string.login_progress_signing_in);
 			showProgress(true);
 			mAuthTask = new UserLoginTask();
 			mAuthTask.execute((Void) null);
@@ -249,16 +255,18 @@ public class LoginActivity extends Activity {
 						}
 					});
 			
-			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-			imm.hideSoftInputFromWindow(mEmailView.getWindowToken(), 0);
+
 		} else {
 			// The ViewPropertyAnimator APIs are not available, so simply show
 			// and hide the relevant UI components.
 			mLoginStatusView.setVisibility(show ? View.VISIBLE : View.GONE);
 			mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
 		}
+		
 	}
 
+
+	
 	/**
 	 * Represents an asynchronous login/registration task used to authenticate
 	 * the user.
@@ -278,25 +286,65 @@ public class LoginActivity extends Activity {
 								Domain.valueOf(domainSpinner.getSelectedItem().toString()),
 								mEmail,
 								mPassword);
-						JSONArray classGrades = d.getClassGrades();
-						//print server data
-						Log.d("server data", classGrades.toString());
-						// Hopefully this works!
-						SharedPreferences sharedPrefs = LoginActivity.this.getPreferences(Context.MODE_PRIVATE);
+						
+						// Update the loading screen.
+						runOnUiThread(new Runnable() {
+						     public void run() {
+						    	 ((TextView)mLoginStatusMessageView).setText(R.string.login_progress_mypisd);
+						    }
+						});
+						d.login();
+						if (d.getEditureLogin() == -1) {
+					    	return false;
+						}
+						
+						{
+							// Update the loading screen.
+							runOnUiThread(new Runnable() {
+							     public void run() {
+							    	 ((TextView)mLoginStatusMessageView).setText(R.string.login_progress_gradebook);
+							    }
+							});
+							String[] ptc = d.getPassthroughCredentials();
+							d.loginGradebook(ptc[0], ptc[1], mEmail, mPassword);
+						}
+						// Update the loading screen.
+						runOnUiThread(new Runnable() {
+						     public void run() {
+						    	 ((TextView)mLoginStatusMessageView).setText(R.string.login_progress_downloading_data);
+						    }
+						});
+						
+						// No longer gets all class grades on load. Too slow!
+						//JSONArray classGrades = d.getAllClassGrades();
+						JSONArray gradeSummary = d.getGradeSummary();
+//						System.out.println(gradeSummary.toString());
+						// Store class grades in Shared Preferences.
+						SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(LoginActivity.this);
 						SharedPreferences.Editor editor = sharedPrefs.edit();
-						editor.putString("classGrades", classGrades.toString());
+						editor.putString("gradeSummary", gradeSummary.toString());
 						editor.commit();
 						Intent startMain = new Intent(LoginActivity.this, MainActivity.class);
 						startActivity(startMain);
 				    } else {
-				    	AlertDialog.Builder popupBuilder = new AlertDialog.Builder(LoginActivity.this);
-				    	TextView myMsg = new TextView(LoginActivity.this);
-				    	myMsg.setText("No internet connection detected! Please find a connection and try again.");
-				    	myMsg.setGravity(Gravity.CENTER_HORIZONTAL);
-				    	popupBuilder.setView(myMsg);
+				    	System.err.println("No internet connection");
+				    	// Program exits mysteriously here.
+						runOnUiThread(new Runnable() {
+						     public void run() {
+						    	 AlertDialog.Builder popupBuilder = new AlertDialog.Builder(LoginActivity.this);
+							    	TextView myMsg = new TextView(LoginActivity.this);
+							    	myMsg.setText("No internet connection detected! Please find a connection and try again.");
+							    	myMsg.setGravity(Gravity.CENTER_HORIZONTAL);
+							    	popupBuilder.setView(myMsg);
+						    }
+						});
 				    }
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (PISDException e) {
+				e.printStackTrace();
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 

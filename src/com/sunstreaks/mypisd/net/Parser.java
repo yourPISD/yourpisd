@@ -69,12 +69,12 @@ public class Parser {
 		return new String[] {uT, uID};
 	}
 	
-	public static int studentIdPinnacle (ArrayList<String> cookies) {
+	public static int studentIdPinnacle (ArrayList<String> cookies) throws PISDException {
+//		System.out.println("Cookies size = " + cookies.size());
 		for (String c : cookies)
 			if (c.substring(0,c.indexOf('=')).equals("PinnacleWeb.StudentId"))
 				return Integer.parseInt(c.substring(c.indexOf('=')+1));
-
-		return -1;
+		throw new PISDException ("Student ID not found. Cookies: " + cookies.toString());
 	}
 	
 	public static JSONArray detailedReport (String html) throws JSONException {
@@ -149,12 +149,16 @@ public class Parser {
 		return new String[] {teacherName, email};
 	}
 	
-	public static JSONArray termCategoryGrades (String html) throws JSONException {
+	public static Object[] termCategoryGrades (String html) throws JSONException {
 		JSONArray termCategoryGrades = new JSONArray();
 		
 		Element doc = Jsoup.parse(html);
 		Element categoryTable = doc.getElementById("Category");
 		Elements rows = categoryTable.getElementsByTag("tbody").get(0).getElementsByTag("tr");
+		
+		double weight = 0;
+		double points = 0;
+		
 		for (Element row : rows) {
 			JSONObject category = new JSONObject();
 			Elements columns = row.getElementsByTag("td");
@@ -178,9 +182,14 @@ public class Parser {
 				}
 			}
 			termCategoryGrades.put(category);
+			if (category.optDouble("Percent", 0) != 0) {
+				points += category.optDouble("Percent", 0) * category.optDouble("Weight", 0);
+				weight += category.optDouble("Weight", 0);
+			}
 		}
-		
-		return termCategoryGrades;
+		//System.out.println("Points = " + points + "; Weight = " + weight);
+		double average = weight>0? points/weight: -1;
+		return new Object[] {termCategoryGrades, average};
 	}
 	
 	/*
@@ -226,6 +235,55 @@ public class Parser {
 			return "Letter";
 		default:
 			return null;
+		}
+	}
+	
+	public static JSONArray gradeSummary (String html, JSONArray classList) throws JSONException {
+		System.out.println(html);
+		Element doc = Jsoup.parse(html);
+//		Elements table1 = doc.getElementsByTag("table");
+//		Element table2 = table1.get(2);
+//		Elements table3 = table2.getElementsByTag("tbody");
+//		Element reportTable = table3.get(0);
+		Element reportTable = doc.getElementsByClass("reportTable").get(0).getElementsByTag("tbody").get(0);
+		Elements rows = reportTable.getElementsByTag("tr");
+		
+		for (int i = 0; i < rows.size(); i++) {
+			Element row = rows.get(i);
+			Elements columns = row.getElementsByTag("td");
+			for (int j = 0; j < 8; j++) {
+				int col = termToColumn(j);
+				Element column = columns.get(col);
+				if ( ! column.text().equals(""))
+					try {
+						classList.getJSONObject(i).getJSONArray("terms").getJSONObject(col).put("average", Integer.parseInt(column.text()));
+					} catch (JSONException e) {
+						// Hopefully this will only execute if there is a class that does not last for all year.
+						// In which case we have encountered ArrayIndexOutOfBounds
+					}
+			}
+		}
+		
+		return classList;
+	}
+	
+	/*
+	 * for use with GradeSummary
+	 */
+	public static int termToColumn (int column) {
+		switch (column) {
+		case 0:
+		case 1:
+		case 2:
+		case 3:
+			return column;
+		case 4:
+		case 5:
+		case 6:
+		case 7:
+			return column + 1;		// skips over first semester average column 
+		default:
+			return -1;
 		}
 	}
 	

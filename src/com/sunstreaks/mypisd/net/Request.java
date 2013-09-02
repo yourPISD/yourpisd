@@ -99,7 +99,8 @@ public class Request {
 		//setCookies(conn.getHeaderFields().get("Set-Cookie"));
 		
 		// Do not clear cookies each time!
-//		cookies = new ArrayList<String>();
+		//cookies = new ArrayList<String>();
+		System.out.println("Cookie-size: " + cs.getCookies().size());
 		for (HttpCookie c : cs.getCookies()) {
 			cookies.add(c.toString());
 		}
@@ -191,8 +192,10 @@ public class Request {
 		//setCookies(conn.getHeaderFields().get("Set-Cookie"));
 		
 		// Do not clear cookies each time!
-//		cookies = new ArrayList<String>();
+		//cookies = new ArrayList<String>();
+		System.out.println("Cookie-size: " + cs.getCookies().size());
 		for (HttpCookie c : cs.getCookies()) {
+			System.out.println(c.toString());
 			cookies.add(c.toString());
 		}
 		

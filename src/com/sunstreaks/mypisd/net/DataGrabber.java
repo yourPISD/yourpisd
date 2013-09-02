@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -17,58 +19,55 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
-public class DataGrabber {
+public final class DataGrabber {
 
-	Domain domain;
-	String username;
-	String password;
+	static Domain domain;
+	static String username;
+	static String password;
+	static String[] passthroughCredentials;
+	static String[] gradebookCredentials;
+	static String pageUniqueId;
+	// 1= success. 0 = not tried; <0 = failure.
+	static int editureLogin = 0;
+	static int gradebookLogin = 0;
 	
-	ArrayList<String> cookies = new ArrayList<String>();
-	JSONArray classList = null;
-	Date lastUpdated;
-	int studentId = 0;
-	String pageUniqueId;
-	JSONArray classGrades = null;
+	static ArrayList<String> cookies = new ArrayList<String>();
+	static JSONArray classList = null;
+	// Class -> Term
+	static Date[][] lastUpdated;
+	static int studentId = 0;
+	static int[] classIds;
+	static JSONArray classGrades = null;
 	
-/*
-	public static void main(String args[]) throws MalformedURLException, IllegalUrlException, IOException, JSONException {
-		
-		
-		 //to accept expired certificate of login1.mypisd.net
-		
-		acceptAllCertificates();
-		
+	public static void main(String args[]) throws Exception  {
 		long startTime = System.currentTimeMillis();
 		
 		String username = "sidharth.kapur.1";
 		String password = "{\"pass\":0}";
-
 		
-		DataGrabber d = new DataGrabber();
-//		d.login(Domain.PARENT, "poonamkapur2000@yahoo.com", "NikooMe2");
-		d.login(Domain.PLANO_WEST, username, password);
-
-		System.out.println(d.getClassGrades());
-
+		DataGrabber d = new DataGrabber(Domain.PLANO_WEST, username, password);
+		d.login();
+		
 		long endTime = System.currentTimeMillis();
 		System.out.println(endTime - startTime + "ms");
-		
-
 	}
-*/
+	
+
 	public DataGrabber (Domain domain, String username, String password) {
 		this.domain = domain;
 		this.username = username;
 		this.password = password;
-	}
-
-	public boolean login(/*Domain dom, String username, String password*/) throws MalformedURLException, IllegalUrlException, IOException {
 		
-
 		/*
 		 * to accept expired certificate of login1.mypisd.net
 		*/
 		acceptAllCertificates();
+	}
+
+	public static void login(/*Domain dom, String username, String password*/)
+			throws MalformedURLException, IllegalUrlException, IOException, PISDException {
+		
+
 		
 		Object[] cookieAuth = Request.sendPost(
 				domain.loginAddress, 
@@ -80,12 +79,15 @@ public class DataGrabber {
 		cookies = (ArrayList<String>) cookieAuth[2];
 //		System.out.println(response);
 		
-		if (Parser.accessGrantedEditure(response))
+		if (Parser.accessGrantedEditure(response)) {
 			System.out.println("Editure access granted!");
+			editureLogin = 1;
+		}
 		else {
-			System.out.println("Bad username/password!");
+			System.out.println("Bad username/password 1!");
 			System.out.println(response);
-			return false;
+			editureLogin = -1;
+			return; /* false; */
 		}
 
 		
@@ -98,15 +100,16 @@ public class DataGrabber {
 			cookies = (ArrayList<String>) myClasses[2];
 		}
 			
-		String[] passthroughCredentials = Parser.passthroughCredentials(response);
+		passthroughCredentials = Parser.passthroughCredentials(response);
 		
-		
+		/*
 		boolean loginAttempt = false;
 		int counter = 0;
 		do {
 			if (counter > 0) {
 				try {
-					Thread.sleep(1500);
+					Thread.sleep(3000);
+					System.out.println("trying again");
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -115,12 +118,13 @@ public class DataGrabber {
 			counter++;
 		} while (counter < 5 && loginAttempt == false);
 		return loginAttempt;
+		*/
 	}
 	
 	/*
 	 * userType is P (parent) or S (student)
 	 */
-	public boolean loginGradebook(String userType, String uID, String email, String password) throws MalformedURLException, IllegalUrlException, IOException {
+	public static boolean loginGradebook(String userType, String uID, String email, String password) throws MalformedURLException, IllegalUrlException, IOException, PISDException {
 
 		// commented reques paramater is allowed for parent account, not allowed for student account. never required.
 		Object[] passthrough = Request.sendPost(
@@ -141,10 +145,13 @@ public class DataGrabber {
 		/*
 		 * escapes if access not granted.
 		 */
-		if (Parser.accessGrantedGradebook(gradebookCredentials))
+		if (Parser.accessGrantedGradebook(gradebookCredentials)) {
 			System.out.println("Gradebook access granted!");
+			gradebookLogin = 1;
+		}
 		else {
-			System.out.println("Bad username/password!");
+			System.out.println("Bad username/password 2!");
+			gradebookLogin--;
 			return false;
 		}
 		
@@ -160,8 +167,20 @@ public class DataGrabber {
 		cookies = (ArrayList<String>) link[2];
 		
 
+		System.out.println("Cookies after link: " + cookies);
 		
+		// perhaps this is where we get our StudentId cookie!
 		
+		Object[] defaultAspx = Request.sendPost("https://gradebook.pisd.edu/Pinnacle/Gradebook/Default.aspx",
+				postParams,
+				cookies);
+
+		response = (String) link[0];
+		responseCode = (Integer) link[1];
+		cookies = (ArrayList<String>) link[2];
+		
+
+		System.out.println("Cookies after Default.aspx: " + cookies);
 
 		/*
 		 * retrieves the pageUniqueID from html of link.aspx.
@@ -169,11 +188,9 @@ public class DataGrabber {
 		 * 
 		 */
 		pageUniqueId = Parser.pageUniqueId(response);
+		// throws PISDException
 		studentId = Parser.studentIdPinnacle(cookies);
-		if (studentId == -1) {
-			System.out.println("Cookie parsing error. studentId is -1");
-			return false;
-		}
+		
 		if (pageUniqueId == null) {
 			System.out.println("Some error. pageUniqueId is null");
 			return false;
@@ -213,7 +230,7 @@ public class DataGrabber {
 		return true;
 	}
 	
-	public void setClassList(String json) throws JSONException {
+	public static void setClassList(String json) throws JSONException {
 		
 		JSONObject j = new JSONObject(json);
 		classList = j.getJSONArray("classes");
@@ -227,8 +244,9 @@ public class DataGrabber {
 //	}
 //	
 	@SuppressWarnings("finally")
-	public int[] getClassIds() {
-		int[] classIds = null;
+	public static int[] getClassIds() {
+		if (classIds != null)
+			return classIds;
 		
 		if (classList == null) {
 			System.out.println("You didn't login!");
@@ -245,7 +263,7 @@ public class DataGrabber {
 		}
 	}
 //	
-	public int[] getTermIds( int classId ) throws JSONException {
+	public static int[] getTermIds( int classId ) throws JSONException {
 		for (int i = 0; i < classList.length(); i++) {
 			if (classList.getJSONObject(i).getInt("classId") == classId) {
 				JSONArray terms = classList.getJSONObject(i).getJSONArray("terms");
@@ -259,12 +277,17 @@ public class DataGrabber {
 		//if class not found.
 		return null;
 	}
+	
+	public static int getTermCount (int index) throws JSONException {
+		return classList.getJSONObject(index).getJSONArray("terms").length();
+	}
+	
 //	
 //	public int[] getDetailedReport( int classId, int termId ) {
 //		
 //	}
 
-	public String getDetailedReport (int classId, int termId, int studentId) {
+	public static String getDetailedReport (int classId, int termId, int studentId) {
 		try {
 			String url = "https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/StudentAssignments.aspx?" + 
 					"&EnrollmentId=" + 	classId + 
@@ -290,29 +313,110 @@ public class DataGrabber {
 		}
 	}
 	
-
-	public JSONArray getClassGrades () throws JSONException {
+	public static JSONArray getGradeSummary () throws JSONException {
 		
-		if (classList==null)
-			try {
-				login();
-			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalUrlException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		String classId = classList.getJSONObject(0).getString("enrollmentId");
+		String termId = classList.getJSONObject(0).getJSONArray("terms").getJSONObject(0).getString("termId");
+		
+		try {
+			String url = "https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/GradeSummary.aspx?" + 
+					"&EnrollmentId=" + 	classId + 
+					"&TermId=" + termId + 
+					"&ReportType=0&StudentId=" + studentId;
+			
+
+			Object[] summary = Request.sendGet(url,	cookies);
+			String response = (String) summary[0];
+			int responseCode = (Integer) summary[1];
+			cookies = (ArrayList<String>) summary[2];
+			
+			if (responseCode != 200) {
+				System.out.println("Response code: " + responseCode);
 			}
+			
+			/*
+			 * puts averages in classList, under each term.
+			 */
+			classList = Parser.gradeSummary(response, classList);
+
+			return classList;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		} catch (IllegalUrlException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public static void getClassGrades( int classIndex, int termIndex ) throws JSONException {
+		
+		
+		int classId = getClassIds()[classIndex];
+		int termId = getTermIds(classId)[termIndex];
+		
+		String html = getDetailedReport(classId, termId, studentId);
+		
+		
+		//Parse the teacher name if not already there.
+		try {
+			classGrades.getJSONObject(classIndex).getString("teacher");
+		} catch (JSONException e) {
+			// Teacher was not found.
+			String[] teacher = Parser.teacher(html);
+			classGrades.getJSONObject(classIndex).put("teacher", teacher[0]);
+			classGrades.getJSONObject(classIndex).put("teacherEmail", teacher[1]);
+		}
+
+		
+		JSONArray termGrades = Parser.detailedReport(html);
+		Object[] termCategory = Parser.termCategoryGrades(html);
+		JSONArray termCategoryGrades = (JSONArray) termCategory[0];
+		
+		if ((Double)termCategory[1] != -1)
+			classGrades.getJSONObject(classIndex).getJSONArray("terms").getJSONObject(termIndex).put("average", termCategory[1]);
+		classGrades.getJSONObject(classIndex).getJSONArray("terms").getJSONObject(termIndex).put("grades", termGrades);
+		classGrades.getJSONObject(classIndex).getJSONArray("terms").getJSONObject(termIndex).put("categoryGrades", termCategoryGrades);
+		
+	}
+	
+	
+	public static JSONArray getAllClassGrades() throws JSONException {
+		if (classList == null)
+			return null;
+		if (classIds == null)
+			getClassIds();
+		if (classGrades == null)
+			classGrades = classList;
+		
+		for (int i = 0; i < classIds.length; i++) {
+			for (int j = 0; j < getTermIds(classIds[i]).length; j++) {
+				getClassGrades (i , j);
+			}
+		}
+		
+		return classGrades;
+	}
+	
+	/*
+	public JSONArray getAllClassGrades () throws JSONException {
+		
+//		if (classList==null)
+//			try {
+//				login();
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//				return null;
+//			}
 
 		
 		classGrades = classList;
-
+		
+		//makes sure that classIds is not null.
+		getClassIds();
 		// fetch each class
-		for (int i = 0; i < getClassIds().length; i++) {
-			int classId = getClassIds()[i];
+		for (int i = 0; i < classIds.length; i++) {
+			int classId = classIds[i];
 			int[] termIds = getTermIds(classId);
 			JSONArray grades = new JSONArray();
 			
@@ -330,16 +434,33 @@ public class DataGrabber {
 				}
 				
 				JSONArray termGrades = Parser.detailedReport(html);
-				JSONArray termCategoryGrades = Parser.termCategoryGrades(html);
+				Object[] termCategory = Parser.termCategoryGrades(html);
+				JSONArray termCategoryGrades = (JSONArray) termCategory[0];
 				
+				if ((Double)termCategory[1] != -1)
+					classGrades.getJSONObject(i).getJSONArray("terms").getJSONObject(j).put("average", termCategory[1]);
 				classGrades.getJSONObject(i).getJSONArray("terms").getJSONObject(j).put("grades", termGrades);
 				classGrades.getJSONObject(i).getJSONArray("terms").getJSONObject(j).put("categoryGrades", termCategoryGrades);
 			}
 
 		}
+		
+		Date d = Calendar.getInstance().getTime();
+		
+		// Gives a last updated time for each CLASS, not each TERM.
+		lastUpdated = new Date[classIds.length][];
+		for (int i = 0; i < lastUpdated.length; i++) {
+			lastUpdated[i] = new Date[getTermCount(i)];
+			for (int j = 0; j < lastUpdated[i].length; j++) {
+				lastUpdated[i][j] = d;
+			}
+		}
+		
+		// Possibly do it this way? The only problem is inconsistent term count.
+		// java.util.Arrays.fill(lastUpdated, d);
 		return classGrades;
 	}
-
+*/
 
 	/*
 	 * Temporary code. In use because login1.mypisd.net has an expired certificate. with new portal website, should not be necessary.
@@ -368,7 +489,7 @@ public class DataGrabber {
 			} 
 	}
 	
-	public void printCookies() {
+	public static void printCookies() {
 		System.out.println();
 		System.out.println("Cookies:");
 		for (String c : cookies)
@@ -377,6 +498,25 @@ public class DataGrabber {
 	}
 	
 
+	public static int getEditureLogin() {
+		return editureLogin;
+	}
 	
+	public static int getGradebookLogin() {
+		return gradebookLogin;
+	}
+	
+	public static String[] getGradebookCredentials() {
+		return gradebookCredentials;
+	}
+	
+	public static String[] getPassthroughCredentials() {
+		return passthroughCredentials;
+	}
+	
+
+	public static JSONArray getClassGrades () {
+		return classGrades;
+	}
 	
 }

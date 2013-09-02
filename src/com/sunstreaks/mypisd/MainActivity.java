@@ -5,24 +5,36 @@ import java.util.Locale;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
-import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
+import android.widget.AbsListView;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TableLayout.LayoutParams;
 import android.widget.TextView;
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends FragmentActivity implements View.OnClickListener {
 
+	static int classCount;
+	static Button[] buttons;
+	
+	
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide
 	 * fragments for each of the sections. We use a
@@ -127,65 +139,120 @@ public class MainActivity extends FragmentActivity {
 		    int tabLayout = 0;
 		    switch (position) {
 		    case 0:
-			tabLayout = R.layout.tab_new;
-			break;
+		    	tabLayout = R.layout.tab_new;
+//		    	{
+//		    	TextView classGradesJson = (TextView) getActivity().findViewById(R.id.class_grades);
+//		    	SharedPreferences sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
+//		    	String classGrades = sharedPrefs.getString("classGrades", "class grades go here");
+//		    	classGradesJson.setText(classGrades);
+//		    	}
+		    	break;
 		    case 1:
-			tabLayout = R.layout.tab_summary;
-			break;
-
+		    	tabLayout = R.layout.tab_summary;
+		    	break;
 		    }
+		    
 
+		    
 		    View rootView = inflater.inflate(tabLayout, container, false);
-		    if(position == 1)//on page 2 with grade summaries
-		    try {
-		    	SharedPreferences sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
-		    	JSONArray classGrades = new JSONArray(sharedPrefs.getString("classGrades", ""));
+		    
+		    if (position == 1)
+		    	try {
 		    	
-		    	TextView[] classTextViews = new TextView[classGrades.length()];
-		    	RelativeLayout rl = (RelativeLayout) getActivity().findViewById(R.id.container);
-		    	for (int i = 0; i < classGrades.length(); i++) {
-		    		classTextViews[i] = new TextView(getActivity());
-		    		RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)classTextViews[i].getLayoutParams();
-		    		params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-		    		params.addRule(RelativeLayout.BELOW, R.id.textView2);
+		    		ScrollView sv = new ScrollView(getActivity());
 		    		
-		    		classTextViews[i].setText(classGrades.getJSONObject(i).getString("name"));
 		    		
-		    		classTextViews[i].setLayoutParams(params); //causes layout update
-		    		rl.addView(classTextViews[i]);
-		    	}
-		    	rootView = rl;
-//		    	classes[0] = (TextView)rootView.findViewById(R.id.class1);
-//		    	x1.setText("Computer Science");
-//		    	Button y1 = (Button)rootView.findViewById(R.id.button1);
-//		    	y1.setText("97");
-//		    	y1.setOnClickListener(new OnClickListener() {
-//		    	    public void onClick(View v)
-//		    	    {
-//		    	        Intent startSwipe = new Intent(getActivity(), ClassSwipe.class);
-//		    	        startSwipe.putExtra("period", 1);
-//		    	        startActivity(startSwipe);
-//		    	    } 
-//		    	});
-//		    	TextView x2 = (TextView)rootView.findViewById(R.id.class2);
-//		    	x2.setText("Calculus BC");
-//		    	Button y2 = (Button)rootView.findViewById(R.id.button2);
-//		    	y2.setText("97");
-//		    	y2.setOnClickListener(new OnClickListener() {
-//		    	    public void onClick(View v)
-//		    	    {
-//		    	        Intent startSwipe = new Intent(getActivity(), ClassSwipe.class);
-//		    	        startSwipe.putExtra("period", 2);
-//		    	        startActivity(startSwipe);
-//		    	    } 
-//		    	});
-		    } catch (JSONException e) {
+		    		
+		    		LinearLayout layout = new LinearLayout(getActivity());
+		    		 
+		            layout.setOrientation(LinearLayout.VERTICAL);
+		            layout.setLayoutParams(new LinearLayout.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, AbsListView.LayoutParams.MATCH_PARENT));
+		     
+		     
+		            TextView title = new TextView(getActivity());
+		            LinearLayout.LayoutParams lll = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
+		            lll.gravity = Gravity.CENTER_HORIZONTAL;
+		            title.setLayoutParams(lll);
+		            title.setText("Grade Summary");
+		            title.setId(900);
+		            title.setTextSize(30);
+		            layout.addView(title);
+		            
+		            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+		            		LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+		            
+		            lp.setMargins(30, 20, 30, 0);
+		            
+		            LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(
+		            		LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+		            lp1.setMargins(0, 0, 0, 20);
+		            
+		            
+			    	SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+			    	JSONArray gradeSummary;
+			    	{
+			    		String source = sharedPrefs.getString("gradeSummary", "[]");
+			    		gradeSummary = new JSONArray(source);
+			    	}
+		            
+			    	classCount = gradeSummary.length();
+			    	buttons = new Button[classCount];
+			    	
+		            for (int i = 0; i < classCount ; i++) {
+		            	
+		            	JSONObject course = gradeSummary.getJSONObject(i);
+		            	
+		            	String name = " " + course.getString("title");
+		            	
+		            	LinearLayout innerLayout = new LinearLayout(getActivity());
+			            innerLayout.setOrientation(LinearLayout.HORIZONTAL);
+			            
+			            TextView className = new TextView(getActivity());
+			            className.setText(name);
+			            className.setTextSize(20);
+			            className.setLayoutParams(
+			            		new LinearLayout.LayoutParams(
+			            				LinearLayout.LayoutParams.WRAP_CONTENT, 
+			            				LinearLayout.LayoutParams.WRAP_CONTENT, 
+			            				1f));
+			            
+			            innerLayout.addView(className);
+			            
+			            //Hard coded for first six weeks average.
+			            JSONObject term = course.getJSONArray("terms").getJSONObject(0);
+			            int average = term.optInt("average", -1);
+			            
+			            buttons[i] = new Button(getActivity());
+			            buttons[i].setText(average + "");
+			            buttons[i].setId(i);
+			            buttons[i].setOnClickListener((View.OnClickListener)getActivity());
+			            innerLayout.addView(buttons[i]);
+			            if (i % 2 == 0)
+			            	innerLayout.setBackgroundColor(getResources().getColor(R.color.light_blue));
+			            else
+			            	innerLayout.setBackgroundColor(Color.WHITE);
+			            layout.addView(innerLayout, lp);
+			            
+		            }
+		            
+		            sv.addView(layout, lp1);
+		            return sv;
+		    	} catch (JSONException e) {
 		    	e.printStackTrace();
 		    }
 		    return rootView;
 		}
 
 		
+	}
+
+	@Override
+	public void onClick(View v) {
+		System.out.println(v.getId());
+		Intent intent = new Intent (this, ClassSwipe.class);
+		intent.putExtra("classCount", classCount);
+		intent.putExtra("classIndex", v.getId());
+		startActivity(intent);
 	}
 
 }

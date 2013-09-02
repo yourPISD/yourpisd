@@ -19,6 +19,7 @@
             android:name="com.sunstreaks.mypisd.MainActivity"
             android:label="@string/app_name" >
 
+
         </activity>
         <activity
             android:name="com.sunstreaks.mypisd.ClassSwipe"

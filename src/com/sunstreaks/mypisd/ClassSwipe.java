@@ -1,11 +1,23 @@
 package com.sunstreaks.mypisd;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import com.sunstreaks.mypisd.net.DataGrabber;
+import com.sunstreaks.mypisd.net.Domain;
+import com.sunstreaks.mypisd.net.IllegalUrlException;
+import com.sunstreaks.mypisd.net.PISDException;
+
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -19,7 +31,7 @@ import android.widget.TextView;
 
 @SuppressLint("ValidFragment")
 public class ClassSwipe extends FragmentActivity {
-	ArrayList<Fragment> mFragments;
+	static List<Fragment> mFragments = new ArrayList<Fragment>();
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide
 	 * fragments for each of the sections. We use a
@@ -35,31 +47,26 @@ public class ClassSwipe extends FragmentActivity {
 	 */
 	static String test = "Ishman";
 	String test2 = "OMGOMG";
-	ViewPager mViewPager;
+	static ViewPager mViewPager;
 	static int received;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_class_swipe);
-		received = getIntent().getExtras().getInt("period");
+		received = getIntent().getExtras().getInt("classIndex");
 		
-		mFragments = new ArrayList<Fragment>();
-		mFragments.add(new DescriptionFragment());
-		mFragments.add(new DescriptionFragment());
-		mFragments.add(new DescriptionFragment());
-		mFragments.add(new DescriptionFragment());
-		mFragments.add(new DescriptionFragment()); 
-		mFragments.add(new DescriptionFragment());
-		mFragments.add(new DescriptionFragment());
+		for (int i = 0; i < getIntent().getExtras().getInt("classCount"); i++) {
+			mFragments.add(new DescriptionFragment());
+		}
 		// Create the adapter that will return a fragment for each of the three
 		// primary sections of the app.
-		  mSectionsPagerAdapter = new SectionsPagerAdapter(
+		mSectionsPagerAdapter = new SectionsPagerAdapter(
 			        getSupportFragmentManager(), mFragments);
 
 		// Set up the ViewPager with the sections adapter.
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 		mViewPager.setAdapter(mSectionsPagerAdapter);
-		mViewPager.setCurrentItem(received-1);
+		mViewPager.setCurrentItem(received);
 		mViewPager.setOffscreenPageLimit(1);
 	}
 
@@ -97,25 +104,13 @@ public class ClassSwipe extends FragmentActivity {
 		@Override
 		public CharSequence getPageTitle(int position) {
 			Locale l = Locale.getDefault();
-			switch (position) {
-			case 0:
-				return "Computer Science";
-			case 1:
-				return getString(R.string.title_section2).toUpperCase(l);
-			case 2:
-				return getString(R.string.title_section3).toUpperCase(l);
-			case 3:
-				return getString(R.string.title_section3).toUpperCase(l);
-			case 4:
-				return getString(R.string.title_section3).toUpperCase(l);
-			case 5:
-				return getString(R.string.title_section3).toUpperCase(l);
-			case 6:
-				return getString(R.string.title_section3).toUpperCase(l);
-			case 7:
-				return getString(R.string.title_section3).toUpperCase(l);
+			try {
+				SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ClassSwipe.this);
+		    	JSONArray gradeSummary = new JSONArray(sharedPrefs.getString("gradeSummary", "No name"));
+		    	return gradeSummary.getJSONObject(position).getString("title");
+			} catch (JSONException e) {
+				return "Class title";
 			}
-			return null;
 		}
 	}
 	
@@ -138,6 +133,36 @@ public class ClassSwipe extends FragmentActivity {
 				Bundle savedInstanceState) {
 			View rootView = inflater.inflate(
 					R.layout.class_description, container, false);
+			
+			
+			SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+			//
+			JSONArray classGrades = null;
+			JSONArray grades;
+			try {
+				classGrades = new JSONArray(sharedPrefs.getString("classGrades", ""));
+				grades = classGrades.getJSONArray(mViewPager.getCurrentItem());
+			} catch (JSONException e) {
+				// This page has not been loaded.... ever.
+				try {
+					DataGrabber.login();
+					for (int i = 0; i < ClassSwipe.mFragments.size(); i++) {
+						//hard coded for first six weeks!
+						DataGrabber.getClassGrades(i, 0);
+					}
+					SharedPreferences.Editor editor = sharedPrefs.edit();
+					classGrades = DataGrabber.getClassGrades();
+					editor.putString("classGrades", classGrades.toString());
+					editor.commit();
+				} catch (Exception f) {
+					e.printStackTrace();
+				}
+			}
+				try {
+					grades = classGrades.getJSONArray(mViewPager.getCurrentItem());
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
 				TextView teacher = (TextView) rootView.findViewById(R.id.teacher);
 				teacher.setText("Tracy Ishman");
 
