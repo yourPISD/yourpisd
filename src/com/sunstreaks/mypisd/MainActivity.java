@@ -167,7 +167,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		    		 
 		            layout.setOrientation(LinearLayout.VERTICAL);
 		            layout.setLayoutParams(new LinearLayout.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, AbsListView.LayoutParams.MATCH_PARENT));
-		     
+	
 		     
 		            TextView title = new TextView(getActivity());
 		            LinearLayout.LayoutParams lll = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
@@ -206,7 +206,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		            	
 		            	LinearLayout innerLayout = new LinearLayout(getActivity());
 			            innerLayout.setOrientation(LinearLayout.HORIZONTAL);
-			            
+			   
 			            TextView className = new TextView(getActivity());
 			            className.setText(name);
 			            className.setTextSize(20);
@@ -227,10 +227,11 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 			            buttons[i].setId(i);
 			            buttons[i].setOnClickListener((View.OnClickListener)getActivity());
 			            innerLayout.addView(buttons[i]);
-			            if (i % 2 == 0)
-			            	innerLayout.setBackgroundColor(getResources().getColor(R.color.light_blue));
-			            else
-			            	innerLayout.setBackgroundColor(Color.WHITE);
+//			            if (i % 2 == 0)
+//			            	innerLayout.setBackgroundColor(getResources().getColor(R.color.light_blue));
+//			            else
+//			            	innerLayout.setBackgroundColor(Color.WHITE);
+			            innerLayout.setBackgroundDrawable(getResources().getDrawable(R.drawable.background_with_shadow));
 			            layout.addView(innerLayout, lp);
 			            
 		            }
