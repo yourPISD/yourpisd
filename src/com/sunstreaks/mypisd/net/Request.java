@@ -43,46 +43,79 @@ public class Request {
 		CookieHandler.setDefault(cm);
 		CookieStore cs = cm.getCookieStore();
 		
-		URLConnection conn = (new URL(url)).openConnection();
+		final static int MAX_RETRIES = 3;
+		int numTries = 0;
+		URLConnection conn = null;
 		
-        conn.setReadTimeout(10000 /* milliseconds */);
-        conn.setConnectTimeout(15000 /* milliseconds */);
-		if (isSecure) {
-			((HttpsURLConnection) conn).setRequestMethod("GET");
-		}
-		else {
-			((HttpURLConnection) conn).setRequestMethod("GET");
-		}
-		
-		
-		conn.setUseCaches(false);
-		
-		
-		if (requestProperties != null && requestProperties.size()>0)
-			for (String[] property : requestProperties)
-				conn.addRequestProperty(property[0], property[1]);
+		// 3 tries in order to evade EOFException. EOFException implements IOException.
+		// copied from http://stackoverflow.com/questions/17208336/getting-java-io-eofexception-using-httpurlconnection
+		while (numTries < MAX_RETRIES) {
 			
+			if (numTries != 0) {
+           		LOGV(TAG, "Retry n°" + numTries);
+       		} 
+			
+			try {
 		
-		// Concatenates the cookies into one cookie string, seperated by semicolons.
-		if (cookies != null && cookies.size()>0) {
-			String cookieRequest = "";
-			for (int i = 0; i < cookies.size(); i++) {
-				cookieRequest += cookies.get(i);
-				if (i < cookies.size() - 1)
-					cookieRequest += "; ";
-			}
-			conn.setRequestProperty("Cookie", cookieRequest);
+				conn = (new URL(url)).openConnection();
+				
+				conn.setReadTimeout(10000 /* milliseconds */);
+				conn.setConnectTimeout(15000 /* milliseconds */);
+				if (isSecure) {
+					((HttpsURLConnection) conn).setRequestMethod("GET");
+				}
+				else {
+					((HttpURLConnection) conn).setRequestMethod("GET");
+				}
+				
+				
+				conn.setUseCaches(false);
+				
+				
+				if (requestProperties != null && requestProperties.size()>0)
+					for (String[] property : requestProperties)
+						conn.addRequestProperty(property[0], property[1]);
+					
+				
+				// Concatenates the cookies into one cookie string, seperated by semicolons.
+				if (cookies != null && cookies.size()>0) {
+					String cookieRequest = "";
+					for (int i = 0; i < cookies.size(); i++) {
+						cookieRequest += cookies.get(i);
+						if (i < cookies.size() - 1)
+							cookieRequest += "; ";
+					}
+					conn.setRequestProperty("Cookie", cookieRequest);
+				}
+				
+		
+				
+				int responseCode;
+				if (isSecure) {
+					responseCode = ((HttpsURLConnection) conn).getResponseCode();
+				}
+				else {
+					responseCode = ((HttpURLConnection) conn).getResponseCode();
+				}
+		
+			} catch (UnsupportedEncodingException e) {
+				LOGV(TAG, "Unsupported encoding exception"); 
+				} catch (MalformedURLException e) {
+					LOGV(TAG, "Malformed URL exception"); 
+				} catch (IOException e) {
+					LOGV(TAG, "IO exception: " + e.toString());
+					// e.printStackTrace(); 
+				} finally { 
+		 
+					if (conn != null)
+						conn.disconnect();
+				} 
+				numTries++;
+				
+				if (numTries == MAX_RETRIES)
+					LOGV(TAG, "Max retries reached. Giving up..."); 
 		}
 		
-
-		
-		int responseCode;
-		if (isSecure) {
-			responseCode = ((HttpsURLConnection) conn).getResponseCode();
-		}
-		else {
-			responseCode = ((HttpURLConnection) conn).getResponseCode();
-		}
 //		System.out.println("\nSending 'GET' request to URL : " + url);
 //		System.out.println("Response Code : " + responseCode);
 	 
