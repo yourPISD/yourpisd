@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.R.drawable;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -209,6 +210,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 			   
 			            TextView className = new TextView(getActivity());
 			            className.setText(name);
+			            //className.setBackgroundColor(Color.WHITE);
 			            className.setTextSize(20);
 			            className.setLayoutParams(
 			            		new LinearLayout.LayoutParams(
@@ -231,7 +233,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 //			            	innerLayout.setBackgroundColor(getResources().getColor(R.color.light_blue));
 //			            else
 //			            	innerLayout.setBackgroundColor(Color.WHITE);
-			            innerLayout.setBackgroundDrawable(getResources().getDrawable(R.drawable.background_with_shadow));
+//			            innerLayout.setBackgroundDrawable(getResources().getDrawable(drawable.toast_frame));
+			            innerLayout.setBackgroundDrawable(getResources().getDrawable(R.drawable.dropshadow));
 			            layout.addView(innerLayout, lp);
 			            
 		            }
