@@ -21,23 +21,23 @@ import org.json.JSONObject;
 
 public final class DataGrabber {
 
-	static Domain domain;
-	static String username;
-	static String password;
-	static String[] passthroughCredentials;
-	static String[] gradebookCredentials;
-	static String pageUniqueId;
+	Domain domain;
+	String username;
+	String password;
+	String[] passthroughCredentials;
+	String[] gradebookCredentials;
+	String pageUniqueId;
 	// 1= success. 0 = not tried; <0 = failure.
-	static int editureLogin = 0;
-	static int gradebookLogin = 0;
+	int editureLogin = 0;
+	int gradebookLogin = 0;
 	
-	static ArrayList<String> cookies = new ArrayList<String>();
-	static JSONArray classList = null;
+	ArrayList<String> cookies = new ArrayList<String>();
+	JSONArray classList = null;
 	// Class -> Term
-	static Date[][] lastUpdated;
-	static int studentId = 0;
-	static int[] classIds;
-	static JSONArray classGrades = null;
+	Date[][] lastUpdated;
+	int studentId = 0;
+	int[] classIds;
+	JSONArray classGrades = null;
 	
 	public static void main(String args[]) throws Exception  {
 		long startTime = System.currentTimeMillis();
@@ -64,7 +64,7 @@ public final class DataGrabber {
 		acceptAllCertificates();
 	}
 
-	public static void login(/*Domain dom, String username, String password*/)
+	public void login(/*Domain dom, String username, String password*/)
 			throws MalformedURLException, IllegalUrlException, IOException, PISDException {
 		
 
@@ -124,7 +124,7 @@ public final class DataGrabber {
 	/*
 	 * userType is P (parent) or S (student)
 	 */
-	public static boolean loginGradebook(String userType, String uID, String email, String password) throws MalformedURLException, IllegalUrlException, IOException, PISDException {
+	public boolean loginGradebook(String userType, String uID, String email, String password) throws MalformedURLException, IllegalUrlException, IOException, PISDException {
 
 		// commented reques paramater is allowed for parent account, not allowed for student account. never required.
 		Object[] passthrough = Request.sendPost(
@@ -230,7 +230,7 @@ public final class DataGrabber {
 		return true;
 	}
 	
-	public static void setClassList(String json) throws JSONException {
+	public void setClassList(String json) throws JSONException {
 		
 		JSONObject j = new JSONObject(json);
 		classList = j.getJSONArray("classes");
@@ -244,7 +244,7 @@ public final class DataGrabber {
 //	}
 //	
 	@SuppressWarnings("finally")
-	public static int[] getClassIds() {
+	public int[] getClassIds() {
 		if (classIds != null)
 			return classIds;
 		
@@ -263,7 +263,7 @@ public final class DataGrabber {
 		}
 	}
 //	
-	public static int[] getTermIds( int classId ) throws JSONException {
+	public int[] getTermIds( int classId ) throws JSONException {
 		for (int i = 0; i < classList.length(); i++) {
 			if (classList.getJSONObject(i).getInt("classId") == classId) {
 				JSONArray terms = classList.getJSONObject(i).getJSONArray("terms");
@@ -278,7 +278,7 @@ public final class DataGrabber {
 		return null;
 	}
 	
-	public static int getTermCount (int index) throws JSONException {
+	public int getTermCount (int index) throws JSONException {
 		return classList.getJSONObject(index).getJSONArray("terms").length();
 	}
 	
@@ -287,7 +287,7 @@ public final class DataGrabber {
 //		
 //	}
 
-	public static String getDetailedReport (int classId, int termId, int studentId) {
+	public String getDetailedReport (int classId, int termId, int studentId) {
 		try {
 			String url = "https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/StudentAssignments.aspx?" + 
 					"&EnrollmentId=" + 	classId + 
@@ -313,7 +313,7 @@ public final class DataGrabber {
 		}
 	}
 	
-	public static JSONArray getGradeSummary () throws JSONException {
+	public JSONArray getGradeSummary () throws JSONException {
 		
 		String classId = classList.getJSONObject(0).getString("enrollmentId");
 		String termId = classList.getJSONObject(0).getJSONArray("terms").getJSONObject(0).getString("termId");
@@ -349,7 +349,7 @@ public final class DataGrabber {
 		}
 	}
 
-	public static void getClassGrades( int classIndex, int termIndex ) throws JSONException {
+	public void getClassGrades( int classIndex, int termIndex ) throws JSONException {
 		
 		
 		int classId = getClassIds()[classIndex];
@@ -381,7 +381,7 @@ public final class DataGrabber {
 	}
 	
 	
-	public static JSONArray getAllClassGrades() throws JSONException {
+	public JSONArray getAllClassGrades() throws JSONException {
 		if (classList == null)
 			return null;
 		if (classIds == null)
@@ -489,7 +489,7 @@ public final class DataGrabber {
 			} 
 	}
 	
-	public static void printCookies() {
+	public void printCookies() {
 		System.out.println();
 		System.out.println("Cookies:");
 		for (String c : cookies)
@@ -498,24 +498,24 @@ public final class DataGrabber {
 	}
 	
 
-	public static int getEditureLogin() {
+	public int getEditureLogin() {
 		return editureLogin;
 	}
 	
-	public static int getGradebookLogin() {
+	public int getGradebookLogin() {
 		return gradebookLogin;
 	}
 	
-	public static String[] getGradebookCredentials() {
+	public String[] getGradebookCredentials() {
 		return gradebookCredentials;
 	}
 	
-	public static String[] getPassthroughCredentials() {
+	public String[] getPassthroughCredentials() {
 		return passthroughCredentials;
 	}
 	
 
-	public static JSONArray getClassGrades () {
+	public JSONArray getClassGrades () {
 		return classGrades;
 	}
 	
