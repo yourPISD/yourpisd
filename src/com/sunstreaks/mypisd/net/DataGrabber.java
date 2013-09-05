@@ -5,9 +5,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -18,8 +16,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.AsyncTask;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public final class DataGrabber {
+
+public class DataGrabber implements Parcelable {
 
 	Domain domain;
 	String username;
@@ -34,11 +36,92 @@ public final class DataGrabber {
 	ArrayList<String> cookies = new ArrayList<String>();
 	JSONArray classList = null;
 	// Class -> Term
-	Date[][] lastUpdated;
+//	Date[][] lastUpdated;
 	int studentId = 0;
 	int[] classIds;
 	JSONArray classGrades = null;
 	
+	RequestTask mRequestTask;
+
+	
+	@Override
+	public int describeContents() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	
+    private DataGrabber(Parcel in) {
+    	this.domain = Domain.values()[in.readInt()];	//in.readInt() is the index of the domain
+    	this.username = in.readString();
+    	this.password = in.readString();
+    	this.passthroughCredentials = in.createStringArray();
+    	this.gradebookCredentials = in.createStringArray();
+    	this.pageUniqueId = in.readString();
+    	this.editureLogin = in.readInt();
+    	this.gradebookLogin = in.readInt();
+    	this.cookies = in.createStringArrayList();
+    	
+    	try {												// recreate the json array
+			this.classList = new JSONArray(in.readString());
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+    	
+    	this.studentId = in.readInt();
+    	this.classIds = in.createIntArray();
+    	
+    	
+    	try {												// recreate the json array
+			this.classGrades = new JSONArray(in.readString());
+		} catch (JSONException e) {
+			// Should ONLY happen if the readString is null.
+			System.out.println("Empty string read. Making null JSONArray classGrades.");
+			this.classGrades = null;
+		} catch (NullPointerException e) {
+			// We maybe need a better way to deal with a null list.
+			e.printStackTrace();
+		}
+    	
+    	
+    	acceptAllCertificates();
+    }
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeInt(domain.index);
+		dest.writeString(username);
+		dest.writeString(password);
+		dest.writeStringArray(passthroughCredentials);
+		dest.writeStringArray(gradebookCredentials);
+		dest.writeString(pageUniqueId);
+		dest.writeInt(editureLogin);
+		dest.writeInt(gradebookLogin);
+		dest.writeStringList(cookies);
+		dest.writeString(classList.toString());
+		dest.writeInt(studentId);
+		dest.writeIntArray(classIds);
+		if (classGrades != null)
+			dest.writeString(classGrades.toString());
+		else
+			dest.writeString("");
+		
+	}
+	
+    public static final Parcelable.Creator<DataGrabber> CREATOR
+    	= new Parcelable.Creator<DataGrabber>() {
+    		public DataGrabber createFromParcel(Parcel in) {
+    			return new DataGrabber(in);
+    		}
+
+    		public DataGrabber[] newArray(int size) {
+    			return new DataGrabber[size];
+    		}
+    };
+	
+
+	
+    	/*
 	public static void main(String args[]) throws Exception  {
 		long startTime = System.currentTimeMillis();
 		
@@ -51,7 +134,7 @@ public final class DataGrabber {
 		long endTime = System.currentTimeMillis();
 		System.out.println(endTime - startTime + "ms");
 	}
-	
+	*/
 
 	public DataGrabber (Domain domain, String username, String password) {
 		this.domain = domain;
@@ -65,9 +148,17 @@ public final class DataGrabber {
 	}
 
 	public void login(/*Domain dom, String username, String password*/)
-			throws MalformedURLException, IllegalUrlException, IOException, PISDException {
+			throws MalformedURLException, IllegalUrlException, IOException, PISDException, InterruptedException, ExecutionException {
 		
-
+//		mRequestTask = new RequestTask();
+//		mRequestTask.execute(
+//				"POST",					// Request Type
+//				domain.loginAddress,	// String url
+//				cookies,					// ArrayList<String> cookies
+//				null,					// ArrayList<String> requestProperties
+//				"password=" + URLEncoder.encode(password,"UTF-8") + "&username=" + URLEncoder.encode(username,"UTF-8") + "&Submit=Login"
+//				);
+//		Object[] cookieAuth = (Object[]) mRequestTask.get();		
 		
 		Object[] cookieAuth = Request.sendPost(
 				domain.loginAddress, 
@@ -124,9 +215,21 @@ public final class DataGrabber {
 	/*
 	 * userType is P (parent) or S (student)
 	 */
-	public boolean loginGradebook(String userType, String uID, String email, String password) throws MalformedURLException, IllegalUrlException, IOException, PISDException {
+	public boolean loginGradebook(String userType, String uID, String email, String password) throws MalformedURLException, IllegalUrlException, IOException, PISDException, InterruptedException, ExecutionException {
 
-		// commented reques paramater is allowed for parent account, not allowed for student account. never required.
+		
+//		mRequestTask = new RequestTask();
+//		mRequestTask.execute(
+//				"POST",											// Request Type
+//				"https://parentviewer.pisd.edu/EP/PIV_Passthrough.aspx?action=trans&uT=" + userType + "&uID=" + uID,	
+//																// String url
+//				cookies,										// ArrayList<String> cookies
+//				null,											// ArrayList<String> requestProperties
+//				"password=" + password + "&username=" + email	// String postParams
+//				);
+//		Object[] passthrough = (Object[]) mRequestTask.get();	
+		
+		// commented request paramater is allowed for parent account, not allowed for student account. never required.
 		Object[] passthrough = Request.sendPost(
 				"https://parentviewer.pisd.edu/EP/PIV_Passthrough.aspx?action=trans&uT=" + userType + "&uID=" + uID /*+ "&submit=Login+to+Parent+Viewer"*/, 
 				"password=" + password + "&username=" + email, 
@@ -158,6 +261,18 @@ public final class DataGrabber {
 		
 		
 		String postParams = "userId=" + gradebookCredentials[0] + "&password=" + gradebookCredentials[1];
+		
+//		mRequestTask = new RequestTask();
+//		mRequestTask.execute(
+//				"POST",					// Request Type
+//				"https://gradebook.pisd.edu/Pinnacle/Gradebook/link.aspx?target=InternetViewer",	
+//										// String url
+//				cookies,				// ArrayList<String> cookies
+//				null,					// ArrayList<String> requestProperties
+//				postParams				// String postParams
+//				);
+//		Object[] link = (Object[]) mRequestTask.get();	
+		
 		Object[] link = Request.sendPost("https://gradebook.pisd.edu/Pinnacle/Gradebook/link.aspx?target=InternetViewer",
 				postParams,
 				cookies);
@@ -170,6 +285,18 @@ public final class DataGrabber {
 		System.out.println("Cookies after link: " + cookies);
 		
 		// perhaps this is where we get our StudentId cookie!
+		
+		
+//		mRequestTask = new RequestTask();
+//		mRequestTask.execute(
+//				"POST",					// Request Type
+//				"https://gradebook.pisd.edu/Pinnacle/Gradebook/Default.aspx",	
+//										// String url
+//				cookies,				// ArrayList<String> cookies
+//				null,					// ArrayList<String> requestProperties
+//				postParams				// String postParams
+//				);
+//		Object[] defaultAspx = (Object[]) mRequestTask.get();	
 		
 		Object[] defaultAspx = Request.sendPost("https://gradebook.pisd.edu/Pinnacle/Gradebook/Default.aspx",
 				postParams,
@@ -208,11 +335,24 @@ public final class DataGrabber {
 		//required for json files
 		requestProperties.add(new String[] {"Content-Type", "application/json"});
 
+//		mRequestTask = new RequestTask();
+//		mRequestTask.execute(
+//				"POST",					// Request Type
+//				"https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/InternetViewerService.ashx/Init?PageUniqueId=" + pageUniqueId,	
+//										// String url
+//				cookies,				// ArrayList<String> cookies
+//				requestProperties,		// ArrayList<String> requestProperties
+//				postParams				// String postParams
+//				);
+//		Object[] init = (Object[]) mRequestTask.get();	
+		
+		
 		Object[] init = Request.sendPost(
 				"https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/InternetViewerService.ashx/Init?PageUniqueId=" + pageUniqueId,
-				postParams,
 				cookies,
-				requestProperties, true);
+				requestProperties, 
+				true, 
+				postParams);
 		
 		response = (String) init[0];
 		responseCode = (Integer) init[1];
@@ -287,44 +427,61 @@ public final class DataGrabber {
 //		
 //	}
 
-	public String getDetailedReport (int classId, int termId, int studentId) {
-		try {
-			String url = "https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/StudentAssignments.aspx?" + 
-					"&EnrollmentId=" + 	classId + 
-					"&TermId=" + termId + 
-					"&ReportType=0&StudentId=" + studentId;
-			
+	public String getDetailedReport (int classId, int termId, int studentId) throws InterruptedException, ExecutionException {
 
-			Object[] report = Request.sendGet(url,	cookies);
-			String response = (String) report[0];
-			int responseCode = (Integer) report[1];
-			cookies = (ArrayList<String>) report[2];
 			
-			if (responseCode != 200) {
-				System.out.println("Response code: " + responseCode);
-			}
-			return response;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		} catch (IllegalUrlException e) {
-			e.printStackTrace();
-			return null;
+		String url = "https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/StudentAssignments.aspx?" + 
+				"&EnrollmentId=" + 	classId + 
+				"&TermId=" + termId + 
+				"&ReportType=0&StudentId=" + studentId;
+		
+
+		mRequestTask = new RequestTask();
+		mRequestTask.execute(
+				"GET",		// Request Type
+				url,		// String url
+				cookies,	// ArrayList<String> cookies
+				null		// ArrayList<String> requestProperties
+				);
+		Object[] report = (Object[]) mRequestTask.get();	
+		
+		
+//			Object[] report = Request.sendGet(url,	cookies);
+		String response = (String) report[0];
+		int responseCode = (Integer) report[1];
+		cookies = (ArrayList<String>) report[2];
+		
+		if (responseCode != 200) {
+			System.out.println("Response code: " + responseCode);
 		}
+		return response;
 	}
 	
+	/**
+	 * Uses internet every time.
+	 * @throws ExecutionException 
+	 * @throws InterruptedException 
+	 * 
+	 */
 	public JSONArray getGradeSummary () throws JSONException {
-		
-		String classId = classList.getJSONObject(0).getString("enrollmentId");
-		String termId = classList.getJSONObject(0).getJSONArray("terms").getJSONObject(0).getString("termId");
-		
 		try {
+			String classId = classList.getJSONObject(0).getString("enrollmentId");
+			String termId = classList.getJSONObject(0).getJSONArray("terms").getJSONObject(0).getString("termId");
+	
 			String url = "https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/GradeSummary.aspx?" + 
 					"&EnrollmentId=" + 	classId + 
 					"&TermId=" + termId + 
 					"&ReportType=0&StudentId=" + studentId;
 			
-
+	//		mRequestTask = new RequestTask();
+	//		mRequestTask.execute(
+	//				"GET",		// Request Type
+	//				url,		// String url
+	//				cookies,	// ArrayList<String> cookies
+	//				null		// ArrayList<String> requestProperties
+	//				);
+	//		Object[] summary = (Object[]) mRequestTask.get();	
+	
 			Object[] summary = Request.sendGet(url,	cookies);
 			String response = (String) summary[0];
 			int responseCode = (Integer) summary[1];
@@ -338,18 +495,19 @@ public final class DataGrabber {
 			 * puts averages in classList, under each term.
 			 */
 			classList = Parser.gradeSummary(response, classList);
-
+	
 			return classList;
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
 		} catch (IllegalUrlException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}
 	}
 
-	public void getClassGrades( int classIndex, int termIndex ) throws JSONException {
+	public void getClassGrades( int classIndex, int termIndex ) throws JSONException, InterruptedException, ExecutionException {
 		
 		
 		int classId = getClassIds()[classIndex];
@@ -381,7 +539,7 @@ public final class DataGrabber {
 	}
 	
 	
-	public JSONArray getAllClassGrades() throws JSONException {
+	public JSONArray getAllClassGrades() throws JSONException, InterruptedException, ExecutionException {
 		if (classList == null)
 			return null;
 		if (classIds == null)
@@ -517,6 +675,60 @@ public final class DataGrabber {
 
 	public JSONArray getClassGrades () {
 		return classGrades;
+	}
+
+
+	public class LoginTask extends AsyncTask<Void, Void, Void> {
+
+		protected void onPreExecute() {
+			System.out.println("on Pre Execute");
+		}
+		
+		protected void onPostExecute() {
+			System.out.println("on Post Execute");
+		}
+		
+		@Override
+		protected Void doInBackground(Void... params) {
+			try {
+				System.out.println("Process started");
+				login();
+				System.out.println("Process ended");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			System.out.println(java.util.Arrays.toString(passthroughCredentials));
+			return null;
+		}
+		
+	}
+	
+	public class LoginGradebookTask extends AsyncTask<String, Void, Boolean> {
+
+		@Override
+		protected Boolean doInBackground(String... params) {
+			try {
+				return loginGradebook(params[0], params[1], params[2], params[3]);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return false;
+			}
+		}
+		
+	}
+	
+	public class DetailedReportTask extends AsyncTask<Integer, Void, Void> {
+
+		@Override
+		protected Void doInBackground(Integer... params) {
+			try {
+				getDetailedReport(params[0], params[1], params[2]);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+		
 	}
 	
 }

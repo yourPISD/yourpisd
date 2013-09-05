@@ -2,15 +2,23 @@
 package com.sunstreaks.mypisd;
 
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.R.drawable;
+import com.sunstreaks.mypisd.net.DataGrabber;
+import com.sunstreaks.mypisd.net.Domain;
+import com.sunstreaks.mypisd.net.PISDException;
+
+import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -34,7 +42,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
 	static int classCount;
 	static Button[] buttons;
-	
+	static DataGrabber dg;
 	
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -49,13 +57,20 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 	 * The {@link ViewPager} that will host the section contents.
 	 */
 	ViewPager mViewPager;
-	static Course[] courses = new Course[7];
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		
+		// Makes sure that there IS a datagrabber to insert. Now, what if there were multiple
+		// versions of DataGrabber....? I wonder what would happen.
+		Intent intent = getIntent();
+		{
+			DataGrabber myDG = (DataGrabber) intent.getParcelableExtra("DataGrabber");
+			if (myDG != null)
+				dg = myDG;
+		}
 		
 		
 		// Create the adapter that will return a fragment for each of the three
@@ -189,12 +204,13 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		            lp1.setMargins(0, 0, 0, 20);
 		            
 		            
-			    	SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-			    	JSONArray gradeSummary;
-			    	{
-			    		String source = sharedPrefs.getString("gradeSummary", "[]");
-			    		gradeSummary = new JSONArray(source);
-			    	}
+		            // Don't need SharedPrefs here anymore. although "gradeSummary" might be stored there.
+			    	//SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+			    	
+			    	//JSONArray gradeSummary = dg.getGradeSummary();
+		            GradeSummaryTask gsTask = new GradeSummaryTask();
+		            gsTask.execute();
+		            JSONArray gradeSummary = gsTask.get();
 		            
 			    	classCount = gradeSummary.length();
 			    	buttons = new Button[classCount];
@@ -242,20 +258,42 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		            sv.addView(layout, lp1);
 		            return sv;
 		    	} catch (JSONException e) {
-		    	e.printStackTrace();
-		    }
-		    return rootView;
+		    		e.printStackTrace();
+		    	} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		    	return rootView;
 		}
 
+		public class GradeSummaryTask extends AsyncTask<Void, Void, JSONArray> {
+
+			@Override
+			protected JSONArray doInBackground(Void... arg0) {
+				try {
+					return dg.getGradeSummary();
+				} catch (JSONException e) {
+					e.printStackTrace();
+					return null;
+				}
+			}
+			
+		}
 		
 	}
 
+
+	
 	@Override
 	public void onClick(View v) {
 		System.out.println(v.getId());
 		Intent intent = new Intent (this, ClassSwipe.class);
 		intent.putExtra("classCount", classCount);
 		intent.putExtra("classIndex", v.getId());
+		intent.putExtra("DataGrabber", dg);
 		startActivity(intent);
 	}
 

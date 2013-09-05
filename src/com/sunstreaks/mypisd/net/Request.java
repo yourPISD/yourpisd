@@ -3,6 +3,7 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookieStore;
@@ -14,6 +15,8 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 
 import javax.net.ssl.HttpsURLConnection;
+
+import android.os.AsyncTask;
 
 
 public class Request {
@@ -43,16 +46,19 @@ public class Request {
 		CookieHandler.setDefault(cm);
 		CookieStore cs = cm.getCookieStore();
 		
-		final static int MAX_RETRIES = 3;
+		final int MAX_RETRIES = 3;
 		int numTries = 0;
+		boolean success = false;
+		
 		URLConnection conn = null;
+		int responseCode = 0;
 		
 		// 3 tries in order to evade EOFException. EOFException implements IOException.
 		// copied from http://stackoverflow.com/questions/17208336/getting-java-io-eofexception-using-httpurlconnection
-		while (numTries < MAX_RETRIES) {
+		while (!success && numTries < MAX_RETRIES) {
 			
 			if (numTries != 0) {
-           		LOGV(TAG, "Retry n°" + numTries);
+           		System.out.println(numTries + " tries");
        		} 
 			
 			try {
@@ -89,8 +95,7 @@ public class Request {
 				}
 				
 		
-				
-				int responseCode;
+			
 				if (isSecure) {
 					responseCode = ((HttpsURLConnection) conn).getResponseCode();
 				}
@@ -98,22 +103,26 @@ public class Request {
 					responseCode = ((HttpURLConnection) conn).getResponseCode();
 				}
 		
+				success = true;
+				
 			} catch (UnsupportedEncodingException e) {
-				LOGV(TAG, "Unsupported encoding exception"); 
-				} catch (MalformedURLException e) {
-					LOGV(TAG, "Malformed URL exception"); 
-				} catch (IOException e) {
-					LOGV(TAG, "IO exception: " + e.toString());
-					// e.printStackTrace(); 
-				} finally { 
+				e.printStackTrace();
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally { 
 		 
-					if (conn != null)
-						conn.disconnect();
-				} 
+//				if (conn != null)
+//					if (isSecure)
+//						((HttpsURLConnection) conn).disconnect();
+//					else
+//						((HttpURLConnection)conn).disconnect();
+			} 
 				numTries++;
 				
 				if (numTries == MAX_RETRIES)
-					LOGV(TAG, "Max retries reached. Giving up..."); 
+					System.out.println("Max retries reached. Giving up..."); 
 		}
 		
 //		System.out.println("\nSending 'GET' request to URL : " + url);
@@ -133,7 +142,7 @@ public class Request {
 		
 		// Do not clear cookies each time!
 		//cookies = new ArrayList<String>();
-		System.out.println("Cookie-size: " + cs.getCookies().size());
+//		System.out.println("Cookie-size: " + cs.getCookies().size());
 		for (HttpCookie c : cs.getCookies()) {
 			cookies.add(c.toString());
 		}
@@ -145,18 +154,18 @@ public class Request {
 	
 	public static Object[] sendPost(String url, String postParams, ArrayList<String> cookies) throws IllegalUrlException, MalformedURLException, IOException {
 		
-		return sendPost (url, postParams, cookies, null, isSecure(url));
+		return sendPost (url, cookies, null, isSecure(url), postParams);
 		
 	}
 	
 	public static Object[] sendPost(String url, String postParams, ArrayList<String> cookies, ArrayList<String[]> requestProperties) throws IllegalUrlException, MalformedURLException, IOException {
 		if (isSecure(url))
-			return sendPost (url, postParams, cookies, requestProperties, true);
+			return sendPost (url, cookies, requestProperties, true, postParams);
 		else
-			return sendPost (url, postParams, cookies, requestProperties, false);
+			return sendPost (url, cookies, requestProperties, false, postParams);
 	}
 	
-	public static Object[] sendPost(String url, String postParams, ArrayList<String> cookies, ArrayList<String[]> requestProperties, boolean isSecure) throws MalformedURLException, IOException {
+	public static Object[] sendPost(String url, ArrayList<String> cookies, ArrayList<String[]> requestProperties, boolean isSecure, String postParams) throws MalformedURLException, IOException {
 //		System.out.println(url);
 //		System.out.println(postParams);
 		
@@ -164,16 +173,18 @@ public class Request {
 		CookieHandler.setDefault(cm);
 		CookieStore cs = cm.getCookieStore();
 		
-		final static int MAX_RETRIES = 3;
+		final int MAX_RETRIES = 3;
 		int numTries = 0;
-		URLConnection conn = null;
+		boolean success = false;
 		
+		URLConnection conn = null;
+		int responseCode = 0;
 		// 3 tries in order to evade EOFException. EOFException implements IOException.
 		// copied from http://stackoverflow.com/questions/17208336/getting-java-io-eofexception-using-httpurlconnection
-		while (numTries < MAX_RETRIES) {
+		while (!success && numTries < MAX_RETRIES) {
 			
 			if (numTries != 0) {
-           		LOGV(TAG, "Retry n°" + numTries);
+           		System.out.println(numTries + " tries");
        		} 
 			
 			try {
@@ -216,29 +227,34 @@ public class Request {
 				wr.flush();
 				wr.close();
 				
-				int responseCode;
+				
 				if (isSecure) {
 					responseCode = ((HttpsURLConnection) conn).getResponseCode();
 				}
 				else {
 					responseCode = ((HttpURLConnection) conn).getResponseCode();
 				}
+				
+				success = true;
+				
 			} catch (UnsupportedEncodingException e) {
-            LOGV(TAG, "Unsupported encoding exception"); 
+				e.printStackTrace();
 			} catch (MalformedURLException e) {
-				LOGV(TAG, "Malformed URL exception"); 
+				e.printStackTrace();
 			} catch (IOException e) {
-				LOGV(TAG, "IO exception: " + e.toString());
-				// e.printStackTrace(); 
+				e.printStackTrace();
 			} finally { 
 	 
-				if (conn != null)
-					conn.disconnect();
+//				if (conn != null)
+//					if (isSecure)
+//						((HttpsURLConnection) conn).disconnect();
+//					else
+//						((HttpURLConnection)conn).disconnect();
 			} 
 			numTries++;
 			
 			if (numTries == MAX_RETRIES)
-				LOGV(TAG, "Max retries reached. Giving up..."); 
+				System.out.println("Max retries reached. Giving up..."); 
 		}
 		
 
@@ -259,9 +275,9 @@ public class Request {
 		
 		// Do not clear cookies each time!
 		//cookies = new ArrayList<String>();
-		System.out.println("Cookie-size: " + cs.getCookies().size());
+//		System.out.println("Cookie-size: " + cs.getCookies().size());
 		for (HttpCookie c : cs.getCookies()) {
-			System.out.println(c.toString());
+//			System.out.println(c.toString());
 			cookies.add(c.toString());
 		}
 		
@@ -280,4 +296,7 @@ public class Request {
 		else
 			throw new IllegalUrlException("Not a valid url: " + url);
 	}
+	
+	
+	
 }

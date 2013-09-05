@@ -239,7 +239,7 @@ public class Parser {
 	}
 	
 	public static JSONArray gradeSummary (String html, JSONArray classList) throws JSONException {
-		System.out.println(html);
+//		System.out.println(html);
 		Element doc = Jsoup.parse(html);
 //		Elements table1 = doc.getElementsByTag("table");
 //		Element table2 = table1.get(2);

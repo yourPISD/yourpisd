@@ -282,7 +282,7 @@ public class LoginActivity extends Activity {
 				    NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 				    if (networkInfo != null && networkInfo.isConnected()) {
 						// Simulate network access.
-						DataGrabber d = new DataGrabber(
+						DataGrabber dg = new DataGrabber(
 								Domain.valueOf(domainSpinner.getSelectedItem().toString()),
 								mEmail,
 								mPassword);
@@ -293,21 +293,40 @@ public class LoginActivity extends Activity {
 						    	 ((TextView)mLoginStatusMessageView).setText(R.string.login_progress_mypisd);
 						    }
 						});
-						d.login();
-						if (d.getEditureLogin() == -1) {
+						
+
+						
+						dg.login();
+						if (dg.getEditureLogin() == -1) {
 					    	return false;
 						}
 						
+						
+						// Update the loading screen.
+						runOnUiThread(new Runnable() {
+						     public void run() {
+						    	 ((TextView)mLoginStatusMessageView).setText(R.string.login_progress_gradebook);
+						    }
+						});
+						
 						{
-							// Update the loading screen.
-							runOnUiThread(new Runnable() {
-							     public void run() {
-							    	 ((TextView)mLoginStatusMessageView).setText(R.string.login_progress_gradebook);
-							    }
-							});
-							String[] ptc = d.getPassthroughCredentials();
-							d.loginGradebook(ptc[0], ptc[1], mEmail, mPassword);
+							String[] ptc = dg.getPassthroughCredentials();
+							boolean loginAttempt = false;
+							int counter = 0;
+							do {
+								if (counter > 0) {
+									try {
+										Thread.sleep(3000);
+										System.out.println("trying again");
+									} catch (InterruptedException e) {
+										e.printStackTrace();
+									}
+								}
+								loginAttempt = dg.loginGradebook(ptc[0], ptc[1], mEmail, mPassword);
+								counter++;
+							} while (counter < 5 && loginAttempt == false);
 						}
+
 						// Update the loading screen.
 						runOnUiThread(new Runnable() {
 						     public void run() {
@@ -317,14 +336,16 @@ public class LoginActivity extends Activity {
 						
 						// No longer gets all class grades on load. Too slow!
 						//JSONArray classGrades = d.getAllClassGrades();
-						JSONArray gradeSummary = d.getGradeSummary();
+						JSONArray gradeSummary = dg.getGradeSummary();
 //						System.out.println(gradeSummary.toString());
 						// Store class grades in Shared Preferences.
+						System.out.println("Done getting data.");
 						SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(LoginActivity.this);
 						SharedPreferences.Editor editor = sharedPrefs.edit();
 						editor.putString("gradeSummary", gradeSummary.toString());
 						editor.commit();
 						Intent startMain = new Intent(LoginActivity.this, MainActivity.class);
+						startMain.putExtra("DataGrabber", dg);
 						startActivity(startMain);
 				    } else {
 				    	System.err.println("No internet connection");
@@ -341,8 +362,6 @@ public class LoginActivity extends Activity {
 				    }
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (PISDException e) {
 				e.printStackTrace();
 			} catch (Exception e) {
 				e.printStackTrace();

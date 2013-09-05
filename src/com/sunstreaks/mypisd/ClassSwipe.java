@@ -1,23 +1,18 @@
 package com.sunstreaks.mypisd;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
 import com.sunstreaks.mypisd.net.DataGrabber;
-import com.sunstreaks.mypisd.net.Domain;
-import com.sunstreaks.mypisd.net.IllegalUrlException;
-import com.sunstreaks.mypisd.net.PISDException;
+
 
 import android.annotation.SuppressLint;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -49,11 +44,19 @@ public class ClassSwipe extends FragmentActivity {
 	String test2 = "OMGOMG";
 	static ViewPager mViewPager;
 	static int received;
+	static DataGrabber dg;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_class_swipe);
 		received = getIntent().getExtras().getInt("classIndex");
+		
+		{	// let's hope this doesn't accidentally create multiple versions of dg.
+			DataGrabber myDG = getIntent().getParcelableExtra("DataGrabber");
+			if (myDG != null)
+				dg = myDG;
+		}
 		
 		for (int i = 0; i < getIntent().getExtras().getInt("classCount"); i++) {
 			mFragments.add(new DescriptionFragment());
@@ -103,11 +106,13 @@ public class ClassSwipe extends FragmentActivity {
 
 		@Override
 		public CharSequence getPageTitle(int position) {
-			Locale l = Locale.getDefault();
+//			Locale l = Locale.getDefault();
 			try {
-				SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ClassSwipe.this);
-		    	JSONArray gradeSummary = new JSONArray(sharedPrefs.getString("gradeSummary", "No name"));
-		    	return gradeSummary.getJSONObject(position).getString("title");
+//				SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ClassSwipe.this);
+//		    	JSONArray gradeSummary = new JSONArray(sharedPrefs.getString("gradeSummary", "No name"));		    	
+//		    	return gradeSummary.getJSONObject(position).getString("title");
+		    	
+		    	return dg.getGradeSummary().getJSONObject(position).getString("title");
 			} catch (JSONException e) {
 				return "Class title";
 			}
@@ -130,42 +135,43 @@ public class ClassSwipe extends FragmentActivity {
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
-				Bundle savedInstanceState) {
+				Bundle savedInstanceState)  {
 			View rootView = inflater.inflate(
 					R.layout.class_description, container, false);
 			
 			
-			SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+//			SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
 			//
 			JSONArray classGrades = null;
 			JSONArray grades;
 			try {
-				classGrades = new JSONArray(sharedPrefs.getString("classGrades", ""));
+//				classGrades = new JSONArray(sharedPrefs.getString("classGrades", ""));
+				classGrades = dg.getClassGrades();
 				grades = classGrades.getJSONArray(mViewPager.getCurrentItem());
 			} catch (JSONException e) {
 				// This page has not been loaded.... ever.
 				try {
-					DataGrabber.login();
+					dg.login();
 					for (int i = 0; i < ClassSwipe.mFragments.size(); i++) {
 						//hard coded for first six weeks!
-						DataGrabber.getClassGrades(i, 0);
+						dg.getClassGrades(i, 0);
 					}
-					SharedPreferences.Editor editor = sharedPrefs.edit();
-					classGrades = DataGrabber.getClassGrades();
-					editor.putString("classGrades", classGrades.toString());
-					editor.commit();
+//					SharedPreferences.Editor editor = sharedPrefs.edit();
+					classGrades = dg.getClassGrades();
+//					editor.putString("classGrades", classGrades.toString());
+//					editor.commit();
 				} catch (Exception f) {
 					e.printStackTrace();
 				}
 			}
 				try {
 					grades = classGrades.getJSONArray(mViewPager.getCurrentItem());
+					TextView teacher = (TextView) rootView.findViewById(R.id.teacher);
+					teacher.setText(dg.getClassGrades().getJSONObject(mViewPager.getCurrentItem())
+						.getString("teacher"));
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
-				TextView teacher = (TextView) rootView.findViewById(R.id.teacher);
-				teacher.setText("Tracy Ishman");
-
 			return rootView;
 		}
 	}
