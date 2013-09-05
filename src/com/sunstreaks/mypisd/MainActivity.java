@@ -274,7 +274,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 			@Override
 			protected JSONArray doInBackground(Void... arg0) {
 				try {
-					return dg.getGradeSummary();
+					return dg.loadGradeSummary();
 				} catch (JSONException e) {
 					e.printStackTrace();
 					return null;

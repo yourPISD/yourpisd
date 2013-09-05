@@ -12,6 +12,7 @@ import com.sunstreaks.mypisd.net.DataGrabber;
 
 
 import android.annotation.SuppressLint;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -111,10 +112,21 @@ public class ClassSwipe extends FragmentActivity {
 //				SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ClassSwipe.this);
 //		    	JSONArray gradeSummary = new JSONArray(sharedPrefs.getString("gradeSummary", "No name"));		    	
 //		    	return gradeSummary.getJSONObject(position).getString("title");
-		    	
-		    	return dg.getGradeSummary().getJSONObject(position).getString("title");
+		    	JSONArray gradeSummary = dg.getGradeSummary();
+		    	if (gradeSummary == null) {
+		    		GradeSummaryTask gsTask = new GradeSummaryTask();
+		    		gsTask.execute();
+		    		gradeSummary = gsTask.get();
+		    	}
+		    	return gradeSummary.getJSONObject(position).getString("title");
 			} catch (JSONException e) {
 				return "Class title";
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+				return "Interrupted exception";
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+				return "Execution exception";
 			}
 		}
 	}
@@ -149,12 +161,18 @@ public class ClassSwipe extends FragmentActivity {
 				classGrades = dg.getClassGrades();
 				grades = classGrades.getJSONArray(mViewPager.getCurrentItem());
 			} catch (JSONException e) {
+				e.printStackTrace();
+			} catch (NullPointerException e) {
+			
 				// This page has not been loaded.... ever.
 				try {
-					dg.login();
+					//dg.login();
 					for (int i = 0; i < ClassSwipe.mFragments.size(); i++) {
 						//hard coded for first six weeks!
-						dg.getClassGrades(i, 0);
+						ClassGradesTask cgTask = new ClassGradesTask();
+						cgTask.execute(i, 0);
+						cgTask.get();
+						System.out.println("Loop run");
 					}
 //					SharedPreferences.Editor editor = sharedPrefs.edit();
 					classGrades = dg.getClassGrades();
@@ -174,6 +192,46 @@ public class ClassSwipe extends FragmentActivity {
 				}
 			return rootView;
 		}
+		
+		
+		public class ClassGradesTask extends AsyncTask<Integer, Void, Boolean> {
+
+			@Override
+			protected Boolean doInBackground(Integer... args) {
+				
+				try {
+					dg.getClassGrades(args[0], args[1]);
+					return true;
+				} catch (JSONException e) {
+					e.printStackTrace();
+					return false;
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+					return false;
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+					return false;
+				}
+				
+			}
+			
+		}
 	}
 
+	public class GradeSummaryTask extends AsyncTask<Void, Void, JSONArray> {
+
+		@Override
+		protected JSONArray doInBackground(Void... params) {
+			try {
+				return dg.loadGradeSummary();
+			} catch (JSONException e) {
+				e.printStackTrace();
+				return null;
+			}
+		}
+		
+	}
+	
+
+	
 }

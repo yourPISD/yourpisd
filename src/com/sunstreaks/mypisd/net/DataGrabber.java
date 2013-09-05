@@ -35,6 +35,7 @@ public class DataGrabber implements Parcelable {
 	
 	ArrayList<String> cookies = new ArrayList<String>();
 	JSONArray classList = null;
+	JSONArray gradeSummary = null;
 	// Class -> Term
 //	Date[][] lastUpdated;
 	int studentId = 0;
@@ -64,18 +65,22 @@ public class DataGrabber implements Parcelable {
     	
     	try {												// recreate the json array
 			this.classList = new JSONArray(in.readString());
+			this.gradeSummary = new JSONArray(in.readString());
 		} catch (JSONException e) {
 			e.printStackTrace();
+			this.classList = null;
+			this.gradeSummary = null;
 		}
     	
     	this.studentId = in.readInt();
     	this.classIds = in.createIntArray();
     	
-    	
+    	String cg = in.readString();
     	try {												// recreate the json array
-			this.classGrades = new JSONArray(in.readString());
+			this.classGrades = new JSONArray(cg);
 		} catch (JSONException e) {
 			// Should ONLY happen if the readString is null.
+			System.out.println("CG= " + cg);
 			System.out.println("Empty string read. Making null JSONArray classGrades.");
 			this.classGrades = null;
 		} catch (NullPointerException e) {
@@ -99,6 +104,7 @@ public class DataGrabber implements Parcelable {
 		dest.writeInt(gradebookLogin);
 		dest.writeStringList(cookies);
 		dest.writeString(classList.toString());
+		dest.writeString(gradeSummary.toString());
 		dest.writeInt(studentId);
 		dest.writeIntArray(classIds);
 		if (classGrades != null)
@@ -463,7 +469,7 @@ public class DataGrabber implements Parcelable {
 	 * @throws InterruptedException 
 	 * 
 	 */
-	public JSONArray getGradeSummary () throws JSONException {
+	public JSONArray loadGradeSummary () throws JSONException {
 		try {
 			String classId = classList.getJSONObject(0).getString("enrollmentId");
 			String termId = classList.getJSONObject(0).getJSONArray("terms").getJSONObject(0).getString("termId");
@@ -494,9 +500,9 @@ public class DataGrabber implements Parcelable {
 			/*
 			 * puts averages in classList, under each term.
 			 */
-			classList = Parser.gradeSummary(response, classList);
+			gradeSummary = Parser.gradeSummary(response, classList);
 	
-			return classList;
+			return gradeSummary;
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
@@ -506,9 +512,15 @@ public class DataGrabber implements Parcelable {
 			return null;
 		}
 	}
+	
+	public JSONArray getGradeSummary () {
+		return gradeSummary;
+	}
 
 	public void getClassGrades( int classIndex, int termIndex ) throws JSONException, InterruptedException, ExecutionException {
 		
+		if (classGrades == null)
+			classGrades = classList;
 		
 		int classId = getClassIds()[classIndex];
 		int termId = getTermIds(classId)[termIndex];
