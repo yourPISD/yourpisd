@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -16,7 +18,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.os.AsyncTask;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -40,9 +41,8 @@ public class DataGrabber implements Parcelable {
 //	Date[][] lastUpdated;
 	int studentId = 0;
 	int[] classIds;
-	JSONArray classGrades = null;
+	Map<Integer, JSONObject> classGrades = new HashMap<Integer, JSONObject>();
 	
-	RequestTask mRequestTask;
 
 	
 	@Override
@@ -75,21 +75,37 @@ public class DataGrabber implements Parcelable {
     	this.studentId = in.readInt();
     	this.classIds = in.createIntArray();
     	
-    	String cg = in.readString();
-    	try {												// recreate the json array
-			this.classGrades = new JSONArray(cg);
-		} catch (JSONException e) {
-			// Should ONLY happen if the readString is null.
-			System.out.println("CG= " + cg);
-			System.out.println("Empty string read. Making null JSONArray classGrades.");
-			this.classGrades = null;
-		} catch (NullPointerException e) {
-			// We maybe need a better way to deal with a null list.
-			e.printStackTrace();
-		}
+//    	String cg = in.readString();
+//    	try {												// recreate the json array
+//    		JSONArray classGradesArray = new JSONArray(cg);
+//    		this.classGrades = new JSONObject[classGradesArray.length()];
+//    		for (int i = 0; i < classGrades.length; i++) {
+//    			classGrades[i] = classGradesArray.getJSONObject(i);
+//    		}
+//			//this.classGrades = new JSONObject(cg);
+//		} catch (JSONException e) {
+//			// Should ONLY happen if the readString is null.
+//			System.out.println("CG= " + cg);
+//			System.out.println("Empty string read. Making null JSONArray classGrades.");
+//			this.classGrades = null;
+//		} catch (NullPointerException e) {
+//			// We maybe need a better way to deal with a null list.
+//			e.printStackTrace();
+//		}
     	
-    	
+    	try {
+	    	final int N = in.readInt();
+	        for (int i = 0; i < N; i++) {
+	            int key = in.readInt();
+	            JSONObject dat = new JSONObject(in.readString());
+	            classGrades.put(key, dat);
+	        } 
+    	} catch (JSONException e) {
+    		e.printStackTrace();
+    	}
     	acceptAllCertificates();
+    	
+    	System.out.println("Done un-packing.");
     }
 
 	@Override
@@ -107,10 +123,26 @@ public class DataGrabber implements Parcelable {
 		dest.writeString(gradeSummary.toString());
 		dest.writeInt(studentId);
 		dest.writeIntArray(classIds);
-		if (classGrades != null)
-			dest.writeString(classGrades.toString());
-		else
-			dest.writeString("");
+		
+		
+//		if (classGrades != null) {
+//			JSONArray classGradesArray = new JSONArray();
+//			for (JSONObject classGrade : classGrades)
+//				classGradesArray.put(classGrade);
+//			dest.writeString(classGradesArray.toString());
+//		}
+//		else
+//			dest.writeString("");
+		
+        final int N = classGrades.size();
+        dest.writeInt(N);
+        if (N > 0) {
+            for (Map.Entry<Integer, JSONObject> entry : classGrades.entrySet()) {
+                dest.writeInt(entry.getKey());
+                JSONObject dat = entry.getValue();
+                dest.writeString(dat.toString());
+            } 
+        } 
 		
 	}
 	
@@ -380,7 +412,6 @@ public class DataGrabber implements Parcelable {
 		
 		JSONObject j = new JSONObject(json);
 		classList = j.getJSONArray("classes");
-		
 	}
 
 	
@@ -433,8 +464,9 @@ public class DataGrabber implements Parcelable {
 //		
 //	}
 
-	public String getDetailedReport (int classId, int termId, int studentId) throws InterruptedException, ExecutionException {
+	public String getDetailedReport (int classId, int termId, int studentId) throws InterruptedException, ExecutionException, MalformedURLException, IllegalUrlException, IOException {
 
+		System.out.println("getDetailedReport started");
 			
 		String url = "https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/StudentAssignments.aspx?" + 
 				"&EnrollmentId=" + 	classId + 
@@ -442,17 +474,17 @@ public class DataGrabber implements Parcelable {
 				"&ReportType=0&StudentId=" + studentId;
 		
 
-		mRequestTask = new RequestTask();
-		mRequestTask.execute(
-				"GET",		// Request Type
-				url,		// String url
-				cookies,	// ArrayList<String> cookies
-				null		// ArrayList<String> requestProperties
-				);
-		Object[] report = (Object[]) mRequestTask.get();	
+//		mRequestTask = new RequestTask();
+//		mRequestTask.execute(
+//				"GET",		// Request Type
+//				url,		// String url
+//				cookies,	// ArrayList<String> cookies
+//				null		// ArrayList<String> requestProperties
+//				);
+//		Object[] report = (Object[]) mRequestTask.get();	
 		
 		
-//			Object[] report = Request.sendGet(url,	cookies);
+		Object[] report = Request.sendGet(url,	cookies);
 		String response = (String) report[0];
 		int responseCode = (Integer) report[1];
 		cookies = (ArrayList<String>) report[2];
@@ -517,51 +549,60 @@ public class DataGrabber implements Parcelable {
 		return gradeSummary;
 	}
 
-	public void getClassGrades( int classIndex, int termIndex ) throws JSONException, InterruptedException, ExecutionException {
+	public JSONObject getClassGrade( int classIndex, int termIndex ) throws JSONException, InterruptedException, ExecutionException, MalformedURLException, IllegalUrlException, IOException {
+		System.out.println("method started");
 		
-		if (classGrades == null)
-			classGrades = classList;
 		
 		int classId = getClassIds()[classIndex];
 		int termId = getTermIds(classId)[termIndex];
 		
+		System.out.println("method locatino 2");
 		String html = getDetailedReport(classId, termId, studentId);
 		
-		
+		System.out.println("html received");
 		//Parse the teacher name if not already there.
 		try {
-			classGrades.getJSONObject(classIndex).getString("teacher");
+			classList.getJSONObject(classIndex).getString("teacher");
 		} catch (JSONException e) {
 			// Teacher was not found.
 			String[] teacher = Parser.teacher(html);
-			classGrades.getJSONObject(classIndex).put("teacher", teacher[0]);
-			classGrades.getJSONObject(classIndex).put("teacherEmail", teacher[1]);
+			classList.getJSONObject(classIndex).put("teacher", teacher[0]);
+			classList.getJSONObject(classIndex).put("teacherEmail", teacher[1]);
 		}
 
+		JSONObject classGrade; 
+		
+//		if (classGrades[ classIndex ] != null)
+//			classGrade = classGrades [ classIndex ];
+//		else
+			classGrade = classList.getJSONObject( classIndex );
 		
 		JSONArray termGrades = Parser.detailedReport(html);
 		Object[] termCategory = Parser.termCategoryGrades(html);
 		JSONArray termCategoryGrades = (JSONArray) termCategory[0];
 		
 		if ((Double)termCategory[1] != -1)
-			classGrades.getJSONObject(classIndex).getJSONArray("terms").getJSONObject(termIndex).put("average", termCategory[1]);
-		classGrades.getJSONObject(classIndex).getJSONArray("terms").getJSONObject(termIndex).put("grades", termGrades);
-		classGrades.getJSONObject(classIndex).getJSONArray("terms").getJSONObject(termIndex).put("categoryGrades", termCategoryGrades);
+			classGrade.getJSONArray("terms").getJSONObject(termIndex).put("average", termCategory[1]);
+		classGrade.getJSONArray("terms").getJSONObject(termIndex).put("grades", termGrades);
+		classGrade.getJSONArray("terms").getJSONObject(termIndex).put("categoryGrades", termCategoryGrades);
 		
+		System.out.println(classGrade.toString());
+		classGrades.put(classIndex, classGrade);
+		return classGrade;
 	}
 	
 	
-	public JSONArray getAllClassGrades() throws JSONException, InterruptedException, ExecutionException {
+	public Map<Integer,JSONObject> getAllClassGrades() throws JSONException, InterruptedException, ExecutionException, MalformedURLException, IllegalUrlException, IOException {
 		if (classList == null)
 			return null;
 		if (classIds == null)
 			getClassIds();
-		if (classGrades == null)
-			classGrades = classList;
+//		if (classGrades == null)
+//			classGrades = classList;
 		
 		for (int i = 0; i < classIds.length; i++) {
 			for (int j = 0; j < getTermIds(classIds[i]).length; j++) {
-				getClassGrades (i , j);
+				getClassGrade (i , j);
 			}
 		}
 		
@@ -685,11 +726,23 @@ public class DataGrabber implements Parcelable {
 	}
 	
 
-	public JSONArray getClassGrades () {
+	public Map<Integer,JSONObject> getClassGrades (int classIndex) {
 		return classGrades;
 	}
 
-
+	public String getClassName (int classIndex) {
+		if (classList == null)
+			return "null";
+		else
+			try {
+				return classList.getJSONObject(classIndex).getString("title");
+			} catch (JSONException e) {
+				e.printStackTrace();
+				return "jsonException";
+			}
+	}
+	
+	/*
 	public class LoginTask extends AsyncTask<Void, Void, Void> {
 
 		protected void onPreExecute() {
@@ -742,5 +795,5 @@ public class DataGrabber implements Parcelable {
 		}
 		
 	}
-	
+	*/
 }

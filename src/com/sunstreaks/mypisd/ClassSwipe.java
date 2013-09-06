@@ -2,14 +2,11 @@ package com.sunstreaks.mypisd;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-
-import com.sunstreaks.mypisd.net.DataGrabber;
-
+import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 import android.os.AsyncTask;
@@ -24,6 +21,8 @@ import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.sunstreaks.mypisd.net.DataGrabber;
 
 @SuppressLint("ValidFragment")
 public class ClassSwipe extends FragmentActivity {
@@ -41,27 +40,27 @@ public class ClassSwipe extends FragmentActivity {
 	/**
 	 * The {@link ViewPager} that will host the section contents.
 	 */
-	static String test = "Ishman";
-	String test2 = "OMGOMG";
 	static ViewPager mViewPager;
+	
+
 	static int received;
+	static int classCount;
+	
 	static DataGrabber dg;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_class_swipe);
+		
 		received = getIntent().getExtras().getInt("classIndex");
-		
-		{	// let's hope this doesn't accidentally create multiple versions of dg.
-			DataGrabber myDG = getIntent().getParcelableExtra("DataGrabber");
-			if (myDG != null)
-				dg = myDG;
-		}
-		
-		for (int i = 0; i < getIntent().getExtras().getInt("classCount"); i++) {
+		classCount = getIntent().getExtras().getInt("classCount");
+		dg = getIntent().getParcelableExtra("DataGrabber");
+
+		for (int i = 0; i < classCount; i++) {
 			mFragments.add(new DescriptionFragment());
 		}
+		
 		// Create the adapter that will return a fragment for each of the three
 		// primary sections of the app.
 		mSectionsPagerAdapter = new SectionsPagerAdapter(
@@ -107,34 +106,13 @@ public class ClassSwipe extends FragmentActivity {
 
 		@Override
 		public CharSequence getPageTitle(int position) {
-//			Locale l = Locale.getDefault();
-			try {
-//				SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ClassSwipe.this);
-//		    	JSONArray gradeSummary = new JSONArray(sharedPrefs.getString("gradeSummary", "No name"));		    	
-//		    	return gradeSummary.getJSONObject(position).getString("title");
-		    	JSONArray gradeSummary = dg.getGradeSummary();
-		    	if (gradeSummary == null) {
-		    		GradeSummaryTask gsTask = new GradeSummaryTask();
-		    		gsTask.execute();
-		    		gradeSummary = gsTask.get();
-		    	}
-		    	return gradeSummary.getJSONObject(position).getString("title");
-			} catch (JSONException e) {
-				return "Class title";
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-				return "Interrupted exception";
-			} catch (ExecutionException e) {
-				e.printStackTrace();
-				return "Execution exception";
-			}
+			return dg.getClassName(position);
 		}
 	}
 	
 
 	/**
-	 * A dummy fragment representing a section of the app, but that simply
-	 * displays dummy text.
+	 * A fragment that displays grades for one class.
 	 */
 	public static class DescriptionFragment extends Fragment {
 		/**
@@ -142,80 +120,59 @@ public class ClassSwipe extends FragmentActivity {
 		 * fragment.
 		 */
 		public static final String ARG_SECTION_NUMBER = "section_number";
+		private ClassGradeTask mClassGradeTask;
+		private int position;
+		private JSONObject mClassGrade;
 		public DescriptionFragment() {
 		}
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState)  {
-			View rootView = inflater.inflate(
-					R.layout.class_description, container, false);
 			
+			position = mViewPager.getCurrentItem();
 			
-//			SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-			//
-			JSONArray classGrades = null;
-			JSONArray grades;
+			View rootView = inflater.inflate(R.layout.class_description, container, false);
 			try {
-//				classGrades = new JSONArray(sharedPrefs.getString("classGrades", ""));
-				classGrades = dg.getClassGrades();
-				grades = classGrades.getJSONArray(mViewPager.getCurrentItem());
+				mClassGradeTask = new ClassGradeTask();
+				mClassGradeTask.execute(position, 0);
+				mClassGrade = mClassGradeTask.get();
+				TextView teacher = (TextView) rootView.findViewById(R.id.teacher);
+				teacher.setText(mClassGrade.getString("teacher"));
 			} catch (JSONException e) {
 				e.printStackTrace();
-			} catch (NullPointerException e) {
-			
-				// This page has not been loaded.... ever.
-				try {
-					//dg.login();
-					for (int i = 0; i < ClassSwipe.mFragments.size(); i++) {
-						//hard coded for first six weeks!
-						ClassGradesTask cgTask = new ClassGradesTask();
-						cgTask.execute(i, 0);
-						cgTask.get();
-						System.out.println("Loop run");
-					}
-//					SharedPreferences.Editor editor = sharedPrefs.edit();
-					classGrades = dg.getClassGrades();
-//					editor.putString("classGrades", classGrades.toString());
-//					editor.commit();
-				} catch (Exception f) {
-					e.printStackTrace();
-				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				e.printStackTrace();
 			}
-				try {
-					grades = classGrades.getJSONArray(mViewPager.getCurrentItem());
-					TextView teacher = (TextView) rootView.findViewById(R.id.teacher);
-					teacher.setText(dg.getClassGrades().getJSONObject(mViewPager.getCurrentItem())
-						.getString("teacher"));
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
 			return rootView;
 		}
 		
-		
-		public class ClassGradesTask extends AsyncTask<Integer, Void, Boolean> {
-
+		public class ClassGradeTask extends AsyncTask<Integer, Void, JSONObject> {
+			
 			@Override
-			protected Boolean doInBackground(Integer... args) {
-				
-				try {
-					dg.getClassGrades(args[0], args[1]);
-					return true;
-				} catch (JSONException e) {
-					e.printStackTrace();
-					return false;
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-					return false;
-				} catch (ExecutionException e) {
-					e.printStackTrace();
-					return false;
-				}
-				
+			protected void onPreExecute () {
+				System.out.println("ClassGradeTask starting");
 			}
 			
+			@Override
+			protected void onPostExecute (JSONObject result) {
+//				mClassGrade = result;
+				System.out.println("ClassGradeTask finished");
+			}
+			
+			@Override
+			protected JSONObject doInBackground(Integer... integers) {
+				try {
+					return dg.getClassGrade(integers[0], integers[1]);
+				} catch (Exception e) {
+					e.printStackTrace();
+					return null;
+				}
+			}
 		}
+
 	}
 
 	public class GradeSummaryTask extends AsyncTask<Void, Void, JSONArray> {
@@ -224,7 +181,7 @@ public class ClassSwipe extends FragmentActivity {
 		protected JSONArray doInBackground(Void... params) {
 			try {
 				return dg.loadGradeSummary();
-			} catch (JSONException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 				return null;
 			}

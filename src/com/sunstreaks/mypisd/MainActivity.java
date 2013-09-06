@@ -68,8 +68,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		Intent intent = getIntent();
 		{
 			DataGrabber myDG = (DataGrabber) intent.getParcelableExtra("DataGrabber");
-			if (myDG != null)
-				dg = myDG;
+			dg = myDG;
 		}
 		
 		
@@ -291,6 +290,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 	public void onClick(View v) {
 		System.out.println(v.getId());
 		Intent intent = new Intent (this, ClassSwipe.class);
+		System.out.println("classCount = " + classCount);
+		System.out.println("classIndex = " + v.getId());
 		intent.putExtra("classCount", classCount);
 		intent.putExtra("classIndex", v.getId());
 		intent.putExtra("DataGrabber", dg);
