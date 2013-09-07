@@ -80,7 +80,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		// Set up the ViewPager with the sections adapter.
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 		mViewPager.setAdapter(mSectionsPagerAdapter);
-
+		mViewPager.setCurrentItem(1);
 	}
 
 	@Override

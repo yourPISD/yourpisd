@@ -30,11 +30,10 @@ public final class R {
         public static final int shadow=0x7f020003;
     }
     public static final class id {
-        public static final int TextView01=0x7f090011;
-        public static final int action_forgot_password=0x7f090016;
-        public static final int action_settings=0x7f090015;
-        public static final int class_grades=0x7f090013;
-        public static final int container=0x7f090014;
+        public static final int TextView01=0x7f090010;
+        public static final int action_forgot_password=0x7f090013;
+        public static final int action_settings=0x7f090012;
+        public static final int container=0x7f090011;
         public static final int daily=0x7f09000c;
         public static final int domain_spinner=0x7f090005;
         public static final int email=0x7f090006;
@@ -51,8 +50,6 @@ public final class R {
         public static final int section_label=0x7f09000e;
         public static final int sign_in_button=0x7f09000a;
         public static final int teacher=0x7f09000b;
-        public static final int textView1=0x7f090010;
-        public static final int textView2=0x7f090012;
     }
     public static final class layout {
         public static final int activity_class_swipe=0x7f030000;

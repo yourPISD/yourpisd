@@ -11,40 +11,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical" >
-            
-            <TextView
-		        android:id="@+id/textView1"
-		        android:layout_width="match_parent"
-		        android:layout_height="wrap_content"
-		        android:layout_marginTop="60dp"
-		        android:text="UPCOMING ASSIGNMENTS"
-		        android:textSize="25sp" />
 
-		    <TextView
-		        android:id="@+id/TextView01"
-		        android:layout_width="match_parent"
-		        android:layout_height="wrap_content"
-		        android:text="Welcome: Name"
-		        android:textSize="25sp" />
-		
-		    <TextView
-		        android:id="@+id/textView2"
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:layout_marginTop="30dp"
-		        android:text="STUFF TO BE IMPLEMENTED"
-		        android:textSize="25sp"
-		        android:textAppearance="?android:attr/textAppearanceLarge" />
-    
-		    <TextView
-		        android:id="@+id/class_grades"
-		        android:layout_width="wrap_content"
-		        android:layout_height="0dp"
-		        android:layout_weight="1"
-		        android:ellipsize="none"
-		        android:text="default text"
-		        android:maxLines="100"
-		        android:scrollHorizontally="false" />
+            <TextView
+                android:id="@+id/TextView01"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Welcome: Name"
+                android:textSize="25sp" />
             
         </LinearLayout>
     </ScrollView>
