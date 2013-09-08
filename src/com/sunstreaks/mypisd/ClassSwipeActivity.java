@@ -2,7 +2,6 @@ package com.sunstreaks.mypisd;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,7 +24,7 @@ import android.widget.TextView;
 import com.sunstreaks.mypisd.net.DataGrabber;
 
 @SuppressLint("ValidFragment")
-public class ClassSwipe extends FragmentActivity {
+public class ClassSwipeActivity extends FragmentActivity {
 	static List<Fragment> mFragments = new ArrayList<Fragment>();
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -58,7 +57,7 @@ public class ClassSwipe extends FragmentActivity {
 		dg = getIntent().getParcelableExtra("DataGrabber");
 
 		for (int i = 0; i < classCount; i++) {
-			mFragments.add(new DescriptionFragment());
+			mFragments.add(new DescriptionFragment(getResources().getString(R.string.class_swipe_loading)));
 		}
 		
 		// Create the adapter that will return a fragment for each of the three
@@ -106,6 +105,7 @@ public class ClassSwipe extends FragmentActivity {
 
 		@Override
 		public CharSequence getPageTitle(int position) {
+			//return ( (DescriptionFragment)fragmentList.get(position) ).getClassName();
 			return dg.getClassName(position);
 		}
 	}
@@ -123,31 +123,58 @@ public class ClassSwipe extends FragmentActivity {
 		private ClassGradeTask mClassGradeTask;
 		private int position;
 		private JSONObject mClassGrade;
+		private String className;
+		private String teacherName;
+		private View rootView;
+		
 		public DescriptionFragment() {
 		}
-
+		
+		public DescriptionFragment(String className) {
+			this.className = className;
+		}
+		
+		public void setClassName(String className) {
+			this.className = className;
+		}
+		
+		public String getClassName() {
+			return className;
+		}
+		
+		
+		
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState)  {
+			if (savedInstanceState != null)
+				System.out.println("Why am i doing this a second time?");
+			else
+				System.out.println("Oncreateview first time");
 			
 			position = mViewPager.getCurrentItem();
+			System.out.println("position = " + position);
 			
-			View rootView = inflater.inflate(R.layout.class_description, container, false);
-			try {
+			rootView = inflater.inflate(R.layout.class_description, container, false);
+			
+			if (this.teacherName == null)
+				this.teacherName = getResources().getString(R.string.teacher_name);
+			
+			( (TextView) rootView.findViewById(R.id.teacher) ).setText(teacherName);
+			if (this.mClassGrade == null) {
 				mClassGradeTask = new ClassGradeTask();
 				mClassGradeTask.execute(position, 0);
-				mClassGrade = mClassGradeTask.get();
-				TextView teacher = (TextView) rootView.findViewById(R.id.teacher);
-				teacher.setText(mClassGrade.getString("teacher"));
-			} catch (JSONException e) {
-				e.printStackTrace();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			} catch (ExecutionException e) {
-				e.printStackTrace();
 			}
+			
+
+
 			return rootView;
 		}
+		
+//		@Override
+//		public void onPause() {
+//			super.onPause();
+//		}
 		
 		public class ClassGradeTask extends AsyncTask<Integer, Void, JSONObject> {
 			
@@ -158,8 +185,19 @@ public class ClassSwipe extends FragmentActivity {
 			
 			@Override
 			protected void onPostExecute (JSONObject result) {
-//				mClassGrade = result;
+				mClassGrade = result;
+				
 				System.out.println("ClassGradeTask finished");
+				System.out.println(mClassGrade);
+				
+				TextView teacher = (TextView) rootView.findViewById(R.id.teacher);
+				
+				try {
+					teacherName = mClassGrade.getString("teacher");
+					teacher.setText(teacherName);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
 			}
 			
 			@Override

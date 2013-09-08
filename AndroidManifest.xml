@@ -22,7 +22,7 @@
 
         </activity>
         <activity
-            android:name="com.sunstreaks.mypisd.ClassSwipe"
+            android:name="com.sunstreaks.mypisd.ClassSwipeActivity"
             android:label="@string/title_activity_class_swipe" >
 
         </activity>

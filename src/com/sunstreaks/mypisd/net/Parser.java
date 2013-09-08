@@ -119,7 +119,7 @@ public class Parser {
 		return grades;
 	}
 	
-	/*
+	/**
 	 * Reads assignment view page and returns teacher name.
 	 * 
 	 * Parses from this table:
@@ -238,6 +238,16 @@ public class Parser {
 		}
 	}
 	
+	/** Parses average of each term from GradeSummary.aspx. Returns in JSONArray, which *should*
+	 *  be saved to classList.
+	 * NOTICE: Does not work for second semester classes in which the second semester schedule
+	 *  is different from the first semester schedule.
+	 * 
+	 * @param html : source of GradeSummary.aspx
+	 * @param classList : classList as returned by Init.aspx
+	 * @return modified classList that includes averages
+	 * @throws JSONException
+	 */
 	public static JSONArray gradeSummary (String html, JSONArray classList) throws JSONException {
 //		System.out.println(html);
 		Element doc = Jsoup.parse(html);
@@ -247,21 +257,32 @@ public class Parser {
 //		Element reportTable = table3.get(0);
 		Element reportTable = doc.getElementsByClass("reportTable").get(0).getElementsByTag("tbody").get(0);
 		Elements rows = reportTable.getElementsByTag("tr");
+		int rowIndex = 0; int classIndex = 0;
 		
-		for (int i = 0; i < rows.size(); i++) {
-			Element row = rows.get(i);
+		while (rowIndex < rows.size() ) {
+			Element row = rows.get(rowIndex);
 			Elements columns = row.getElementsByTag("td");
+			
+			// Skip classes that don't exist in the first semester.
+			// Must be modified before 2nd semester!
+			if (columns.get(0).attr("class").equals("disabledCell")) {
+				rowIndex++;
+				continue;
+			}
+			
 			for (int j = 0; j < 8; j++) {
 				int col = termToColumn(j);
 				Element column = columns.get(col);
 				if ( ! column.text().equals(""))
 					try {
-						classList.getJSONObject(i).getJSONArray("terms").getJSONObject(col).put("average", Integer.parseInt(column.text()));
+						classList.getJSONObject(classIndex).getJSONArray("terms").getJSONObject(j).put("average", Integer.parseInt(column.text()));
 					} catch (JSONException e) {
+						e.printStackTrace();
 						// Hopefully this will only execute if there is a class that does not last for all year.
 						// In which case we have encountered ArrayIndexOutOfBounds
 					}
 			}
+			rowIndex++; classIndex++;
 		}
 		
 		return classList;

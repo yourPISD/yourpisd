@@ -71,7 +71,7 @@ public final class R {
         public static final int action_sign_in_register=0x7f06000d;
         public static final int action_sign_in_short=0x7f06000e;
         public static final int app_name=0x7f060000;
-        public static final int class_grades=0x7f060009;
+        public static final int class_swipe_loading=0x7f060009;
         public static final int daily=0x7f060006;
         public static final int error_field_required=0x7f060016;
         public static final int error_incorrect_password=0x7f060015;

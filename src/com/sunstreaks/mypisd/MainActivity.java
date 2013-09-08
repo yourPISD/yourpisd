@@ -289,7 +289,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 	@Override
 	public void onClick(View v) {
 		System.out.println(v.getId());
-		Intent intent = new Intent (this, ClassSwipe.class);
+		Intent intent = new Intent (this, ClassSwipeActivity.class);
 		System.out.println("classCount = " + classCount);
 		System.out.println("classIndex = " + v.getId());
 		intent.putExtra("classCount", classCount);

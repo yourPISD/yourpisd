@@ -272,6 +272,9 @@ public class LoginActivity extends Activity {
 	 * the user.
 	 */
 	public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+		
+		private DataGrabber dg;
+		
 		@Override
 		protected Boolean doInBackground(Void... params) {
 			// TODO: attempt authentication against a network service.
@@ -282,7 +285,7 @@ public class LoginActivity extends Activity {
 				    NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 				    if (networkInfo != null && networkInfo.isConnected()) {
 						// Simulate network access.
-						DataGrabber dg = new DataGrabber(
+						dg = new DataGrabber(
 								Domain.valueOf(domainSpinner.getSelectedItem().toString()),
 								mEmail,
 								mPassword);
@@ -344,9 +347,6 @@ public class LoginActivity extends Activity {
 						SharedPreferences.Editor editor = sharedPrefs.edit();
 						editor.putString("gradeSummary", gradeSummary.toString());
 						editor.commit();
-						Intent startMain = new Intent(LoginActivity.this, MainActivity.class);
-						startMain.putExtra("DataGrabber", dg);
-						startActivity(startMain);
 				    } else {
 				    	System.err.println("No internet connection");
 				    	// Program exits mysteriously here.
@@ -386,6 +386,9 @@ public class LoginActivity extends Activity {
 
 			if (success) {
 				finish();
+				Intent startMain = new Intent(LoginActivity.this, MainActivity.class);
+				startMain.putExtra("DataGrabber", dg);
+				startActivity(startMain);
 			} else {
 				mPasswordView
 						.setError(getString(R.string.error_incorrect_password));

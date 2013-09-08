@@ -550,16 +550,23 @@ public class DataGrabber implements Parcelable {
 	}
 
 	public JSONObject getClassGrade( int classIndex, int termIndex ) throws JSONException, InterruptedException, ExecutionException, MalformedURLException, IllegalUrlException, IOException {
+		
+		if (classGrades.get(classIndex) != null) {
+			System.out.println("returning cached version of classGrade");
+			return classGrades.get(classIndex);
+		}
+			
+		
 		System.out.println("method started");
 		
 		
 		int classId = getClassIds()[classIndex];
 		int termId = getTermIds(classId)[termIndex];
 		
-		System.out.println("method locatino 2");
+		
 		String html = getDetailedReport(classId, termId, studentId);
 		
-		System.out.println("html received");
+		
 		//Parse the teacher name if not already there.
 		try {
 			classList.getJSONObject(classIndex).getString("teacher");
@@ -586,7 +593,7 @@ public class DataGrabber implements Parcelable {
 		classGrade.getJSONArray("terms").getJSONObject(termIndex).put("grades", termGrades);
 		classGrade.getJSONArray("terms").getJSONObject(termIndex).put("categoryGrades", termCategoryGrades);
 		
-		System.out.println(classGrade.toString());
+//		System.out.println(classGrade.toString());
 		classGrades.put(classIndex, classGrade);
 		return classGrade;
 	}
@@ -742,58 +749,5 @@ public class DataGrabber implements Parcelable {
 			}
 	}
 	
-	/*
-	public class LoginTask extends AsyncTask<Void, Void, Void> {
-
-		protected void onPreExecute() {
-			System.out.println("on Pre Execute");
-		}
-		
-		protected void onPostExecute() {
-			System.out.println("on Post Execute");
-		}
-		
-		@Override
-		protected Void doInBackground(Void... params) {
-			try {
-				System.out.println("Process started");
-				login();
-				System.out.println("Process ended");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			System.out.println(java.util.Arrays.toString(passthroughCredentials));
-			return null;
-		}
-		
-	}
 	
-	public class LoginGradebookTask extends AsyncTask<String, Void, Boolean> {
-
-		@Override
-		protected Boolean doInBackground(String... params) {
-			try {
-				return loginGradebook(params[0], params[1], params[2], params[3]);
-			} catch (Exception e) {
-				e.printStackTrace();
-				return false;
-			}
-		}
-		
-	}
-	
-	public class DetailedReportTask extends AsyncTask<Integer, Void, Void> {
-
-		@Override
-		protected Void doInBackground(Integer... params) {
-			try {
-				getDetailedReport(params[0], params[1], params[2]);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			return null;
-		}
-		
-	}
-	*/
 }
