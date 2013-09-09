@@ -241,6 +241,10 @@ public class ClassSwipeActivity extends FragmentActivity {
 					ScrollView sv = new ScrollView(getActivity());
 					LinearLayout layout = new LinearLayout(getActivity());
 					layout.setOrientation(LinearLayout.VERTICAL);
+					LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+		            		LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+		            
+		            lp.setMargins(30, 20, 30, 0);
 		            layout.setLayoutParams(
 		            		new LinearLayout.LayoutParams(
 		            				AbsListView.LayoutParams.MATCH_PARENT, 
@@ -269,7 +273,8 @@ public class ClassSwipeActivity extends FragmentActivity {
 			            grade.setTextSize(30);
 			            innerLayout.addView(className);
 			            innerLayout.addView(grade);
-			            layout.addView(innerLayout);
+			            innerLayout.setBackgroundDrawable(getResources().getDrawable(R.drawable.dropshadow));
+			            layout.addView(innerLayout, lp);
 		            }
 		            linearLayout.addView(layout);
 //					gradeListLayout = layout;
