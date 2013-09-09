@@ -80,6 +80,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		// Set up the ViewPager with the sections adapter.
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 		mViewPager.setAdapter(mSectionsPagerAdapter);
+		// Opens Grade Summary (index 1) on open.
 		mViewPager.setCurrentItem(1);
 	}
 
@@ -114,7 +115,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
 		@Override
 		public int getCount() {
-			// Show 3 total pages.
+			// Show 2 total pages.
 			return 2;
 		}
 

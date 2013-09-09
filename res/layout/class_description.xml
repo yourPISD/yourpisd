@@ -7,6 +7,7 @@
 	    android:layout_width="match_parent"
 	    android:layout_height="wrap_content"
 	    android:orientation="vertical"
+	    android:id="@+id/class_description_linear_layout"
 	    >
 
 		<TextView
@@ -35,6 +36,13 @@
 		    android:layout_alignParentTop="true"
 		    android:text="@string/major"
 		    android:textSize="30sp" />
+		
+		<LinearLayout
+		    android:id="@+id/grade_list"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:orientation="vertical"
+		    />
 		
 	</LinearLayout>
 </ScrollView>
