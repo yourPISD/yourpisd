@@ -2,6 +2,7 @@ package com.sunstreaks.mypisd;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -201,12 +202,69 @@ public class ClassSwipeActivity extends FragmentActivity {
 				this.teacherName = getResources().getString(R.string.teacher_name);
 			
 			( (TextView) rootView.findViewById(R.id.teacher) ).setText(teacherName);
+<<<<<<< HEAD
+			
+			if (this.mClassGrade == null) {
+=======
 			if (this.mClassGrade == null && !gradeLoaded) {
+>>>>>>> e420121b18db8984ddb2710ee8c43788a7846281
 				mClassGradeTask = new ClassGradeTask();
 				gradeLoaded = true;
 				mClassGradeTask.execute(position, 0);
 			}
+<<<<<<< HEAD
+			try
+			{
+				mClassGradeTask.get(10000, TimeUnit.MILLISECONDS);
+			}
+			catch(Exception e)
+			{
+				
+			}
+			try {
+				TextView teacher = (TextView) rootView.findViewById(R.id.teacher);
+				ScrollView sv = new ScrollView(getActivity());
+				LinearLayout layout = new LinearLayout(getActivity());
+				layout.setOrientation(LinearLayout.VERTICAL);
+	            layout.setLayoutParams(new LinearLayout.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, AbsListView.LayoutParams.MATCH_PARENT));
+	            for(int i = 0; i< mClassGrade.getJSONArray("terms")
+	            		.getJSONObject(0).getJSONArray("grades").length(); i++)
+	            {
+	            	LinearLayout innerLayout = new LinearLayout(getActivity());
+		            innerLayout.setOrientation(LinearLayout.HORIZONTAL);
+		   
+		            TextView className = new TextView(getActivity());
+		            className.setText(mClassGrade.getJSONArray("terms")
+		            		.getJSONObject(0).getJSONArray("grades")
+		            		.getJSONObject(i).getString("Description"));
+		            //className.setBackgroundColor(Color.WHITE);
+		            className.setTextSize(20);
+		            className.setLayoutParams(
+		            		new LinearLayout.LayoutParams(
+		            				LinearLayout.LayoutParams.WRAP_CONTENT, 
+		            				LinearLayout.LayoutParams.WRAP_CONTENT, 
+		            				1f));
+		            TextView grade = new TextView(getActivity());
+		            grade.setText(mClassGrade.getJSONArray("terms")
+		            		.getJSONObject(0).getJSONArray("grades")
+		            		.getJSONObject(i).getString("Grade"));
+		            grade.setTextSize(30);
+		            innerLayout.addView(className);
+		            innerLayout.addView(grade);
+		            layout.addView(innerLayout);
+	            }
+	            rootView = layout;
+			}
+		 catch (JSONException e) {
+			e.printStackTrace();
+		} 
+			catch(NullPointerException e)
+			{
+				e.printStackTrace();
+			}
+=======
 
+>>>>>>> e420121b18db8984ddb2710ee8c43788a7846281
 
 
 			return rootView;
@@ -231,8 +289,12 @@ public class ClassSwipeActivity extends FragmentActivity {
 				System.out.println("ClassGradeTask finished");
 				System.out.println(mClassGrade);
 				
-				TextView teacher = (TextView) rootView.findViewById(R.id.teacher);
 				
+<<<<<<< HEAD
+//					teacherName = mClassGrade.getString("teacher");
+//					teacher.setText(teacherName);
+
+=======
 				try {
 					teacherName = mClassGrade.getString("teacher");
 					teacher.setText(teacherName);
@@ -283,6 +345,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 				
 				
 				
+>>>>>>> e420121b18db8984ddb2710ee8c43788a7846281
 			}
 			
 			@Override
