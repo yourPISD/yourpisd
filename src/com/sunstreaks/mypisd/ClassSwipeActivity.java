@@ -8,6 +8,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.FragmentTransaction;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -19,13 +21,16 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.sunstreaks.mypisd.net.DataGrabber;
 
 @SuppressLint("ValidFragment")
 public class ClassSwipeActivity extends FragmentActivity {
-	static List<Fragment> mFragments = new ArrayList<Fragment>();
+	static List<Fragment> mFragments;
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide
 	 * fragments for each of the sections. We use a
@@ -44,6 +49,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 	static int received;
 	static int classCount;
+	static int classesMade = 0;
 	
 	static DataGrabber dg;
 	
@@ -55,21 +61,34 @@ public class ClassSwipeActivity extends FragmentActivity {
 		received = getIntent().getExtras().getInt("classIndex");
 		classCount = getIntent().getExtras().getInt("classCount");
 		dg = getIntent().getParcelableExtra("DataGrabber");
-
-		for (int i = 0; i < classCount; i++) {
-			mFragments.add(new DescriptionFragment(getResources().getString(R.string.class_swipe_loading)));
+		
+		
+		// 7 fragments were being added to mFragments every time that this onCreate method was run.
+		if (mFragments == null) {
+			mFragments = new ArrayList<Fragment>();
+			for (int i = 0; i < classCount; i++) {
+				mFragments.add(new DescriptionFragment());
+			}
 		}
+		
+		
+		System.out.println("mFragments size = " + mFragments.size() + "and classCount = " + classCount);
+		
 		
 		// Create the adapter that will return a fragment for each of the three
 		// primary sections of the app.
+
 		mSectionsPagerAdapter = new SectionsPagerAdapter(
-			        getSupportFragmentManager(), mFragments);
+			       getSupportFragmentManager(), mFragments);
+
 
 		// Set up the ViewPager with the sections adapter.
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 		mViewPager.setAdapter(mSectionsPagerAdapter);
 		mViewPager.setCurrentItem(received);
-		mViewPager.setOffscreenPageLimit(1);
+		mViewPager.setOffscreenPageLimit(7);
+
+
 	}
 
 	@Override
@@ -105,8 +124,8 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 		@Override
 		public CharSequence getPageTitle(int position) {
-			//return ( (DescriptionFragment)fragmentList.get(position) ).getClassName();
-			return dg.getClassName(position);
+			return ( (DescriptionFragment)fragmentList.get(position) ).getPageTitle();
+			//return dg.getClassName(position);
 		}
 	}
 	
@@ -121,25 +140,37 @@ public class ClassSwipeActivity extends FragmentActivity {
 		 */
 		public static final String ARG_SECTION_NUMBER = "section_number";
 		private ClassGradeTask mClassGradeTask;
-		private int position;
+		private final int position;
 		private JSONObject mClassGrade;
-		private String className;
+		private String pageTitle;
 		private String teacherName;
 		private View rootView;
+		private boolean gradeLoaded = false;
+		private double random;
+		private ViewGroup linearLayout;
+		//private ViewGroup gradeListLayout;
 		
 		public DescriptionFragment() {
+			this.position = classesMade++;
+			if (classesMade > classCount)
+				System.out.println("Something really weird is going on.");
+			this.random = Math.random();
 		}
 		
-		public DescriptionFragment(String className) {
-			this.className = className;
+		@Override
+		public void onAttach(Activity activity) {
+			super.onAttach(activity);
 		}
 		
-		public void setClassName(String className) {
-			this.className = className;
+		public DescriptionFragment(int position) {
+			this.position = position;
+			this.random = Math.random();
 		}
 		
-		public String getClassName() {
-			return className;
+		public String getPageTitle() {
+			if (pageTitle == null)
+				return Integer.toString(position);
+			return pageTitle;
 		}
 		
 		
@@ -147,25 +178,35 @@ public class ClassSwipeActivity extends FragmentActivity {
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState)  {
-			if (savedInstanceState != null)
-				System.out.println("Why am i doing this a second time?");
-			else
-				System.out.println("Oncreateview first time");
 			
-			position = mViewPager.getCurrentItem();
-			System.out.println("position = " + position);
+			
+			this.pageTitle = getResources().getString(R.string.class_swipe_loading);
+			
+			if (mClassGradeTask != null)
+				System.out.println("Grade task has been created before");
+			else
+				System.out.println("First time grade task");
+			
+//			position = mViewPager.getCurrentItem();
+			System.out.println("position = " + position + " and random = " + random);
+			
+			pageTitle = dg.getClassName(position); 
 			
 			rootView = inflater.inflate(R.layout.class_description, container, false);
+			
+
+			linearLayout =  (ViewGroup) rootView.findViewById(R.id.class_description_linear_layout);
 			
 			if (this.teacherName == null)
 				this.teacherName = getResources().getString(R.string.teacher_name);
 			
 			( (TextView) rootView.findViewById(R.id.teacher) ).setText(teacherName);
-			if (this.mClassGrade == null) {
+			if (this.mClassGrade == null && !gradeLoaded) {
 				mClassGradeTask = new ClassGradeTask();
+				gradeLoaded = true;
 				mClassGradeTask.execute(position, 0);
 			}
-			
+
 
 
 			return rootView;
@@ -195,9 +236,53 @@ public class ClassSwipeActivity extends FragmentActivity {
 				try {
 					teacherName = mClassGrade.getString("teacher");
 					teacher.setText(teacherName);
+					
+					
+					ScrollView sv = new ScrollView(getActivity());
+					LinearLayout layout = new LinearLayout(getActivity());
+					layout.setOrientation(LinearLayout.VERTICAL);
+		            layout.setLayoutParams(
+		            		new LinearLayout.LayoutParams(
+		            				AbsListView.LayoutParams.MATCH_PARENT, 
+		            				AbsListView.LayoutParams.MATCH_PARENT));
+		            for(int i = 0; i< mClassGrade.getJSONArray("terms")
+		            		.getJSONObject(0).getJSONArray("grades").length(); i++)
+		            {
+		            	LinearLayout innerLayout = new LinearLayout(getActivity());
+			            innerLayout.setOrientation(LinearLayout.HORIZONTAL);
+			   
+			            TextView className = new TextView(getActivity());
+			            className.setText(mClassGrade.getJSONArray("terms")
+			            		.getJSONObject(0).getJSONArray("grades")
+			            		.getJSONObject(i).getString("Description"));
+			            //className.setBackgroundColor(Color.WHITE);
+			            className.setTextSize(20);
+			            className.setLayoutParams(
+			            		new LinearLayout.LayoutParams(
+			            				LinearLayout.LayoutParams.WRAP_CONTENT, 
+			            				LinearLayout.LayoutParams.WRAP_CONTENT, 
+			            				1f));
+			            TextView grade = new TextView(getActivity());
+			            grade.setText(mClassGrade.getJSONArray("terms")
+			            		.getJSONObject(0).getJSONArray("grades")
+			            		.getJSONObject(i).optString("Grade", ""));
+			            grade.setTextSize(30);
+			            innerLayout.addView(className);
+			            innerLayout.addView(grade);
+			            layout.addView(innerLayout);
+		            }
+		            linearLayout.addView(layout);
+//					gradeListLayout = layout;
+					
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
+				
+				
+				
+				
+				
+				
 			}
 			
 			@Override
