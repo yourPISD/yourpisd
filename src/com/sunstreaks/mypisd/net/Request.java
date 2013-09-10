@@ -21,7 +21,11 @@ import android.os.AsyncTask;
 
 public class Request {
 	
+	static String redirectLocation = "";
 	
+	public static String getRedirectLocation() {
+		return redirectLocation;
+	}
 
 	public static Object[] sendGet(String url) throws IllegalUrlException, MalformedURLException, IOException {
 		return sendGet (url, new ArrayList<String>());
@@ -37,7 +41,7 @@ public class Request {
 			return sendGet (url, cookies, null, isSecure(url));
 	}
 	
-	/*
+	/**
 	 * returns Object[] {String response, int responseCode, ArrayList<String> cookies}
 	 */
 	public static Object[] sendGet(String url, ArrayList<String> cookies, ArrayList<String[]> requestProperties, boolean isSecure) throws MalformedURLException, IOException {
@@ -235,7 +239,11 @@ public class Request {
 					responseCode = ((HttpURLConnection) conn).getResponseCode();
 				}
 				
+				
 				success = true;
+				
+				// Bad practice.
+				redirectLocation = conn.getHeaderField("Location");
 				
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
@@ -285,7 +293,7 @@ public class Request {
 	}
 	
 	
-	/*
+	/**
 	 * returns true if begins with https, false if begins with http. Otherwise, throws IllegalUrlException.
 	 */
 	public static boolean isSecure (String url) throws IllegalUrlException {

@@ -83,7 +83,6 @@ public class LoginActivity extends Activity {
 		for (Domain d : Domain.values()) {
 			SpinnerArray.add(d.name());
 		}
-
 	    ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, SpinnerArray);
 	    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 	    domainSpinner = (Spinner) findViewById(R.id.domain_spinner);
@@ -129,7 +128,11 @@ public class LoginActivity extends Activity {
 		mPasswordView.setText(sharedPrefs.getString("password", ""));
 		mRememberPassword = sharedPrefs.getBoolean("remember_password", false);
 		rememberPassword.setChecked(mRememberPassword);
-		domainSpinner.setSelection(sharedPrefs.getInt("domain", 0));
+		try {
+			domainSpinner.setSelection(sharedPrefs.getInt("domain", 0));
+		} catch (IndexOutOfBoundsException e) {
+			// Do not set the index.
+		}
 		mLoginFormView = findViewById(R.id.login_form);
 		mLoginStatusView = findViewById(R.id.login_status);
 		mLoginStatusMessageView = (TextView) findViewById(R.id.login_status_message);

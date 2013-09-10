@@ -59,7 +59,7 @@ public class Parser {
 		return new String[] {userId, password};
 	}
 
-	/*
+	/**
 	 * must take html from [Domain].portalAddress or [Domain].portalAddress/myclasses
 	 */
 	public static String[] passthroughCredentials (String html) {
@@ -306,6 +306,26 @@ public class Parser {
 		default:
 			return -1;
 		}
+	}
+	
+	/**
+	 * 
+	 * @param html html source code of https://sso.portal.mypisd.net/cas/login?service=http%3A%2F%2Fportal.mypisd.net%2Fc%2Fportal%2Flogin
+	 * @return the value embedded in the <input type="hidden" name="lt" value=""> block
+	 */
+	public static String portalLt (String html) {
+		Element doc = Jsoup.parse(html);
+		Elements inputTags = doc.getElementsByTag("input");
+		//Shortcut
+		if (inputTags.get(4).attr("name").equals("lt"))
+			return inputTags.get(4).attr("value");
+		else {
+			for (Element tag : inputTags) {
+				if (tag.attr("name").equals("lt"))
+					return tag.attr("value");
+			}
+		}
+		return null;
 	}
 	
 }

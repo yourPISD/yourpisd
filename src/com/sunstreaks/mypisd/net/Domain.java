@@ -6,11 +6,19 @@ public enum Domain {
 	/*
 	 * Parent account. Note that the String loginAddress is of inconsistent format with schools. NOTE: The constructor is different.
 	 */
-	PARENT ("http://parent.mypisd.net/CookieAuth?domain=www.parent.mypisd.net", "http://parent.mypisd.net", 0),
-	
+	PARENT (
+			"http://parent.mypisd.net/CookieAuth?domain=www.parent.mypisd.net", 
+			"http://parent.mypisd.net", 
+			0),
+	STUDENT (
+			"https://sso.portal.mypisd.net/cas/login?service=http%3A%2F%2Fportal.mypisd.net%2Fc%2Fportal%2Flogin",
+			"https://sso.portal.mypisd.net/cas/login?service=http%3A%2F%2Fportal.mypisd.net%2Fc%2Fportal%2Flogin",
+			1);
 	/*
 	 * Elementary schools
 	 */
+	
+			/*
 	ALDRIDGE ("aldridge.mypisd.net", "http://aldridge.mypisd.net", 1),
 	ANDREWS ("andrews.mypisd.net", "http://andrews.mypisd.net", 2),
 	BARKSDALE ("barksdale.mypisd.net", "http://barksdale.mypisd.net", 3),
@@ -54,10 +62,14 @@ public enum Domain {
 	WEATHERFORD ("weatherford.mypisd.net", "http://weatherford.mypisd.net", 41),
 	WELLS ("wells.mypisd.net", "http://wells.mypisd.net", 42),
 	WYATT ("wyatt.mypisd.net", "http://wyatt.mypisd.net", 43),
+		*/
+
 
 	/*
 	 * Middle schools
 	 */
+			
+		/*
 	ARMSTRONG ("armstrong.mypisd.net", "http://armstrong.mypisd.net", 44),
 	BOWMAN ("bowman.mypisd.net", "http://bowman.mypisd.net", 45),
 	CARPENTER ("carpenter.mypisd.net", "http://carpenter.mypisd.net", 46),
@@ -71,10 +83,12 @@ public enum Domain {
 	ROBINSON ("robinson.mypisd.net", "http://robinson.mypisd.net", 54),
 	SCHIMELPFENIG ("schimelpfenig.mypisd.net", "http://schimelpfenig.mypisd.net", 55),
 	WILSON ("wilson.mypisd.net", "http://wilson.mypisd.net", 56),
-
+		*/
+			
 	/*
 	 * High schools
 	 */
+		/*
 	MCMILLEN ("mcmillen.mypisd.net", "http://mcmillen.mypisd.net", 57),
 	PLANO_EAST ("pesh.mypisd.net", "http://pesh.mypisd.net", 58),
 	PLANO_SENIOR ("pshs.mypisd.net", "http://pshs.mypisd.net", 59),
@@ -82,9 +96,9 @@ public enum Domain {
 	SHEPTON ("shepton.mypisd.net", "http://shepton.mypisd.net", 61),
 	VINES ("vines.mypisd.net", "http://vines.mypisd.net", 62),
 	WILLIAMS ("williams.mypisd.net", "http://williams.mypisd.net", 63);
-	
+		*/
 
-	public static final String MYPISD_LOGIN_PREFIX = "https://login1.mypisd.net/CookieAuth?domain=www.";
+	//public static final String MYPISD_LOGIN_PREFIX = "https://login1.mypisd.net/CookieAuth?domain=www.";
 
 	public final String loginAddress;
 	public final String portalAddress;
@@ -93,10 +107,10 @@ public enum Domain {
 	Domain (String loginAddress, String portalAddress, int index) {
 		this.index = index;
 		
-		if (loginAddress.equals("http://parent.mypisd.net/CookieAuth?domain=www.parent.mypisd.net"))
+//		if (loginAddress.equals("http://parent.mypisd.net/CookieAuth?domain=www.parent.mypisd.net"))
 			this.loginAddress = loginAddress;
-		else
-			this.loginAddress = MYPISD_LOGIN_PREFIX + loginAddress;
+//		else
+//			this.loginAddress = MYPISD_LOGIN_PREFIX + loginAddress;
 		this.portalAddress = portalAddress;
 	}
 

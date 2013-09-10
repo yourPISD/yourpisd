@@ -26,6 +26,7 @@ import android.widget.AbsListView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.TableLayout.LayoutParams;
 
 import com.sunstreaks.mypisd.net.DataGrabber;
 
@@ -179,7 +180,8 @@ public class ClassSwipeActivity extends FragmentActivity {
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState)  {
-			
+			if (rootView != null)
+				return rootView;
 			
 			this.pageTitle = getResources().getString(R.string.class_swipe_loading);
 			
@@ -202,78 +204,22 @@ public class ClassSwipeActivity extends FragmentActivity {
 				this.teacherName = getResources().getString(R.string.teacher_name);
 			
 			( (TextView) rootView.findViewById(R.id.teacher) ).setText(teacherName);
-<<<<<<< HEAD
+
 			
-			if (this.mClassGrade == null) {
-=======
 			if (this.mClassGrade == null && !gradeLoaded) {
->>>>>>> e420121b18db8984ddb2710ee8c43788a7846281
+
 				mClassGradeTask = new ClassGradeTask();
 				gradeLoaded = true;
 				mClassGradeTask.execute(position, 0);
 			}
-<<<<<<< HEAD
-			try
-			{
-				mClassGradeTask.get(10000, TimeUnit.MILLISECONDS);
-			}
-			catch(Exception e)
-			{
-				
-			}
-			try {
-				TextView teacher = (TextView) rootView.findViewById(R.id.teacher);
-				ScrollView sv = new ScrollView(getActivity());
-				LinearLayout layout = new LinearLayout(getActivity());
-				layout.setOrientation(LinearLayout.VERTICAL);
-	            layout.setLayoutParams(new LinearLayout.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, AbsListView.LayoutParams.MATCH_PARENT));
-	            for(int i = 0; i< mClassGrade.getJSONArray("terms")
-	            		.getJSONObject(0).getJSONArray("grades").length(); i++)
-	            {
-	            	LinearLayout innerLayout = new LinearLayout(getActivity());
-		            innerLayout.setOrientation(LinearLayout.HORIZONTAL);
-		   
-		            TextView className = new TextView(getActivity());
-		            className.setText(mClassGrade.getJSONArray("terms")
-		            		.getJSONObject(0).getJSONArray("grades")
-		            		.getJSONObject(i).getString("Description"));
-		            //className.setBackgroundColor(Color.WHITE);
-		            className.setTextSize(20);
-		            className.setLayoutParams(
-		            		new LinearLayout.LayoutParams(
-		            				LinearLayout.LayoutParams.WRAP_CONTENT, 
-		            				LinearLayout.LayoutParams.WRAP_CONTENT, 
-		            				1f));
-		            TextView grade = new TextView(getActivity());
-		            grade.setText(mClassGrade.getJSONArray("terms")
-		            		.getJSONObject(0).getJSONArray("grades")
-		            		.getJSONObject(i).getString("Grade"));
-		            grade.setTextSize(30);
-		            innerLayout.addView(className);
-		            innerLayout.addView(grade);
-		            layout.addView(innerLayout);
-	            }
-	            rootView = layout;
-			}
-		 catch (JSONException e) {
-			e.printStackTrace();
-		} 
-			catch(NullPointerException e)
-			{
-				e.printStackTrace();
-			}
-=======
-
->>>>>>> e420121b18db8984ddb2710ee8c43788a7846281
-
 
 			return rootView;
 		}
 		
-//		@Override
-//		public void onPause() {
-//			super.onPause();
-//		}
+		@Override
+		public void onPause() {
+			super.onPause();
+		}
 		
 		public class ClassGradeTask extends AsyncTask<Integer, Void, JSONObject> {
 			
@@ -289,12 +235,8 @@ public class ClassSwipeActivity extends FragmentActivity {
 				System.out.println("ClassGradeTask finished");
 				System.out.println(mClassGrade);
 				
-				
-<<<<<<< HEAD
-//					teacherName = mClassGrade.getString("teacher");
-//					teacher.setText(teacherName);
+				TextView teacher = (TextView) rootView.findViewById(R.id.teacher);
 
-=======
 				try {
 					teacherName = mClassGrade.getString("teacher");
 					teacher.setText(teacherName);
@@ -303,6 +245,13 @@ public class ClassSwipeActivity extends FragmentActivity {
 					ScrollView sv = new ScrollView(getActivity());
 					LinearLayout layout = new LinearLayout(getActivity());
 					layout.setOrientation(LinearLayout.VERTICAL);
+					
+					
+					LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams (
+							LinearLayout.LayoutParams.MATCH_PARENT,
+							LinearLayout.LayoutParams.WRAP_CONTENT);
+					lp.setMargins(15,20,15,0);
+					
 		            layout.setLayoutParams(
 		            		new LinearLayout.LayoutParams(
 		            				AbsListView.LayoutParams.MATCH_PARENT, 
@@ -314,24 +263,37 @@ public class ClassSwipeActivity extends FragmentActivity {
 			            innerLayout.setOrientation(LinearLayout.HORIZONTAL);
 			   
 			            TextView className = new TextView(getActivity());
-			            className.setText(mClassGrade.getJSONArray("terms")
+			            className.setText(" " + mClassGrade.getJSONArray("terms")
 			            		.getJSONObject(0).getJSONArray("grades")
 			            		.getJSONObject(i).getString("Description"));
 			            //className.setBackgroundColor(Color.WHITE);
 			            className.setTextSize(20);
-			            className.setLayoutParams(
-			            		new LinearLayout.LayoutParams(
-			            				LinearLayout.LayoutParams.WRAP_CONTENT, 
-			            				LinearLayout.LayoutParams.WRAP_CONTENT, 
-			            				1f));
+			            
+			            LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(
+			            		LinearLayout.LayoutParams.WRAP_CONTENT,
+			            		LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+			            
+			            className.setLayoutParams(lp1);
+			            className.setPadding(10,10,10,10);
+			            
 			            TextView grade = new TextView(getActivity());
 			            grade.setText(mClassGrade.getJSONArray("terms")
 			            		.getJSONObject(0).getJSONArray("grades")
-			            		.getJSONObject(i).optString("Grade", ""));
+			            		.getJSONObject(i).optString("Grade", "") + " ");
 			            grade.setTextSize(30);
 			            innerLayout.addView(className);
 			            innerLayout.addView(grade);
-			            layout.addView(innerLayout);
+			            
+			            LinearLayout.LayoutParams lp2 = new LinearLayout.LayoutParams(
+			            		LinearLayout.LayoutParams.MATCH_PARENT,
+			            		LinearLayout.LayoutParams.WRAP_CONTENT);
+			            
+			            lp2.setMargins(10,10,10,0);
+			            innerLayout.setLayoutParams(lp2);
+			            
+			            innerLayout.setBackgroundDrawable(getResources().getDrawable(R.drawable.dropshadow));
+			            layout.addView(innerLayout, lp);
+			            
 		            }
 		            linearLayout.addView(layout);
 //					gradeListLayout = layout;
@@ -340,12 +302,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 					e.printStackTrace();
 				}
 				
-				
-				
-				
-				
-				
->>>>>>> e420121b18db8984ddb2710ee8c43788a7846281
+
 			}
 			
 			@Override

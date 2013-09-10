@@ -188,48 +188,109 @@ public class DataGrabber implements Parcelable {
 	public void login(/*Domain dom, String username, String password*/)
 			throws MalformedURLException, IllegalUrlException, IOException, PISDException, InterruptedException, ExecutionException {
 		
-//		mRequestTask = new RequestTask();
-//		mRequestTask.execute(
-//				"POST",					// Request Type
-//				domain.loginAddress,	// String url
-//				cookies,					// ArrayList<String> cookies
-//				null,					// ArrayList<String> requestProperties
-//				"password=" + URLEncoder.encode(password,"UTF-8") + "&username=" + URLEncoder.encode(username,"UTF-8") + "&Submit=Login"
-//				);
-//		Object[] cookieAuth = (Object[]) mRequestTask.get();		
+		String response;
+		int responseCode;
 		
-		Object[] cookieAuth = Request.sendPost(
-				domain.loginAddress, 
-				"password=" + URLEncoder.encode(password,"UTF-8") + "&username=" + URLEncoder.encode(username,"UTF-8") + "&Submit=Login", 
-				cookies);
-		
-		String response = (String) cookieAuth[0];
-		int responseCode = (Integer) cookieAuth[1];
-		cookies = (ArrayList<String>) cookieAuth[2];
-//		System.out.println(response);
-		
-		if (Parser.accessGrantedEditure(response)) {
-			System.out.println("Editure access granted!");
-			editureLogin = 1;
+		switch (domain.index) {
+		case 0:	// Parent
+			Object[] cookieAuth = Request.sendPost(
+					domain.loginAddress, 
+					"password=" + URLEncoder.encode(password,"UTF-8") + "&username=" + URLEncoder.encode(username,"UTF-8") + "&Submit=Login", 
+					cookies);
+			
+			response = (String) cookieAuth[0];
+			responseCode = (Integer) cookieAuth[1];
+			cookies = (ArrayList<String>) cookieAuth[2];
+			
+			if (Parser.accessGrantedEditure(response)) {
+				System.out.println("Editure access granted!");
+				editureLogin = 1;
+
+
+				passthroughCredentials = Parser.passthroughCredentials(response);
+				
+				break;
+			}
+			else {
+				System.out.println("Bad username/password 1!");
+				System.out.println(response);
+				editureLogin = -1;
+				return; /* false; */
+			}
+		case 1: // Student
+			Object[] portalDefaultPage = Request.sendGet(
+					domain.loginAddress,
+					cookies);
+			
+			response = (String) portalDefaultPage[0];
+			responseCode = (Integer) portalDefaultPage[1];
+			cookies = (ArrayList<String>) portalDefaultPage[2];
+			
+			String[][] requestProperties = new String[][] {
+					{"Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"},
+					{"Accept-Encoding","gzip,deflate,sdch"},
+					{"Accept-Language","en-US,en;q=0.8,es;q=0.6"},
+					{"Cache-Control","max-age=0"},
+					{"Connection","keep-alive"},
+					//{"Content-Length","75"},
+					{"Content-Type","application/x-www-form-urlencoded"},
+					//{"Cookie","JSESSIONID=22DDAFA488B9D839F082FE26EFE8B38B"},
+					{"Host","sso.portal.mypisd.net"},
+					{"Origin","https://sso.portal.mypisd.net"},
+					{"Referer","https://sso.portal.mypisd.net/cas/login?service=http%3A%2F%2Fportal.mypisd.net%2Fc%2Fportal%2Flogin"},
+					{"User-Agent","Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.66 Safari/537.36"}
+			};
+
+			ArrayList<String[]> rp = new ArrayList<String[]>(java.util.Arrays.asList(requestProperties));
+			
+			String lt = Parser.portalLt(response);
+			
+			String postParams = "username=" + URLEncoder.encode(username, "UTF-8") + 
+					"&password=" + URLEncoder.encode(password, "UTF-8") + 
+					"&lt=" + lt +
+					"&_eventId=submit";
+			System.out.println(postParams);
+			Object[] portalLogin = Request.sendPost(
+					domain.loginAddress,
+					cookies,
+					rp,
+					true,
+					postParams);
+			
+			response = (String) portalLogin[0];
+			responseCode = (Integer) portalLogin[1];
+			cookies = (ArrayList<String>) portalLogin[2];
+			
+			Object[] ticket = Request.sendGet(
+					Request.getRedirectLocation(),
+					cookies);
+			
+			response = (String) ticket[0];
+			responseCode = (Integer) ticket[1];
+			cookies = (ArrayList<String>) ticket[2];
+			
+			passthroughCredentials = Parser.passthroughCredentials(response);
+			break;
+			
+			
+		default:
+			return;
 		}
-		else {
-			System.out.println("Bad username/password 1!");
-			System.out.println(response);
-			editureLogin = -1;
-			return; /* false; */
-		}
+	
+		
+		
 
 		
 		
 		// Go to myClasses in order to find login information for Gradebook. Sidharth will clean this up later.
-		if (domain != Domain.PARENT) {
-			Object[] myClasses = Request.sendGet(domain.portalAddress + "/myclasses", 	cookies);
-			response = (String) myClasses[0];
-			responseCode = (Integer) myClasses[1];
-			cookies = (ArrayList<String>) myClasses[2];
-		}
+//		if (domain != Domain.PARENT) {
+//			Object[] myClasses = Request.sendGet(domain.portalAddress + "/myclasses", 	cookies);
+//			response = (String) myClasses[0];
+//			responseCode = (Integer) myClasses[1];
+//			cookies = (ArrayList<String>) myClasses[2];
+//		}
 			
-		passthroughCredentials = Parser.passthroughCredentials(response);
+		
 		
 		/*
 		boolean loginAttempt = false;
@@ -256,21 +317,18 @@ public class DataGrabber implements Parcelable {
 	public boolean loginGradebook(String userType, String uID, String email, String password) throws MalformedURLException, IllegalUrlException, IOException, PISDException, InterruptedException, ExecutionException {
 
 		
-//		mRequestTask = new RequestTask();
-//		mRequestTask.execute(
-//				"POST",											// Request Type
-//				"https://parentviewer.pisd.edu/EP/PIV_Passthrough.aspx?action=trans&uT=" + userType + "&uID=" + uID,	
-//																// String url
-//				cookies,										// ArrayList<String> cookies
-//				null,											// ArrayList<String> requestProperties
-//				"password=" + password + "&username=" + email	// String postParams
-//				);
-//		Object[] passthrough = (Object[]) mRequestTask.get();	
+	
 		
 		// commented request paramater is allowed for parent account, not allowed for student account. never required.
+		String url = "https://parentviewer.pisd.edu/EP/PIV_Passthrough.aspx?action=trans&uT=" + userType + "&uID=" + uID /*+ "&submit=Login+to+Parent+Viewer"*/;
+		String postParams = "password=" + password + "&username=" + email;
+		
+		System.out.println(url);
+		System.out.println(postParams);
+		
 		Object[] passthrough = Request.sendPost(
-				"https://parentviewer.pisd.edu/EP/PIV_Passthrough.aspx?action=trans&uT=" + userType + "&uID=" + uID /*+ "&submit=Login+to+Parent+Viewer"*/, 
-				"password=" + password + "&username=" + email, 
+				url, 
+				postParams, 
 				cookies);
 		
 		String response = (String) passthrough[0];
@@ -298,18 +356,9 @@ public class DataGrabber implements Parcelable {
 		
 		
 		
-		String postParams = "userId=" + gradebookCredentials[0] + "&password=" + gradebookCredentials[1];
+		postParams = "userId=" + gradebookCredentials[0] + "&password=" + gradebookCredentials[1];
 		
-//		mRequestTask = new RequestTask();
-//		mRequestTask.execute(
-//				"POST",					// Request Type
-//				"https://gradebook.pisd.edu/Pinnacle/Gradebook/link.aspx?target=InternetViewer",	
-//										// String url
-//				cookies,				// ArrayList<String> cookies
-//				null,					// ArrayList<String> requestProperties
-//				postParams				// String postParams
-//				);
-//		Object[] link = (Object[]) mRequestTask.get();	
+	
 		
 		Object[] link = Request.sendPost("https://gradebook.pisd.edu/Pinnacle/Gradebook/link.aspx?target=InternetViewer",
 				postParams,
@@ -325,16 +374,7 @@ public class DataGrabber implements Parcelable {
 		// perhaps this is where we get our StudentId cookie!
 		
 		
-//		mRequestTask = new RequestTask();
-//		mRequestTask.execute(
-//				"POST",					// Request Type
-//				"https://gradebook.pisd.edu/Pinnacle/Gradebook/Default.aspx",	
-//										// String url
-//				cookies,				// ArrayList<String> cookies
-//				null,					// ArrayList<String> requestProperties
-//				postParams				// String postParams
-//				);
-//		Object[] defaultAspx = (Object[]) mRequestTask.get();	
+
 		
 		Object[] defaultAspx = Request.sendPost("https://gradebook.pisd.edu/Pinnacle/Gradebook/Default.aspx",
 				postParams,
@@ -373,16 +413,7 @@ public class DataGrabber implements Parcelable {
 		//required for json files
 		requestProperties.add(new String[] {"Content-Type", "application/json"});
 
-//		mRequestTask = new RequestTask();
-//		mRequestTask.execute(
-//				"POST",					// Request Type
-//				"https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/InternetViewerService.ashx/Init?PageUniqueId=" + pageUniqueId,	
-//										// String url
-//				cookies,				// ArrayList<String> cookies
-//				requestProperties,		// ArrayList<String> requestProperties
-//				postParams				// String postParams
-//				);
-//		Object[] init = (Object[]) mRequestTask.get();	
+
 		
 		
 		Object[] init = Request.sendPost(
@@ -474,14 +505,7 @@ public class DataGrabber implements Parcelable {
 				"&ReportType=0&StudentId=" + studentId;
 		
 
-//		mRequestTask = new RequestTask();
-//		mRequestTask.execute(
-//				"GET",		// Request Type
-//				url,		// String url
-//				cookies,	// ArrayList<String> cookies
-//				null		// ArrayList<String> requestProperties
-//				);
-//		Object[] report = (Object[]) mRequestTask.get();	
+
 		
 		
 		Object[] report = Request.sendGet(url,	cookies);
@@ -511,14 +535,7 @@ public class DataGrabber implements Parcelable {
 					"&TermId=" + termId + 
 					"&ReportType=0&StudentId=" + studentId;
 			
-	//		mRequestTask = new RequestTask();
-	//		mRequestTask.execute(
-	//				"GET",		// Request Type
-	//				url,		// String url
-	//				cookies,	// ArrayList<String> cookies
-	//				null		// ArrayList<String> requestProperties
-	//				);
-	//		Object[] summary = (Object[]) mRequestTask.get();	
+	
 	
 			Object[] summary = Request.sendGet(url,	cookies);
 			String response = (String) summary[0];
