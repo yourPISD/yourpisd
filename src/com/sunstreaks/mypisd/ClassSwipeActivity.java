@@ -148,15 +148,16 @@ public class ClassSwipeActivity extends FragmentActivity {
 		private String teacherName;
 		private View rootView;
 		private boolean gradeLoaded = false;
-		private double random;
+		
 		private ViewGroup linearLayout;
-		//private ViewGroup gradeListLayout;
+		private LinearLayout gradesListLayout;
+		
+		
 		
 		public DescriptionFragment() {
 			this.position = classesMade++;
 			if (classesMade > classCount)
 				System.out.println("Something really weird is going on.");
-			this.random = Math.random();
 		}
 		
 		@Override
@@ -166,7 +167,6 @@ public class ClassSwipeActivity extends FragmentActivity {
 		
 		public DescriptionFragment(int position) {
 			this.position = position;
-			this.random = Math.random();
 		}
 		
 		public String getPageTitle() {
@@ -180,8 +180,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState)  {
-			if (rootView != null)
-				return rootView;
+
 			
 			this.pageTitle = getResources().getString(R.string.class_swipe_loading);
 			
@@ -191,7 +190,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 				System.out.println("First time grade task");
 			
 //			position = mViewPager.getCurrentItem();
-			System.out.println("position = " + position + " and random = " + random);
+			System.out.println("position = " + position);
 			
 			pageTitle = dg.getClassName(position); 
 			
@@ -211,6 +210,10 @@ public class ClassSwipeActivity extends FragmentActivity {
 				mClassGradeTask = new ClassGradeTask();
 				gradeLoaded = true;
 				mClassGradeTask.execute(position, 0);
+			}
+			else {
+				((ViewGroup)gradesListLayout.getParent()).removeView(gradesListLayout);
+				linearLayout.addView(gradesListLayout);
 			}
 
 			return rootView;
@@ -242,61 +245,130 @@ public class ClassSwipeActivity extends FragmentActivity {
 					teacher.setText(teacherName);
 					
 					
-					ScrollView sv = new ScrollView(getActivity());
-					LinearLayout layout = new LinearLayout(getActivity());
-					layout.setOrientation(LinearLayout.VERTICAL);
+					gradesListLayout = new LinearLayout(getActivity());
+					gradesListLayout.setOrientation(LinearLayout.VERTICAL);
 					
 					
-					LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams (
-							LinearLayout.LayoutParams.MATCH_PARENT,
-							LinearLayout.LayoutParams.WRAP_CONTENT);
-					lp.setMargins(15,20,15,0);
 					
-		            layout.setLayoutParams(
+					gradesListLayout.setLayoutParams(
 		            		new LinearLayout.LayoutParams(
 		            				AbsListView.LayoutParams.MATCH_PARENT, 
 		            				AbsListView.LayoutParams.MATCH_PARENT));
-		            for(int i = 0; i< mClassGrade.getJSONArray("terms")
-		            		.getJSONObject(0).getJSONArray("grades").length(); i++)
-		            {
-		            	LinearLayout innerLayout = new LinearLayout(getActivity());
-			            innerLayout.setOrientation(LinearLayout.HORIZONTAL);
-			   
-			            TextView className = new TextView(getActivity());
-			            className.setText(" " + mClassGrade.getJSONArray("terms")
-			            		.getJSONObject(0).getJSONArray("grades")
-			            		.getJSONObject(i).getString("Description"));
-			            //className.setBackgroundColor(Color.WHITE);
-			            className.setTextSize(20);
+		            
+					JSONArray terms = mClassGrade.getJSONArray("terms");
+					
+					
+					
+					for (int category = 0;
+							category < terms.getJSONObject(0).getJSONArray("categoryGrades").length();
+							category++)
+					{
+						LinearLayout categoryLayout = new LinearLayout(getActivity());
+						categoryLayout.setOrientation(LinearLayout.VERTICAL);
+						
+						// Name of the category ("Daily Work", etc)
+						String categoryName = mClassGrade.getJSONArray("terms").getJSONObject(0)
+								.getJSONArray("categoryGrades").getJSONObject(category).getString("Category");
+						
+						// for every grade in this term [any category]
+			            for(int i = 0; i< mClassGrade.getJSONArray("terms")
+			            		.getJSONObject(0).getJSONArray("grades").length(); i++)
+			            {
+			            	// only if this grade is in the category which we're looking for
+			            	if (mClassGrade.getJSONArray("terms").getJSONObject(0)
+			            			.getJSONArray("grades").getJSONObject(i).getString("Category")
+			            			.equals(categoryName))
+			            	{
+			            		// test whether the grade has been found.
+			            		System.out.println("category name = " + categoryName + "; gradeName = " + mClassGrade.getJSONArray("terms")
+					            		.getJSONObject(0).getJSONArray("grades")
+					            		.getJSONObject(i).getString("Description")); 
+			            		
+			            		LinearLayout innerLayout = new LinearLayout(getActivity());
+					            innerLayout.setOrientation(LinearLayout.HORIZONTAL);
+					   
+					            // Create a textview to display the assignment description
+					            TextView descriptionView = new TextView(getActivity());
+					            descriptionView.setText(" " + mClassGrade.getJSONArray("terms")
+					            		.getJSONObject(0).getJSONArray("grades")
+					            		.getJSONObject(i).getString("Description"));
+					            //className.setBackgroundColor(Color.WHITE);
+					            descriptionView.setTextSize(20);
+					            
+					            LinearLayout.LayoutParams descriptionLP = new LinearLayout.LayoutParams(
+					            		LinearLayout.LayoutParams.WRAP_CONTENT,
+					            		LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+					            
+					            descriptionView.setLayoutParams(descriptionLP);
+					            descriptionView.setPadding(10,10,10,10);
+					            
+					            TextView grade = new TextView(getActivity());
+					            grade.setText(mClassGrade.getJSONArray("terms")
+					            		.getJSONObject(0).getJSONArray("grades")
+					            		.getJSONObject(i).optString("Grade", "") + " ");
+					            grade.setTextSize(30);
+					            innerLayout.addView(descriptionView);
+					            innerLayout.addView(grade);
+					            
+					            LinearLayout.LayoutParams scoreLP = new LinearLayout.LayoutParams(
+					            		LinearLayout.LayoutParams.MATCH_PARENT,
+					            		LinearLayout.LayoutParams.WRAP_CONTENT);
+					            
+					            scoreLP.setMargins(10,10,10,0);
+					            innerLayout.setLayoutParams(scoreLP);
+					            
+					            innerLayout.setBackgroundDrawable(getResources().getDrawable(R.drawable.dropshadow));
+					            
+
+								LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams (
+										LinearLayout.LayoutParams.MATCH_PARENT,
+										LinearLayout.LayoutParams.WRAP_CONTENT);
+								lp.setMargins(15,20,15,0);
+					            
+								categoryLayout.addView(innerLayout);
+								innerLayout = null;
+			            	}
+
+			            }
+						
+			            LinearLayout categorySummaryLayout = new LinearLayout(getActivity());
+			            categorySummaryLayout.setOrientation(LinearLayout.HORIZONTAL);
 			            
-			            LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(
+			            TextView categoryNameView = new TextView(getActivity());
+			            categoryNameView.setText(categoryName);
+			            categoryNameView.setTextSize(20);
+
+			            LinearLayout.LayoutParams descriptionLP = new LinearLayout.LayoutParams(
 			            		LinearLayout.LayoutParams.WRAP_CONTENT,
 			            		LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
 			            
-			            className.setLayoutParams(lp1);
-			            className.setPadding(10,10,10,10);
+			            categoryNameView.setLayoutParams(descriptionLP);
 			            
-			            TextView grade = new TextView(getActivity());
-			            grade.setText(mClassGrade.getJSONArray("terms")
-			            		.getJSONObject(0).getJSONArray("grades")
-			            		.getJSONObject(i).optString("Grade", "") + " ");
-			            grade.setTextSize(30);
-			            innerLayout.addView(className);
-			            innerLayout.addView(grade);
+			            TextView scoreView = new TextView(getActivity());
+			            scoreView.setText(mClassGrade.getJSONArray("terms")
+			            		.getJSONObject(0).getJSONArray("categoryGrades")
+			            		.getJSONObject(category).optString("Letter", "") + " ");
+			            scoreView.setTextSize(30);
+			            categorySummaryLayout.addView(categoryNameView);
+			            categorySummaryLayout.addView(scoreView);
 			            
-			            LinearLayout.LayoutParams lp2 = new LinearLayout.LayoutParams(
+			            LinearLayout.LayoutParams categorySummaryLP = new LinearLayout.LayoutParams(
 			            		LinearLayout.LayoutParams.MATCH_PARENT,
 			            		LinearLayout.LayoutParams.WRAP_CONTENT);
 			            
-			            lp2.setMargins(10,10,10,0);
-			            innerLayout.setLayoutParams(lp2);
+			            categorySummaryLP.setMargins(10,10,10,0);
+			            categorySummaryLayout.setLayoutParams(categorySummaryLP);
 			            
-			            innerLayout.setBackgroundDrawable(getResources().getDrawable(R.drawable.dropshadow));
-			            layout.addView(innerLayout, lp);
+			            categoryLayout.addView(categorySummaryLayout, categorySummaryLP);
 			            
-		            }
-		            linearLayout.addView(layout);
-//					gradeListLayout = layout;
+			            gradesListLayout.addView(categoryLayout);
+			            
+					}
+					
+					
+					
+
+		            linearLayout.addView(gradesListLayout);
 					
 				} catch (JSONException e) {
 					e.printStackTrace();

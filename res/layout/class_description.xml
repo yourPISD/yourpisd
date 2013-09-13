@@ -18,24 +18,6 @@
 		    android:layout_alignParentTop="true"
 		    android:text="@string/teacher_name"
 		    android:textSize="30sp" />
-	
-		<TextView
-		    android:id="@+id/daily"
-		    android:layout_width="wrap_content"
-		    android:layout_height="wrap_content"
-		    android:layout_alignParentLeft="true"
-		    android:layout_alignParentTop="true"
-		    android:text="@string/daily"
-		    android:textSize="30sp" />
-		
-		<TextView
-		    android:id="@+id/major"
-		    android:layout_width="wrap_content"
-		    android:layout_height="wrap_content"
-		    android:layout_alignParentLeft="true"
-		    android:layout_alignParentTop="true"
-		    android:text="@string/major"
-		    android:textSize="30sp" />
 		
 		<LinearLayout
 		    android:id="@+id/grade_list"
