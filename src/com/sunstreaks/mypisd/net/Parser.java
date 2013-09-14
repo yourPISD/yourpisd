@@ -247,18 +247,28 @@ public class Parser {
 	 * NOTICE: Does not work for second semester classes in which the second semester schedule
 	 *  is different from the first semester schedule.
 	 * 
-	 * @param html : source of GradeSummary.aspx
-	 * @param classList : classList as returned by Init.aspx
+	 * @param html source of GradeSummary.aspx
+	 * @param classList classList as returned by Init.aspx
 	 * @return modified classList that includes averages
 	 * @throws JSONException
 	 */
 	public static JSONArray gradeSummary (String html, JSONArray classList) throws JSONException {
-//		System.out.println(html);
 		Element doc = Jsoup.parse(html);
-//		Elements table1 = doc.getElementsByTag("table");
-//		Element table2 = table1.get(2);
-//		Elements table3 = table2.getElementsByTag("tbody");
-//		Element reportTable = table3.get(0);
+		return gradeSummary(doc, classList);
+	}
+	
+	/** Parses average of each term from GradeSummary.aspx. Returns in JSONArray, which *should*
+	 *  be saved to classList.
+	 * NOTICE: Does not work for second semester classes in which the second semester schedule
+	 *  is different from the first semester schedule.
+	 * 
+	 * @param doc the Jsoup element of GradeSummary.aspx
+	 * @param classList classList as returned by Init.aspx
+	 * @return modified classList that includes averages
+	 * @throws JSONException
+	 */
+	public static JSONArray gradeSummary (Element doc, JSONArray classList) throws JSONException {
+
 		Element reportTable = doc.getElementsByClass("reportTable").get(0).getElementsByTag("tbody").get(0);
 		Elements rows = reportTable.getElementsByTag("tr");
 		int rowIndex = 0; int classIndex = 0;
@@ -290,6 +300,23 @@ public class Parser {
 		}
 		
 		return classList;
+	}
+	
+	/**
+	 * @param html Source code of any Gradebook page.
+	 * @return the full name (Last, First) of the student and ID number.
+	 */
+	public static String studentName (String html) {
+		return studentName(Jsoup.parse(html));
+	}
+	
+	/**
+	 * @param doc The Jsoup element from any Gradebook page.
+	 * @return the full name (Last, First) of the student and ID number.
+	 */
+	public static String studentName (Element doc) {
+		Element studentName = doc.getElementById("ctl00_ctl00_ContentPlaceHolder_uxMultiple");
+		return studentName.text();
 	}
 	
 	/*

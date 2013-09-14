@@ -17,12 +17,14 @@ import javax.net.ssl.X509TrustManager;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
 
-public class DataGrabber implements Parcelable {
+public class DataGrabber /*implements Parcelable*/ {
 
 	Domain domain;
 	String username;
@@ -42,9 +44,10 @@ public class DataGrabber implements Parcelable {
 	int studentId = 0;
 	int[] classIds;
 	Map<Integer, JSONObject> classGrades = new HashMap<Integer, JSONObject>();
-	
+	String studentName = "";
 
 	
+	/*
 	@Override
 	public int describeContents() {
 		// TODO Auto-generated method stub
@@ -103,7 +106,10 @@ public class DataGrabber implements Parcelable {
     	} catch (JSONException e) {
     		e.printStackTrace();
     	}
-    	acceptAllCertificates();
+    	
+    	//acceptAllCertificates();
+    	
+    	this.studentName = in.readString();
     	
     	System.out.println("Done un-packing.");
     }
@@ -144,6 +150,7 @@ public class DataGrabber implements Parcelable {
             } 
         } 
 		
+        dest.writeString(studentName);
 	}
 	
     public static final Parcelable.Creator<DataGrabber> CREATOR
@@ -156,7 +163,7 @@ public class DataGrabber implements Parcelable {
     			return new DataGrabber[size];
     		}
     };
-	
+	*/
 
 	
     	/*
@@ -537,8 +544,10 @@ public class DataGrabber implements Parcelable {
 			/*
 			 * puts averages in classList, under each term.
 			 */
-			gradeSummary = Parser.gradeSummary(response, classList);
-	
+			Element doc = Jsoup.parse(response);
+			gradeSummary = Parser.gradeSummary(doc, classList);
+			studentName = Parser.studentName(doc);
+			
 			return gradeSummary;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -684,7 +693,7 @@ public class DataGrabber implements Parcelable {
 	}
 */
 
-	/*
+	/**
 	 * Temporary code. In use because login1.mypisd.net has an expired certificate. with new portal website, should not be necessary.
 	 */
 	public static void acceptAllCertificates() {
@@ -753,5 +762,8 @@ public class DataGrabber implements Parcelable {
 			}
 	}
 	
+	public String getStudentName() {
+		return studentName;
+	}
 	
 }

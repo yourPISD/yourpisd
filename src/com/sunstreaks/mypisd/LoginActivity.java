@@ -271,7 +271,7 @@ public class LoginActivity extends Activity {
 	 */
 	public class UserLoginTask extends AsyncTask<Void, Integer, Integer> {
 		
-		private DataGrabber dg;
+		private DataGrabber dg = ((YourPISDApplication)getApplication()).getDataGrabber();
 		
 		@Override
 		protected Integer doInBackground(Void... params) {
@@ -362,7 +362,8 @@ public class LoginActivity extends Activity {
 			case 1:
 				finish();
 				Intent startMain = new Intent(LoginActivity.this, MainActivity.class);
-				startMain.putExtra("DataGrabber", dg);
+//				startMain.putExtra("DataGrabber", dg);
+				((YourPISDApplication) getApplication()).setDataGrabber(dg);
 				startActivity(startMain);
 				break;
 			case -1:

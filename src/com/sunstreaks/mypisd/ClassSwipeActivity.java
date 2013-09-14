@@ -59,12 +59,13 @@ public class ClassSwipeActivity extends FragmentActivity {
 		
 		received = getIntent().getExtras().getInt("classIndex");
 		classCount = getIntent().getExtras().getInt("classCount");
-		dg = getIntent().getParcelableExtra("DataGrabber");
+//		dg = getIntent().getParcelableExtra("DataGrabber");
 		
+		dg = ((YourPISDApplication) getApplication() ).getDataGrabber();
 		
 		// 7 fragments were being added to mFragments every time that this onCreate method was run.
 		{
-			MyApplication appState = ((MyApplication)this.getApplication());
+			YourPISDApplication appState = ((YourPISDApplication)this.getApplication());
 			List<Fragment> mFragments = appState.mFragments;
 			ClassSwipeActivity.mFragments = mFragments;
 		}
@@ -98,7 +99,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 	@Override
 	protected void onPause() {
 		super.onPause();
-		MyApplication appState = (MyApplication)this.getApplication();
+		YourPISDApplication appState = (YourPISDApplication)this.getApplication();
 		appState.mFragments = this.mFragments;
 	}
 	

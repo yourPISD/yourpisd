@@ -65,12 +65,12 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
 		// Makes sure that there IS a datagrabber to insert. Now, what if there were multiple
 		// versions of DataGrabber....? I wonder what would happen.
-		Intent intent = getIntent();
-		{
-			DataGrabber myDG = (DataGrabber) intent.getParcelableExtra("DataGrabber");
-			dg = myDG;
-		}
-		
+//		Intent intent = getIntent();
+//		{
+//			DataGrabber myDG = (DataGrabber) intent.getParcelableExtra("DataGrabber");
+//			dg = myDG;
+//		}
+		dg = ( (YourPISDApplication) getApplication() ).getDataGrabber();
 		
 		// Create the adapter that will return a fragment for each of the three
 		// primary sections of the app.
@@ -291,7 +291,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		System.out.println("classIndex = " + v.getId());
 		intent.putExtra("classCount", classCount);
 		intent.putExtra("classIndex", v.getId());
-		intent.putExtra("DataGrabber", dg);
+//		intent.putExtra("DataGrabber", dg);
+		((YourPISDApplication) getApplication()).setDataGrabber(dg);
 		startActivity(intent);
 	}
 

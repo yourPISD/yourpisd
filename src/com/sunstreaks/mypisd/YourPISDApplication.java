@@ -7,9 +7,16 @@ import android.support.v4.app.Fragment;
 
 import com.sunstreaks.mypisd.net.DataGrabber;
 
-public class MyApplication extends Application {
+public class YourPISDApplication extends Application {
 	
-	public DataGrabber dg;
+	private DataGrabber dg;
 	public List<Fragment> mFragments;
 	
+	public DataGrabber getDataGrabber() {
+		return dg;
+	}
+	
+	public void setDataGrabber(DataGrabber dg) {
+		this.dg = dg;
+	}
 }
