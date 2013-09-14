@@ -12,6 +12,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
@@ -32,6 +33,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sunstreaks.mypisd.net.DataGrabber;
 import com.sunstreaks.mypisd.net.Domain;
@@ -42,12 +44,7 @@ import com.sunstreaks.mypisd.net.PISDException;
  * well.
  */
 public class LoginActivity extends Activity {
-	/**
-	 * A dummy authentication store containing known user names and passwords.
-	 * TODO: remove after connecting to a real authentication system.
-	 */
-	private static final String[] DUMMY_CREDENTIALS = new String[] {
-			"foo@example.com:hello", "bar@example.com:world" };
+
 
 	/**
 	 * The default email to populate the email field with.
@@ -59,7 +56,9 @@ public class LoginActivity extends Activity {
 	 */
 	private UserLoginTask mAuthTask = null;
 
-	// Values for email and password at the time of the login attempt.
+	/**
+	 * Values for email and password at the time of the login attempt.
+	 */
 	private String mEmail;
 	private String mPassword;
 	private boolean mRememberPassword;
@@ -215,9 +214,7 @@ public class LoginActivity extends Activity {
 			
 			// Modified from default.
 			
-			
 
-			//mLoginStatusMessageView.setText(R.string.login_progress_signing_in);
 			showProgress(true);
 			mAuthTask = new UserLoginTask();
 			mAuthTask.execute((Void) null);
@@ -274,12 +271,12 @@ public class LoginActivity extends Activity {
 	 * Represents an asynchronous login/registration task used to authenticate
 	 * the user.
 	 */
-	public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+	public class UserLoginTask extends AsyncTask<Void, Integer, Integer> {
 		
 		private DataGrabber dg;
 		
 		@Override
-		protected Boolean doInBackground(Void... params) {
+		protected Integer doInBackground(Void... params) {
 			// TODO: attempt authentication against a network service.
 
 			try {
@@ -293,28 +290,18 @@ public class LoginActivity extends Activity {
 								mEmail,
 								mPassword);
 						
-						// Update the loading screen.
-						runOnUiThread(new Runnable() {
-						     public void run() {
-						    	 ((TextView)mLoginStatusMessageView).setText(R.string.login_progress_mypisd);
-						    }
-						});
-						
+						// Update the loading screen: Signing into myPISD...
+						publishProgress(0);
 
 						
 						dg.login();
-						if (dg.getEditureLogin() == -1) {
-					    	return false;
-						}
+						if (dg.getEditureLogin() == -1)
+					    	return -1;
 						
+						// Update the loading screen: Signing into Gradebook...
+						publishProgress(1);
 						
-						// Update the loading screen.
-						runOnUiThread(new Runnable() {
-						     public void run() {
-						    	 ((TextView)mLoginStatusMessageView).setText(R.string.login_progress_gradebook);
-						    }
-						});
-						
+						// Try logging into Gradebook 5 times.
 						{
 							String[] ptc = dg.getPassthroughCredentials();
 							boolean loginAttempt = false;
@@ -331,14 +318,17 @@ public class LoginActivity extends Activity {
 								loginAttempt = dg.loginGradebook(ptc[0], ptc[1], mEmail, mPassword);
 								counter++;
 							} while (counter < 5 && loginAttempt == false);
+							
+							// If even 5 tries was not enough and still getting NotSet.
+							if (loginAttempt == false)
+								return -2;
 						}
+						
+						
+						// Update the loading screen: Downloading class grades...
+						publishProgress(2);
 
-						// Update the loading screen.
-						runOnUiThread(new Runnable() {
-						     public void run() {
-						    	 ((TextView)mLoginStatusMessageView).setText(R.string.login_progress_downloading_data);
-						    }
-						});
+						
 						
 						// No longer gets all class grades on load. Too slow!
 						//JSONArray classGrades = d.getAllClassGrades();
@@ -352,16 +342,7 @@ public class LoginActivity extends Activity {
 						editor.commit();
 				    } else {
 				    	System.err.println("No internet connection");
-				    	// Program exits mysteriously here.
-						runOnUiThread(new Runnable() {
-						     public void run() {
-						    	 AlertDialog.Builder popupBuilder = new AlertDialog.Builder(LoginActivity.this);
-							    	TextView myMsg = new TextView(LoginActivity.this);
-							    	myMsg.setText("No internet connection detected! Please find a connection and try again.");
-							    	myMsg.setGravity(Gravity.CENTER_HORIZONTAL);
-							    	popupBuilder.setView(myMsg);
-						    }
-						});
+						return -3;
 				    }
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
@@ -370,33 +351,63 @@ public class LoginActivity extends Activity {
 				e.printStackTrace();
 			}
 
-			for (String credential : DUMMY_CREDENTIALS) {
-				String[] pieces = credential.split(":");
-				if (pieces[0].equals(mEmail)) {
-					// Account exists, return true if the password matches.
-					return pieces[1].equals(mPassword);
-				}
-			}
 
-			// TODO: register the new account here.
-			return true;
+
+			return 1;
 		}
 
 		@Override
-		protected void onPostExecute(final Boolean success) {
+		protected void onPostExecute(final Integer success) {
 			mAuthTask = null;
 			showProgress(false);
 
-			if (success) {
+			switch (success) {
+			case 1:
 				finish();
 				Intent startMain = new Intent(LoginActivity.this, MainActivity.class);
 				startMain.putExtra("DataGrabber", dg);
 				startActivity(startMain);
-			} else {
-				mPasswordView
-						.setError(getString(R.string.error_incorrect_password));
+				break;
+			case -1:
+				// Bad password
+				mPasswordView.setError(getString(R.string.error_incorrect_password));
 				mPasswordView.requestFocus();
+				break;
+			case -2:
+			{// Gradebook error even after 5 tries
+		    	AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+		    	builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+		            public void onClick(DialogInterface dialog, int id) {
+		                // User clicked OK button
+		            }
+		        });
+		    	AlertDialog alertDialog = builder.create();
+		    	alertDialog.setTitle("Info");
+		    	alertDialog.setMessage("Gradebook encountered an error. Please try again.");
+		    	alertDialog.setIcon(R.drawable.ic_alerts_and_states_warning);
+
+		    	alertDialog.show();
+				break;
 			}
+			case -3:
+			{// No internet connection
+		    	AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+		    	builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+		            public void onClick(DialogInterface dialog, int id) {
+		                // User clicked OK button
+		            }
+		        });
+		    	AlertDialog alertDialog = builder.create();
+		    	alertDialog.setTitle("Info");
+		    	alertDialog.setMessage("No internet connection detected! Please find a connection and try again.");
+		    	alertDialog.setIcon(R.drawable.ic_alerts_and_states_warning);
+
+		    	alertDialog.show();
+				break;
+			}
+			
+			}
+
 		}
 
 		@Override
@@ -404,5 +415,26 @@ public class LoginActivity extends Activity {
 			mAuthTask = null;
 			showProgress(false);
 		}
+		
+		protected void onProgressUpdate(Integer... progress) {
+			int message;
+			switch (progress[0]) {
+			case 0:
+				message = R.string.login_progress_mypisd;
+				break;
+			case 1:
+				message = R.string.login_progress_gradebook;
+				break;
+			case 2:
+				message = R.string.login_progress_downloading_data;
+				break;
+			default:
+				// Do nothing.
+				return;
+			}
+			
+			((TextView)mLoginStatusMessageView).setText(message);
+	     }
+		
 	}
 }
