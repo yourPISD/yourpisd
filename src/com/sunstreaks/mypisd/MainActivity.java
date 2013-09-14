@@ -207,10 +207,12 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		            // Don't need SharedPrefs here anymore. although "gradeSummary" might be stored there.
 			    	//SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
 			    	
-			    	//JSONArray gradeSummary = dg.getGradeSummary();
-		            GradeSummaryTask gsTask = new GradeSummaryTask();
-		            gsTask.execute();
-		            JSONArray gradeSummary = gsTask.get();
+			    	
+//		            GradeSummaryTask gsTask = new GradeSummaryTask();
+//		            gsTask.execute();
+//		            JSONArray gradeSummary = gsTask.get();
+		            
+		            JSONArray gradeSummary = dg.getGradeSummary();
 		            
 			    	classCount = gradeSummary.length();
 			    	buttons = new Button[classCount];
@@ -259,13 +261,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		            return sv;
 		    	} catch (JSONException e) {
 		    		e.printStackTrace();
-		    	} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (ExecutionException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+		    	}
 		    	return rootView;
 		}
 

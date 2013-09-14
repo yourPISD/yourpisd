@@ -56,9 +56,7 @@ public class LoginActivity extends Activity {
 	 */
 	private UserLoginTask mAuthTask = null;
 
-	/**
-	 * Values for email and password at the time of the login attempt.
-	 */
+	// Values for email and password at the time of the login attempt.
 	private String mEmail;
 	private String mPassword;
 	private boolean mRememberPassword;
@@ -330,10 +328,9 @@ public class LoginActivity extends Activity {
 
 						
 						
-						// No longer gets all class grades on load. Too slow!
-						//JSONArray classGrades = d.getAllClassGrades();
+						
 						JSONArray gradeSummary = dg.loadGradeSummary();
-//						System.out.println(gradeSummary.toString());
+
 						// Store class grades in Shared Preferences.
 						System.out.println("Done getting data.");
 						SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(LoginActivity.this);

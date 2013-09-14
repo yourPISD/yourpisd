@@ -185,6 +185,16 @@ public class DataGrabber implements Parcelable {
 		acceptAllCertificates();
 	}
 
+	/**
+	 * Logs in to Editure/New Age portal. Retrieves passthroughCredentials.
+	 * Precondition: username and password are defined.
+	 * @throws MalformedURLException
+	 * @throws IllegalUrlException
+	 * @throws IOException
+	 * @throws PISDException
+	 * @throws InterruptedException
+	 * @throws ExecutionException
+	 */
 	public void login(/*Domain dom, String username, String password*/)
 			throws MalformedURLException, IllegalUrlException, IOException, PISDException, InterruptedException, ExecutionException {
 		
@@ -276,45 +286,23 @@ public class DataGrabber implements Parcelable {
 		default:
 			return;
 		}
-	
-		
-		
-
-		
-		
-		// Go to myClasses in order to find login information for Gradebook. Sidharth will clean this up later.
-//		if (domain != Domain.PARENT) {
-//			Object[] myClasses = Request.sendGet(domain.portalAddress + "/myclasses", 	cookies);
-//			response = (String) myClasses[0];
-//			responseCode = (Integer) myClasses[1];
-//			cookies = (ArrayList<String>) myClasses[2];
-//		}
 			
-		
-		
-		/*
-		boolean loginAttempt = false;
-		int counter = 0;
-		do {
-			if (counter > 0) {
-				try {
-					Thread.sleep(3000);
-					System.out.println("trying again");
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-			loginAttempt = loginGradebook(passthroughCredentials[0], passthroughCredentials[1], username, password);
-			counter++;
-		} while (counter < 5 && loginAttempt == false);
-		return loginAttempt;
-		*/
+
 	}
 	
-	/*
-	 * userType is P (parent) or S (student)
+	/**
+	 * Logs into Gradebook using PIV_Passthrough.aspx and receives classList (from InternetViewerService.ashx/Init).
+	 * @param userType P (parent) or S (student)
+	 * @param uID
+	 * @param email
+	 * @param password
+	 * @return boolean success
+	 * @throws MalformedURLException
+	 * @throws IllegalUrlException
+	 * @throws IOException
+	 * @throws PISDException
 	 */
-	public boolean loginGradebook(String userType, String uID, String email, String password) throws MalformedURLException, IllegalUrlException, IOException, PISDException, InterruptedException, ExecutionException {
+	public boolean loginGradebook(String userType, String uID, String email, String password) throws MalformedURLException, IllegalUrlException, IOException, PISDException {
 
 		
 	
@@ -451,7 +439,7 @@ public class DataGrabber implements Parcelable {
 //		
 //	}
 //	
-	@SuppressWarnings("finally")
+	
 	public int[] getClassIds() {
 		if (classIds != null)
 			return classIds;
@@ -556,7 +544,6 @@ public class DataGrabber implements Parcelable {
 			e.printStackTrace();
 			return null;
 		} catch (IllegalUrlException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}
