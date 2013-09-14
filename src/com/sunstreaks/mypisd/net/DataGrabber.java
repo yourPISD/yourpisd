@@ -20,8 +20,7 @@ import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.graphics.Bitmap;
 
 
 public class DataGrabber /*implements Parcelable*/ {
@@ -45,7 +44,7 @@ public class DataGrabber /*implements Parcelable*/ {
 	int[] classIds;
 	Map<Integer, JSONObject> classGrades = new HashMap<Integer, JSONObject>();
 	String studentName = "";
-
+	Bitmap studentPictureBitmap;
 	
 	/*
 	@Override
@@ -764,6 +763,27 @@ public class DataGrabber /*implements Parcelable*/ {
 	
 	public String getStudentName() {
 		return studentName;
+	}
+	
+	private void loadStudentPicture() {
+		ArrayList<String[]> requestProperties = new ArrayList<String[]>();
+		
+		Object[] response = Request.getBitmap("https://gradebook.pisd.edu/Pinnacle/Gradebook/common/picture.ashx?studentId=" + studentId, 
+					cookies,
+					requestProperties,
+					true);
+		
+		studentPictureBitmap = (Bitmap) response[0];
+		int responseCode = (Integer) response[1];
+		cookies = (ArrayList<String>) cookies;
+		
+	}
+	
+	public Bitmap getStudentPicture() {
+		if (studentPictureBitmap == null)
+			loadStudentPicture();
+		
+		return studentPictureBitmap;
 	}
 	
 }

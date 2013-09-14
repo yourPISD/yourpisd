@@ -1,7 +1,11 @@
 package com.sunstreaks.mypisd.net;
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.CookieHandler;
@@ -16,7 +20,8 @@ import java.util.ArrayList;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import android.os.AsyncTask;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 
 public class Request {
@@ -305,6 +310,100 @@ public class Request {
 			throw new IllegalUrlException("Not a valid url: " + url);
 	}
 	
+	
+	/**
+	 * 
+	 * @param url
+	 * @param cookies
+	 * @param requestProperties
+	 * @param isSecure
+	 * @return
+	 * @throws IOException 
+	 * @throws Exception
+	 */
+	public static Object[] getBitmap (String url, ArrayList<String> cookies, ArrayList<String[]> requestProperties, boolean isSecure) {
+		try {
+			CookieManager cm = new CookieManager();
+			CookieHandler.setDefault(cm);
+			CookieStore cs = cm.getCookieStore();
+			
+			URL obj = new URL(url);
+			
+			URLConnection conn = obj.openConnection();
+			
+			if (isSecure) {
+				((HttpsURLConnection) conn).setRequestMethod("GET");
+			}
+			else {
+				((HttpURLConnection) conn).setRequestMethod("GET");
+			}
+			
+			conn.setUseCaches(false);		//what does this do?
+			
+			
+			if (requestProperties != null && requestProperties.size()>0)
+				for (String[] property : requestProperties)
+					conn.addRequestProperty(property[0], property[1]);
+			
+			// Concatenates the cookies into one cookie string, seperated by semicolons.
+			if (cookies != null && cookies.size()>0) {
+				String cookieRequest = "";
+				for (int i = 0; i < cookies.size(); i++) {
+					cookieRequest += cookies.get(i);
+					if (i < cookies.size() - 1)
+						cookieRequest += "; ";
+				}
+				conn.setRequestProperty("Cookie", cookieRequest);
+			}
+			
+			int responseCode;
+			if (isSecure) {
+				responseCode = ((HttpsURLConnection) conn).getResponseCode();
+			}
+			else {
+				responseCode = ((HttpURLConnection) conn).getResponseCode();
+			}
+	
+			
+			/*
+			BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			String inputLine;
+			StringBuffer response = new StringBuffer();
+		 
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+			in.close();
+		 
+			// Get the response cookies
+			//setCookies(conn.getHeaderFields().get("Set-Cookie"));
+			setCookies();
+			*/
+			
+			
+			InputStream in = new BufferedInputStream(obj.openStream());
+	//		ByteArrayOutputStream out = new ByteArrayOutputStream();
+	//		byte[] buf = new byte[1024];
+	//		int n = 0;
+	//		while (-1!=(n=in.read(buf)))
+	//		{
+	//		   out.write(buf, 0, n);
+	//		}
+	//		out.close();
+	//		in.close();
+	//		byte[] response = out.toByteArray();
+	//		
+	//		
+	//		FileOutputStream fos = new FileOutputStream("C:\\Users\\StudyDesktop\\Desktop\\studentImage.jpeg");
+	//		fos.write(response);
+	//		fos.close();
+			
+			return new Object[] {BitmapFactory.decodeStream(in), responseCode, cookies};
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 	
 	
 }
