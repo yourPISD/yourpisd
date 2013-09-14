@@ -2,7 +2,6 @@ package com.sunstreaks.mypisd;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -10,7 +9,7 @@ import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.FragmentTransaction;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -24,9 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.TableLayout.LayoutParams;
 
 import com.sunstreaks.mypisd.net.DataGrabber;
 
@@ -224,6 +221,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 			super.onPause();
 		}
 		
+		@SuppressLint("ResourceAsColor")
 		public class ClassGradeTask extends AsyncTask<Integer, Void, JSONObject> {
 			
 			@Override
@@ -247,14 +245,17 @@ public class ClassSwipeActivity extends FragmentActivity {
 					
 					gradesListLayout = new LinearLayout(getActivity());
 					gradesListLayout.setOrientation(LinearLayout.VERTICAL);
+					LinearLayout.LayoutParams overAll = new LinearLayout.LayoutParams(
+		            		LinearLayout.LayoutParams.MATCH_PARENT,
+		            		LinearLayout.LayoutParams.MATCH_PARENT);
+					overAll.setMargins(5, 5, 5, 5);
 					
-					
-					
-					gradesListLayout.setLayoutParams(
-		            		new LinearLayout.LayoutParams(
-		            				AbsListView.LayoutParams.MATCH_PARENT, 
-		            				AbsListView.LayoutParams.MATCH_PARENT));
-		            
+					gradesListLayout.setLayoutParams(overAll);
+//					String average = mClassGrade.getJSONArray("terms").getJSONObject(0).optInt("Average")+"";
+//					TextView averageText = new TextView(getActivity());
+//					averageText.setTextSize(20);
+//					averageText.setText(average);
+//		            gradesListLayout.addView(averageText);
 					JSONArray terms = mClassGrade.getJSONArray("terms");
 					
 					
@@ -306,7 +307,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 					            grade.setText(mClassGrade.getJSONArray("terms")
 					            		.getJSONObject(0).getJSONArray("grades")
 					            		.getJSONObject(i).optString("Grade", "") + " ");
-					            grade.setTextSize(30);
+					            grade.setTextSize(25);
 					            innerLayout.addView(descriptionView);
 					            innerLayout.addView(grade);
 					            
@@ -317,9 +318,8 @@ public class ClassSwipeActivity extends FragmentActivity {
 					            scoreLP.setMargins(10,10,10,0);
 					            innerLayout.setLayoutParams(scoreLP);
 					            
-					            innerLayout.setBackgroundDrawable(getResources().getDrawable(R.drawable.dropshadow));
-					            
-
+//					            innerLayout.setBackgroundDrawable(getResources().getDrawable(R.drawable.dropshadow));
+					            innerLayout.setBackgroundDrawable(getResources().getDrawable(R.drawable.divider));
 								LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams (
 										LinearLayout.LayoutParams.MATCH_PARENT,
 										LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -335,8 +335,9 @@ public class ClassSwipeActivity extends FragmentActivity {
 			            categorySummaryLayout.setOrientation(LinearLayout.HORIZONTAL);
 			            
 			            TextView categoryNameView = new TextView(getActivity());
+			            categoryNameView.setTypeface(null, Typeface.BOLD);
 			            categoryNameView.setText(categoryName);
-			            categoryNameView.setTextSize(20);
+			            categoryNameView.setTextSize(23);
 
 			            LinearLayout.LayoutParams descriptionLP = new LinearLayout.LayoutParams(
 			            		LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -356,11 +357,11 @@ public class ClassSwipeActivity extends FragmentActivity {
 			            		LinearLayout.LayoutParams.MATCH_PARENT,
 			            		LinearLayout.LayoutParams.WRAP_CONTENT);
 			            
-			            categorySummaryLP.setMargins(10,10,10,0);
+			            categorySummaryLP.setMargins(15,10,15,0);
 			            categorySummaryLayout.setLayoutParams(categorySummaryLP);
 			            
 			            categoryLayout.addView(categorySummaryLayout, categorySummaryLP);
-			            
+			            categoryLayout.setBackgroundDrawable(getResources().getDrawable(R.drawable.dropshadow));
 			            gradesListLayout.addView(categoryLayout);
 			            
 					}
