@@ -605,7 +605,7 @@ public class DataGrabber implements Parcelable {
 		Object[] termCategory = Parser.termCategoryGrades(html);
 		JSONArray termCategoryGrades = (JSONArray) termCategory[0];
 		
-		if ((Double)termCategory[1] != -1)
+		if ((Integer)termCategory[1] != -1)
 			classGrade.getJSONArray("terms").getJSONObject(termIndex).put("average", termCategory[1]);
 		classGrade.getJSONArray("terms").getJSONObject(termIndex).put("grades", termGrades);
 		classGrade.getJSONArray("terms").getJSONObject(termIndex).put("categoryGrades", termCategoryGrades);

@@ -156,8 +156,7 @@ public class Parser {
 		Element categoryTable = doc.getElementById("Category");
 		Elements rows = categoryTable.getElementsByTag("tbody").get(0).getElementsByTag("tr");
 		
-		double weight = 0;
-		double points = 0;
+
 		
 		for (Element row : rows) {
 			JSONObject category = new JSONObject();
@@ -182,13 +181,18 @@ public class Parser {
 				}
 			}
 			termCategoryGrades.put(category);
-			if (category.optDouble("Percent", 0) != 0) {
-				points += category.optDouble("Percent", 0) * category.optDouble("Weight", 0);
-				weight += category.optDouble("Weight", 0);
-			}
+
 		}
-		//System.out.println("Points = " + points + "; Weight = " + weight);
-		double average = weight>0? points/weight: -1;
+		
+		// The average for the six weeks is 
+		int average = -1;
+		try {
+			Element finalGrade = doc.getElementById("finalGrade");
+			average = Integer.parseInt(finalGrade.getElementsByTag("td").get(3).text());
+		} catch (NullPointerException e) {
+			// Let average be -1
+		}
+
 		return new Object[] {termCategoryGrades, average};
 	}
 	

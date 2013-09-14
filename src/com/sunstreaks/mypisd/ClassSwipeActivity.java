@@ -49,6 +49,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 	static int received;
 	static int classCount;
 	static int classesMade = 0;
+	static boolean doneMakingClasses;
 	
 	static DataGrabber dg;
 	
@@ -63,10 +64,15 @@ public class ClassSwipeActivity extends FragmentActivity {
 		
 		
 		// 7 fragments were being added to mFragments every time that this onCreate method was run.
+		{
+			MyApplication appState = ((MyApplication)this.getApplication());
+			List<Fragment> mFragments = appState.mFragments;
+			ClassSwipeActivity.mFragments = mFragments;
+		}
 		if (mFragments == null) {
 			mFragments = new ArrayList<Fragment>();
 			for (int i = 0; i < classCount; i++) {
-				mFragments.add(new DescriptionFragment());
+				mFragments.add(new DescriptionFragment(i));
 			}
 		}
 		
@@ -90,6 +96,13 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 	}
 
+	@Override
+	protected void onPause() {
+		super.onPause();
+		MyApplication appState = (MyApplication)this.getApplication();
+		appState.mFragments = this.mFragments;
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -149,7 +162,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 		private ViewGroup linearLayout;
 		private LinearLayout gradesListLayout;
 		
-		
+
 		
 		public DescriptionFragment() {
 			this.position = classesMade++;
@@ -251,11 +264,11 @@ public class ClassSwipeActivity extends FragmentActivity {
 					overAll.setMargins(5, 5, 5, 5);
 					
 					gradesListLayout.setLayoutParams(overAll);
-//					String average = mClassGrade.getJSONArray("terms").getJSONObject(0).optInt("Average")+"";
-//					TextView averageText = new TextView(getActivity());
-//					averageText.setTextSize(20);
-//					averageText.setText(average);
-//		            gradesListLayout.addView(averageText);
+					String average = mClassGrade.getJSONArray("terms").getJSONObject(0).optInt("average", -1)+"";
+					TextView averageText = new TextView(getActivity());
+					averageText.setTextSize(20);
+					averageText.setText(average);
+		            gradesListLayout.addView(averageText);
 					JSONArray terms = mClassGrade.getJSONArray("terms");
 					
 					
@@ -280,10 +293,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 			            			.getJSONArray("grades").getJSONObject(i).getString("Category")
 			            			.equals(categoryName))
 			            	{
-			            		// test whether the grade has been found.
-			            		System.out.println("category name = " + categoryName + "; gradeName = " + mClassGrade.getJSONArray("terms")
-					            		.getJSONObject(0).getJSONArray("grades")
-					            		.getJSONObject(i).getString("Description")); 
+
 			            		
 			            		LinearLayout innerLayout = new LinearLayout(getActivity());
 					            innerLayout.setOrientation(LinearLayout.HORIZONTAL);
