@@ -33,11 +33,11 @@ public final class R {
         public static final int shadow=0x7f020006;
     }
     public static final class id {
-        public static final int TextView01=0x7f090010;
-        public static final int action_forgot_password=0x7f090013;
-        public static final int action_settings=0x7f090012;
+        public static final int TextView01=0x7f090011;
+        public static final int action_forgot_password=0x7f090014;
+        public static final int action_settings=0x7f090013;
         public static final int class_description_linear_layout=0x7f09000b;
-        public static final int container=0x7f090011;
+        public static final int container=0x7f090012;
         public static final int domain_spinner=0x7f090005;
         public static final int email=0x7f090006;
         public static final int grade_list=0x7f09000d;
@@ -45,6 +45,7 @@ public final class R {
         public static final int login_form=0x7f090004;
         public static final int login_status=0x7f090002;
         public static final int login_status_message=0x7f090003;
+        public static final int overall=0x7f090010;
         public static final int pager=0x7f090000;
         public static final int pager_title_strip=0x7f090001;
         public static final int password=0x7f090007;

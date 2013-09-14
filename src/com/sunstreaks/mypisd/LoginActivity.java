@@ -271,7 +271,7 @@ public class LoginActivity extends Activity {
 	 */
 	public class UserLoginTask extends AsyncTask<Void, Integer, Integer> {
 		
-		private DataGrabber dg = ((YourPISDApplication)getApplication()).getDataGrabber();
+		private DataGrabber dg = ((YourPISDApplication) getApplication()).getDataGrabber();
 		
 		@Override
 		protected Integer doInBackground(Void... params) {

@@ -2,25 +2,17 @@
 package com.sunstreaks.mypisd;
 
 import java.util.Locale;
-import java.util.concurrent.ExecutionException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.sunstreaks.mypisd.net.DataGrabber;
-import com.sunstreaks.mypisd.net.Domain;
-import com.sunstreaks.mypisd.net.PISDException;
-
-import android.app.AlertDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -33,16 +25,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TableLayout.LayoutParams;
 import android.widget.TextView;
+
+import com.sunstreaks.mypisd.net.DataGrabber;
 
 public class MainActivity extends FragmentActivity implements View.OnClickListener {
 
 	static int classCount;
 	static Button[] buttons;
 	static DataGrabber dg;
+	static Bitmap proPic;
 	
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -80,8 +76,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		// Set up the ViewPager with the sections adapter.
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 		mViewPager.setAdapter(mSectionsPagerAdapter);
-		// Opens Grade Summary (index 1) on open.
-		mViewPager.setCurrentItem(1);
+		// Opens Grade Summary (index 0) on open.
+		mViewPager.setCurrentItem(0);
 	}
 
 	@Override
@@ -124,9 +120,9 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 			Locale l = Locale.getDefault();
 			switch (position) {
 			case 0:
-				return getString(R.string.title_section1).toUpperCase(l);
-			case 1:
 				return getString(R.string.title_section2).toUpperCase(l);
+			case 1:
+				return getString(R.string.title_section1).toUpperCase(l);
 			}
 			return null;
 		}
@@ -142,7 +138,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		 * fragment.
 		 */
 		public static final String ARG_OBJECT = "object";
-
+		private View rootView;
 		public DummySectionFragment() {
 		}
 
@@ -155,7 +151,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		    int tabLayout = 0;
 		    switch (position) {
 		    case 0:
-		    	tabLayout = R.layout.tab_new;
+		    	tabLayout = R.layout.tab_summary;
 //		    	{
 //		    	TextView classGradesJson = (TextView) getActivity().findViewById(R.id.class_grades);
 //		    	SharedPreferences sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
@@ -164,15 +160,15 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 //		    	}
 		    	break;
 		    case 1:
-		    	tabLayout = R.layout.tab_summary;
+		    	tabLayout = R.layout.tab_new;
 		    	break;
 		    }
 		    
 
 		    
-		    View rootView = inflater.inflate(tabLayout, container, false);
+		    rootView = inflater.inflate(tabLayout, container, false);
 		    
-		    if (position == 1)
+		    if (position == 0)
 		    	try {
 		    	
 		    		ScrollView sv = new ScrollView(getActivity());
@@ -262,19 +258,46 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		    	} catch (JSONException e) {
 		    		e.printStackTrace();
 		    	}
-		    	return rootView;
+//		    StudentPictureTask spTask = new StudentPictureTask();
+//		    spTask.execute();
+		    if(position==1)
+		    {
+		    	StudentPictureTask spTask = new StudentPictureTask();
+			    spTask.execute();
+//		    	LinearLayout lv = (LinearLayout)rootView.findViewById(R.id.overall);
+//		    	LinearLayout card = new LinearLayout(getActivity());
+//		    	ImageView profilePic = new ImageView(getActivity());
+//
+//		    	Drawable picture = new BitmapDrawable(getResources(), proPic);
+//		    	profilePic.setImageDrawable(picture);
+//		    	card.addView(profilePic);
+//		    	card.setBackgroundDrawable(getResources().getDrawable(R.drawable.dropshadow));
+//
+//		    	lv.addView(card);
+		    }
+		    return rootView;
+		    
 		}
 
-		public class GradeSummaryTask extends AsyncTask<Void, Void, JSONArray> {
+		public class StudentPictureTask extends AsyncTask<Void, Void, Bitmap> {
 
 			@Override
-			protected JSONArray doInBackground(Void... arg0) {
-				try {
-					return dg.loadGradeSummary();
-				} catch (JSONException e) {
-					e.printStackTrace();
-					return null;
-				}
+			protected Bitmap doInBackground(Void... arg0) {	
+				return dg.getStudentPicture();
+
+			}
+			@Override
+			protected void onPostExecute (final Bitmap result) {
+				LinearLayout lv = (LinearLayout)rootView.findViewById(R.id.overall);
+		    	LinearLayout card = new LinearLayout(getActivity());
+		    	ImageView profilePic = new ImageView(getActivity());
+
+		    	Drawable picture = new BitmapDrawable(getResources(), result);
+		    	profilePic.setImageDrawable(picture);
+		    	card.addView(profilePic);
+		    	card.setBackgroundDrawable(getResources().getDrawable(R.drawable.dropshadow));
+
+		    	lv.addView(card);
 			}
 			
 		}

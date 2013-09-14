@@ -767,7 +767,7 @@ public class DataGrabber /*implements Parcelable*/ {
 	
 	private void loadStudentPicture() {
 		ArrayList<String[]> requestProperties = new ArrayList<String[]>();
-		
+		requestProperties.add(new String[] {"Content-Type", "image/jpeg"} );
 		Object[] response = Request.getBitmap("https://gradebook.pisd.edu/Pinnacle/Gradebook/common/picture.ashx?studentId=" + studentId, 
 					cookies,
 					requestProperties,
