@@ -379,26 +379,31 @@ public class Request {
 			//setCookies(conn.getHeaderFields().get("Set-Cookie"));
 			setCookies();
 			*/
+			for (HttpCookie c : cs.getCookies()) {
+				cookies.add(c.toString());
+			}
 			
 			
-			InputStream in = new BufferedInputStream(obj.openStream());
-	//		ByteArrayOutputStream out = new ByteArrayOutputStream();
-	//		byte[] buf = new byte[1024];
-	//		int n = 0;
-	//		while (-1!=(n=in.read(buf)))
-	//		{
-	//		   out.write(buf, 0, n);
-	//		}
-	//		out.close();
-	//		in.close();
-	//		byte[] response = out.toByteArray();
+			InputStream in = conn.getInputStream();
+			Bitmap bmp = BitmapFactory.decodeStream(in);
+//			InputStream in = new BufferedInputStream(obj.openStream());
+//			ByteArrayOutputStream out = new ByteArrayOutputStream();
+//			byte[] buf = new byte[1024];
+//			int n = 0;
+//			while (-1!=(n=in.read(buf)))
+//			{
+//			   out.write(buf, 0, n);
+//			}
+//			out.close();
+//			in.close();
+//			byte[] response = out.toByteArray();
 	//		
 	//		
 	//		FileOutputStream fos = new FileOutputStream("C:\\Users\\StudyDesktop\\Desktop\\studentImage.jpeg");
 	//		fos.write(response);
 	//		fos.close();
 			
-			return new Object[] {BitmapFactory.decodeStream(in), responseCode, cookies};
+			return new Object[] {bmp, responseCode, cookies};
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;

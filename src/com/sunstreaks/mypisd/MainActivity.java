@@ -102,9 +102,9 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 			// getItem is called to instantiate the fragment for the given page.
 			// Return a DummySectionFragment (defined as a static inner class
 			// below) with the page number as its lone argument.
-			Fragment fragment = new DummySectionFragment();
+			Fragment fragment = new MainActivityFragment();
 			Bundle args = new Bundle();
-			args.putInt(DummySectionFragment.ARG_OBJECT, position);
+			args.putInt(MainActivityFragment.ARG_OBJECT, position);
 			fragment.setArguments(args);
 			return fragment;
 		}
@@ -132,32 +132,28 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 	 * A dummy fragment representing a section of the app, but that simply
 	 * displays dummy text.
 	 */
-	public static class DummySectionFragment extends Fragment  {
+	public static class MainActivityFragment extends Fragment  {
 		/**
 		 * The fragment argument representing the section number for this
 		 * fragment.
 		 */
 		public static final String ARG_OBJECT = "object";
 		private View rootView;
-		public DummySectionFragment() {
+		private int position;
+		
+		public MainActivityFragment() {
 		}
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
 			Bundle args = getArguments();
-		    int position = args.getInt(ARG_OBJECT);
+		    position = args.getInt(ARG_OBJECT);
 
 		    int tabLayout = 0;
 		    switch (position) {
 		    case 0:
 		    	tabLayout = R.layout.tab_summary;
-//		    	{
-//		    	TextView classGradesJson = (TextView) getActivity().findViewById(R.id.class_grades);
-//		    	SharedPreferences sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
-//		    	String classGrades = sharedPrefs.getString("classGrades", "class grades go here");
-//		    	classGradesJson.setText(classGrades);
-//		    	}
 		    	break;
 		    case 1:
 		    	tabLayout = R.layout.tab_new;
@@ -200,13 +196,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		            lp1.setMargins(0, 0, 0, 20);
 		            
 		            
-		            // Don't need SharedPrefs here anymore. although "gradeSummary" might be stored there.
-			    	//SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-			    	
-			    	
-//		            GradeSummaryTask gsTask = new GradeSummaryTask();
-//		            gsTask.execute();
-//		            JSONArray gradeSummary = gsTask.get();
+			    
 		            
 		            JSONArray gradeSummary = dg.getGradeSummary();
 		            
@@ -258,23 +248,13 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		    	} catch (JSONException e) {
 		    		e.printStackTrace();
 		    	}
-//		    StudentPictureTask spTask = new StudentPictureTask();
-//		    spTask.execute();
-		    if(position==1)
-		    {
+
+		    
+		    if (position == 1) {
 		    	StudentPictureTask spTask = new StudentPictureTask();
 			    spTask.execute();
-//		    	LinearLayout lv = (LinearLayout)rootView.findViewById(R.id.overall);
-//		    	LinearLayout card = new LinearLayout(getActivity());
-//		    	ImageView profilePic = new ImageView(getActivity());
-//
-//		    	Drawable picture = new BitmapDrawable(getResources(), proPic);
-//		    	profilePic.setImageDrawable(picture);
-//		    	card.addView(profilePic);
-//		    	card.setBackgroundDrawable(getResources().getDrawable(R.drawable.dropshadow));
-//
-//		    	lv.addView(card);
 		    }
+		    
 		    return rootView;
 		    
 		}
@@ -286,6 +266,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 				return dg.getStudentPicture();
 
 			}
+			
 			@Override
 			protected void onPostExecute (final Bitmap result) {
 				LinearLayout lv = (LinearLayout)rootView.findViewById(R.id.overall);

@@ -768,6 +768,9 @@ public class DataGrabber /*implements Parcelable*/ {
 	private void loadStudentPicture() {
 		ArrayList<String[]> requestProperties = new ArrayList<String[]>();
 		requestProperties.add(new String[] {"Content-Type", "image/jpeg"} );
+		
+		System.out.println(studentId);
+		
 		Object[] response = Request.getBitmap("https://gradebook.pisd.edu/Pinnacle/Gradebook/common/picture.ashx?studentId=" + studentId, 
 					cookies,
 					requestProperties,
@@ -776,7 +779,10 @@ public class DataGrabber /*implements Parcelable*/ {
 		studentPictureBitmap = (Bitmap) response[0];
 		int responseCode = (Integer) response[1];
 		cookies = (ArrayList<String>) cookies;
-		
+		System.out.println(responseCode);
+		System.out.println(response[0]);
+		System.out.println(cookies);
+		System.out.println(studentPictureBitmap.getHeight() + " " + studentPictureBitmap.getWidth());
 	}
 	
 	public Bitmap getStudentPicture() {

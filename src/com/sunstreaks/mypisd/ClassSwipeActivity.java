@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.sunstreaks.mypisd.MainActivity.MainActivityFragment;
 import com.sunstreaks.mypisd.net.DataGrabber;
 
 @SuppressLint("ValidFragment")
@@ -72,7 +73,11 @@ public class ClassSwipeActivity extends FragmentActivity {
 		if (mFragments == null) {
 			mFragments = new ArrayList<Fragment>();
 			for (int i = 0; i < classCount; i++) {
-				mFragments.add(new DescriptionFragment(i));
+				Bundle args = new Bundle();
+				args.putInt(DescriptionFragment.ARG_SECTION_NUMBER, i);
+				Fragment fragment = new DescriptionFragment();
+				fragment.setArguments(args);
+				mFragments.add(new DescriptionFragment());
 			}
 		}
 		
@@ -163,9 +168,11 @@ public class ClassSwipeActivity extends FragmentActivity {
 		private LinearLayout gradesListLayout;
 		
 
+
 		
 		public DescriptionFragment() {
-			this.position = classesMade++;
+			
+			position = getArguments().getInt(ARG_SECTION_NUMBER);
 			if (classesMade > classCount)
 				System.out.println("Something really weird is going on.");
 		}
