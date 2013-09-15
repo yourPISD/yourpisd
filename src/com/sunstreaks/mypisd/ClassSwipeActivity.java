@@ -157,7 +157,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 		 */
 		public static final String ARG_SECTION_NUMBER = "section_number";
 		private ClassGradeTask mClassGradeTask;
-		private final int position;
+		private int position;
 		private JSONObject mClassGrade;
 		private String pageTitle;
 		private String teacherName;
