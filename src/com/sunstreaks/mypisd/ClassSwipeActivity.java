@@ -77,7 +77,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 				args.putInt(DescriptionFragment.ARG_SECTION_NUMBER, i);
 				Fragment fragment = new DescriptionFragment();
 				fragment.setArguments(args);
-				mFragments.add(new DescriptionFragment());
+				mFragments.add(fragment);
 			}
 		}
 		
@@ -171,10 +171,6 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 		
 		public DescriptionFragment() {
-			
-			position = getArguments().getInt(ARG_SECTION_NUMBER);
-			if (classesMade > classCount)
-				System.out.println("Something really weird is going on.");
 		}
 		
 		@Override
@@ -182,9 +178,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 			super.onAttach(activity);
 		}
 		
-		public DescriptionFragment(int position) {
-			this.position = position;
-		}
+
 		
 		public String getPageTitle() {
 			if (pageTitle == null)
@@ -198,6 +192,8 @@ public class ClassSwipeActivity extends FragmentActivity {
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState)  {
 
+			position = getArguments().getInt(ARG_SECTION_NUMBER);
+			System.out.println("position = " + position);
 			
 			this.pageTitle = getResources().getString(R.string.class_swipe_loading);
 			
@@ -205,9 +201,6 @@ public class ClassSwipeActivity extends FragmentActivity {
 				System.out.println("Grade task has been created before");
 			else
 				System.out.println("First time grade task");
-			
-//			position = mViewPager.getCurrentItem();
-			System.out.println("position = " + position);
 			
 			pageTitle = dg.getClassName(position); 
 			
