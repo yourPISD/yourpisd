@@ -17,7 +17,7 @@
                 android:id="@+id/TextView01"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Welcome: Name"
+                android:text="Welcome to yourPISD"
                 android:textSize="25sp" />
             
         </LinearLayout>

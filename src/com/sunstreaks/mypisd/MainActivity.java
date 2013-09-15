@@ -258,7 +258,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		    return rootView;
 		    
 		}
-
+		LinearLayout card;
 		public class StudentPictureTask extends AsyncTask<Void, Void, Bitmap> {
 
 			@Override
@@ -270,15 +270,39 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 			@Override
 			protected void onPostExecute (final Bitmap result) {
 				LinearLayout lv = (LinearLayout)rootView.findViewById(R.id.overall);
-		    	LinearLayout card = new LinearLayout(getActivity());
 		    	ImageView profilePic = new ImageView(getActivity());
-
+		    	card =new LinearLayout(getActivity());
 		    	Drawable picture = new BitmapDrawable(getResources(), result);
 		    	profilePic.setImageDrawable(picture);
+		    	LinearLayout.LayoutParams profileLP = new LinearLayout.LayoutParams(
+	            		LinearLayout.LayoutParams.WRAP_CONTENT,
+	            		LinearLayout.LayoutParams.WRAP_CONTENT);
+		    	profileLP.setMargins(10, 10, 10, 10);
+		    	profilePic.setLayoutParams(profileLP);
+
+		    	
 		    	card.addView(profilePic);
 		    	card.setBackgroundDrawable(getResources().getDrawable(R.drawable.dropshadow));
-
+		    	StudentNameTask snTask = new StudentNameTask();
+			    snTask.execute();
 		    	lv.addView(card);
+			}
+			
+		}
+		public class StudentNameTask extends AsyncTask<Void, Void, String> {
+
+			@Override
+			protected String doInBackground(Void... arg0) {	
+				return dg.getStudentName();
+
+			}
+			
+			@Override
+			protected void onPostExecute (final String result) {
+				TextView name = new TextView(getActivity());
+				name.setTextSize(25);
+				name.setText("  "+ result);
+				card.addView(name);
 			}
 			
 		}
