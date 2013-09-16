@@ -226,7 +226,9 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 			            
 			            //Hard coded for first six weeks average.
 			            JSONObject term = course.getJSONArray("terms").getJSONObject(0);
-			            int average = term.optInt("average", -1);
+			            int avg = term.optInt("average", -1);
+			            
+			            String average = avg == -1 ? "" : avg + "";
 			            
 			            buttons[i] = new Button(getActivity());
 			            buttons[i].setText(average + "");

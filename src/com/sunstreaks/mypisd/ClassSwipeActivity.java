@@ -264,7 +264,9 @@ public class ClassSwipeActivity extends FragmentActivity {
 					overAll.setMargins(5, 5, 5, 5);
 					
 					gradesListLayout.setLayoutParams(overAll);
-					String average = mClassGrade.getJSONArray("terms").getJSONObject(0).optInt("average", -1)+"";
+					int avg = mClassGrade.getJSONArray("terms").getJSONObject(0).optInt("average", -1);
+					String average = avg == -1 ? "" : "" + avg;
+		
 					TextView averageText = new TextView(getActivity());
 					averageText.setTextSize(20);
 					averageText.setText(average);
