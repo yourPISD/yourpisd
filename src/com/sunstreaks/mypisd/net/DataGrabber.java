@@ -37,7 +37,7 @@ public class DataGrabber /*implements Parcelable*/ {
 	
 	ArrayList<String> cookies = new ArrayList<String>();
 	JSONArray classList = null;
-	JSONArray gradeSummary = null;
+	int[][] gradeSummary = null;
 	// Class -> Term
 //	Date[][] lastUpdated;
 	int studentId = 0;
@@ -45,6 +45,8 @@ public class DataGrabber /*implements Parcelable*/ {
 	Map<Integer, JSONObject> classGrades = new HashMap<Integer, JSONObject>();
 	String studentName = "";
 	Bitmap studentPictureBitmap;
+	
+	int[] classMatch;
 	
 	/*
 	@Override
@@ -200,8 +202,9 @@ public class DataGrabber /*implements Parcelable*/ {
 	 * @throws PISDException
 	 * @throws InterruptedException
 	 * @throws ExecutionException
+	 * @return 1 if success, -1 if parent failure, -2 if student failure, 0 if domain value is not 0 or 1
 	 */
-	public void login(/*Domain dom, String username, String password*/)
+	public int login(/*Domain dom, String username, String password*/)
 			throws MalformedURLException, IllegalUrlException, IOException, PISDException, InterruptedException, ExecutionException {
 		
 		String response;
@@ -225,13 +228,13 @@ public class DataGrabber /*implements Parcelable*/ {
 
 				passthroughCredentials = Parser.passthroughCredentials(response);
 				
-				break;
+				return 1;
 			}
 			else {
 				System.out.println("Bad username/password 1!");
 				System.out.println(response);
 				editureLogin = -1;
-				return; /* false; */
+				return -1;
 			}
 		case 1: // Student
 			Object[] portalDefaultPage = Request.sendGet(
@@ -281,18 +284,19 @@ public class DataGrabber /*implements Parcelable*/ {
 					Request.getRedirectLocation(),
 					cookies);
 			
+			if (ticket == null)
+				return -2;
+			
 			response = (String) ticket[0];
 			responseCode = (Integer) ticket[1];
 			cookies = (ArrayList<String>) ticket[2];
 			
 			passthroughCredentials = Parser.passthroughCredentials(response);
-			break;
-			
+			return 1;
 			
 		default:
-			return;
+			return 0;
 		}
-			
 
 	}
 	
@@ -519,7 +523,7 @@ public class DataGrabber /*implements Parcelable*/ {
 	 * @throws InterruptedException 
 	 * 
 	 */
-	public JSONArray loadGradeSummary () throws JSONException {
+	public int[][] loadGradeSummary () throws JSONException {
 		try {
 			String classId = classList.getJSONObject(0).getString("enrollmentId");
 			String termId = classList.getJSONObject(0).getJSONArray("terms").getJSONObject(0).getString("termId");
@@ -557,7 +561,13 @@ public class DataGrabber /*implements Parcelable*/ {
 		}
 	}
 	
-	public JSONArray getGradeSummary () {
+	public int[][] getGradeSummary () {
+		if (gradeSummary == null)
+			try {
+				loadGradeSummary();
+			} catch (JSONException e) {
+				return null;
+			}
 		return gradeSummary;
 	}
 
@@ -790,6 +800,14 @@ public class DataGrabber /*implements Parcelable*/ {
 			loadStudentPicture();
 		
 		return studentPictureBitmap;
+	}
+	
+	public void setClassMatch (int[] classMatch) {
+		this.classMatch = classMatch;
+	}
+	
+	public int[] getClassMatch () {
+		return classMatch;
 	}
 	
 }

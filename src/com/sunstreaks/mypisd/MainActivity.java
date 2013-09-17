@@ -1,9 +1,10 @@
 //THIS WAS EDITED WITHIN ECLIPSE AS AN TEST
 package com.sunstreaks.mypisd;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -165,8 +166,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		    rootView = inflater.inflate(tabLayout, container, false);
 		    
 		    if (position == 0)
-		    	try {
-		    	
+		    {
 		    		ScrollView sv = new ScrollView(getActivity());
 		    		
 		    		
@@ -198,16 +198,32 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		            
 			    
 		            
-		            JSONArray gradeSummary = dg.getGradeSummary();
+		            int[][] gradeSummary = dg.getGradeSummary();
 		            
-			    	classCount = gradeSummary.length();
+			    	classCount = gradeSummary.length;
 			    	buttons = new Button[classCount];
+			    	
+			    	int[] classMatch = new int[classCount];
+			    	int classesMatched = 0;
+			    	
+			    	while (classesMatched < classCount) {
+			    		for (int i = classesMatched; i < dg.getClassIds().length; i++) {
+			    			if (dg.getClassIds()[i] == gradeSummary[classesMatched][0]) {
+			    				classMatch[classesMatched] = i;
+			    				classesMatched++;
+			    				break;
+			    			}
+			    		}
+			    	}
+			    	
+			    	dg.setClassMatch(classMatch);
 			    	
 		            for (int i = 0; i < classCount ; i++) {
 		            	
-		            	JSONObject course = gradeSummary.getJSONObject(i);
+		            	int jsonIndex = classMatch[i];
 		            	
-		            	String name = " " + course.getString("title");
+		            	
+		            	String name = " " + dg.getClassName(jsonIndex);
 		            	
 		            	LinearLayout innerLayout = new LinearLayout(getActivity());
 			            innerLayout.setOrientation(LinearLayout.HORIZONTAL);
@@ -224,10 +240,14 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 			            
 			            innerLayout.addView(className);
 			            
-			            //Hard coded for first six weeks average.
-			            JSONObject term = course.getJSONArray("terms").getJSONObject(0);
-			            int avg = term.optInt("average", -1);
+			            // Hard coded for first six weeks average.
 			            
+			            // JSONObject term = course.getJSONArray("terms").getJSONObject(0);
+			            // int avg = term.optInt("average", -1);
+			            
+			            // six weeks index.
+			            int avg = gradeSummary[i][1 + 0];
+			            		
 			            String average = avg == -1 ? "" : avg + "";
 			            
 			            buttons[i] = new Button(getActivity());
@@ -247,9 +267,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		            
 		            sv.addView(layout, lp1);
 		            return sv;
-		    	} catch (JSONException e) {
-		    		e.printStackTrace();
-		    	}
+		    }	
 
 		    
 		    if (position == 1) {

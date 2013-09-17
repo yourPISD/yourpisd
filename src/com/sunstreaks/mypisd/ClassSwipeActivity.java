@@ -141,8 +141,8 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 		@Override
 		public CharSequence getPageTitle(int position) {
-			return ( (DescriptionFragment)fragmentList.get(position) ).getPageTitle();
-			//return dg.getClassName(position);
+			//return ( (DescriptionFragment)fragmentList.get(position) ).getPageTitle();
+			return dg.getClassName(dg.getClassMatch()[position]);
 		}
 	}
 	
@@ -158,6 +158,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 		public static final String ARG_SECTION_NUMBER = "section_number";
 		private ClassGradeTask mClassGradeTask;
 		private int position;
+		private int classIndex;
 		private JSONObject mClassGrade;
 		private String pageTitle;
 		private String teacherName;
@@ -171,6 +172,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 		
 		public DescriptionFragment() {
+			
 		}
 		
 		@Override
@@ -180,11 +182,11 @@ public class ClassSwipeActivity extends FragmentActivity {
 		
 
 		
-		public String getPageTitle() {
-			if (pageTitle == null)
-				return Integer.toString(position);
-			return pageTitle;
-		}
+//		public String getPageTitle() {
+//			if (pageTitle == null)
+//				return Integer.toString(position);
+//			return pageTitle;
+//		}
 		
 		
 		
@@ -193,6 +195,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 				Bundle savedInstanceState)  {
 
 			position = getArguments().getInt(ARG_SECTION_NUMBER);
+			classIndex = dg.getClassMatch()[position];
 			System.out.println("position = " + position);
 			
 			this.pageTitle = getResources().getString(R.string.class_swipe_loading);
@@ -202,7 +205,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 			else
 				System.out.println("First time grade task");
 			
-			pageTitle = dg.getClassName(position); 
+			//pageTitle = dg.getClassName(classIndex); 
 			
 			rootView = inflater.inflate(R.layout.class_description, container, false);
 			
@@ -219,7 +222,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 				mClassGradeTask = new ClassGradeTask();
 				gradeLoaded = true;
-				mClassGradeTask.execute(position, 0);
+				mClassGradeTask.execute(classIndex, 0);
 			}
 			else {
 				((ViewGroup)gradesListLayout.getParent()).removeView(gradesListLayout);
@@ -403,19 +406,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 	}
 
-	public class GradeSummaryTask extends AsyncTask<Void, Void, JSONArray> {
 
-		@Override
-		protected JSONArray doInBackground(Void... params) {
-			try {
-				return dg.loadGradeSummary();
-			} catch (Exception e) {
-				e.printStackTrace();
-				return null;
-			}
-		}
-		
-	}
 	
 
 	

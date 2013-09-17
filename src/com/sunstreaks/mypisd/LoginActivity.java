@@ -176,11 +176,7 @@ public class LoginActivity extends Activity {
 			mPasswordView.setError(getString(R.string.error_field_required));
 			focusView = mPasswordView;
 			cancel = true;
-		} /*else if (mPassword.length() < 4) {
-			mPasswordView.setError(getString(R.string.error_invalid_password));
-			focusView = mPasswordView;
-			cancel = true;
-		}*/
+		}
 
 		// Check for a valid email address.
 		if (TextUtils.isEmpty(mEmail)) {
@@ -292,9 +288,16 @@ public class LoginActivity extends Activity {
 						publishProgress(0);
 
 						
-						dg.login();
-						if (dg.getEditureLogin() == -1)
-					    	return -1;
+						int loginSuccess = dg.login();
+						switch (loginSuccess) {
+						case -1: // Parent login error
+							return -1;	// Bad password display
+						case -2: // Server error
+							return -2; // Server error
+						case 1:
+						default:
+							break;
+						}
 						
 						// Update the loading screen: Signing into Gradebook...
 						publishProgress(1);
@@ -329,21 +332,16 @@ public class LoginActivity extends Activity {
 						
 						
 						
-						JSONArray gradeSummary = dg.loadGradeSummary();
+						dg.loadGradeSummary();
+						System.out.println(dg.getGradeSummary() == null ? "null" : "not null");
 
 						// Store class grades in Shared Preferences.
 						System.out.println("Done getting data.");
-						SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(LoginActivity.this);
-						SharedPreferences.Editor editor = sharedPrefs.edit();
-						editor.putString("gradeSummary", gradeSummary.toString());
-						editor.commit();
+
 				    } else {
 				    	System.err.println("No internet connection");
 						return -3;
 				    }
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -364,6 +362,7 @@ public class LoginActivity extends Activity {
 				Intent startMain = new Intent(LoginActivity.this, MainActivity.class);
 //				startMain.putExtra("DataGrabber", dg);
 				((YourPISDApplication) getApplication()).setDataGrabber(dg);
+				System.out.println("Intent to Main!");
 				startActivity(startMain);
 				break;
 			case -1:
@@ -372,7 +371,8 @@ public class LoginActivity extends Activity {
 				mPasswordView.requestFocus();
 				break;
 			case -2:
-			{// Gradebook error even after 5 tries
+			{
+				// Server error
 		    	AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
 		    	builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 		            public void onClick(DialogInterface dialog, int id) {
@@ -397,7 +397,7 @@ public class LoginActivity extends Activity {
 		        });
 		    	AlertDialog alertDialog = builder.create();
 		    	alertDialog.setTitle("Info");
-		    	alertDialog.setMessage("No internet connection detected! Please find a connection and try again.");
+		    	alertDialog.setMessage("No internet connection found! Please find a connection and try again.");
 		    	alertDialog.setIcon(R.drawable.ic_alerts_and_states_warning);
 
 		    	alertDialog.show();

@@ -62,20 +62,22 @@ public class Request {
 		URLConnection conn = null;
 		int responseCode = 0;
 		
+		long startTime = System.currentTimeMillis();
 		// 3 tries in order to evade EOFException. EOFException implements IOException.
 		// copied from http://stackoverflow.com/questions/17208336/getting-java-io-eofexception-using-httpurlconnection
 		while (!success && numTries < MAX_RETRIES) {
 			
 			if (numTries != 0) {
-           		System.out.println(numTries + " tries");
+           		System.out.println(numTries + " tries; this attempt took " + (System.currentTimeMillis() - startTime) + "ms");
+           		startTime = System.currentTimeMillis();
        		} 
 			
 			try {
 		
 				conn = (new URL(url)).openConnection();
-				
-				conn.setReadTimeout(10000 /* milliseconds */);
-				conn.setConnectTimeout(15000 /* milliseconds */);
+				// Timeout extended because of really slow Portal.
+				conn.setReadTimeout(2*10000 /* milliseconds */);
+				conn.setConnectTimeout(2*15000 /* milliseconds */);
 				if (isSecure) {
 					((HttpsURLConnection) conn).setRequestMethod("GET");
 				}
@@ -130,9 +132,12 @@ public class Request {
 			} 
 				numTries++;
 				
-				if (numTries == MAX_RETRIES)
+				if (numTries == MAX_RETRIES) {
 					System.out.println("Max retries reached. Giving up..."); 
+					return null;
+				}
 		}
+		System.out.println("Success! " + (System.currentTimeMillis() - startTime) + "ms");
 		
 //		System.out.println("\nSending 'GET' request to URL : " + url);
 //		System.out.println("Response Code : " + responseCode);
@@ -188,12 +193,15 @@ public class Request {
 		
 		URLConnection conn = null;
 		int responseCode = 0;
+		
+		long startTime = System.currentTimeMillis();
 		// 3 tries in order to evade EOFException. EOFException implements IOException.
 		// copied from http://stackoverflow.com/questions/17208336/getting-java-io-eofexception-using-httpurlconnection
 		while (!success && numTries < MAX_RETRIES) {
 			
 			if (numTries != 0) {
-           		System.out.println(numTries + " tries");
+				System.out.println(numTries + " tries; this attempt took " + (System.currentTimeMillis() - startTime) + "ms");
+           		startTime = System.currentTimeMillis();
        		} 
 			
 			try {
@@ -266,10 +274,13 @@ public class Request {
 			} 
 			numTries++;
 			
-			if (numTries == MAX_RETRIES)
+			if (numTries == MAX_RETRIES) {
 				System.out.println("Max retries reached. Giving up..."); 
+				return null;
+			}
 		}
-		
+
+		System.out.println("Success! " + (System.currentTimeMillis() - startTime) + "ms");
 
 //		System.out.println("\nSending 'GET' request to URL : " + url);
 //		System.out.println("Response Code : " + responseCode);

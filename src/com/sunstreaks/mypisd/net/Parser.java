@@ -1,6 +1,7 @@
 package com.sunstreaks.mypisd.net;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -242,38 +243,47 @@ public class Parser {
 		}
 	}
 	
-	/** Parses average of each term from GradeSummary.aspx. Returns in JSONArray, which *should*
-	 *  be saved to classList.
+	/** Parses average of each term from GradeSummary.aspx.
 	 * NOTICE: Does not work for second semester classes in which the second semester schedule
 	 *  is different from the first semester schedule.
 	 * 
 	 * @param html source of GradeSummary.aspx
 	 * @param classList classList as returned by Init.aspx
-	 * @return modified classList that includes averages
 	 * @throws JSONException
+	 * @return 	 [
+	 * 		[classId, avg0, avg1, ...],
+	 * 		[classId, avg0, avg1, ...],
+	 * ]
 	 */
-	public static JSONArray gradeSummary (String html, JSONArray classList) throws JSONException {
+	public static int[][] gradeSummary (String html, JSONArray classList) {
 		Element doc = Jsoup.parse(html);
 		return gradeSummary(doc, classList);
 	}
 	
-	/** Parses average of each term from GradeSummary.aspx. Returns in JSONArray, which *should*
-	 *  be saved to classList.
+	/** Parses average of each term from GradeSummary.aspx.
 	 * NOTICE: Does not work for second semester classes in which the second semester schedule
 	 *  is different from the first semester schedule.
 	 * 
 	 * @param doc the Jsoup element of GradeSummary.aspx
 	 * @param classList classList as returned by Init.aspx
-	 * @return modified classList that includes averages
 	 * @throws JSONException
+	 * @return 	 [
+	 * 		[classId, avg0, avg1, ...],
+	 * 		[classId, avg0, avg1, ...],
+	 * ]
 	 */
-	public static JSONArray gradeSummary (Element doc, JSONArray classList) throws JSONException {
+	public static int[][] gradeSummary (Element doc, JSONArray classList) {
+		
+		List<Integer[]> gradeSummary = new ArrayList<Integer[]>();
 
 		Element reportTable = doc.getElementsByClass("reportTable").get(0).getElementsByTag("tbody").get(0);
 		Elements rows = reportTable.getElementsByTag("tr");
 		int rowIndex = 0; int classIndex = 0;
 		
 		while (rowIndex < rows.size() ) {
+			
+			List<Integer> classAverages = new ArrayList<Integer>();
+			
 			Element row = rows.get(rowIndex);
 			Elements columns = row.getElementsByTag("td");
 			
@@ -284,22 +294,55 @@ public class Parser {
 				continue;
 			}
 			
+			classAverages.add(getClassId(row));
+			
 			for (int j = 0; j < 8; j++) {
 				int col = termToColumn(j);
 				Element column = columns.get(col);
-				if ( ! column.text().equals(""))
-					try {
-						classList.getJSONObject(classIndex).getJSONArray("terms").getJSONObject(j).put("average", Integer.parseInt(column.text()));
-					} catch (JSONException e) {
-						e.printStackTrace();
-						// Hopefully this will only execute if there is a class that does not last for all year.
-						// In which case we have encountered ArrayIndexOutOfBounds
-					}
+				String text = column.text();
+				classAverages.add(text.equals("") ? -1 : Integer.parseInt(column.text()));
+				
+				
+//				if ( ! column.text().equals(""))
+//					try {
+//						classList.getJSONObject(classIndex).getJSONArray("terms").getJSONObject(j).put("average", Integer.parseInt(column.text()));
+//					} catch (JSONException e) {
+//						e.printStackTrace();
+//						// Hopefully this will only execute if there is a class that does not last for all year.
+//						// In which case we have encountered ArrayIndexOutOfBounds
+//					}
 			}
+			Integer[] thisRow = new Integer[classAverages.size()];
+			classAverages.toArray(thisRow);
+			gradeSummary.add( thisRow );
 			rowIndex++; classIndex++;
 		}
 		
-		return classList;
+		/*
+		 * [
+		 * 		[classId, avg0, avg1, ...],
+		 * 		[classId, avg0, avg1, ...],
+		 * ]
+		 */
+		int[][] result = new int[gradeSummary.size()][];
+		for (int i = 0; i < result.length; i++) {
+			result[i] = new int[gradeSummary.get(i).length];
+			for (int j = 0; j < result[i].length; j++)
+				result[i][j] = gradeSummary.get(i)[j];
+		}
+		return result;
+	}
+	
+	/**
+	 * 
+	 * @param A Jsoup Element that contains the html for a row in GradeSummary
+	 * @return 
+	 */
+	public static int getClassId (Element row) {
+		Elements th = row.getElementsByTag("th");
+		String href = th.get(0).getElementsByTag("a").get(0).attr("href");
+		// href="javascript:ClassDetails.getClassDetails(2976981);"
+		return Integer.parseInt(href.substring(40, 47));
 	}
 	
 	/**
