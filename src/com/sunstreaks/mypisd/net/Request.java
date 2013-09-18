@@ -76,8 +76,8 @@ public class Request {
 		
 				conn = (new URL(url)).openConnection();
 				// Timeout extended because of really slow Portal.
-				conn.setReadTimeout(2*10000 /* milliseconds */);
-				conn.setConnectTimeout(2*15000 /* milliseconds */);
+				conn.setReadTimeout(4*10000 /* milliseconds */);
+				conn.setConnectTimeout(4*15000 /* milliseconds */);
 				if (isSecure) {
 					((HttpsURLConnection) conn).setRequestMethod("GET");
 				}
@@ -207,8 +207,8 @@ public class Request {
 			try {
 
 				conn = (new URL(url)).openConnection();
-				conn.setReadTimeout(10000 /* milliseconds */);
-				conn.setConnectTimeout(15000 /* milliseconds */);
+				conn.setReadTimeout(4*10000 /* milliseconds */);
+				conn.setConnectTimeout(4*15000 /* milliseconds */);
 				if (isSecure) {
 					((HttpsURLConnection) conn).setRequestMethod("POST");
 				}
