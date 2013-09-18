@@ -1,4 +1,3 @@
-//THIS WAS EDITED WITHIN ECLIPSE AS AN TEST
 package com.sunstreaks.mypisd;
 
 import java.util.HashMap;
