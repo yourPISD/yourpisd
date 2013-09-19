@@ -33,66 +33,76 @@ public final class R {
         public static final int shadow=0x7f020006;
     }
     public static final class id {
-        public static final int TextView01=0x7f090011;
-        public static final int action_forgot_password=0x7f090014;
-        public static final int action_settings=0x7f090013;
+        public static final int TextView01=0x7f090016;
+        public static final int action_forgot_password=0x7f090019;
+        public static final int action_settings=0x7f090018;
+        public static final int category_name=0x7f09000f;
+        public static final int category_score=0x7f090010;
         public static final int class_description_linear_layout=0x7f09000b;
-        public static final int container=0x7f090012;
+        public static final int container=0x7f090017;
+        public static final int description=0x7f090011;
         public static final int domain_spinner=0x7f090005;
         public static final int email=0x7f090006;
-        public static final int grade_list=0x7f09000d;
+        public static final int grade=0x7f090012;
+        public static final int layout_grades_list=0x7f09000e;
         public static final int login=0x7f090008;
         public static final int login_form=0x7f090004;
         public static final int login_status=0x7f090002;
         public static final int login_status_message=0x7f090003;
-        public static final int overall=0x7f090010;
+        public static final int overall=0x7f090015;
         public static final int pager=0x7f090000;
         public static final int pager_title_strip=0x7f090001;
         public static final int password=0x7f090007;
         public static final int remember_password=0x7f090009;
-        public static final int scrollView1=0x7f09000f;
-        public static final int section_label=0x7f09000e;
+        public static final int scrollView1=0x7f090014;
+        public static final int section_label=0x7f090013;
         public static final int sign_in_button=0x7f09000a;
-        public static final int teacher=0x7f09000c;
+        public static final int six_weeks_average=0x7f09000d;
+        public static final int teacher_name=0x7f09000c;
     }
     public static final class layout {
         public static final int activity_class_swipe=0x7f030000;
         public static final int activity_login=0x7f030001;
         public static final int activity_main=0x7f030002;
         public static final int class_description=0x7f030003;
-        public static final int fragment_class_swipe_dummy=0x7f030004;
-        public static final int fragment_main_dummy=0x7f030005;
-        public static final int tab_new=0x7f030006;
-        public static final int tab_summary=0x7f030007;
+        public static final int class_swipe_category_card=0x7f030004;
+        public static final int class_swipe_grade_view=0x7f030005;
+        public static final int fragment_class_swipe_dummy=0x7f030006;
+        public static final int fragment_main_dummy=0x7f030007;
+        public static final int tab_new=0x7f030008;
+        public static final int tab_summary=0x7f030009;
     }
     public static final class menu {
         public static final int class_swipe=0x7f080000;
         public static final int login=0x7f080001;
     }
     public static final class string {
-        public static final int action_forgot_password=0x7f06000f;
+        public static final int action_forgot_password=0x7f060012;
         public static final int action_settings=0x7f060001;
-        public static final int action_sign_in_register=0x7f06000d;
-        public static final int action_sign_in_short=0x7f06000e;
+        public static final int action_sign_in_register=0x7f060010;
+        public static final int action_sign_in_short=0x7f060011;
         public static final int app_name=0x7f060000;
         public static final int class_swipe_loading=0x7f060009;
         public static final int daily=0x7f060006;
-        public static final int error_field_required=0x7f060016;
-        public static final int error_incorrect_password=0x7f060015;
-        public static final int error_invalid_email=0x7f060013;
-        public static final int error_invalid_password=0x7f060014;
-        public static final int login_progress_downloading_data=0x7f060012;
-        public static final int login_progress_gradebook=0x7f060011;
-        public static final int login_progress_mypisd=0x7f060010;
+        public static final int default_category_name=0x7f06000b;
+        public static final int default_description=0x7f06000a;
+        public static final int default_grade=0x7f06000c;
+        public static final int error_field_required=0x7f060019;
+        public static final int error_incorrect_password=0x7f060018;
+        public static final int error_invalid_email=0x7f060016;
+        public static final int error_invalid_password=0x7f060017;
+        public static final int login_progress_downloading_data=0x7f060015;
+        public static final int login_progress_gradebook=0x7f060014;
+        public static final int login_progress_mypisd=0x7f060013;
         public static final int major=0x7f060007;
         /**  Strings related to login 
          */
-        public static final int prompt_email=0x7f06000b;
-        public static final int prompt_password=0x7f06000c;
-        public static final int remember_password=0x7f060017;
+        public static final int prompt_email=0x7f06000e;
+        public static final int prompt_password=0x7f06000f;
+        public static final int remember_password=0x7f06001a;
         public static final int teacher_name=0x7f060005;
         public static final int title_activity_class_swipe=0x7f060008;
-        public static final int title_activity_login=0x7f06000a;
+        public static final int title_activity_login=0x7f06000d;
         public static final int title_section1=0x7f060002;
         public static final int title_section2=0x7f060003;
         public static final int title_section3=0x7f060004;

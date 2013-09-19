@@ -11,20 +11,27 @@
 	    >
 
 		<TextView
-		    android:id="@+id/teacher"
+		    android:id="@+id/teacher_name"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
-		    android:layout_alignParentLeft="true"
-		    android:layout_alignParentTop="true"
 		    android:text="@string/teacher_name"
 		    android:textSize="30sp" />
 		
+		<TextView
+		    android:id="@+id/six_weeks_average"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:text="@string/default_grade"
+		    android:textSize="20sp" />
+		
+		<!-- 
 		<LinearLayout
 		    android:id="@+id/grade_list"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
 		    android:orientation="vertical"
 		    />
+		-->
 		
 	</LinearLayout>
 </ScrollView>
