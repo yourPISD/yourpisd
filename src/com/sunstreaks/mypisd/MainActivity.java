@@ -222,12 +222,17 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		            	int jsonIndex = classMatch[i];
 		            	
 		            	
-		            	String name = " " + dg.getClassName(jsonIndex);
+		            	String name = dg.getClassName(jsonIndex);
+//		            	String temp = name.charAt(0)+"";
+//		            	name = name.substring(1);
+//		            	name = name.toLowerCase();
+//		            	name = temp+name;
 		            	
 		            	LinearLayout innerLayout = new LinearLayout(getActivity());
 			            innerLayout.setOrientation(LinearLayout.HORIZONTAL);
 			   
 			            TextView className = new TextView(getActivity());
+			            
 			            className.setText(name);
 			            //className.setBackgroundColor(Color.WHITE);
 			            className.setTextSize(20);
