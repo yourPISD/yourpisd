@@ -5,34 +5,33 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     tools:context=".ClassSwipeActivity"
+    android:background="@drawable/divider"
+     
     >
 
     <TextView
         android:id="@+id/description"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_margin="12dp"
         android:layout_weight="1"
+        android:fontFamily="sans-serif-light"
+        android:paddingBottom="5dp"
+        android:paddingLeft="5dp"
         android:text="@string/default_description"
         android:textSize="20sp"
-        android:layout_margin="12dp"
-        android:textStyle="normal"
-        android:fontFamily="sans-serif-light"
-        android:paddingLeft="5dp"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        android:background="@drawable/divider" 
-        />
+        android:textStyle="normal" />
 
     <TextView
         android:id="@+id/grade"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginRight="10dp"
         android:layout_marginBottom="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="15dp"
+        android:fontFamily="sans-serif-light"
         android:text="@string/default_grade"
-        android:textSize="25sp" 
-        android:fontFamily="sans-serif-light"/>
+        android:textSize="25sp" />
 
 </LinearLayout>
