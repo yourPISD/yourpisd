@@ -267,7 +267,7 @@ public class LoginActivity extends Activity {
 	 */
 	public class UserLoginTask extends AsyncTask<Void, Integer, Integer> {
 		
-		private DataGrabber dg = ((YourPISDApplication) getApplication()).getDataGrabber();
+		private DataGrabber dg = ((DataGrabber) getApplication());
 		
 		@Override
 		protected Integer doInBackground(Void... params) {
@@ -279,7 +279,9 @@ public class LoginActivity extends Activity {
 				    NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 				    if (networkInfo != null && networkInfo.isConnected()) {
 						// Simulate network access.
-						dg = new DataGrabber(
+				    	dg = (DataGrabber) getApplication();
+//						dg = new DataGrabber(
+						dg.setData (
 								Domain.valueOf(domainSpinner.getSelectedItem().toString()),
 								mEmail,
 								mPassword);
@@ -361,7 +363,7 @@ public class LoginActivity extends Activity {
 				finish();
 				Intent startMain = new Intent(LoginActivity.this, MainActivity.class);
 //				startMain.putExtra("DataGrabber", dg);
-				((YourPISDApplication) getApplication()).setDataGrabber(dg);
+//				((OldYourPISDApplication) getApplication()).setDataGrabber(dg);
 				System.out.println("Intent to Main!");
 				startActivity(startMain);
 				break;

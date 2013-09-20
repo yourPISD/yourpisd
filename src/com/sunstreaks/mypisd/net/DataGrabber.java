@@ -3,6 +3,7 @@ package com.sunstreaks.mypisd.net;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,10 +21,12 @@ import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 
+import android.app.Application;
 import android.graphics.Bitmap;
+import android.util.SparseArray;
 
 
-public class DataGrabber /*implements Parcelable*/ {
+public class DataGrabber /*implements Parcelable*/ extends Application {
 
 	Domain domain;
 	String username;
@@ -42,147 +45,18 @@ public class DataGrabber /*implements Parcelable*/ {
 //	Date[][] lastUpdated;
 	int studentId = 0;
 	int[] classIds;
-	Map<Integer, JSONObject> classGrades = new HashMap<Integer, JSONObject>();
+	SparseArray<JSONObject> classGrades = new SparseArray<JSONObject>();
 	String studentName = "";
 	Bitmap studentPictureBitmap;
 	
 	int[] classMatch;
 	
-	/*
-	@Override
-	public int describeContents() {
-		// TODO Auto-generated method stub
-		return 0;
+	public DataGrabber () {
+		
 	}
 
-	
-    private DataGrabber(Parcel in) {
-    	this.domain = Domain.values()[in.readInt()];	//in.readInt() is the index of the domain
-    	this.username = in.readString();
-    	this.password = in.readString();
-    	this.passthroughCredentials = in.createStringArray();
-    	this.gradebookCredentials = in.createStringArray();
-    	this.pageUniqueId = in.readString();
-    	this.editureLogin = in.readInt();
-    	this.gradebookLogin = in.readInt();
-    	this.cookies = in.createStringArrayList();
-    	
-    	try {												// recreate the json array
-			this.classList = new JSONArray(in.readString());
-			this.gradeSummary = new JSONArray(in.readString());
-		} catch (JSONException e) {
-			e.printStackTrace();
-			this.classList = null;
-			this.gradeSummary = null;
-		}
-    	
-    	this.studentId = in.readInt();
-    	this.classIds = in.createIntArray();
-    	
-//    	String cg = in.readString();
-//    	try {												// recreate the json array
-//    		JSONArray classGradesArray = new JSONArray(cg);
-//    		this.classGrades = new JSONObject[classGradesArray.length()];
-//    		for (int i = 0; i < classGrades.length; i++) {
-//    			classGrades[i] = classGradesArray.getJSONObject(i);
-//    		}
-//			//this.classGrades = new JSONObject(cg);
-//		} catch (JSONException e) {
-//			// Should ONLY happen if the readString is null.
-//			System.out.println("CG= " + cg);
-//			System.out.println("Empty string read. Making null JSONArray classGrades.");
-//			this.classGrades = null;
-//		} catch (NullPointerException e) {
-//			// We maybe need a better way to deal with a null list.
-//			e.printStackTrace();
-//		}
-    	
-    	try {
-	    	final int N = in.readInt();
-	        for (int i = 0; i < N; i++) {
-	            int key = in.readInt();
-	            JSONObject dat = new JSONObject(in.readString());
-	            classGrades.put(key, dat);
-	        } 
-    	} catch (JSONException e) {
-    		e.printStackTrace();
-    	}
-    	
-    	//acceptAllCertificates();
-    	
-    	this.studentName = in.readString();
-    	
-    	System.out.println("Done un-packing.");
-    }
-
-	@Override
-	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeInt(domain.index);
-		dest.writeString(username);
-		dest.writeString(password);
-		dest.writeStringArray(passthroughCredentials);
-		dest.writeStringArray(gradebookCredentials);
-		dest.writeString(pageUniqueId);
-		dest.writeInt(editureLogin);
-		dest.writeInt(gradebookLogin);
-		dest.writeStringList(cookies);
-		dest.writeString(classList.toString());
-		dest.writeString(gradeSummary.toString());
-		dest.writeInt(studentId);
-		dest.writeIntArray(classIds);
-		
-		
-//		if (classGrades != null) {
-//			JSONArray classGradesArray = new JSONArray();
-//			for (JSONObject classGrade : classGrades)
-//				classGradesArray.put(classGrade);
-//			dest.writeString(classGradesArray.toString());
-//		}
-//		else
-//			dest.writeString("");
-		
-        final int N = classGrades.size();
-        dest.writeInt(N);
-        if (N > 0) {
-            for (Map.Entry<Integer, JSONObject> entry : classGrades.entrySet()) {
-                dest.writeInt(entry.getKey());
-                JSONObject dat = entry.getValue();
-                dest.writeString(dat.toString());
-            } 
-        } 
-		
-        dest.writeString(studentName);
-	}
-	
-    public static final Parcelable.Creator<DataGrabber> CREATOR
-    	= new Parcelable.Creator<DataGrabber>() {
-    		public DataGrabber createFromParcel(Parcel in) {
-    			return new DataGrabber(in);
-    		}
-
-    		public DataGrabber[] newArray(int size) {
-    			return new DataGrabber[size];
-    		}
-    };
-	*/
-
-	
-    	/*
-	public static void main(String args[]) throws Exception  {
-		long startTime = System.currentTimeMillis();
-		
-		String username = "sidharth.kapur.1";
-		String password = "{\"pass\":0}";
-		
-		DataGrabber d = new DataGrabber(Domain.PLANO_WEST, username, password);
-		d.login();
-		
-		long endTime = System.currentTimeMillis();
-		System.out.println(endTime - startTime + "ms");
-	}
-	*/
-
-	public DataGrabber (Domain domain, String username, String password) {
+	public void setData (Domain domain, String username, String password) {
+//	public DataGrabber (Domain domain, String username, String password) {
 		this.domain = domain;
 		this.username = username;
 		this.password = password;
@@ -269,30 +143,35 @@ public class DataGrabber /*implements Parcelable*/ {
 					"&lt=" + lt +
 					"&_eventId=submit";
 			System.out.println(postParams);
-			Object[] portalLogin = Request.sendPost(
-					domain.loginAddress,
-					cookies,
-					rp,
-					true,
-					postParams);
-			
-			response = (String) portalLogin[0];
-			responseCode = (Integer) portalLogin[1];
-			cookies = (ArrayList<String>) portalLogin[2];
-			
-			Object[] ticket = Request.sendGet(
-					Request.getRedirectLocation(),
-					cookies);
-			
-			if (ticket == null)
+			try {
+				Object[] portalLogin = Request.sendPost(
+						domain.loginAddress,
+						cookies,
+						rp,
+						true,
+						postParams);
+
+				response = (String) portalLogin[0];
+				responseCode = (Integer) portalLogin[1];
+				cookies = (ArrayList<String>) portalLogin[2];
+				
+				Object[] ticket = Request.sendGet(
+						Request.getRedirectLocation(),
+						cookies);
+				
+				if (ticket == null)
+					return -2;
+				
+				response = (String) ticket[0];
+				responseCode = (Integer) ticket[1];
+				cookies = (ArrayList<String>) ticket[2];
+				
+				passthroughCredentials = Parser.passthroughCredentials(response);
+				return 1;
+			} catch (SocketTimeoutException e) {
+				e.printStackTrace();
 				return -2;
-			
-			response = (String) ticket[0];
-			responseCode = (Integer) ticket[1];
-			cookies = (ArrayList<String>) ticket[2];
-			
-			passthroughCredentials = Parser.passthroughCredentials(response);
-			return 1;
+			}
 			
 		default:
 			return 0;
@@ -571,6 +450,19 @@ public class DataGrabber /*implements Parcelable*/ {
 		return gradeSummary;
 	}
 
+	public void putClassGrade (int classIndex, JSONObject classGrade) {
+		classGrades.put(classIndex, classGrade);
+	}
+	
+	public JSONObject getClassGrade (int classIndex) {
+		return classGrades.get(classIndex);
+	}
+	
+	public boolean hasClassGrade (int classIndex) {
+		// Checks whether the SparseArray contains a value at classIndex.
+		return classGrades.indexOfKey(classIndex) == -1 ? false : true;
+	}
+	
 	public JSONObject getClassGrade( int classIndex, int termIndex ) throws JSONException, InterruptedException, ExecutionException, MalformedURLException, IllegalUrlException, IOException {
 		
 		if (classGrades.get(classIndex) != null) {
@@ -621,22 +513,22 @@ public class DataGrabber /*implements Parcelable*/ {
 	}
 	
 	
-	public Map<Integer,JSONObject> getAllClassGrades() throws JSONException, InterruptedException, ExecutionException, MalformedURLException, IllegalUrlException, IOException {
-		if (classList == null)
-			return null;
-		if (classIds == null)
-			getClassIds();
-//		if (classGrades == null)
-//			classGrades = classList;
-		
-		for (int i = 0; i < classIds.length; i++) {
-			for (int j = 0; j < getTermIds(classIds[i]).length; j++) {
-				getClassGrade (i , j);
-			}
-		}
-		
-		return classGrades;
-	}
+//	public Map<Integer,JSONObject> getAllClassGrades() throws JSONException, InterruptedException, ExecutionException, MalformedURLException, IllegalUrlException, IOException {
+//		if (classList == null)
+//			return null;
+//		if (classIds == null)
+//			getClassIds();
+////		if (classGrades == null)
+////			classGrades = classList;
+//		
+//		for (int i = 0; i < classIds.length; i++) {
+//			for (int j = 0; j < getTermIds(classIds[i]).length; j++) {
+//				getClassGrade (i , j);
+//			}
+//		}
+//		
+//		return classGrades;
+//	}
 	
 	/*
 	public JSONArray getAllClassGrades () throws JSONException {
@@ -755,9 +647,11 @@ public class DataGrabber /*implements Parcelable*/ {
 	}
 	
 
-	public Map<Integer,JSONObject> getClassGrades (int classIndex) {
-		return classGrades;
-	}
+//	public Map<Integer,JSONObject> getClassGrades (int classIndex) {
+//		return classGrades;
+//	}
+	
+
 
 	public String getClassName (int classIndex) {
 		if (classList == null)

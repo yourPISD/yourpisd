@@ -66,7 +66,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 //			DataGrabber myDG = (DataGrabber) intent.getParcelableExtra("DataGrabber");
 //			dg = myDG;
 //		}
-		dg = ( (YourPISDApplication) getApplication() ).getDataGrabber();
+		dg = ( (DataGrabber) getApplication() );
 		
 		// Create the adapter that will return a fragment for each of the three
 		// primary sections of the app.
@@ -344,7 +344,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		intent.putExtra("classCount", classCount);
 		intent.putExtra("classIndex", v.getId());
 //		intent.putExtra("DataGrabber", dg);
-		((YourPISDApplication) getApplication()).setDataGrabber(dg);
+//		((OldYourPISDApplication) getApplication()).setDataGrabber(dg);
 		startActivity(intent);
 	}
 

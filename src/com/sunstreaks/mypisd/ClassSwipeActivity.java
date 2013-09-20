@@ -61,17 +61,16 @@ public class ClassSwipeActivity extends FragmentActivity {
 		
 		received = getIntent().getExtras().getInt("classIndex");
 		classCount = getIntent().getExtras().getInt("classCount");
-//		dg = getIntent().getParcelableExtra("DataGrabber");
 		
-		dg = ((YourPISDApplication) getApplication() ).getDataGrabber();
+		dg = ((DataGrabber) getApplication() );
 		
 		// 7 fragments were being added to mFragments every time that this onCreate method was run.
-		{
-			YourPISDApplication appState = ((YourPISDApplication)this.getApplication());
-			List<Fragment> mFragments = appState.mFragments;
-			ClassSwipeActivity.mFragments = mFragments;
-		}
-		if (mFragments == null) {
+//		{
+//			YourPISDApplication appState = ((YourPISDApplication)this.getApplication());
+//			List<Fragment> mFragments = appState.mFragments;
+//			ClassSwipeActivity.mFragments = mFragments;
+//		}
+//		if (mFragments == null) {
 			mFragments = new ArrayList<Fragment>();
 			for (int i = 0; i < classCount; i++) {
 				Bundle args = new Bundle();
@@ -80,10 +79,10 @@ public class ClassSwipeActivity extends FragmentActivity {
 				fragment.setArguments(args);
 				mFragments.add(fragment);
 			}
-		}
+//		}
 		
 		
-		System.out.println("mFragments size = " + mFragments.size() + "and classCount = " + classCount);
+		System.out.println("mFragments size = " + mFragments.size() + " and classCount = " + classCount);
 		
 		
 		// Create the adapter that will return a fragment for each of the three
@@ -105,9 +104,12 @@ public class ClassSwipeActivity extends FragmentActivity {
 	@Override
 	protected void onPause() {
 		super.onPause();
-		YourPISDApplication appState = (YourPISDApplication)this.getApplication();
-		appState.mFragments = this.mFragments;
+//		OldYourPISDApplication appState = (OldYourPISDApplication)this.getApplication();
+////		appState.mFragments = this.mFragments;
+//		appState.setDataGrabber(dg);
 	}
+	
+
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -160,14 +162,15 @@ public class ClassSwipeActivity extends FragmentActivity {
 		private ClassGradeTask mClassGradeTask;
 		private int position;
 		private int classIndex;
+		private final int TERM_INDEX = 0;
 		private JSONObject mClassGrade;
-		private String pageTitle;
+//		private String pageTitle;
 		private String teacherName;
 		private View rootView;
 		private boolean gradeLoaded = false;
 		
-		private ViewGroup linearLayout;
-		private LinearLayout gradesListLayout;
+//		private ViewGroup linearLayout;
+//		private LinearLayout gradesListLayout;
 		
 
 
@@ -176,10 +179,10 @@ public class ClassSwipeActivity extends FragmentActivity {
 			
 		}
 		
-		@Override
-		public void onAttach(Activity activity) {
-			super.onAttach(activity);
-		}
+//		@Override
+//		public void onAttach(Activity activity) {
+//			super.onAttach(activity);
+//		}
 		
 
 		
@@ -190,6 +193,12 @@ public class ClassSwipeActivity extends FragmentActivity {
 //		}
 		
 		
+		@Override
+		public void onPause () {
+			if (mClassGradeTask != null)
+				mClassGradeTask.cancel(true);
+			super.onPause();
+		}
 		
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -199,44 +208,45 @@ public class ClassSwipeActivity extends FragmentActivity {
 			classIndex = dg.getClassMatch()[position];
 			System.out.println("position = " + position);
 			
-			this.pageTitle = getResources().getString(R.string.class_swipe_loading);
-			
-			if (mClassGradeTask != null)
-				System.out.println("Grade task has been created before");
-			else
-				System.out.println("First time grade task");
-			
+//			this.pageTitle = getResources().getString(R.string.class_swipe_loading);	
 			//pageTitle = dg.getClassName(classIndex); 
 			
 			rootView = inflater.inflate(R.layout.class_description, container, false);
 			
 
-			linearLayout =  (ViewGroup) rootView.findViewById(R.id.class_description_linear_layout);
+//			linearLayout =  (ViewGroup) rootView.findViewById(R.id.class_description_linear_layout);
 			
-			if (this.teacherName == null)
-				this.teacherName = getResources().getString(R.string.teacher_name);
-			
-			( (TextView) rootView.findViewById(R.id.teacher_name) ).setText(teacherName);
+//			if (this.teacherName == null)
+//				this.teacherName = getResources().getString(R.string.teacher_name);
+//			
+//			( (TextView) rootView.findViewById(R.id.teacher_name) ).setText(teacherName);
+
+			if ( dg.hasClassGrade(classIndex) ) {
+				mClassGrade = dg.getClassGrade(classIndex);
+				setUiElements();
+			} else {
+				mClassGradeTask = new ClassGradeTask();
+				mClassGradeTask.execute(classIndex, TERM_INDEX);
+			}
 
 			
+			/*
 			if (this.mClassGrade == null && !gradeLoaded) {
 
 				mClassGradeTask = new ClassGradeTask();
 				gradeLoaded = true;
-				mClassGradeTask.execute(classIndex, 0);
+				mClassGradeTask.execute(classIndex, TERM_INDEX);
 			}
 			else {
-				((ViewGroup)gradesListLayout.getParent()).removeView(gradesListLayout);
-				linearLayout.addView(gradesListLayout);
+//				((ViewGroup)gradesListLayout.getParent()).removeView(gradesListLayout);
+//				linearLayout.addView(gradesListLayout);
 			}
+			*/
 
 			return rootView;
 		}
 		
-		@Override
-		public void onPause() {
-			super.onPause();
-		}
+
 		
 		@SuppressLint("ResourceAsColor")
 		public class ClassGradeTask extends AsyncTask<Integer, Void, JSONObject> {
@@ -249,89 +259,11 @@ public class ClassSwipeActivity extends FragmentActivity {
 			@Override
 			protected void onPostExecute (JSONObject result) {
 				mClassGrade = result;
-				
 				System.out.println("ClassGradeTask finished");
-				System.out.println(mClassGrade);
 				
-				TextView teacher = (TextView) rootView.findViewById(R.id.teacher_name);
-				TextView sixWeeksAverage = (TextView) rootView.findViewById(R.id.six_weeks_average);
-
-				LinearLayout classDescriptionLinearLayout = (LinearLayout) rootView.findViewById(R.id.class_description_linear_layout);
+				dg.putClassGrade(classIndex, mClassGrade);
 				
-				try {
-					teacherName = mClassGrade.getString("teacher");
-					teacher.setText(teacherName);
-					
-					int avg = mClassGrade.getJSONArray("terms").getJSONObject(0).optInt("average", -1);
-					String average = avg == -1 ? "" : "" + avg;
-					sixWeeksAverage.setText(average);
-
-					JSONArray terms = mClassGrade.getJSONArray("terms");
-					
-					for (int category = 0;
-							category < terms.getJSONObject(0).getJSONArray("categoryGrades").length();
-							category++)
-					{
-
-						
-						LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-						LinearLayout categoryLayout = (LinearLayout) inflater.inflate(R.layout.class_swipe_category_card, classDescriptionLinearLayout, false);
-						LinearLayout gradesListLayout = (LinearLayout) categoryLayout.findViewById(R.id.layout_grades_list);
-								
-						// Name of the category ("Daily Work", etc)
-						String categoryName = mClassGrade.getJSONArray("terms").getJSONObject(0)
-								.getJSONArray("categoryGrades").getJSONObject(category).getString("Category");
-						
-						// for every grade in this term [any category]
-			            for(int i = 0; i< mClassGrade.getJSONArray("terms")
-			            		.getJSONObject(0).getJSONArray("grades").length(); i++)
-			            {
-			            	// only if this grade is in the category which we're looking for
-			            	if (mClassGrade.getJSONArray("terms").getJSONObject(0)
-			            			.getJSONArray("grades").getJSONObject(i).getString("Category")
-			            			.equals(categoryName))
-			            	{
-			            		LinearLayout innerLayout = (LinearLayout) inflater.inflate(R.layout.class_swipe_grade_view, categoryLayout, false);
-
-			            		TextView descriptionView = (TextView) innerLayout.findViewById(R.id.description);
-					            String description = "" + mClassGrade.getJSONArray("terms")
-					            		.getJSONObject(0).getJSONArray("grades")
-					            		.getJSONObject(i).getString("Description");
-					            descriptionView.setText(description);
-
-					            TextView grade = (TextView) innerLayout.findViewById(R.id.grade);
-					            String gradeValue = mClassGrade.getJSONArray("terms")
-					            		.getJSONObject(0).getJSONArray("grades")
-					            		.getJSONObject(i).optString("Grade", "") + "";
-					            grade.setText(gradeValue);
-
-								gradesListLayout.addView(innerLayout);
-			            	}
-
-			            }
-						
-
-			            
-			            TextView categoryNameView = (TextView) categoryLayout.findViewById(R.id.category_name);
-			            categoryNameView.setText(categoryName);
-			            
-			            TextView scoreView = (TextView) categoryLayout.findViewById(R.id.category_score);
-			            String categoryScore = mClassGrade.getJSONArray("terms")
-			            		.getJSONObject(0).getJSONArray("categoryGrades")
-			            		.getJSONObject(category).optString("Letter", "") + "";
-			            scoreView.setText(categoryScore);
-
-			            classDescriptionLinearLayout.addView(categoryLayout);
-			            
-					}
-					
-
-					
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
-				
-
+				setUiElements();
 			}
 			
 			@Override
@@ -343,6 +275,88 @@ public class ClassSwipeActivity extends FragmentActivity {
 					return null;
 				}
 			}
+		}
+
+		public void setUiElements () {
+			
+			TextView teacher = (TextView) rootView.findViewById(R.id.teacher_name);
+			TextView sixWeeksAverage = (TextView) rootView.findViewById(R.id.six_weeks_average);
+
+			LinearLayout classDescriptionLinearLayout = (LinearLayout) rootView.findViewById(R.id.class_description_linear_layout);
+			
+			try {
+				teacherName = mClassGrade.getString("teacher");
+				teacher.setText(teacherName);
+								
+				int avg = mClassGrade.getJSONArray("terms").getJSONObject(0).optInt("average", -1);
+				String average = avg == -1 ? "" : "" + avg;
+				sixWeeksAverage.setText(average);
+
+				JSONArray terms = mClassGrade.getJSONArray("terms");
+				
+				for (int category = 0;
+						category < terms.getJSONObject(0).getJSONArray("categoryGrades").length();
+						category++)
+				{
+
+					
+					LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+					LinearLayout categoryLayout = (LinearLayout) inflater.inflate(R.layout.class_swipe_category_card, classDescriptionLinearLayout, false);
+					LinearLayout gradesListLayout = (LinearLayout) categoryLayout.findViewById(R.id.layout_grades_list);
+							
+					// Name of the category ("Daily Work", etc)
+					String categoryName = mClassGrade.getJSONArray("terms").getJSONObject(0)
+							.getJSONArray("categoryGrades").getJSONObject(category).getString("Category");
+					
+					// for every grade in this term [any category]
+		            for(int i = 0; i< mClassGrade.getJSONArray("terms")
+		            		.getJSONObject(0).getJSONArray("grades").length(); i++)
+		            {
+		            	// only if this grade is in the category which we're looking for
+		            	if (mClassGrade.getJSONArray("terms").getJSONObject(0)
+		            			.getJSONArray("grades").getJSONObject(i).getString("Category")
+		            			.equals(categoryName))
+		            	{
+		            		LinearLayout innerLayout = (LinearLayout) inflater.inflate(R.layout.class_swipe_grade_view, categoryLayout, false);
+
+		            		TextView descriptionView = (TextView) innerLayout.findViewById(R.id.description);
+				            String description = "" + mClassGrade.getJSONArray("terms")
+				            		.getJSONObject(0).getJSONArray("grades")
+				            		.getJSONObject(i).getString("Description");
+				            descriptionView.setText(description);
+
+				            TextView grade = (TextView) innerLayout.findViewById(R.id.grade);
+				            String gradeValue = mClassGrade.getJSONArray("terms")
+				            		.getJSONObject(0).getJSONArray("grades")
+				            		.getJSONObject(i).optString("Grade", "") + "";
+				            grade.setText(gradeValue);
+
+							gradesListLayout.addView(innerLayout);
+		            	}
+
+		            }
+					
+
+		            
+		            TextView categoryNameView = (TextView) categoryLayout.findViewById(R.id.category_name);
+		            categoryNameView.setText(categoryName);
+		            
+		            TextView scoreView = (TextView) categoryLayout.findViewById(R.id.category_score);
+		            String categoryScore = mClassGrade.getJSONArray("terms")
+		            		.getJSONObject(0).getJSONArray("categoryGrades")
+		            		.getJSONObject(category).optString("Letter", "") + "";
+		            scoreView.setText(categoryScore);
+
+		            classDescriptionLinearLayout.addView(categoryLayout);
+		            
+				}
+				
+
+				
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			
 		}
 
 	}
