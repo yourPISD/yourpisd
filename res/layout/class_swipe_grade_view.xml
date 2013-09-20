@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     tools:context=".ClassSwipeActivity"
-    android:background="@drawable/divider" >
+    >
 
     <TextView
         android:id="@+id/description"
@@ -17,6 +17,10 @@
         android:layout_margin="12dp"
         android:textStyle="normal"
         android:fontFamily="sans-serif-light"
+        android:paddingLeft="5dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:background="@drawable/divider" 
         />
 
     <TextView
