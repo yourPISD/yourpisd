@@ -75,6 +75,47 @@ public class LoginActivity extends Activity {
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.activity_login);
+		final SharedPreferences sharedPrefs = this.getPreferences(Context.MODE_PRIVATE);
+		if(sharedPrefs.getBoolean("FirstTime", false)== false)
+		{
+			//user agreement
+	//		AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+	//		alertDialog.setTitle("User Agreement");
+	//		alertDialog.setMessage("This app is provided as-is and we will not be responsible for any damage to your " +
+	//				"phone. By clicking agree, you (the user), will conform to the" +
+	//				"following requirements made by the us (the developers). By entering your" +
+	//				"username and password in the fields, the user is giving us permission in parsing their information" +
+	//				"for displaying in the app. The app is secure; however, the user assumes full responsability regarding " +
+	//				"their information usage and potential damages(extremely unlikely)");
+			AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+			alertDialog.setTitle("User Agreement");
+			alertDialog.setMessage("This app is provided as-is and we will not be responsible for any damage to your " +
+					"phone.\nBy clicking agree, you (the user), will conform to the " +
+					"following requirements made by the us (the developers). By entering your " +
+					"username and password in the fields, the user is giving us permission in parsing their information " +
+					"for displaying in the app. The app is secure; however, the user assumes full responsibility regarding " +
+					"his information usage and potential damages(extremely unlikely).");
+			// Setting Positive "Yes" Button
+	        alertDialog.setPositiveButton("Agree", new DialogInterface.OnClickListener() {
+	            public void onClick(DialogInterface dialog,int which) {
+	            	sharedPrefs.edit().putBoolean("FirstTime", true).commit();
+	            	dialog.cancel();
+	            }
+	        });
+	 
+	        // Setting Negative "NO" Button
+	        alertDialog.setNegativeButton("Disagree", new DialogInterface.OnClickListener() {
+	            public void onClick(DialogInterface dialog, int which) {
+	            // Write your code here to invoke NO event
+	            	Toast.makeText(LoginActivity.this, "Quitting app", Toast.LENGTH_SHORT).show();
+	            	finish();
+	            }
+	        });
+	 
+	        // Showing Alert Message
+	        alertDialog.show();
+		}
+			
 		// Set up the Spinner.
 		List<String> SpinnerArray =  new ArrayList<String>();
 		for (Domain d : Domain.values()) {
@@ -120,7 +161,6 @@ public class LoginActivity extends Activity {
 
 		
 		//Load stored username/password
-		SharedPreferences sharedPrefs = this.getPreferences(Context.MODE_PRIVATE);
 		mEmailView.setText(sharedPrefs.getString("email", mEmail));
 		mPasswordView.setText(sharedPrefs.getString("password", ""));
 		mRememberPassword = sharedPrefs.getBoolean("remember_password", false);
