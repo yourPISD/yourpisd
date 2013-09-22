@@ -6,18 +6,18 @@
     android:orientation="horizontal"
     tools:context=".ClassSwipeActivity"
     android:background="@drawable/divider"
-     
+    android:padding="5dp"
     >
 
     <TextView
         android:id="@+id/description"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="12dp"
         android:layout_weight="1"
         android:fontFamily="sans-serif-light"
-        android:paddingBottom="5dp"
-        android:paddingLeft="5dp"
+		android:paddingLeft="8dp"
+		android:paddingTop="3dp"
+		android:paddingBottom="3dp"
         android:text="@string/default_description"
         android:textSize="20sp"
         android:textStyle="normal" />
@@ -26,10 +26,9 @@
         android:id="@+id/grade"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="15dp"
+		android:paddingRight="8dp"
+		android:paddingTop="3dp"
+		android:paddingBottom="3dp"
         android:fontFamily="sans-serif-light"
         android:text="@string/default_grade"
         android:textSize="25sp" />

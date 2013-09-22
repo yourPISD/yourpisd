@@ -15,6 +15,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.PagerTitleStrip;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -96,7 +97,8 @@ public class ClassSwipeActivity extends FragmentActivity {
 		mViewPager.setAdapter(mSectionsPagerAdapter);
 		mViewPager.setCurrentItem(received);
 		mViewPager.setOffscreenPageLimit(7);
-
+//		PagerTitleStrip classes = (PagerTitleStrip)findViewById(R.id.pager_title_strip);
+//		classes.setTextSize(, 10);
 
 	}
 
@@ -347,7 +349,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 		            scoreView.setText(categoryScore);
 
 		            classDescriptionLinearLayout.addView(categoryLayout);
-		            Animation animation = AnimationUtils.loadAnimation(getActivity(), R.anim.slide_in_down);
+		            Animation animation = AnimationUtils.loadAnimation(getActivity(), R.anim.slide_in_right);
 		            animation.setStartOffset(0);
 		            categoryLayout.startAnimation(animation);
 				}

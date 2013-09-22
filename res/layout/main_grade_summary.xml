@@ -5,7 +5,8 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:background="@drawable/grade_summary_feedback"
-    android:layout_marginTop="0dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="15dp"
     android:clickable="true"
     >
 
@@ -16,7 +17,7 @@
         android:layout_margin="5dp"
         android:layout_weight="1"
         android:fontFamily="sans-serif-light"
-        android:paddingTop="2dp"
+        android:paddingTop="4dp"
         android:paddingBottom="3dp"
         android:paddingLeft="3dp"
         android:text="@string/default_description"
@@ -33,6 +34,6 @@
         android:layout_marginTop="5dp"
         android:fontFamily="sans-serif-light"
         android:text="@string/default_grade"
-        android:textSize="25sp" />
+        android:textSize="28sp" />
 
 </LinearLayout>

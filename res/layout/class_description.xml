@@ -15,14 +15,20 @@
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
 		    android:text="@string/teacher_name"
-		    android:textSize="30sp" />
+		    android:textSize="30sp"
+		    android:fontFamily="sans-serif-light" 
+		    android:padding="15dp"
+		    android:background="@drawable/dropshadow"/>
 		
 		<TextView
 		    android:id="@+id/six_weeks_average"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
 		    android:text="@string/default_grade"
-		    android:textSize="20sp" />
+		    android:textSize="25sp"
+		    android:fontFamily="sans-serif-light" 
+		    android:padding="15dp"
+		    android:background="@drawable/dropshadow"/>
 		
 		<!-- 
 		<LinearLayout
