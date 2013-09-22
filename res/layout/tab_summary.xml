@@ -1,70 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<!-- 
-<ScrollView 
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:background="#F0F0F0"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/scroll"
-    > -->
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@color/gray" >
+ 
 <LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical" 
     android:background="@color/gray"
     android:id="@+id/container">
-<!-- 
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:text="Grades"
-        android:textSize="25sp" />
 
-    <TextView
-        android:id="@+id/class1"
-        android:layout_width="150dp"
-        android:layout_height="40dp"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/textView2"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="58dp"
-        android:text="TextView"
-        android:textSize="15sp" />
-    <TextView
-        android:id="@+id/class2"
-        android:layout_width="150dp"
-        android:layout_height="40dp"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/class1"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="10dp"
-        android:text="TextView"
-        android:textSize="15sp" />
-
-    <Button
-        android:id="@+id/button1"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="80dp"
-        android:layout_height="50dp"
-        android:layout_alignBaseline="@+id/class1"
-        android:layout_alignBottom="@+id/class1"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="14dp"
-        android:text="Button" />
-    <Button
-        android:id="@+id/button2"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="80dp"
-        android:layout_height="50dp"
-        android:layout_alignBaseline="@+id/class2"
-        android:layout_alignBottom="@+id/class2"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="14dp"
-        android:text="Button" />
--->	
 </LinearLayout>
-<!-- </ScrollView> -->
+ </ScrollView> 

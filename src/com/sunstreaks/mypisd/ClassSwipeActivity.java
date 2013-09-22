@@ -8,9 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
-import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -22,10 +20,11 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.sunstreaks.mypisd.MainActivity.MainActivityFragment;
 import com.sunstreaks.mypisd.net.DataGrabber;
 
 @SuppressLint("ValidFragment")
@@ -348,7 +347,9 @@ public class ClassSwipeActivity extends FragmentActivity {
 		            scoreView.setText(categoryScore);
 
 		            classDescriptionLinearLayout.addView(categoryLayout);
-		            
+		            Animation animation = AnimationUtils.loadAnimation(getActivity(), R.anim.slide_in_right);
+		            animation.setStartOffset(0);
+		            categoryLayout.startAnimation(animation);
 				}
 				
 

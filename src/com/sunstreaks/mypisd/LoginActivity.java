@@ -125,6 +125,7 @@ public class LoginActivity extends Activity {
 	    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 	    domainSpinner = (Spinner) findViewById(R.id.domain_spinner);
 	    domainSpinner.setAdapter(adapter);
+	    domainSpinner.setSelection(1);
 		
 	    //Set up the remember_password checkbox
 	    rememberPassword = (CheckBox) findViewById(R.id.remember_password);
@@ -143,6 +144,10 @@ public class LoginActivity extends Activity {
 		// Set up the login form.
 		mEmail = getIntent().getStringExtra(EXTRA_EMAIL);
 		mEmailView = (EditText) findViewById(R.id.email);
+		if(domainSpinner.getSelectedItem().toString().equals("PARENT"))
+			mEmailView.setHint("Email");
+		if(domainSpinner.getSelectedItem().toString().equals("STUDENT"))
+			mEmailView.setHint("Username (first.last.1)");
 		//mEmailView.setText(mEmail);
 
 		mPasswordView = (EditText) findViewById(R.id.password);
@@ -406,6 +411,7 @@ public class LoginActivity extends Activity {
 //				((OldYourPISDApplication) getApplication()).setDataGrabber(dg);
 				System.out.println("Intent to Main!");
 				startActivity(startMain);
+				overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
 				break;
 			case -1:
 				// Bad password

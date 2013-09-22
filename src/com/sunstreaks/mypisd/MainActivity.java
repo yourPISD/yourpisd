@@ -7,6 +7,7 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -36,7 +37,7 @@ import com.sunstreaks.mypisd.net.DataGrabber;
 public class MainActivity extends FragmentActivity implements View.OnClickListener {
 
 	static int classCount;
-	static Button[] buttons;
+	static LinearLayout[] averages;
 	static DataGrabber dg;
 	static Bitmap proPic;
 	
@@ -166,41 +167,38 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		    
 		    if (position == 0)
 		    {
-		    		ScrollView sv = new ScrollView(getActivity());
-		    		
-		    		
-		    		
-		    		LinearLayout layout = new LinearLayout(getActivity());
-		    		 
-		            layout.setOrientation(LinearLayout.VERTICAL);
-		            layout.setLayoutParams(new LinearLayout.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, AbsListView.LayoutParams.MATCH_PARENT));
-	
-		     
-		            TextView title = new TextView(getActivity());
-		            LinearLayout.LayoutParams lll = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
-		            lll.gravity = Gravity.CENTER_HORIZONTAL;
-		            title.setLayoutParams(lll);
-		            title.setText("Grade Summary");
-		            title.setId(900);
-		            title.setTextSize(30);
-		            layout.addView(title);
-		            
-		            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-		            		LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-		            
-		            lp.setMargins(30, 20, 30, 0);
-		            
-		            LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(
-		            		LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-		            lp1.setMargins(0, 0, 0, 20);
-		            
+//		    		ScrollView sv = new ScrollView(getActivity());
+//		    		LinearLayout layout = new LinearLayout(getActivity());
+//		    		 
+//		            layout.setOrientation(LinearLayout.VERTICAL);
+//		            layout.setLayoutParams(new LinearLayout.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, AbsListView.LayoutParams.MATCH_PARENT));
+//	
+//		     
+//		            TextView title = new TextView(getActivity());
+//		            LinearLayout.LayoutParams lll = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
+//		            lll.gravity = Gravity.CENTER_HORIZONTAL;
+//		            title.setLayoutParams(lll);
+//		            title.setText("Grade Summary");
+//		            title.setId(900);
+//		            title.setTextSize(30);
+//		            layout.addView(title);
+//		            
+//		            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+//		            		LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+//		            
+//		            lp.setMargins(30, 20, 30, 0);
+//		            
+//		            LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(
+//		            		LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+//		            lp1.setMargins(0, 0, 0, 20);
+		    		LinearLayout bigLayout = (LinearLayout) rootView.findViewById(R.id.container);
 		            
 			    
 		            
 		            int[][] gradeSummary = dg.getGradeSummary();
 		            
 			    	classCount = gradeSummary.length;
-			    	buttons = new Button[classCount];
+			    	averages = new LinearLayout[classCount];
 			    	
 			    	int[] classMatch = new int[classCount];
 			    	int classesMatched = 0;
@@ -221,56 +219,42 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		            	
 		            	int jsonIndex = classMatch[i];
 		            	
-		            	
+		            	LayoutInflater inflater1 = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+						LinearLayout card = (LinearLayout) inflater.inflate(R.layout.main_grade_summary, bigLayout, false);
+						TextView className = (TextView) card.findViewById(R.id.name);
 		            	String name = dg.getClassName(jsonIndex);
-//		            	String temp = name.charAt(0)+"";
-//		            	name = name.substring(1);
-//		            	name = name.toLowerCase();
-//		            	name = temp+name;
+		            	className.setText(name);
 		            	
-		            	LinearLayout innerLayout = new LinearLayout(getActivity());
-			            innerLayout.setOrientation(LinearLayout.HORIZONTAL);
-			   
-			            TextView className = new TextView(getActivity());
+		            	int avg = gradeSummary[i][1 + 0];
+			            String average = avg == -1 ? "" : avg + "";
+			            TextView grade = (TextView) card.findViewById(R.id.grade);
+			            card.setId(i);
+			            averages[i]=card;
+			            //test code for entire clickable layout
+			            card.setOnClickListener((View.OnClickListener)getActivity());
 			            
-			            className.setText(name);
-			            //className.setBackgroundColor(Color.WHITE);
-			            className.setTextSize(20);
-			            className.setLayoutParams(
-			            		new LinearLayout.LayoutParams(
-			            				LinearLayout.LayoutParams.WRAP_CONTENT, 
-			            				LinearLayout.LayoutParams.WRAP_CONTENT, 
-			            				1f));
-			            
-			            innerLayout.addView(className);
+			            grade.setText(average);
+		            	
+			            bigLayout.addView(card);
+		            		
 			            
 			            // Hard coded for first six weeks average.
 			            
 			            // JSONObject term = course.getJSONArray("terms").getJSONObject(0);
 			            // int avg = term.optInt("average", -1);
 			            
-			            // six weeks index.
-			            int avg = gradeSummary[i][1 + 0];
-			            		
-			            String average = avg == -1 ? "" : avg + "";
-			            
-			            buttons[i] = new Button(getActivity());
-			            buttons[i].setText(average + "");
-			            buttons[i].setId(i);
-			            buttons[i].setOnClickListener((View.OnClickListener)getActivity());
-			            innerLayout.addView(buttons[i]);
-//			            if (i % 2 == 0)
-//			            	innerLayout.setBackgroundColor(getResources().getColor(R.color.light_blue));
-//			            else
-//			            	innerLayout.setBackgroundColor(Color.WHITE);
-//			            innerLayout.setBackgroundDrawable(getResources().getDrawable(drawable.toast_frame));
-			            innerLayout.setBackgroundDrawable(getResources().getDrawable(R.drawable.dropshadow));
-			            layout.addView(innerLayout, lp);
+//			            buttons[i] = new Button(getActivity());
+//			            buttons[i].setText(average + "");
+//			            buttons[i].setId(i);
+//			            buttons[i].setOnClickListener((View.OnClickListener)getActivity());
+//			            innerLayout.addView(buttons[i]);
+//			            innerLayout.setBackgroundDrawable(getResources().getDrawable(R.drawable.dropshadow));
+//			            layout.addView(innerLayout, lp);
 			            
 		            }
 		            
-		            sv.addView(layout, lp1);
-		            return sv;
+//		            sv.addView(layout, lp1);
+		            return rootView;
 		    }	
 
 		    
