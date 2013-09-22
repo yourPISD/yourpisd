@@ -347,7 +347,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 		            scoreView.setText(categoryScore);
 
 		            classDescriptionLinearLayout.addView(categoryLayout);
-		            Animation animation = AnimationUtils.loadAnimation(getActivity(), R.anim.slide_in_right);
+		            Animation animation = AnimationUtils.loadAnimation(getActivity(), R.anim.slide_in_down);
 		            animation.setStartOffset(0);
 		            categoryLayout.startAnimation(animation);
 				}
