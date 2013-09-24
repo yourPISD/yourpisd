@@ -1,4 +1,4 @@
-package com.sunstreaks.mypisd.net;
+package app.sunstreak.yourpisd.net;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;

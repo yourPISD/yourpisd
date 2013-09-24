@@ -1,4 +1,4 @@
-package com.sunstreaks.mypisd;
+package app.sunstreak.yourpisd;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,9 +31,10 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import app.sunstreak.yourpisd.net.DataGrabber;
+import app.sunstreak.yourpisd.net.Domain;
 
-import com.sunstreaks.mypisd.net.DataGrabber;
-import com.sunstreaks.mypisd.net.Domain;
+import com.sunstreaks.mypisd.R;
 
 /**
  * Activity which displays a login screen to the user, offering registration as

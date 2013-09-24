@@ -1,4 +1,4 @@
-package com.sunstreaks.mypisd;
+package app.sunstreak.yourpisd;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +26,9 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import app.sunstreak.yourpisd.net.DataGrabber;
 
-import com.sunstreaks.mypisd.net.DataGrabber;
+import com.sunstreaks.mypisd.R;
 
 @SuppressLint("ValidFragment")
 public class ClassSwipeActivity extends FragmentActivity {

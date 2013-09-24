@@ -1,4 +1,4 @@
-package com.sunstreaks.mypisd;
+package app.sunstreak.yourpisd;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -31,8 +31,9 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TableLayout.LayoutParams;
 import android.widget.TextView;
+import app.sunstreak.yourpisd.net.DataGrabber;
 
-import com.sunstreaks.mypisd.net.DataGrabber;
+import com.sunstreaks.mypisd.R;
 
 public class MainActivity extends FragmentActivity implements View.OnClickListener {
 
