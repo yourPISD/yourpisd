@@ -391,14 +391,14 @@ public class Parser {
 		Element doc = Jsoup.parse(html);
 		Elements inputTags = doc.getElementsByTag("input");
 		//Shortcut
-		if (inputTags.get(4).attr("name").equals("lt"))
-			return inputTags.get(4).attr("value");
-		else {
+//		if (inputTags.get(4).attr("name").equals("lt"))
+//			return inputTags.get(4).attr("value");
+//		else {
 			for (Element tag : inputTags) {
 				if (tag.attr("name").equals("lt"))
 					return tag.attr("value");
 			}
-		}
+//		}
 		return null;
 	}
 	

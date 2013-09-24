@@ -137,10 +137,9 @@ public class Request {
 					return null;
 				}
 		}
+		
 		System.out.println("Success! " + (System.currentTimeMillis() - startTime) + "ms");
 		
-//		System.out.println("\nSending 'GET' request to URL : " + url);
-//		System.out.println("Response Code : " + responseCode);
 	 
 		BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 		String inputLine;
@@ -282,8 +281,7 @@ public class Request {
 
 		System.out.println("Success! " + (System.currentTimeMillis() - startTime) + "ms");
 
-//		System.out.println("\nSending 'GET' request to URL : " + url);
-//		System.out.println("Response Code : " + responseCode);
+
 	 
 		BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 		String inputLine;
@@ -397,22 +395,7 @@ public class Request {
 			
 			InputStream in = conn.getInputStream();
 			Bitmap bmp = BitmapFactory.decodeStream(in);
-//			InputStream in = new BufferedInputStream(obj.openStream());
-//			ByteArrayOutputStream out = new ByteArrayOutputStream();
-//			byte[] buf = new byte[1024];
-//			int n = 0;
-//			while (-1!=(n=in.read(buf)))
-//			{
-//			   out.write(buf, 0, n);
-//			}
-//			out.close();
-//			in.close();
-//			byte[] response = out.toByteArray();
-	//		
-	//		
-	//		FileOutputStream fos = new FileOutputStream("C:\\Users\\StudyDesktop\\Desktop\\studentImage.jpeg");
-	//		fos.write(response);
-	//		fos.close();
+
 			
 			return new Object[] {bmp, responseCode, cookies};
 		} catch (IOException e) {

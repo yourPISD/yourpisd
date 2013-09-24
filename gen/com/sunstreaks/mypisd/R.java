@@ -88,35 +88,38 @@ public final class R {
         public static final int login=0x7f090001;
     }
     public static final class string {
-        public static final int action_forgot_password=0x7f070012;
+        public static final int action_forgot_password=0x7f070014;
         public static final int action_settings=0x7f070001;
-        public static final int action_sign_in_register=0x7f070010;
-        public static final int action_sign_in_short=0x7f070011;
+        public static final int action_sign_in_register=0x7f070012;
+        public static final int action_sign_in_short=0x7f070013;
         public static final int app_name=0x7f070000;
+        public static final int auto_login=0x7f07001d;
         public static final int class_swipe_loading=0x7f070009;
         public static final int daily=0x7f070006;
         public static final int default_category_name=0x7f07000b;
         public static final int default_description=0x7f07000a;
-        public static final int default_grade=0x7f07000c;
-        public static final int error_field_required=0x7f070019;
-        public static final int error_incorrect_password=0x7f070018;
-        public static final int error_invalid_email=0x7f070016;
-        public static final int error_invalid_password=0x7f070017;
-        public static final int login_progress_downloading_data=0x7f070015;
-        public static final int login_progress_gradebook=0x7f070014;
-        public static final int login_progress_mypisd=0x7f070013;
+        public static final int error_field_required=0x7f07001b;
+        public static final int error_incorrect_password=0x7f07001a;
+        public static final int error_invalid_email=0x7f070018;
+        public static final int error_invalid_password=0x7f070019;
+        public static final int login_progress_downloading_data=0x7f070017;
+        public static final int login_progress_gradebook=0x7f070016;
+        public static final int login_progress_mypisd=0x7f070015;
         public static final int major=0x7f070007;
         /**  Strings related to login 
          */
-        public static final int prompt_email=0x7f07000e;
-        public static final int prompt_password=0x7f07000f;
-        public static final int remember_password=0x7f07001a;
+        public static final int prompt_email=0x7f070010;
+        public static final int prompt_password=0x7f070011;
+        public static final int remember_password=0x7f07001c;
         public static final int teacher_name=0x7f070005;
         public static final int title_activity_class_swipe=0x7f070008;
-        public static final int title_activity_login=0x7f07000d;
+        public static final int title_activity_login=0x7f07000c;
         public static final int title_section1=0x7f070002;
         public static final int title_section2=0x7f070003;
         public static final int title_section3=0x7f070004;
+        public static final int user_agreement=0x7f07000f;
+        public static final int user_agreement_old=0x7f07000e;
+        public static final int user_agreement_title=0x7f07000d;
     }
     public static final class style {
         /** 

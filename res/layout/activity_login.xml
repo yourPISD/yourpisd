@@ -71,7 +71,17 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/remember_password" />
-
+            
+            <!-- 
+            
+            <CheckBox
+                android:id="@+id/auto_login"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/auto_login" />
+			-->
+			
+			
             <Button
                 android:id="@+id/sign_in_button"
                 android:layout_width="wrap_content"

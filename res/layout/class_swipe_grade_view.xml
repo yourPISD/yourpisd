@@ -30,7 +30,6 @@
 		android:paddingTop="3dp"
 		android:paddingBottom="3dp"
         android:fontFamily="sans-serif-light"
-        android:text="@string/default_grade"
         android:textSize="25sp" />
 
 </LinearLayout>

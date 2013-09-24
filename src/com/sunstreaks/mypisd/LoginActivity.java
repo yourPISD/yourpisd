@@ -3,9 +3,6 @@ package com.sunstreaks.mypisd;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
@@ -15,21 +12,21 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.text.TextUtils;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -37,7 +34,6 @@ import android.widget.Toast;
 
 import com.sunstreaks.mypisd.net.DataGrabber;
 import com.sunstreaks.mypisd.net.Domain;
-import com.sunstreaks.mypisd.net.PISDException;
 
 /**
  * Activity which displays a login screen to the user, offering registration as
@@ -60,6 +56,7 @@ public class LoginActivity extends Activity {
 	private String mEmail;
 	private String mPassword;
 	private boolean mRememberPassword;
+//	private boolean mAutoLogin;
 	
 	// UI references.
 	private EditText mEmailView;
@@ -67,8 +64,9 @@ public class LoginActivity extends Activity {
 	private View mLoginFormView;
 	private View mLoginStatusView;
 	private TextView mLoginStatusMessageView;
-	private Spinner domainSpinner;
-	private CheckBox rememberPassword;
+	private Spinner mDomainSpinner;
+	private CheckBox mRememberPasswordCheckBox;
+//	private CheckBox mAutoLoginCheckBox;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -76,46 +74,37 @@ public class LoginActivity extends Activity {
 
 		setContentView(R.layout.activity_login);
 		final SharedPreferences sharedPrefs = this.getPreferences(Context.MODE_PRIVATE);
-		if(sharedPrefs.getBoolean("FirstTime", false)== false)
-		{
-			//user agreement
-	//		AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-	//		alertDialog.setTitle("User Agreement");
-	//		alertDialog.setMessage("This app is provided as-is and we will not be responsible for any damage to your " +
-	//				"phone. By clicking agree, you (the user), will conform to the" +
-	//				"following requirements made by the us (the developers). By entering your" +
-	//				"username and password in the fields, the user is giving us permission in parsing their information" +
-	//				"for displaying in the app. The app is secure; however, the user assumes full responsability regarding " +
-	//				"their information usage and potential damages(extremely unlikely)");
-			AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-			alertDialog.setTitle("User Agreement");
-			alertDialog.setMessage("This app is provided as-is and we will not be responsible for any damage to your " +
-					"phone.\nBy clicking agree, you (the user), will conform to the " +
-					"following requirements made by the us (the developers). By entering your " +
-					"username and password in the fields, the user is giving us permission in parsing their information " +
-					"for displaying in the app. The app is secure; however, the user assumes full responsibility regarding " +
-					"his information usage and potential damages(extremely unlikely).");
+		
+		
+		if ( ! sharedPrefs.getBoolean("AcceptedUserAgreement", false) ) {
+			
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle(getResources().getString(R.string.user_agreement_title));
+			builder.setMessage(getResources().getString(R.string.user_agreement));
 			// Setting Positive "Yes" Button
-	        alertDialog.setPositiveButton("Agree", new DialogInterface.OnClickListener() {
+	        builder.setPositiveButton("Agree", new DialogInterface.OnClickListener() {
 	            public void onClick(DialogInterface dialog,int which) {
-	            	sharedPrefs.edit().putBoolean("FirstTime", true).commit();
+	            	sharedPrefs.edit().putBoolean("AcceptedUserAgreement", true).commit();
 	            	dialog.cancel();
 	            }
 	        });
 	 
 	        // Setting Negative "NO" Button
-	        alertDialog.setNegativeButton("Disagree", new DialogInterface.OnClickListener() {
+	        builder.setNegativeButton("Disagree", new DialogInterface.OnClickListener() {
 	            public void onClick(DialogInterface dialog, int which) {
 	            // Write your code here to invoke NO event
+	            	sharedPrefs.edit().putBoolean("AcceptedUserAgreement", false).commit();
 	            	Toast.makeText(LoginActivity.this, "Quitting app", Toast.LENGTH_SHORT).show();
 	            	finish();
 	            }
 	        });
-	 
-	        // Showing Alert Message
+	        
+	        AlertDialog alertDialog = builder.create();
 	        alertDialog.show();
 		}
-			
+		
+		
+		
 		// Set up the Spinner.
 		List<String> SpinnerArray =  new ArrayList<String>();
 		for (Domain d : Domain.values()) {
@@ -123,30 +112,54 @@ public class LoginActivity extends Activity {
 		}
 	    ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, SpinnerArray);
 	    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-	    domainSpinner = (Spinner) findViewById(R.id.domain_spinner);
-	    domainSpinner.setAdapter(adapter);
-	    domainSpinner.setSelection(1);
+	    mDomainSpinner = (Spinner) findViewById(R.id.domain_spinner);
+	    mDomainSpinner.setAdapter(adapter);
+	    mDomainSpinner.setSelection(1);
 		
-	    //Set up the remember_password checkbox
-	    rememberPassword = (CheckBox) findViewById(R.id.remember_password);
-		rememberPassword.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					if (rememberPassword.isChecked()) {
-						mRememberPassword = true;
+	    // Set up the remember_password CheckBox
+	    mRememberPasswordCheckBox = (CheckBox) findViewById(R.id.remember_password);
+		mRememberPasswordCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+				public void onCheckedChanged(CompoundButton button, boolean isChecked) {
+					mRememberPassword = isChecked;
+					/*
+					if (!mRememberPassword) {
+						mAutoLoginCheckBox.setChecked(false);
+						mAutoLoginCheckBox.setEnabled(false);
 					}
-					else {
-						mRememberPassword = false;
-					}
+					*/
 				}
 				
 			});
+		mRememberPassword = sharedPrefs.getBoolean("remember_password", false);
+		mRememberPasswordCheckBox.setChecked(mRememberPassword);
+		
+		
+		// Set up the auto_login CheckBox
+		/*
+		mAutoLoginCheckBox = (CheckBox) findViewById(R.id.auto_login);
+		mAutoLoginCheckBox.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				mAutoLogin = mAutoLoginCheckBox.isChecked();
+			}
+			
+		});
+		mAutoLogin = sharedPrefs.getBoolean("auto_login", false);
+		mAutoLoginCheckBox.setChecked(mAutoLogin);
+		mAutoLoginCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			public void onCheckedChanged(CompoundButton button, boolean isChecked) {
+				mAutoLogin = isChecked;
+			}
+			
+		});
+		*/
+		
 		// Set up the login form.
 		mEmail = getIntent().getStringExtra(EXTRA_EMAIL);
 		mEmailView = (EditText) findViewById(R.id.email);
-		if(domainSpinner.getSelectedItem().toString().equals("PARENT"))
+		if(mDomainSpinner.getSelectedItem().toString().equals("PARENT"))
 			mEmailView.setHint("Email");
-		if(domainSpinner.getSelectedItem().toString().equals("STUDENT"))
+		if(mDomainSpinner.getSelectedItem().toString().equals("STUDENT"))
 			mEmailView.setHint("Username (first.last.1)");
 		//mEmailView.setText(mEmail);
 
@@ -168,10 +181,11 @@ public class LoginActivity extends Activity {
 		//Load stored username/password
 		mEmailView.setText(sharedPrefs.getString("email", mEmail));
 		mPasswordView.setText(sharedPrefs.getString("password", ""));
-		mRememberPassword = sharedPrefs.getBoolean("remember_password", false);
-		rememberPassword.setChecked(mRememberPassword);
+		
+		
+		
 		try {
-			domainSpinner.setSelection(sharedPrefs.getInt("domain", 0));
+			mDomainSpinner.setSelection(sharedPrefs.getInt("domain", 0));
 		} catch (IndexOutOfBoundsException e) {
 			// Do not set the index.
 		}
@@ -186,6 +200,11 @@ public class LoginActivity extends Activity {
 						attemptLogin();
 					}
 				});
+		
+		/*
+		if (mAutoLogin)
+			attemptLogin();
+		*/
 	}
 
 	@Override
@@ -230,7 +249,7 @@ public class LoginActivity extends Activity {
 			cancel = true;
 		}
 		//requires @ if parent account selected
-		else if (domainSpinner.getSelectedItem().toString().equals("PARENT") && !mEmail.contains("@")) {
+		else if (mDomainSpinner.getSelectedItem().toString().equals("PARENT") && !mEmail.contains("@")) {
 			mEmailView.setError(getString(R.string.error_invalid_email));
 			focusView = mEmailView;
 			cancel = true;
@@ -245,10 +264,11 @@ public class LoginActivity extends Activity {
 			// perform the user login attempt.
 			SharedPreferences sharedPrefs = this.getPreferences(Context.MODE_PRIVATE);
 			SharedPreferences.Editor editor = sharedPrefs.edit();
-			editor.putInt("domain", domainSpinner.getSelectedItemPosition());
+			editor.putInt("domain", mDomainSpinner.getSelectedItemPosition());
 			editor.putString("email", mEmail);
-			editor.putBoolean("remember_password", mRememberPassword);
 			editor.putString("password", mRememberPassword? mPassword: "");
+			editor.putBoolean("remember_password", mRememberPassword);
+//			editor.putBoolean("auto_login", mAutoLogin);
 			editor.commit();
 			
 			// Modified from default.
@@ -316,8 +336,10 @@ public class LoginActivity extends Activity {
 		
 		@Override
 		protected Integer doInBackground(Void... params) {
-			// TODO: attempt authentication against a network service.
 
+			// Lock screen orientation to prevent onCreateView() being called.
+			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+			
 			try {
 				ConnectivityManager connMgr = (ConnectivityManager) 
 				        getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -327,7 +349,7 @@ public class LoginActivity extends Activity {
 				    	dg = (DataGrabber) getApplication();
 //						dg = new DataGrabber(
 						dg.setData (
-								Domain.valueOf(domainSpinner.getSelectedItem().toString()),
+								Domain.valueOf(mDomainSpinner.getSelectedItem().toString()),
 								mEmail,
 								mPassword);
 						
@@ -383,7 +405,6 @@ public class LoginActivity extends Activity {
 						System.out.println(dg.getGradeSummary() == null ? "null" : "not null");
 
 						// Store class grades in Shared Preferences.
-						System.out.println("Done getting data.");
 
 				    } else {
 				    	System.err.println("No internet connection");
@@ -400,6 +421,10 @@ public class LoginActivity extends Activity {
 
 		@Override
 		protected void onPostExecute(final Integer success) {
+			
+			// Un-lock the screen orientation
+			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+			
 			mAuthTask = null;
 			showProgress(false);
 
@@ -407,9 +432,6 @@ public class LoginActivity extends Activity {
 			case 1:
 				finish();
 				Intent startMain = new Intent(LoginActivity.this, MainActivity.class);
-//				startMain.putExtra("DataGrabber", dg);
-//				((OldYourPISDApplication) getApplication()).setDataGrabber(dg);
-				System.out.println("Intent to Main!");
 				startActivity(startMain);
 				overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
 				break;
