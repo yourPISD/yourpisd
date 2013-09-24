@@ -310,7 +310,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 			protected void onPostExecute (final String result) {
 				TextView name = new TextView(getActivity());
 				name.setTextSize(25);
-				name.setText("  "+ result);
+				name.setText(result);
 				card.addView(name);
 			}
 			
