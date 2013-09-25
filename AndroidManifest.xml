@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.sunstreaks.mypisd"
+    package="app.sunstreak.yourpisd"
     android:versionCode="1"
     android:versionName="1.0" >
 
     <uses-sdk
         android:minSdkVersion="14"
-        android:targetSdkVersion="17" />
+        android:targetSdkVersion="18" />
     <uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
@@ -16,28 +16,33 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme"
         android:name="app.sunstreak.yourpisd.net.DataGrabber" >
+        
         <activity
+            android:theme="@android:style/Theme.Holo.Light"
             android:name="app.sunstreak.yourpisd.MainActivity"
-            android:label="@string/app_name" >
-
-
+            android:label="@string/app_name"
+            android:parentActivityName="app.sunstreak.yourpisd.LoginActivity" >
         </activity>
+        
         <activity
+            android:theme="@android:style/Theme.Holo.Light"
             android:name="app.sunstreak.yourpisd.ClassSwipeActivity"
-            android:label="@string/title_activity_class_swipe" >
+            android:label="@string/title_activity_class_swipe"
+            android:parentActivityName="app.sunstreak.yourpisd.MainActivity" >
 
         </activity>
+        
         <activity
+            android:theme="@android:style/Theme.Holo.Light"
             android:name="app.sunstreak.yourpisd.LoginActivity"
             android:label="@string/app_name"
             android:windowSoftInputMode="adjustResize|stateVisible" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            
         </activity>
+        
     </application>
 
 </manifest>

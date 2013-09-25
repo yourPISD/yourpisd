@@ -10,33 +10,34 @@
 	    android:id="@+id/class_description_linear_layout"
 	    >
 
-		<TextView
+	    <RelativeLayout
+	        android:layout_width = "match_parent"
+	        android:layout_height="wrap_content"
+	        >
+	        
+	        <TextView
 		    android:id="@+id/teacher_name"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
 		    android:text="@string/teacher_name"
-		    android:textSize="30sp"
+		    android:textSize="28sp"
 		    android:fontFamily="sans-serif-light" 
 		    android:padding="15dp"
-		    android:background="@drawable/dropshadow"/>
+		    android:background="@drawable/dropshadow"
+		    android:layout_alignParentLeft="true"/>
 		
 		<TextView
 		    android:id="@+id/six_weeks_average"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
-		    android:textSize="25sp"
+		    android:textSize="28sp"
 		    android:fontFamily="sans-serif-light" 
 		    android:padding="15dp"
-		    android:background="@drawable/dropshadow"/>
-		
-		<!-- 
-		<LinearLayout
-		    android:id="@+id/grade_list"
-		    android:layout_width="wrap_content"
-		    android:layout_height="wrap_content"
-		    android:orientation="vertical"
-		    />
-		-->
+		    android:background="@drawable/dropshadow"
+		    android:layout_alignParentRight="true"/>
+	        
+	    </RelativeLayout>
+
 		
 	</LinearLayout>
 </ScrollView>

@@ -31,10 +31,10 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import app.sunstreak.yourpisd.R;
 import app.sunstreak.yourpisd.net.DataGrabber;
 import app.sunstreak.yourpisd.net.Domain;
 
-import com.sunstreaks.mypisd.R;
 
 /**
  * Activity which displays a login screen to the user, offering registration as
@@ -348,6 +348,7 @@ public class LoginActivity extends Activity {
 				    if (networkInfo != null && networkInfo.isConnected()) {
 						// Simulate network access.
 				    	dg = (DataGrabber) getApplication();
+				    	dg.clearData();
 //						dg = new DataGrabber(
 						dg.setData (
 								Domain.valueOf(mDomainSpinner.getSelectedItem().toString()),

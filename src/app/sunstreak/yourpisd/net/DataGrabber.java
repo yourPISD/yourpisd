@@ -6,6 +6,8 @@ import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -21,7 +23,6 @@ import org.jsoup.nodes.Element;
 
 import android.app.Application;
 import android.graphics.Bitmap;
-import android.util.SparseArray;
 
 
 public class DataGrabber /*implements Parcelable*/ extends Application {
@@ -43,13 +44,21 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 	//	Date[][] lastUpdated;
 	int studentId = 0;
 	int[] classIds;
-	SparseArray<JSONObject> classGrades = new SparseArray<JSONObject>();
+	/**
+	 * key is of the form {classIndex, termIndex}.
+	 */
+	Map<Integer[], JSONObject> classGrades = new HashMap<Integer[], JSONObject>();
+	//	SparseArray<JSONObject> classGrades = new SparseArray<JSONObject>();
 	String studentName = "";
 	Bitmap studentPictureBitmap;
 
 	int[] classMatch;
 
-
+	public void clearData () {
+		domain = null;
+		username = null;
+		password = null;
+	}
 
 	public void setData (Domain domain, String username, String password) {
 		//	public DataGrabber (Domain domain, String username, String password) {
@@ -60,7 +69,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 		/*
 		 * to accept expired certificate of login1.mypisd.net
 		 */
-		acceptAllCertificates();
+		//acceptAllCertificates();
 	}
 
 	/**
@@ -334,9 +343,9 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 				classIds[i] = classList.getJSONObject(i).getInt("classId");
 			}
 		} catch (JSONException e) {
-		} finally {
-			return classIds;
+			e.printStackTrace();
 		}
+		return classIds;
 	}
 	//	
 	public int[] getTermIds( int classId ) throws JSONException {
@@ -363,7 +372,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 	//		
 	//	}
 
-	public String getDetailedReport (int classId, int termId, int studentId) throws InterruptedException, ExecutionException, MalformedURLException, IllegalUrlException, IOException {
+	public String getDetailedReport (int classId, int termId, int studentId) throws MalformedURLException, IllegalUrlException, IOException {
 
 
 		String url = "https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/StudentAssignments.aspx?" + 
@@ -440,33 +449,41 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 		return gradeSummary;
 	}
 
-	public void putClassGrade (int classIndex, JSONObject classGrade) {
-		classGrades.put(classIndex, classGrade);
+	public void putClassGrade (int classIndex, int termIndex, JSONObject classGrade) {
+		classGrades.put(new Integer[] {classIndex, termIndex}, classGrade);
 	}
 
-	public JSONObject getClassGrade (int classIndex) {
-		return classGrades.get(classIndex);
+	//	public JSONObject getClassGrade (int termIndex, int classIndex) {
+	//		return classGrades.get(new Integer[] {termIndex, classIndex});
+	//	}
+
+	public boolean hasClassGrade (int classIndex, int termIndex) {
+		return classGrades.containsKey(new Integer[] {classIndex, termIndex});
 	}
 
-	public boolean hasClassGrade (int classIndex) {
-		// Checks whether the SparseArray contains a value at classIndex.
-		return classGrades.indexOfKey(classIndex) == -1 ? false : true;
-	}
+	public JSONObject getClassGrade( int classIndex, int termIndex )  {
 
-	public JSONObject getClassGrade( int classIndex, int termIndex ) throws JSONException, InterruptedException, ExecutionException, MalformedURLException, IllegalUrlException, IOException {
+		String html = "";
 
-		if (classGrades.get(classIndex) != null)
-			return classGrades.get(classIndex);
+		try {
+			if (classGrades.get(classIndex) != null)
+				return classGrades.get(classIndex);
 
 
+			int classId = getClassIds()[classIndex];
+			int termId = getTermIds(classId)[termIndex];
+
+			html = getDetailedReport(classId, termId, studentId);
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (IllegalUrlException e) {
+			e.printStackTrace();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 
 
-
-		int classId = getClassIds()[classIndex];
-		int termId = getTermIds(classId)[termIndex];
-
-
-		String html = getDetailedReport(classId, termId, studentId);
 
 
 		//Parse the teacher name if not already there.
@@ -475,29 +492,38 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 		} catch (JSONException e) {
 			// Teacher was not found.
 			String[] teacher = Parser.teacher(html);
-			classList.getJSONObject(classIndex).put("teacher", teacher[0]);
-			classList.getJSONObject(classIndex).put("teacherEmail", teacher[1]);
+			try {
+				classList.getJSONObject(classIndex).put("teacher", teacher[0]);
+				classList.getJSONObject(classIndex).put("teacherEmail", teacher[1]);
+			} catch (JSONException f) {
+				e.printStackTrace();
+			}
 		}
 
 		JSONObject classGrade; 
 
-		//		if (classGrades[ classIndex ] != null)
-		//			classGrade = classGrades [ classIndex ];
-		//		else
-		classGrade = classList.getJSONObject( classIndex );
+		try {
+			classGrade = classList.getJSONObject( classIndex );
 
-		JSONArray termGrades = Parser.detailedReport(html);
-		Object[] termCategory = Parser.termCategoryGrades(html);
-		JSONArray termCategoryGrades = (JSONArray) termCategory[0];
+			JSONArray termGrades = Parser.detailedReport(html);
+			Object[] termCategory = Parser.termCategoryGrades(html);
+			JSONArray termCategoryGrades = (JSONArray) termCategory[0];
 
-		if ((Integer)termCategory[1] != -1)
-			classGrade.getJSONArray("terms").getJSONObject(termIndex).put("average", termCategory[1]);
-		classGrade.getJSONArray("terms").getJSONObject(termIndex).put("grades", termGrades);
-		classGrade.getJSONArray("terms").getJSONObject(termIndex).put("categoryGrades", termCategoryGrades);
+			if ((Integer)termCategory[1] != -1)
+				classGrade.getJSONArray("terms").getJSONObject(termIndex).put("average", termCategory[1]);
 
-		//		System.out.println(classGrade.toString());
-		classGrades.put(classIndex, classGrade);
-		return classGrade;
+			classGrade.getJSONArray("terms").getJSONObject(termIndex).put("grades", termGrades);
+			classGrade.getJSONArray("terms").getJSONObject(termIndex).put("categoryGrades", termCategoryGrades);
+			
+			classGrades.put(new Integer[] {classIndex, termIndex}, classGrade);
+			return classGrade;
+			
+			
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
 
 
@@ -585,6 +611,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 	/**
 	 * Temporary code. In use because login1.mypisd.net has an expired certificate. with new portal website, should not be necessary.
 	 */
+	/*
 	public static void acceptAllCertificates() {
 		TrustManager[] trustAllCerts = new TrustManager[]{
 				new X509TrustManager() { 
@@ -608,15 +635,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 		} catch (Exception e) {
 		} 
 	}
-
-	public void printCookies() {
-		System.out.println();
-		System.out.println("Cookies:");
-		for (String c : cookies)
-			System.out.println(c);
-		System.out.println();
-	}
-
+	 */
 
 	public int getEditureLogin() {
 		return editureLogin;
@@ -633,11 +652,6 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 	public String[] getPassthroughCredentials() {
 		return passthroughCredentials;
 	}
-
-
-	//	public Map<Integer,JSONObject> getClassGrades (int classIndex) {
-	//		return classGrades;
-	//	}
 
 
 

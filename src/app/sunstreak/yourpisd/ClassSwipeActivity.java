@@ -9,26 +9,26 @@ import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.PagerTitleStrip;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import app.sunstreak.yourpisd.R;
 import app.sunstreak.yourpisd.net.DataGrabber;
 
-import com.sunstreaks.mypisd.R;
 
 @SuppressLint("ValidFragment")
 public class ClassSwipeActivity extends FragmentActivity {
@@ -52,6 +52,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 	static int received;
 	static int classCount;
 	static int classesMade = 0;
+	static int termIndex;
 	static boolean doneMakingClasses;
 
 	static DataGrabber dg;
@@ -61,9 +62,13 @@ public class ClassSwipeActivity extends FragmentActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_class_swipe);
 
+		
 		received = getIntent().getExtras().getInt("classIndex");
 		classCount = getIntent().getExtras().getInt("classCount");
-
+		termIndex = getIntent().getExtras().getInt("termIndex");
+		
+		setTitle(TermFinder.Term.values()[termIndex].name);
+		
 		dg = ((DataGrabber) getApplication() );
 
 
@@ -108,8 +113,43 @@ public class ClassSwipeActivity extends FragmentActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.class_swipe, menu);
-		return true;
+		getMenuInflater().inflate(R.menu.class_swipe_actions, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    
+		Intent intent;
+		// Handle item selection
+	    switch (item.getItemId()) {
+	        case R.id.log_out:
+	        	intent = new Intent(this, LoginActivity.class);
+	        	// Clear all activities between this and LoginActivity
+	        	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	        	startActivity(intent);
+	            return true;
+	        case R.id.previous_six_weeks:
+	        	intent = new Intent(this, ClassSwipeActivity.class);
+	        	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	    		intent.putExtra("classCount", classCount);
+	    		intent.putExtra("classIndex", mViewPager.getCurrentItem());
+	    		// Don't go into the negatives!
+	    		intent.putExtra("termIndex", termIndex - 1 >= 0 ? termIndex - 1 : 0);
+	        	startActivity(intent);
+	            return true;
+	        case R.id.next_six_weeks:
+	        	intent = new Intent(this, ClassSwipeActivity.class);
+	        	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	    		intent.putExtra("classCount", classCount);
+	    		intent.putExtra("classIndex", mViewPager.getCurrentItem());
+	    		// Don't go too positive!
+	    		intent.putExtra("termIndex", termIndex + 1 <= 7 ? termIndex + 1 : 7);
+	        	startActivity(intent);
+	            return true;
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
 	}
 
 	/**
@@ -188,12 +228,12 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 			rootView = inflater.inflate(R.layout.class_description, container, false);
 
-			if ( dg.hasClassGrade(classIndex) ) {
-				mClassGrade = dg.getClassGrade(classIndex);
+			if ( dg.hasClassGrade(classIndex, termIndex) ) {
+				mClassGrade = dg.getClassGrade(classIndex, termIndex);
 				setUiElements();
 			} else {
 				mClassGradeTask = new ClassGradeTask();
-				mClassGradeTask.execute(classIndex, TERM_INDEX);
+				mClassGradeTask.execute(classIndex, termIndex);
 			}
 
 
@@ -215,7 +255,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 				mClassGrade = result;
 				System.out.println("ClassGradeTask finished");
 
-				dg.putClassGrade(classIndex, mClassGrade);
+				dg.putClassGrade(classIndex, TERM_INDEX, mClassGrade);
 
 				setUiElements();
 			}
@@ -246,14 +286,14 @@ public class ClassSwipeActivity extends FragmentActivity {
 				System.out.println(mClassGrade);
 				teacher.setText(mClassGrade.getString("teacher"));
 
-				int avg = mClassGrade.getJSONArray("terms").getJSONObject(0).optInt("average", -1);
+				int avg = mClassGrade.getJSONArray("terms").getJSONObject(termIndex).optInt("average", -1);
 				String average = avg == -1 ? "" : "" + avg;
 				sixWeeksAverage.setText(average);
 
 				JSONArray terms = mClassGrade.getJSONArray("terms");
 
 				for (int category = 0;
-						category < terms.getJSONObject(0).getJSONArray("categoryGrades").length();
+						category < terms.getJSONObject(termIndex).getJSONArray("categoryGrades").length();
 						category++)
 				{
 
@@ -263,7 +303,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 					LinearLayout gradesListLayout = (LinearLayout) categoryLayout.findViewById(R.id.layout_grades_list);
 
 					// Name of the category ("Daily Work", etc)
-					String categoryName = mClassGrade.getJSONArray("terms").getJSONObject(0)
+					String categoryName = mClassGrade.getJSONArray("terms").getJSONObject(termIndex)
 							.getJSONArray("categoryGrades").getJSONObject(category).getString("Category");
 
 					// for every grade in this term [any category]
@@ -271,7 +311,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 							.getJSONObject(0).getJSONArray("grades").length(); i++)
 					{
 						// only if this grade is in the category which we're looking for
-						if (mClassGrade.getJSONArray("terms").getJSONObject(0)
+						if (mClassGrade.getJSONArray("terms").getJSONObject(termIndex)
 								.getJSONArray("grades").getJSONObject(i).getString("Category")
 								.equals(categoryName))
 						{
@@ -279,13 +319,13 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 							TextView descriptionView = (TextView) innerLayout.findViewById(R.id.description);
 							String description = "" + mClassGrade.getJSONArray("terms")
-									.getJSONObject(0).getJSONArray("grades")
+									.getJSONObject(termIndex).getJSONArray("grades")
 									.getJSONObject(i).getString("Description");
 							descriptionView.setText(description);
 
 							TextView grade = (TextView) innerLayout.findViewById(R.id.grade);
 							String gradeValue = mClassGrade.getJSONArray("terms")
-									.getJSONObject(0).getJSONArray("grades")
+									.getJSONObject(termIndex).getJSONArray("grades")
 									.getJSONObject(i).optString("Grade", "") + "";
 							grade.setText(gradeValue);
 
@@ -301,7 +341,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 					TextView scoreView = (TextView) categoryLayout.findViewById(R.id.category_score);
 					String categoryScore = mClassGrade.getJSONArray("terms")
-							.getJSONObject(0).getJSONArray("categoryGrades")
+							.getJSONObject(termIndex).getJSONArray("categoryGrades")
 							.getJSONObject(category).optString("Letter", "") + "";
 					scoreView.setText(categoryScore);
 
