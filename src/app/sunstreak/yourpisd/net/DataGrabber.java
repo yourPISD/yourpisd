@@ -135,8 +135,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 					//{"Cookie","JSESSIONID=22DDAFA488B9D839F082FE26EFE8B38B"},
 					{"Host","sso.portal.mypisd.net"},
 					{"Origin","https://sso.portal.mypisd.net"},
-					{"Referer","https://sso.portal.mypisd.net/cas/login?service=http%3A%2F%2Fportal.mypisd.net%2Fc%2Fportal%2Flogin"},
-					{"User-Agent","Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.66 Safari/537.36"}
+					{"Referer","https://sso.portal.mypisd.net/cas/login?service=http%3A%2F%2Fportal.mypisd.net%2Fc%2Fportal%2Flogin"}
 			};
 
 			ArrayList<String[]> rp = new ArrayList<String[]>(java.util.Arrays.asList(requestProperties));
