@@ -137,7 +137,8 @@ public class ClassSwipeActivity extends FragmentActivity {
 	    		// Don't go into the negatives!
 	    		intent.putExtra("termIndex", termIndex - 1 >= 0 ? termIndex - 1 : 0);
 	        	startActivity(intent);
-	        	overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_down);
+	        	
+	        	overridePendingTransition(R.anim.slide_in_down, R.anim.slide_out_up);
 	            return true;
 	        case R.id.next_six_weeks:
 	        	intent = new Intent(this, ClassSwipeActivity.class);
@@ -147,7 +148,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 	    		// Don't go too positive!
 	    		intent.putExtra("termIndex", termIndex + 1 <= 7 ? termIndex + 1 : 7);
 	        	startActivity(intent);
-	        	overridePendingTransition(R.anim.slide_in_down, R.anim.slide_out_up);
+	        	overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_down);
 	            return true;
 	        default:
 	            return super.onOptionsItemSelected(item);

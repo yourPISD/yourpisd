@@ -38,14 +38,16 @@ public final class R {
         public static final int dropshadow=0x7f020002;
         public static final int dropshadowblue=0x7f020003;
         public static final int grade_summary_feedback=0x7f020004;
-        public static final int ic_alerts_and_states_warning=0x7f020005;
-        public static final int ic_cool_icon=0x7f020006;
-        public static final int ic_launcher=0x7f020007;
-        public static final int navigation_collapse=0x7f020008;
-        public static final int navigation_expand=0x7f020009;
-        public static final int navigation_next_item=0x7f02000a;
-        public static final int navigation_previous_item=0x7f02000b;
-        public static final int shadow=0x7f02000c;
+        public static final int ic_action_next=0x7f020005;
+        public static final int ic_action_prev=0x7f020006;
+        public static final int ic_alerts_and_states_warning=0x7f020007;
+        public static final int ic_cool_icon=0x7f020008;
+        public static final int ic_launcher=0x7f020009;
+        public static final int navigation_collapse=0x7f02000a;
+        public static final int navigation_expand=0x7f02000b;
+        public static final int navigation_next_item=0x7f02000c;
+        public static final int navigation_previous_item=0x7f02000d;
+        public static final int shadow=0x7f02000e;
     }
     public static final class id {
         public static final int TextView01=0x7f0a0019;
