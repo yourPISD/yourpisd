@@ -27,6 +27,7 @@ import android.graphics.BitmapFactory;
 public class Request {
 	
 	static String redirectLocation = "";
+	public static final string USER_AGENT = "yourPISD/1.0 (Android " + android.os.Build.VERSION.RELEASE + ")";
 	
 	public static String getRedirectLocation() {
 		return redirectLocation;
@@ -93,6 +94,7 @@ public class Request {
 					for (String[] property : requestProperties)
 						conn.addRequestProperty(property[0], property[1]);
 					
+				conn.addRequestProperty("User-Agent",USER_AGENT);
 				
 				// Concatenates the cookies into one cookie string, seperated by semicolons.
 				if (cookies != null && cookies.size()>0) {
@@ -221,6 +223,8 @@ public class Request {
 				if (requestProperties != null && requestProperties.size()>0)
 					for (String[] property : requestProperties)
 						conn.addRequestProperty(property[0], property[1]);
+				
+				conn.addRequestProperty("User-Agent", USER_AGENT);
 				
 				// Concatenates the cookies into one cookie string, seperated by semicolons.
 				if (cookies != null && cookies.size()>0) {
