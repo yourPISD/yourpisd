@@ -264,7 +264,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 					for (int termIndex = 1; termIndex < gradeSummary[classIndex].length; termIndex++) {
 
 
-
+		
 						TextView termGrade = new TextView(getActivity());
 						termGrade.setTextSize(25);
 						termGrade.setPadding(10, 10, 10, 10);
@@ -272,7 +272,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 						
 
 						
-						termGrade.setOnClickListener(new ClassSwipeOpenerListener(classIndex, termIndex));
+						termGrade.setOnClickListener(new ClassSwipeOpenerListener(classIndex, termIndex - 1));
 						
 						int avg = gradeSummary[classIndex][termIndex];
 						System.out.println(avg);
