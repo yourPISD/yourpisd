@@ -70,8 +70,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		// Set up the ViewPager with the sections adapter.
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 		mViewPager.setAdapter(mSectionsPagerAdapter);
-		// Opens Grade Summary (index 0) on open.
-		mViewPager.setCurrentItem(0);
+		// Opens Grade Summary (index 1) on open.
+		mViewPager.setCurrentItem(1);
 	}
 
 	@Override
@@ -166,10 +166,10 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 			int tabLayout = 0;
 			switch (position) {
 			case 0:
-				tabLayout = R.layout.tab_summary;
+				tabLayout = R.layout.tab_new;
 				break;
 			case 1:
-				tabLayout = R.layout.tab_new;
+				tabLayout = R.layout.tab_summary;
 				break;
 			case 2:
 				tabLayout = R.layout.tab_year_summary;
@@ -180,7 +180,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
 			rootView = inflater.inflate(tabLayout, container, false);
 
-			if (position == 0)
+			if (position == 1)
 			{
 					    		
 				LinearLayout bigLayout = (LinearLayout) rootView.findViewById(R.id.container);
@@ -237,7 +237,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 			}	
 
 
-			if (position == 1) {
+			if (position == 0) {
 				StudentPictureTask spTask = new StudentPictureTask();
 				spTask.execute();
 			}

@@ -18,14 +18,12 @@
         android:name="app.sunstreak.yourpisd.net.DataGrabber" >
         
         <activity
-            android:theme="@android:style/Theme.Holo.Light"
             android:name="app.sunstreak.yourpisd.MainActivity"
             android:label="@string/app_name"
             android:parentActivityName="app.sunstreak.yourpisd.LoginActivity" >
         </activity>
         
         <activity
-            android:theme="@android:style/Theme.Holo.Light"
             android:name="app.sunstreak.yourpisd.ClassSwipeActivity"
             android:label="@string/title_activity_class_swipe"
             android:parentActivityName="app.sunstreak.yourpisd.MainActivity" >
@@ -33,7 +31,6 @@
         </activity>
         
         <activity
-            android:theme="@android:style/Theme.Holo.Light"
             android:name="app.sunstreak.yourpisd.LoginActivity"
             android:label="@string/app_name"
             android:windowSoftInputMode="adjustResize|stateVisible" >
