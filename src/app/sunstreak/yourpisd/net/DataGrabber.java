@@ -58,6 +58,19 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 		domain = null;
 		username = null;
 		password = null;
+		passthroughCredentials = null;
+		gradebookCredentials = null;
+		pageUniqueId = null;
+		editureLogin = 0;
+		gradebookLogin = 0;
+		cookies = new ArrayList<String>();
+		classList = null;
+		gradeSummary = null;
+		studentId = 0;
+		classIds = null;
+		classGrades = null;
+		studentName = "";
+		studentPictureBitmap = null;
 	}
 
 	public void setData (Domain domain, String username, String password) {
