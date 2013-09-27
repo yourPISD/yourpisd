@@ -68,7 +68,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 		gradeSummary = null;
 		studentId = 0;
 		classIds = null;
-		classGrades = null;
+		classGrades = new HashMap<Integer[], JSONObject>();
 		studentName = "";
 		studentPictureBitmap = null;
 	}

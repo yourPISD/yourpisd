@@ -42,7 +42,6 @@ import app.sunstreak.yourpisd.net.Domain;
  */
 public class LoginActivity extends Activity {
 
-
 	/**
 	 * The default email to populate the email field with.
 	 */
@@ -379,10 +378,10 @@ public class LoginActivity extends Activity {
 							boolean loginAttempt = false;
 							int counter = 0;
 							do {
-								if (counter > 0) {
+								if (true /*counter > 0*/) {
 									try {
-										Thread.sleep(3000);
-										System.out.println("trying again");
+										Thread.sleep(3500);
+										System.out.println("sleeping 3.5s");
 									} catch (InterruptedException e) {
 										e.printStackTrace();
 									}

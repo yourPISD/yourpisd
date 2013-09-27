@@ -275,7 +275,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 						termGrade.setOnClickListener(new ClassSwipeOpenerListener(classIndex, termIndex - 1));
 						
 						int avg = gradeSummary[classIndex][termIndex];
-						System.out.println(avg);
 						String average = avg == -1 ? "" : "" + avg;
 						termGrade.setText(average);
 						summary.addView(termGrade);

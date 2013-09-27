@@ -27,7 +27,7 @@ import android.graphics.BitmapFactory;
 public class Request {
 	
 	static String redirectLocation = "";
-	public static final string USER_AGENT = "yourPISD/1.0 (Android " + android.os.Build.VERSION.RELEASE + ")";
+	public static final String USER_AGENT = "yourPISD/1.0 (Android " + android.os.Build.VERSION.RELEASE + ")";
 	
 	public static String getRedirectLocation() {
 		return redirectLocation;
