@@ -8,5 +8,13 @@
         
     </item>
     
+    <item
+        android:id="@+id/credits"
+        android:title="@string/credits"
+        android:menuCategory="system"
+        >
+        
+    </item>
+    
 
 </menu>

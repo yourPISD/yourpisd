@@ -19,10 +19,13 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -31,7 +34,6 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-import app.sunstreak.yourpisd.R;
 import app.sunstreak.yourpisd.net.DataGrabber;
 import app.sunstreak.yourpisd.net.Domain;
 
@@ -55,6 +57,7 @@ public class LoginActivity extends Activity {
 	// Values for email and password at the time of the login attempt.
 	private String mEmail;
 	private String mPassword;
+	private String encryptedPass;
 	private boolean mRememberPassword;
 //	private boolean mAutoLogin;
 	
@@ -180,7 +183,9 @@ public class LoginActivity extends Activity {
 		
 		//Load stored username/password
 		mEmailView.setText(sharedPrefs.getString("email", mEmail));
-		mPasswordView.setText(sharedPrefs.getString("password", ""));
+		mPasswordView.setText(new String(Base64.decode(sharedPrefs.getString("password", "")
+				, Base64.DEFAULT )));
+//		mPasswordView.setText(sharedPrefs.getString("password", ""));
 		
 		
 		
@@ -197,7 +202,19 @@ public class LoginActivity extends Activity {
 				new View.OnClickListener() {
 					@Override
 					public void onClick(View view) {
+					
+
 						attemptLogin();
+					}
+				});
+		findViewById(R.id.sign_in_button).setOnTouchListener(
+				new View.OnTouchListener() {
+					@Override
+					public boolean onTouch(View v, MotionEvent event) {
+						InputMethodManager imm = 
+							    (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+							imm.hideSoftInputFromWindow(mPasswordView.getWindowToken(), 0);
+					return false;
 					}
 				});
 		
@@ -230,6 +247,8 @@ public class LoginActivity extends Activity {
 
 		// Store values at the time of the login attempt.
 		mEmail = mEmailView.getText().toString();
+		encryptedPass = Base64.encodeToString(mPasswordView.getText().toString()
+				.getBytes(), Base64.DEFAULT );
 		mPassword = mPasswordView.getText().toString();
 
 		boolean cancel = false;
@@ -266,7 +285,7 @@ public class LoginActivity extends Activity {
 			SharedPreferences.Editor editor = sharedPrefs.edit();
 			editor.putInt("domain", mDomainSpinner.getSelectedItemPosition());
 			editor.putString("email", mEmail);
-			editor.putString("password", mRememberPassword? mPassword: "");
+			editor.putString("password", mRememberPassword? encryptedPass: "");
 			editor.putBoolean("remember_password", mRememberPassword);
 //			editor.putBoolean("auto_login", mAutoLogin);
 			editor.commit();
@@ -416,7 +435,10 @@ public class LoginActivity extends Activity {
 			}
 
 
-
+			Intent startMain = new Intent(LoginActivity.this, MainActivity.class);
+			startActivity(startMain);
+//			overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+			finish();
 			return 1;
 		}
 
@@ -431,10 +453,10 @@ public class LoginActivity extends Activity {
 
 			switch (success) {
 			case 1:
-				finish();
-				Intent startMain = new Intent(LoginActivity.this, MainActivity.class);
-				startActivity(startMain);
-				overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+//				finish();
+//				Intent startMain = new Intent(LoginActivity.this, MainActivity.class);
+//				startActivity(startMain);
+//				overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
 				break;
 			case -1:
 				// Bad password

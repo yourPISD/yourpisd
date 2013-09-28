@@ -89,6 +89,10 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 			Intent intent = new Intent(this, LoginActivity.class);
 			startActivity(intent);
 			return true;
+		case R.id.credits:
+			Intent intentCred1 = new Intent(this, CreditActivity.class);
+			startActivity(intentCred1);
+			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
