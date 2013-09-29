@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/refresh"
+        android:menuCategory="system"
+        android:showAsAction="ifRoom"
+        android:title="@string/refresh"
+        android:icon="@drawable/navigation_refresh"/>
     <item
         android:id="@+id/log_out"
-        android:title="@string/log_out"
         android:menuCategory="system"
-        >
-        
-    </item>
-    
+        android:showAsAction="never"
+        android:title="@string/log_out"/>
     <item
         android:id="@+id/credits"
-        android:title="@string/credits"
         android:menuCategory="system"
-        >
-        
-    </item>
-    
+        android:showAsAction="never"
+        android:title="@string/title_activity_credit"/>
 
 </menu>

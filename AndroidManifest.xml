@@ -38,7 +38,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="app.sunstreak.yourpisd.CreditActivity"
+            android:name=".CreditActivity"
             android:label="@string/title_activity_credit" >
         </activity>
     </application>
