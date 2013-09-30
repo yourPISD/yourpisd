@@ -13,6 +13,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -77,7 +79,23 @@ public class LoginActivity extends Activity {
 
 		setContentView(R.layout.activity_login);
 		final SharedPreferences sharedPrefs = this.getPreferences(Context.MODE_PRIVATE);
-		
+		PackageInfo pInfo;
+//		try {
+//			pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+//			String version = pInfo.versionName;
+			if(sharedPrefs.getBoolean("patched", false))
+			{
+			}
+			else
+			{
+				sharedPrefs.edit().remove("password");
+				sharedPrefs.edit().putBoolean("patched", true);
+			}
+//		} catch (NameNotFoundException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+
 		
 		if ( ! sharedPrefs.getBoolean("AcceptedUserAgreement", false) ) {
 			
