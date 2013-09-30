@@ -49,7 +49,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 	static ViewPager mViewPager;
 
 
-	static int receivedClassIndex;
+	static int received;
 	static int classCount;
 	static int classesMade = 0;
 	static int termIndex;
@@ -63,7 +63,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 		setContentView(R.layout.activity_class_swipe);
 
 		
-		receivedClassIndex = getIntent().getExtras().getInt("classIndex");
+		received = getIntent().getExtras().getInt("classIndex");
 		classCount = getIntent().getExtras().getInt("classCount");
 		termIndex = getIntent().getExtras().getInt("termIndex");
 		
@@ -96,7 +96,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 		// Set up the ViewPager with the sections adapter.
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 		mViewPager.setAdapter(mSectionsPagerAdapter);
-		mViewPager.setCurrentItem(receivedClassIndex);
+		mViewPager.setCurrentItem(received);
 		mViewPager.setOffscreenPageLimit(7);
 
 
@@ -114,26 +114,6 @@ public class ClassSwipeActivity extends FragmentActivity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.class_swipe_actions, menu);
-		
-		if (termIndex == 0)
-			menu.findItem(R.id.previous_six_weeks).setEnabled(false);
-		else if (termIndex == 3)
-			menu.findItem(R.id.next_six_weeks).setEnabled(false);
-		
-		if (true) {
-//		if (dg.getStudents().size() > 1) {
-			for (int i = 0; i < dg.getStudents().size(); i++) {
-				String name = dg.getStudents().get(i).name;
-				name = name.substring(name.indexOf(",") + 2, name.indexOf("("))
-						+ name.substring(0, name.indexOf(","));
-				MenuItem item = menu.add(name);
-//				if (i == studentIndex)
-//					item.setEnabled(false);
-				item.setOnMenuItemClickListener(new StudentSelectListener(i));
-				item.setVisible(true);
-			}
-		}
-		
 		return super.onCreateOptionsMenu(menu);
 	}
 	
@@ -149,12 +129,6 @@ public class ClassSwipeActivity extends FragmentActivity {
 	        	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 	        	startActivity(intent);
 	            return true;
-			case R.id.refresh:
-				Intent refreshIntent = new Intent(this, LoginActivity.class);
-				refreshIntent.putExtra("Refresh", true);
-				startActivity(refreshIntent);
-				finish();
-				return true;
 	        case R.id.previous_six_weeks:
 	        	intent = new Intent(this, ClassSwipeActivity.class);
 	        	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -207,7 +181,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 		@Override
 		public CharSequence getPageTitle(int position) {
-			return dg.getStudents().get(dg.studentIndex).getClassName(dg.getStudents().get(dg.studentIndex).getClassMatch()[position]);
+			return dg.getClassName(dg.getClassMatch()[position]);
 		}
 	}
 
@@ -251,14 +225,14 @@ public class ClassSwipeActivity extends FragmentActivity {
 				Bundle savedInstanceState)  {
 
 			position = getArguments().getInt(ARG_SECTION_NUMBER);
-			classIndex = dg.getStudents().get(dg.studentIndex).getClassMatch()[position];
+			classIndex = dg.getClassMatch()[position];
 
 
 
 			rootView = inflater.inflate(R.layout.class_description, container, false);
 
-			if ( dg.getStudents().get(dg.studentIndex).hasClassGrade(classIndex, termIndex) ) {
-				mClassGrade = dg.getStudents().get(dg.studentIndex).getClassGrade(classIndex, termIndex);
+			if ( dg.hasClassGrade(classIndex, termIndex) ) {
+				mClassGrade = dg.getClassGrade(classIndex, termIndex);
 				setUiElements();
 			} else {
 				mClassGradeTask = new ClassGradeTask();
@@ -284,7 +258,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 				mClassGrade = result;
 				System.out.println("ClassGradeTask finished");
 
-				dg.getStudents().get(dg.studentIndex).putClassGrade(classIndex, TERM_INDEX, mClassGrade);
+				dg.putClassGrade(classIndex, TERM_INDEX, mClassGrade);
 
 				setUiElements();
 			}
@@ -292,7 +266,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 			@Override
 			protected JSONObject doInBackground(Integer... integers) {
 				try {
-					return dg.getStudents().get(dg.studentIndex).getClassGrade(integers[0], integers[1]);
+					return dg.getClassGrade(integers[0], integers[1]);
 				} catch (Exception e) {
 					e.printStackTrace();
 					return null;
@@ -316,12 +290,8 @@ public class ClassSwipeActivity extends FragmentActivity {
 				teacher.setText(mClassGrade.getString("teacher"));
 
 				int avg = mClassGrade.getJSONArray("terms").getJSONObject(termIndex).optInt("average", -1);
-				if (avg != -1) {
-					String average = avg  + "";
-					sixWeeksAverage.setText(average);
-				}
-				else
-					sixWeeksAverage.setVisibility(TextView.INVISIBLE);
+				String average = avg == -1 ? "" : "" + avg;
+				sixWeeksAverage.setText(average);
 
 				JSONArray terms = mClassGrade.getJSONArray("terms");
 
@@ -395,35 +365,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 	}
 
-	class StudentSelectListener implements MenuItem.OnMenuItemClickListener {
-
-		int menuStudentIndex;
-		
-		public StudentSelectListener (int menuStudentIndex) {
-			this.menuStudentIndex = menuStudentIndex;
-		}
-		
-		public boolean onMenuItemClick(MenuItem arg0) {
-//			if (studentIndex == menuStudentIndex)
-//				return false;
-//			else {
-	        	Intent intent = new Intent(ClassSwipeActivity.this, ClassSwipeActivity.class);
-	        	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-	    		intent.putExtra("classCount", dg.getStudents().get(menuStudentIndex).getClassMatch().length);
-	    		intent.putExtra("classIndex", 0);
-	    		intent.putExtra("studentIndex", menuStudentIndex);
-	    		intent.putExtra("termIndex", termIndex);
-	    		
-	        	startActivity(intent);
-	        	
-//	        	overridePendingTransition(R.anim.slide_in_down, R.anim.slide_out_up);
-	            return true;
-//			}
-
-		}
-		
-	}
 
 
-	
+
 }

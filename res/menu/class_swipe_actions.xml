@@ -1,26 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <item
-        android:id="@+id/refresh"
-        android:menuCategory="system"
-        android:showAsAction="ifRoom"
-        android:title="@string/refresh"
-        android:icon="@drawable/navigation_refresh"/>
-    <item
-        android:id="@+id/previous_six_weeks"
-        android:icon="@drawable/ic_action_prev"
-        android:showAsAction="ifRoom"
-        android:title="@string/previous_six_weeks"/>
-    <item
-        android:id="@+id/next_six_weeks"
-        android:icon="@drawable/ic_action_next"
-        android:showAsAction="ifRoom"
-        android:title="@string/next_six_weeks"/>
-    <item
-        android:id="@+id/log_out"
-        android:menuCategory="system"
-        android:showAsAction="never"
-        android:title="@string/log_out"/>
+    <item android:id="@+id/previous_six_weeks"
+          android:icon="@drawable/ic_action_prev"
+          android:title="@string/previous_six_weeks"
+          android:showAsAction="ifRoom"/>
+    
+    <item android:id="@+id/next_six_weeks"
+          android:icon="@drawable/ic_action_next"
+          android:title="@string/next_six_weeks"
+          android:showAsAction="ifRoom"/>
 
 </menu>

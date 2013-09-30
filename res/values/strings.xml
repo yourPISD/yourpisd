@@ -3,10 +3,9 @@
 
     <string name="app_name">yourPISD</string>
     <string name="action_settings">Settings</string>
-    
-    <string name="main_section_0_title">Profile</string>
-    <string name="main_section_2_title">Semester Summary</string>
-    
+    <string name="title_section1">New Entries</string>
+    <string name="title_section2">Six Weeks Summary</string>
+    <string name="title_section3">Year Summary</string>
     <string name="teacher_name"></string>
     <string name="daily">Daily Grades:</string>
     <string name="major">Major Evaluations:</string>
@@ -14,9 +13,7 @@
     <string name="class_swipe_loading">Loading &#8230;</string>
     <string name="credits">credits</string>
     <string name="log_out">Log out</string>
-    <string name="title_activity_credit">Credits</string>
+    <string name="title_activity_credit">CreditActivity</string>
     <string name="hello_world">Hello world!</string>
-	
-    <string name="refresh">Refresh</string>
-    
+
 </resources>

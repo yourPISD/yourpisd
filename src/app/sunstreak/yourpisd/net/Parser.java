@@ -402,35 +402,4 @@ public class Parser {
 		return null;
 	}
 	
-	/**
-	 * 
-	 * @param html the source code for ANY page in Gradebook (usually Default.aspx)
-	 * @return
-	 */
-	public static List<String[]> parseStudents (String html) {
-		List<String[]> list = new ArrayList<String[]>();
-		
-		Element doc = Jsoup.parse(html);
-		Element studentList = doc.getElementById("ctl00_ctl00_ContentPlaceHolder_uxStudentlist");
-		
-		
-		// Only one student
-		if (studentList.text().isEmpty()) {
-			// {studentId, studentName}
-			list.add(new String[] {doc.getElementById("ctl00_ctl00_ContentPlaceHolder_uxStudentId").attr("value"), 
-					doc.getElementById("ctl00_ctl00_ContentPlaceHolder_uxMultiple").text()});
-			return list;
-		}
-		// Multiple students
-		else {
-			for (Element a : studentList.getElementsByTag("a")) {
-				String name = a.text();
-				String onClick = a.attr("onClick");
-				String studentId = onClick.substring(onClick.indexOf('\'') + 1, onClick.lastIndexOf('\''));
-				list.add(new String[] {studentId, name});
-			}
-			return list;
-		}
-	}
-	
 }

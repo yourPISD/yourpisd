@@ -2,6 +2,7 @@ package app.sunstreak.yourpisd;
 
 import java.util.Locale;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -25,7 +26,7 @@ import android.widget.TextView;
 import app.sunstreak.yourpisd.net.DataGrabber;
 
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends FragmentActivity implements View.OnClickListener {
 
 	public static final int CURRENT_TERM_INDEX = TermFinder.getCurrentTermIndex();
 	static int classCount;
@@ -52,7 +53,14 @@ public class MainActivity extends FragmentActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		dg = (DataGrabber) getApplication();
+		// Makes sure that there IS a datagrabber to insert. Now, what if there were multiple
+		// versions of DataGrabber....? I wonder what would happen.
+		//		Intent intent = getIntent();
+		//		{
+		//			DataGrabber myDG = (DataGrabber) intent.getParcelableExtra("DataGrabber");
+		//			dg = myDG;
+		//		}
+		dg = ( (DataGrabber) getApplication() );
 
 		// Create the adapter that will return a fragment for each of the three
 		// primary sections of the app.
@@ -64,8 +72,6 @@ public class MainActivity extends FragmentActivity {
 		mViewPager.setAdapter(mSectionsPagerAdapter);
 		// Opens Grade Summary (index 1) on open.
 		mViewPager.setCurrentItem(1);
-		
-		mViewPager.setOffscreenPageLimit(2);
 	}
 
 	@Override
@@ -82,17 +88,10 @@ public class MainActivity extends FragmentActivity {
 		case R.id.log_out:
 			Intent intent = new Intent(this, LoginActivity.class);
 			startActivity(intent);
-			finish();
 			return true;
 		case R.id.credits:
 			Intent intentCred1 = new Intent(this, CreditActivity.class);
 			startActivity(intentCred1);
-			return true;
-		case R.id.refresh:
-			Intent refreshIntent = new Intent(this, LoginActivity.class);
-			refreshIntent.putExtra("Refresh", true);
-			startActivity(refreshIntent);
-			finish();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -132,14 +131,11 @@ public class MainActivity extends FragmentActivity {
 			Locale l = Locale.getDefault();
 			switch (position) {
 			case 0:
-				// Profile
-				return getResources().getString(R.string.main_section_0_title);
+				return "Profile";
 			case 1:
-				// Why is this tab the only one that is uppercase?
 				return TermFinder.Term.values()[CURRENT_TERM_INDEX].name.toUpperCase(l);
 			case 2:
-				// Semester Summary
-				return getResources().getString(R.string.main_section_2_title);
+				return "Semester Summary";
 			default:
 				return null;
 			}
@@ -159,7 +155,7 @@ public class MainActivity extends FragmentActivity {
 		private View rootView;
 		private int position;
 
-		LinearLayout[] profileCards;
+		LinearLayout card;
 
 		public MainActivityFragment() {
 		}
@@ -183,36 +179,10 @@ public class MainActivity extends FragmentActivity {
 				break;
 			}
 
-			classCount = dg.getStudents().get(dg.studentIndex).getClassMatch().length;
+
 
 			rootView = inflater.inflate(tabLayout, container, false);
 
-			
-			if (position == 0) {
-				profileCards = new LinearLayout[dg.getStudents().size()];
-				
-				for (int i = 0; i < dg.getStudents().size(); i++) {
-					
-					profileCards[i] = new LinearLayout(getActivity());
-					
-					
-					TextView name = new TextView(getActivity());
-					name.setTextSize(25);
-					name.setText(dg.getStudents().get(i).name);
-					
-					profileCards[i].addView(name);
-					
-					
-					
-					StudentPictureTask spTask = new StudentPictureTask();
-					spTask.execute(i);
-				}
-				
-//				if (dg.getStudents().size() > 1)
-					colorStudents();
-				
-			}
-			
 			if (position == 1)
 			{
 					    		
@@ -220,9 +190,25 @@ public class MainActivity extends FragmentActivity {
 
 
 
+				int[][] gradeSummary = dg.getGradeSummary();
+
+				classCount = gradeSummary.length;
 				averages = new LinearLayout[classCount];
 
-				int[] classMatch = dg.getStudents().get(dg.studentIndex).getClassMatch();
+				int[] classMatch = new int[classCount];
+				int classesMatched = 0;
+
+				while (classesMatched < classCount) {
+					for (int i = classesMatched; i < dg.getClassIds().length; i++) {
+						if (dg.getClassIds()[i] == gradeSummary[classesMatched][0]) {
+							classMatch[classesMatched] = i;
+							classesMatched++;
+							break;
+						}
+					}
+				}
+
+				dg.setClassMatch(classMatch);
 
 				for (int i = 0; i < classCount; i++) {
 
@@ -231,24 +217,20 @@ public class MainActivity extends FragmentActivity {
 					
 					LinearLayout card = (LinearLayout) inflater.inflate(R.layout.main_grade_summary, bigLayout, false);
 					TextView className = (TextView) card.findViewById(R.id.name);
-					String name = dg.getStudents().get(dg.studentIndex).getClassName(jsonIndex);
+					String name = dg.getClassName(jsonIndex);
 					className.setText(name);
 
-					int avg = dg.getStudents().get(dg.studentIndex).getGradeSummary()[i][1 + CURRENT_TERM_INDEX];
-					
-					// No need to increase overdraw if there is nothing to display
-					if (avg != -1) {
-						String average = avg + "";
-						TextView grade = (TextView) card.findViewById(R.id.grade);
-						averages[i]=card;
-						grade.setText(average);
-					}
+					int avg = gradeSummary[i][1 + 0];
+					String average = avg == -1 ? "" : avg + "";
+					TextView grade = (TextView) card.findViewById(R.id.grade);
+					averages[i]=card;
 					
 					card.setOnClickListener(new ClassSwipeOpenerListener(i, CURRENT_TERM_INDEX));
 
-					
+					grade.setText(average);
 
 					bigLayout.addView(card);
+
 
 
 
@@ -258,14 +240,17 @@ public class MainActivity extends FragmentActivity {
 			}	
 
 
-
+			if (position == 0) {
+				StudentPictureTask spTask = new StudentPictureTask();
+				spTask.execute();
+			}
 
 			if (position == 2) {
 
 				LinearLayout bigLayout = (LinearLayout) rootView.findViewById(R.id.layout_year_summary);
 
-				int[] classMatch = dg.getStudents().get(dg.studentIndex).getClassMatch();
-				int[][] gradeSummary = dg.getStudents().get(dg.studentIndex).getGradeSummary();
+				int[] classMatch = dg.getClassMatch();
+				int[][] gradeSummary = dg.getGradeSummary();
 
 				for (int classIndex = 0; classIndex < classCount; classIndex++) {
 
@@ -273,25 +258,28 @@ public class MainActivity extends FragmentActivity {
 					int jsonIndex = classMatch[classIndex];
 
 					View classSummary = inflater.inflate(R.layout.main_grade_summary_linear_layout, bigLayout, false);
-					
+
 					TextView className = (TextView) classSummary.findViewById(R.id.class_name);
-					className.setText(dg.getStudents().get(dg.studentIndex).getClassName(jsonIndex));
+
+					className.setText(dg.getClassName(jsonIndex));
 
 					LinearLayout summary = (LinearLayout) classSummary.findViewById(R.id.layout_six_weeks_summary);
 
 					for (int termIndex = 1; termIndex < gradeSummary[classIndex].length; termIndex++) {
-						
+
+
+		
 						TextView termGrade = new TextView(getActivity());
 						termGrade.setTextSize(25);
 						termGrade.setPadding(10, 10, 10, 10);
 						termGrade.setClickable(true);
+						
+
+						
 						termGrade.setOnClickListener(new ClassSwipeOpenerListener(classIndex, termIndex - 1));
-						termGrade.setBackgroundResource(R.drawable.dropshadow_white_to_blue);
 						
 						int avg = gradeSummary[classIndex][termIndex];
-						if (avg == -1)
-							continue;
-						String average = avg + "";
+						String average = avg == -1 ? "" : "" + avg;
 						termGrade.setText(average);
 						summary.addView(termGrade);
 
@@ -305,15 +293,12 @@ public class MainActivity extends FragmentActivity {
 			return rootView;
 
 		}
-		public class StudentPictureTask extends AsyncTask<Integer, Void, Bitmap> {
+		public class StudentPictureTask extends AsyncTask<Void, Void, Bitmap> {
 
-			int taskStudentIndex;
-			
 			@Override
-			protected Bitmap doInBackground(Integer... args) {	
-				taskStudentIndex = args[0];
-				return dg.getStudents().get(taskStudentIndex).getStudentPicture();
-				
+			protected Bitmap doInBackground(Void... arg0) {	
+				return dg.getStudentPicture();
+
 			}
 
 			@Override
@@ -321,7 +306,7 @@ public class MainActivity extends FragmentActivity {
 				LinearLayout lv = (LinearLayout)rootView.findViewById(R.id.overall);
 				ImageView profilePic = new ImageView(getActivity());
 
-				
+				card = new LinearLayout(getActivity());
 
 				Drawable picture = new BitmapDrawable(getResources(), result);
 				profilePic.setImageDrawable(picture);
@@ -332,15 +317,31 @@ public class MainActivity extends FragmentActivity {
 				profilePic.setLayoutParams(profileLP);
 
 
-				profileCards[taskStudentIndex].addView(profilePic, 0);
-
-
-				
-				lv.addView(profileCards[taskStudentIndex], taskStudentIndex + 1);
+				card.addView(profilePic);
+				card.setBackgroundDrawable(getResources().getDrawable(R.drawable.dropshadow));
+				StudentNameTask snTask = new StudentNameTask();
+				snTask.execute();
+				lv.addView(card);
 			}
 
 		}
+		public class StudentNameTask extends AsyncTask<Void, Void, String> {
 
+			@Override
+			protected String doInBackground(Void... arg0) {	
+				return dg.getStudentName();
+
+			}
+
+			@Override
+			protected void onPostExecute (final String result) {
+				TextView name = new TextView(getActivity());
+				name.setTextSize(25);
+				name.setText(result);
+				card.addView(name);
+			}
+
+		}
 		
 		
 		class ClassSwipeOpenerListener implements OnClickListener {
@@ -362,33 +363,21 @@ public class MainActivity extends FragmentActivity {
 			}
 			
 		}
-		
-		class StudentChooserListener implements OnClickListener {
-			int studentIndex;
-			
-			StudentChooserListener(int studentIndex) {
-				this.studentIndex = studentIndex;
-			}
 
-			@Override
-			public void onClick(View v) {
-				dg.studentIndex = this.studentIndex;
-				colorStudents();
-			}
-			
-			
-		}
-		
-		public void colorStudents() {
-			for (int i = 0; i < profileCards.length; i++) {
-				// Display the chosen student in a different color.
-				if (i == dg.studentIndex)
-					profileCards[i].setBackgroundResource(R.drawable.dropshadow_yellow_to_blue);
-				else
-					profileCards[i].setBackgroundResource(R.drawable.dropshadow_white_to_blue);
-			}
-		}
-		
 	}
+
+
+
+	@Override
+	public void onClick(View v) {
+		System.out.println(v.getId());
+		Intent intent = new Intent (this, ClassSwipeActivity.class);
+		intent.putExtra("classCount", classCount);
+		intent.putExtra("classIndex", v.getId());
+		intent.putExtra("termIndex", CURRENT_TERM_INDEX);
+		startActivity(intent);
+	}
+
+
 	
 }

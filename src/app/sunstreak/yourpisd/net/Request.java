@@ -26,12 +26,11 @@ import android.graphics.BitmapFactory;
 
 public class Request {
 	
+	static String redirectLocation = "";
 	public static final String USER_AGENT = "yourPISD/1.0 (Android " + android.os.Build.VERSION.RELEASE + ")";
 	
-	static URLConnection conn;
-	
 	public static String getRedirectLocation() {
-		return conn.getHeaderField("Location");
+		return redirectLocation;
 	}
 
 	public static Object[] sendGet(String url) throws IllegalUrlException, MalformedURLException, IOException {
@@ -61,7 +60,7 @@ public class Request {
 		int numTries = 0;
 		boolean success = false;
 		
-		conn = null;
+		URLConnection conn = null;
 		int responseCode = 0;
 		
 		long startTime = System.currentTimeMillis();
@@ -193,7 +192,7 @@ public class Request {
 		int numTries = 0;
 		boolean success = false;
 		
-		conn = null;
+		URLConnection conn = null;
 		int responseCode = 0;
 		
 		long startTime = System.currentTimeMillis();
@@ -259,6 +258,8 @@ public class Request {
 				
 				success = true;
 				
+				// Bad practice.
+				redirectLocation = conn.getHeaderField("Location");
 				
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();

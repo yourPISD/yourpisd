@@ -7,9 +7,13 @@ import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,323 +23,10 @@ import org.jsoup.nodes.Element;
 
 import android.app.Application;
 import android.graphics.Bitmap;
-import android.util.SparseArray;
 
 
 public class DataGrabber /*implements Parcelable*/ extends Application {
 
-	
-	public class Student {
-		
-		public final int studentId;
-		public final String name;
-		JSONArray classList;
-		int[][] gradeSummary;
-		int[] classIds;
-		int[] classMatch;
-		SparseArray<SparseArray<JSONObject>> classGrades = new SparseArray<SparseArray<JSONObject>>();
-//		Map<Integer[], JSONObject> classGrades = new HashMap<Integer[], JSONObject>();
-		Bitmap studentPictureBitmap;
-		
-		public Student (int studentId, String studentName) {
-			this.studentId = studentId;
-			this.name = studentName;
-		}
-		
-		public void getClassList() throws IOException {
-			
-			String postParams = "{\"studentId\":\"" + studentId + "\"}";
-
-			ArrayList<String[]> requestProperties = new ArrayList<String[]>();
-			requestProperties.add(new String[] {"Content-Type", "application/json"});
-			
-			Object[] init = Request.sendPost(
-					"https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/InternetViewerService.ashx/Init?PageUniqueId=" + pageUniqueId,
-					cookies,
-					requestProperties, 
-					true, 
-					postParams);
-
-			String response = (String) init[0];
-			int responseCode = (Integer) init[1];
-			cookies = (ArrayList<String>) init[2];
-			
-			try {
-				classList = (new JSONObject(response)).getJSONArray("classes");
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-			
-		}
-		
-		/**
-		 * Uses internet every time. 
-		 * @throws JSONException
-		 */
-		public int[][] loadGradeSummary () throws JSONException {
-			try {
-				String classId = classList.getJSONObject(0).getString("enrollmentId");
-				String termId = classList.getJSONObject(0).getJSONArray("terms").getJSONObject(0).getString("termId");
-
-				String url = "https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/GradeSummary.aspx?" + 
-						"&EnrollmentId=" + 	classId + 
-						"&TermId=" + termId + 
-						"&ReportType=0&StudentId=" + studentId;
-
-
-
-				Object[] summary = Request.sendGet(url,	cookies);
-				String response = (String) summary[0];
-				int responseCode = (Integer) summary[1];
-				cookies = (ArrayList<String>) summary[2];
-
-				if (responseCode != 200)
-					System.out.println("Response code: " + responseCode);
-				
-				/*
-				 * puts averages in classList, under each term.
-				 */
-				Element doc = Jsoup.parse(response);
-				gradeSummary = Parser.gradeSummary(doc, classList);
-
-				return gradeSummary;
-			} catch (IOException e) {
-				e.printStackTrace();
-				return null;
-			} catch (IllegalUrlException e) {
-				e.printStackTrace();
-				return null;
-			}
-		}
-		
-		
-		public int[] getClassIds() {
-			if (classIds != null)
-				return classIds;
-
-			if (classList == null) {
-				System.out.println("You didn't login!");
-				return classIds;
-			}
-			try {
-				classIds = new int[classList.length()];
-				for (int i = 0; i < classList.length(); i++) {
-					classIds[i] = classList.getJSONObject(i).getInt("classId");
-				}
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-			return classIds;
-		}
-		//	
-		public int[] getTermIds( int classId ) throws JSONException {
-			for (int i = 0; i < classList.length(); i++) {
-				if (classList.getJSONObject(i).getInt("classId") == classId) {
-					JSONArray terms = classList.getJSONObject(i).getJSONArray("terms");
-					int[] termIds = new int[terms.length()];
-					for (int j = 0; j < terms.length(); j++) {
-						termIds[j] = terms.getJSONObject(j).getInt("termId");
-					}
-					return termIds;
-				}
-			}
-			//if class not found.
-			return null;
-		}
-
-		public int getTermCount (int index) throws JSONException {
-			return classList.getJSONObject(index).getJSONArray("terms").length();
-		}
-		
-		
-		public String getDetailedReport (int classId, int termId, int studentId) throws MalformedURLException, IllegalUrlException, IOException {
-
-
-			String url = "https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/StudentAssignments.aspx?" + 
-					"&EnrollmentId=" + 	classId + 
-					"&TermId=" + termId + 
-					"&ReportType=0&StudentId=" + studentId;
-
-
-
-
-
-			Object[] report = Request.sendGet(url,	cookies);
-			String response = (String) report[0];
-			int responseCode = (Integer) report[1];
-			cookies = (ArrayList<String>) report[2];
-
-			if (responseCode != 200) {
-				System.out.println("Response code: " + responseCode);
-			}
-			return response;
-		}
-
-
-
-		public int[][] getGradeSummary () {
-			if (gradeSummary == null)
-				try {
-					loadGradeSummary();
-				} catch (JSONException e) {
-					return null;
-				}
-			return gradeSummary;
-		}
-
-		public void putClassGrade (int classIndex, int termIndex, JSONObject classGrade) {
-			if (classGrades.get(classIndex) == null)
-				classGrades.put(classIndex, new SparseArray<JSONObject>() );
-			
-			classGrades.get(classIndex).put(termIndex, classGrade);
-		}
-		
-		
-		public boolean hasClassGrade (int classIndex, int termIndex) {
-			try {
-				classGrades.get(classIndex).get(termIndex);
-				return true;
-			} catch (NullPointerException e) {
-				return false;
-			}
-		}
-
-		public JSONObject getClassGrade( int classIndex, int termIndex )  {
-
-			String html = "";
-			
-			try {
-				return classGrades.get(classIndex).get(termIndex);
-			} catch (NullPointerException e) {
-				// Keep going
-			}
-
-			try {
-				int classId = getClassIds()[classIndex];
-				int termId = getTermIds(classId)[termIndex];
-
-				html = getDetailedReport(classId, termId, studentId);
-
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (IllegalUrlException e) {
-				e.printStackTrace();
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-
-
-
-
-			//Parse the teacher name if not already there.
-			try {
-				classList.getJSONObject(classIndex).getString("teacher");
-			} catch (JSONException e) {
-				// Teacher was not found.
-				String[] teacher = Parser.teacher(html);
-				try {
-					classList.getJSONObject(classIndex).put("teacher", teacher[0]);
-					classList.getJSONObject(classIndex).put("teacherEmail", teacher[1]);
-				} catch (JSONException f) {
-					e.printStackTrace();
-				}
-			}
-
-			JSONObject classGrade; 
-
-			try {
-				classGrade = classList.getJSONObject( classIndex );
-
-				JSONArray termGrades = Parser.detailedReport(html);
-				Object[] termCategory = Parser.termCategoryGrades(html);
-				JSONArray termCategoryGrades = (JSONArray) termCategory[0];
-
-				if ((Integer)termCategory[1] != -1)
-					classGrade.getJSONArray("terms").getJSONObject(termIndex).put("average", termCategory[1]);
-
-				classGrade.getJSONArray("terms").getJSONObject(termIndex).put("grades", termGrades);
-				classGrade.getJSONArray("terms").getJSONObject(termIndex).put("categoryGrades", termCategoryGrades);
-				
-				if (classGrades.get(classIndex) == null)
-					classGrades.put(classIndex, new SparseArray<JSONObject>());
-				
-				classGrades.get(classIndex).put(termIndex, classGrade);
-				return classGrade;
-				
-				
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-			
-			return null;
-		}
-		
-		public String getClassName (int classIndex) {
-			if (classList == null)
-				return "null";
-			else
-				try {
-					return classList.getJSONObject(classIndex).getString("title");
-				} catch (JSONException e) {
-					e.printStackTrace();
-					return "jsonException";
-				}
-		}
-
-		private void loadStudentPicture() {
-			ArrayList<String[]> requestProperties = new ArrayList<String[]>();
-			requestProperties.add(new String[] {"Content-Type", "image/jpeg"} );
-
-
-			Object[] response = Request.getBitmap("https://gradebook.pisd.edu/Pinnacle/Gradebook/common/picture.ashx?studentId=" + studentId, 
-					cookies,
-					requestProperties,
-					true);
-
-			studentPictureBitmap = (Bitmap) response[0];
-			int responseCode = (Integer) response[1];
-			cookies = (ArrayList<String>) cookies;
-		}
-
-		public Bitmap getStudentPicture() {
-			if (studentPictureBitmap == null)
-				loadStudentPicture();
-
-			return studentPictureBitmap;
-		}
-
-		public void matchClasses() {
-			
-			getClassIds();
-			
-			int[][] gradeSummary = getGradeSummary();
-
-			int classCount = gradeSummary.length;
-			
-
-			classMatch = new int[classCount];
-			int classesMatched = 0;
-
-			while (classesMatched < classCount) {
-				for (int i = classesMatched; i < classIds.length; i++) {
-					if (classIds[i] == gradeSummary[classesMatched][0]) {
-						classMatch[classesMatched] = i;
-						classesMatched++;
-						break;
-					}
-				}
-			}
-		}
-		
-
-
-		public int[] getClassMatch () {
-			if (classMatch == null)
-				matchClasses();
-			return classMatch;
-		}
-		
-	}
 	Domain domain;
 	String username;
 	String password;
@@ -347,24 +38,21 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 	int gradebookLogin = 0;
 
 	ArrayList<String> cookies = new ArrayList<String>();
-	
-	/*
 	JSONArray classList = null;
 	int[][] gradeSummary = null;
+	// Class -> Term
+	//	Date[][] lastUpdated;
 	int studentId = 0;
 	int[] classIds;
-	int[] classMatch;
 	/**
 	 * key is of the form {classIndex, termIndex}.
-	 *
+	 */
 	Map<Integer[], JSONObject> classGrades = new HashMap<Integer[], JSONObject>();
 	//	SparseArray<JSONObject> classGrades = new SparseArray<JSONObject>();
 	String studentName = "";
 	Bitmap studentPictureBitmap;
-	*/
 
-	List<Student> students = new ArrayList<Student>();
-	public int studentIndex = 0;
+	int[] classMatch;
 
 	public void clearData () {
 		domain = null;
@@ -376,7 +64,6 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 		editureLogin = 0;
 		gradebookLogin = 0;
 		cookies = new ArrayList<String>();
-		/*
 		classList = null;
 		gradeSummary = null;
 		studentId = 0;
@@ -384,9 +71,6 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 		classGrades = new HashMap<Integer[], JSONObject>();
 		studentName = "";
 		studentPictureBitmap = null;
-		*/
-		students = new ArrayList<Student>();
-		studentIndex = 0;
 	}
 
 	public void setData (Domain domain, String username, String password) {
@@ -401,18 +85,6 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 		//acceptAllCertificates();
 	}
 
-	public Domain getDomain() {
-		return domain;
-	}
-
-	public String getUsername() {
-		return username;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
 	/**
 	 * Logs in to Editure/New Age portal. Retrieves passthroughCredentials.
 	 * Precondition: username and password are defined.
@@ -424,11 +96,9 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 	 * @throws ExecutionException
 	 * @return 1 if success, -1 if parent failure, -2 if student failure, 0 if domain value is not 0 or 1
 	 */
-	public int login()
+	public int login(/*Domain dom, String username, String password*/)
 			throws MalformedURLException, IllegalUrlException, IOException, PISDException, InterruptedException, ExecutionException {
 
-
-		
 		String response;
 		int responseCode;
 
@@ -542,7 +212,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 	 * @throws IOException
 	 * @throws PISDException
 	 */
-	public boolean loginPassthrough(String userType, String uID, String email, String password) throws MalformedURLException, IllegalUrlException, IOException, PISDException {
+	public boolean loginGradebook(String userType, String uID, String email, String password) throws MalformedURLException, IllegalUrlException, IOException, PISDException {
 
 
 
@@ -564,7 +234,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 
 
 
-		gradebookCredentials = Parser.getGradebookCredentials(response);
+		String[] gradebookCredentials = Parser.getGradebookCredentials(response);
 
 
 		/*
@@ -573,18 +243,16 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 		if (Parser.accessGrantedGradebook(gradebookCredentials)) {
 			System.out.println("Gradebook access granted!");
 			gradebookLogin = 1;
-			return loginGradebook();
 		}
 		else {
 			System.out.println("Bad username/password 2!");
 			gradebookLogin--;
 			return false;
 		}
-	}
 
 
-	public boolean loginGradebook () throws MalformedURLException, IllegalUrlException, IOException {
-		String postParams = "userId=" + gradebookCredentials[0] + "&password=" + gradebookCredentials[1];
+
+		postParams = "userId=" + gradebookCredentials[0] + "&password=" + gradebookCredentials[1];
 
 
 
@@ -592,8 +260,8 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 				postParams,
 				cookies);
 
-		String response = (String) link[0];
-		int responseCode = (Integer) link[1];
+		response = (String) link[0];
+		responseCode = (Integer) link[1];
 		cookies = (ArrayList<String>) link[2];
 
 
@@ -603,35 +271,354 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 				postParams,
 				cookies);
 
-		response = (String) defaultAspx[0];
-		responseCode = (Integer) defaultAspx[1];
-		cookies = (ArrayList<String>) defaultAspx[2];
-
-		for (String[] s : Parser.parseStudents(response)) {
-			Student st = new Student(Integer.parseInt(s[0]), s[1]);
-			students.add(st);
-		}
+		response = (String) link[0];
+		responseCode = (Integer) link[1];
+		cookies = (ArrayList<String>) link[2];
 
 
-		// Retrieves the pageUniqueID from html of Default.aspx.
+
+		/*
+		 * retrieves the pageUniqueID from html of link.aspx.
+		 * retrieves the student id from a cookie, PinnacleWeb.StudentId=###
+		 * 
+		 */
 		pageUniqueId = Parser.pageUniqueId(response);
-
+		// throws PISDException
+		studentId = Parser.studentIdPinnacle(cookies);
 
 		if (pageUniqueId == null) {
 			System.out.println("Some error. pageUniqueId is null");
 			return false;
 		}
-		
-		for (Student st : students) {
-			st.getClassList();
+
+		postParams = "{\"studentId\":\"" + studentId + "\"}";
+
+
+		/*
+		 * get the JSON with list of classes, terms, and reports
+		 */
+
+		ArrayList<String[]> requestProperties = new ArrayList<String[]>();
+
+		//required for json files
+		requestProperties.add(new String[] {"Content-Type", "application/json"});
+
+
+
+
+		Object[] init = Request.sendPost(
+				"https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/InternetViewerService.ashx/Init?PageUniqueId=" + pageUniqueId,
+				cookies,
+				requestProperties, 
+				true, 
+				postParams);
+
+		response = (String) init[0];
+		responseCode = (Integer) init[1];
+		cookies = (ArrayList<String>) init[2];
+
+		//Store the JSON.
+		try {
+			setClassList(response);
+		} catch (JSONException e) {
+			e.printStackTrace();
 		}
+
 
 		return true;
 	}
 
+	public void setClassList(String json) throws JSONException {
 
-	
+		JSONObject j = new JSONObject(json);
+		classList = j.getJSONArray("classes");
+	}
 
+
+	//Stuff to be implemented
+	//	public String getLastUpdated() {
+	//		
+	//	}
+	//	
+
+	public int[] getClassIds() {
+		if (classIds != null)
+			return classIds;
+
+		if (classList == null) {
+			System.out.println("You didn't login!");
+			return classIds;
+		}
+		try {
+			classIds = new int[classList.length()];
+			for (int i = 0; i < classList.length(); i++) {
+				classIds[i] = classList.getJSONObject(i).getInt("classId");
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return classIds;
+	}
+	//	
+	public int[] getTermIds( int classId ) throws JSONException {
+		for (int i = 0; i < classList.length(); i++) {
+			if (classList.getJSONObject(i).getInt("classId") == classId) {
+				JSONArray terms = classList.getJSONObject(i).getJSONArray("terms");
+				int[] termIds = new int[terms.length()];
+				for (int j = 0; j < terms.length(); j++) {
+					termIds[j] = terms.getJSONObject(j).getInt("termId");
+				}
+				return termIds;
+			}
+		}
+		//if class not found.
+		return null;
+	}
+
+	public int getTermCount (int index) throws JSONException {
+		return classList.getJSONObject(index).getJSONArray("terms").length();
+	}
+
+	//	
+	//	public int[] getDetailedReport( int classId, int termId ) {
+	//		
+	//	}
+
+	public String getDetailedReport (int classId, int termId, int studentId) throws MalformedURLException, IllegalUrlException, IOException {
+
+
+		String url = "https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/StudentAssignments.aspx?" + 
+				"&EnrollmentId=" + 	classId + 
+				"&TermId=" + termId + 
+				"&ReportType=0&StudentId=" + studentId;
+
+
+
+
+
+		Object[] report = Request.sendGet(url,	cookies);
+		String response = (String) report[0];
+		int responseCode = (Integer) report[1];
+		cookies = (ArrayList<String>) report[2];
+
+		if (responseCode != 200) {
+			System.out.println("Response code: " + responseCode);
+		}
+		return response;
+	}
+
+	/**
+	 * Uses internet every time.
+	 * @throws ExecutionException 
+	 * @throws InterruptedException 
+	 * 
+	 */
+	public int[][] loadGradeSummary () throws JSONException {
+		try {
+			String classId = classList.getJSONObject(0).getString("enrollmentId");
+			String termId = classList.getJSONObject(0).getJSONArray("terms").getJSONObject(0).getString("termId");
+
+			String url = "https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/GradeSummary.aspx?" + 
+					"&EnrollmentId=" + 	classId + 
+					"&TermId=" + termId + 
+					"&ReportType=0&StudentId=" + studentId;
+
+
+
+			Object[] summary = Request.sendGet(url,	cookies);
+			String response = (String) summary[0];
+			int responseCode = (Integer) summary[1];
+			cookies = (ArrayList<String>) summary[2];
+
+			if (responseCode != 200) {
+				System.out.println("Response code: " + responseCode);
+			}
+
+			/*
+			 * puts averages in classList, under each term.
+			 */
+			Element doc = Jsoup.parse(response);
+			gradeSummary = Parser.gradeSummary(doc, classList);
+			studentName = Parser.studentName(doc);
+
+			return gradeSummary;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		} catch (IllegalUrlException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public int[][] getGradeSummary () {
+		if (gradeSummary == null)
+			try {
+				loadGradeSummary();
+			} catch (JSONException e) {
+				return null;
+			}
+		return gradeSummary;
+	}
+
+	public void putClassGrade (int classIndex, int termIndex, JSONObject classGrade) {
+		classGrades.put(new Integer[] {classIndex, termIndex}, classGrade);
+	}
+
+	//	public JSONObject getClassGrade (int termIndex, int classIndex) {
+	//		return classGrades.get(new Integer[] {termIndex, classIndex});
+	//	}
+
+	public boolean hasClassGrade (int classIndex, int termIndex) {
+		return classGrades.containsKey(new Integer[] {classIndex, termIndex});
+	}
+
+	public JSONObject getClassGrade( int classIndex, int termIndex )  {
+
+		String html = "";
+
+		try {
+			if (classGrades.get(classIndex) != null)
+				return classGrades.get(classIndex);
+
+
+			int classId = getClassIds()[classIndex];
+			int termId = getTermIds(classId)[termIndex];
+
+			html = getDetailedReport(classId, termId, studentId);
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (IllegalUrlException e) {
+			e.printStackTrace();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
+
+
+
+		//Parse the teacher name if not already there.
+		try {
+			classList.getJSONObject(classIndex).getString("teacher");
+		} catch (JSONException e) {
+			// Teacher was not found.
+			String[] teacher = Parser.teacher(html);
+			try {
+				classList.getJSONObject(classIndex).put("teacher", teacher[0]);
+				classList.getJSONObject(classIndex).put("teacherEmail", teacher[1]);
+			} catch (JSONException f) {
+				e.printStackTrace();
+			}
+		}
+
+		JSONObject classGrade; 
+
+		try {
+			classGrade = classList.getJSONObject( classIndex );
+
+			JSONArray termGrades = Parser.detailedReport(html);
+			Object[] termCategory = Parser.termCategoryGrades(html);
+			JSONArray termCategoryGrades = (JSONArray) termCategory[0];
+
+			if ((Integer)termCategory[1] != -1)
+				classGrade.getJSONArray("terms").getJSONObject(termIndex).put("average", termCategory[1]);
+
+			classGrade.getJSONArray("terms").getJSONObject(termIndex).put("grades", termGrades);
+			classGrade.getJSONArray("terms").getJSONObject(termIndex).put("categoryGrades", termCategoryGrades);
+			
+			classGrades.put(new Integer[] {classIndex, termIndex}, classGrade);
+			return classGrade;
+			
+			
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+
+
+	//	public Map<Integer,JSONObject> getAllClassGrades() throws JSONException, InterruptedException, ExecutionException, MalformedURLException, IllegalUrlException, IOException {
+	//		if (classList == null)
+	//			return null;
+	//		if (classIds == null)
+	//			getClassIds();
+	////		if (classGrades == null)
+	////			classGrades = classList;
+	//		
+	//		for (int i = 0; i < classIds.length; i++) {
+	//			for (int j = 0; j < getTermIds(classIds[i]).length; j++) {
+	//				getClassGrade (i , j);
+	//			}
+	//		}
+	//		
+	//		return classGrades;
+	//	}
+
+	/*
+	public JSONArray getAllClassGrades () throws JSONException {
+
+//		if (classList==null)
+//			try {
+//				login();
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//				return null;
+//			}
+
+
+		classGrades = classList;
+
+		//makes sure that classIds is not null.
+		getClassIds();
+		// fetch each class
+		for (int i = 0; i < classIds.length; i++) {
+			int classId = classIds[i];
+			int[] termIds = getTermIds(classId);
+			JSONArray grades = new JSONArray();
+
+			// fetch each term 
+			for (int j = 0; j < termIds.length; j++) {
+				int termId = termIds[j];
+				String html = getDetailedReport(classId, termId, studentId);
+				//Parse the teacher name. Only do this once per class.
+				if (j==0) {
+					String[] teacher = Parser.teacher(html);
+					// System.out.println(Arrays.toString(teacher));
+					// put the teacher and teacherEmail into the class object.
+					classGrades.getJSONObject(i).put("teacher", teacher[0]);
+					classGrades.getJSONObject(i).put("teacherEmail", teacher[1]);
+				}
+
+				JSONArray termGrades = Parser.detailedReport(html);
+				Object[] termCategory = Parser.termCategoryGrades(html);
+				JSONArray termCategoryGrades = (JSONArray) termCategory[0];
+
+				if ((Double)termCategory[1] != -1)
+					classGrades.getJSONObject(i).getJSONArray("terms").getJSONObject(j).put("average", termCategory[1]);
+				classGrades.getJSONObject(i).getJSONArray("terms").getJSONObject(j).put("grades", termGrades);
+				classGrades.getJSONObject(i).getJSONArray("terms").getJSONObject(j).put("categoryGrades", termCategoryGrades);
+			}
+
+		}
+
+		Date d = Calendar.getInstance().getTime();
+
+		// Gives a last updated time for each CLASS, not each TERM.
+		lastUpdated = new Date[classIds.length][];
+		for (int i = 0; i < lastUpdated.length; i++) {
+			lastUpdated[i] = new Date[getTermCount(i)];
+			for (int j = 0; j < lastUpdated[i].length; j++) {
+				lastUpdated[i][j] = d;
+			}
+		}
+
+		// Possibly do it this way? The only problem is inconsistent term count.
+		// java.util.Arrays.fill(lastUpdated, d);
+		return classGrades;
+	}
+	 */
 
 	/**
 	 * Temporary code. In use because login1.mypisd.net has an expired certificate. with new portal website, should not be necessary.
@@ -678,8 +665,52 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 		return passthroughCredentials;
 	}
 
-	public List<Student> getStudents() {
-		return students;
+
+
+	public String getClassName (int classIndex) {
+		if (classList == null)
+			return "null";
+		else
+			try {
+				return classList.getJSONObject(classIndex).getString("title");
+			} catch (JSONException e) {
+				e.printStackTrace();
+				return "jsonException";
+			}
+	}
+
+	public String getStudentName() {
+		return studentName;
+	}
+
+	private void loadStudentPicture() {
+		ArrayList<String[]> requestProperties = new ArrayList<String[]>();
+		requestProperties.add(new String[] {"Content-Type", "image/jpeg"} );
+
+
+		Object[] response = Request.getBitmap("https://gradebook.pisd.edu/Pinnacle/Gradebook/common/picture.ashx?studentId=" + studentId, 
+				cookies,
+				requestProperties,
+				true);
+
+		studentPictureBitmap = (Bitmap) response[0];
+		int responseCode = (Integer) response[1];
+		cookies = (ArrayList<String>) cookies;
+	}
+
+	public Bitmap getStudentPicture() {
+		if (studentPictureBitmap == null)
+			loadStudentPicture();
+
+		return studentPictureBitmap;
+	}
+
+	public void setClassMatch (int[] classMatch) {
+		this.classMatch = classMatch;
+	}
+
+	public int[] getClassMatch () {
+		return classMatch;
 	}
 
 }

@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:background="@drawable/dropshadow_white_to_blue"
+    android:background="@drawable/grade_summary_feedback"
     android:paddingTop="10dp"
     android:paddingBottom="15dp"
     android:clickable="true"
