@@ -57,6 +57,7 @@ public class LoginActivity extends Activity {
 	private UserLoginTask mAuthTask = null;
 
 	// Values for email and password at the time of the login attempt.
+	private Domain mDomain;
 	private String mEmail;
 	private String mPassword;
 	private String encryptedPass;
@@ -78,23 +79,41 @@ public class LoginActivity extends Activity {
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.activity_login);
+
+		
+		mLoginFormView = findViewById(R.id.login_form);
+		mLoginStatusView = findViewById(R.id.login_status);
+		mLoginStatusMessageView = (TextView) findViewById(R.id.login_status_message);
+		
+		
+		try {
+
+			if (getIntent().getExtras().getBoolean("Refresh") == true) {
+				mDomain = ((DataGrabber) getApplication()).getDomain();
+				mEmail = ((DataGrabber) getApplication()).getUsername();
+				mPassword = ((DataGrabber) getApplication()).getPassword();
+				
+				showProgress(true);
+				mAuthTask = new UserLoginTask();
+				mAuthTask.execute((Void) null);
+				
+				InputMethodManager imm = 
+						(InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow(mPasswordView.getWindowToken(), 0);
+			}
+		} catch (NullPointerException e) {
+			// Keep going.
+		}
+
 		final SharedPreferences sharedPrefs = this.getPreferences(Context.MODE_PRIVATE);
 		PackageInfo pInfo;
-//		try {
-//			pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-//			String version = pInfo.versionName;
-			if(sharedPrefs.getBoolean("patched", false))
-			{
+
+			if (sharedPrefs.getBoolean("patched", false)) {
+				SharedPreferences.Editor editor = sharedPrefs.edit();
+				editor.remove("password");
+				editor.putBoolean("patched", true);
+				editor.commit();
 			}
-			else
-			{
-				sharedPrefs.edit().remove("password");
-				sharedPrefs.edit().putBoolean("patched", true);
-			}
-//		} catch (NameNotFoundException e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
 
 		
 		if ( ! sharedPrefs.getBoolean("AcceptedUserAgreement", false) ) {
@@ -201,7 +220,7 @@ public class LoginActivity extends Activity {
 		
 		//Load stored username/password
 		mEmailView.setText(sharedPrefs.getString("email", mEmail));
-		mPasswordView.setText(new String(Base64.decode(sharedPrefs.getString("password", "")
+		mPasswordView.setText(new String(Base64.decode(sharedPrefs.getString("e_password", "")
 				, Base64.DEFAULT )));
 //		mPasswordView.setText(sharedPrefs.getString("password", ""));
 		
@@ -303,7 +322,7 @@ public class LoginActivity extends Activity {
 			SharedPreferences.Editor editor = sharedPrefs.edit();
 			editor.putInt("domain", mDomainSpinner.getSelectedItemPosition());
 			editor.putString("email", mEmail);
-			editor.putString("password", mRememberPassword? encryptedPass: "");
+			editor.putString("e_password", mRememberPassword? encryptedPass: "");
 			editor.putBoolean("remember_password", mRememberPassword);
 //			editor.putBoolean("auto_login", mAutoLogin);
 			editor.commit();
@@ -415,39 +434,39 @@ public class LoginActivity extends Activity {
 							boolean loginAttempt = false;
 							int counter = 0;
 							do {
-								if (true /*counter > 0*/) {
+								
 									try {
 										Thread.sleep(3500);
 										System.out.println("sleeping 3.5s");
 									} catch (InterruptedException e) {
 										e.printStackTrace();
 									}
-								}
-								loginAttempt = dg.loginGradebook(ptc[0], ptc[1], mEmail, mPassword);
-								counter++;
-							} while (counter < 5 && loginAttempt == false);
+
 							
-							// If even 5 tries was not enough and still getting NotSet.
-							if (loginAttempt == false)
-								return -2;
-						}
-						
-						
-						// Update the loading screen: Downloading class grades...
-						publishProgress(2);
+							loginAttempt = dg.loginGradebook(ptc[0], ptc[1], mEmail, mPassword);
+							counter++;
+						} while (counter < 7 && loginAttempt == false);
 
-						
-						
-						
-						dg.loadGradeSummary();
-						System.out.println(dg.getGradeSummary() == null ? "null" : "not null");
+						// If even 5 tries was not enough and still getting NotSet.
+						if (loginAttempt == false)
+							return -2;
+					}
 
-						// Store class grades in Shared Preferences.
 
-				    } else {
-				    	System.err.println("No internet connection");
-						return -3;
-				    }
+					// Update the loading screen: Downloading class grades...
+					publishProgress(2);
+
+
+
+					for (DataGrabber.Student st : dg.getStudents()) {
+						st.loadGradeSummary();
+						st.matchClasses();
+					}
+
+				} else {
+					System.err.println("No internet connection");
+					return -3;
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

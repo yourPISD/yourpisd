@@ -36,21 +36,22 @@ public final class R {
         public static final int background_with_shadow=0x7f020000;
         public static final int divider=0x7f020001;
         public static final int dropshadow=0x7f020002;
-        public static final int dropshadowblue=0x7f020003;
-        public static final int grade_summary_feedback=0x7f020004;
-        public static final int ic_action_next=0x7f020005;
-        public static final int ic_action_prev=0x7f020006;
-        public static final int ic_alerts_and_states_warning=0x7f020007;
-        public static final int ic_cool_icon=0x7f020008;
-        public static final int ic_launcher=0x7f020009;
-        public static final int navigation_collapse=0x7f02000a;
-        public static final int navigation_expand=0x7f02000b;
-        public static final int navigation_next_item=0x7f02000c;
-        public static final int navigation_previous_item=0x7f02000d;
-        public static final int shadow=0x7f02000e;
+        public static final int dropshadow_white_to_blue=0x7f020003;
+        public static final int dropshadow_yellow=0x7f020004;
+        public static final int dropshadow_yellow_to_blue=0x7f020005;
+        public static final int dropshadowblue=0x7f020006;
+        public static final int ic_action_next=0x7f020007;
+        public static final int ic_action_prev=0x7f020008;
+        public static final int ic_alerts_and_states_warning=0x7f020009;
+        public static final int ic_cool_icon=0x7f02000a;
+        public static final int ic_launcher=0x7f02000b;
+        public static final int navigation_collapse=0x7f02000c;
+        public static final int navigation_expand=0x7f02000d;
+        public static final int navigation_next_item=0x7f02000e;
+        public static final int navigation_previous_item=0x7f02000f;
+        public static final int shadow=0x7f020010;
     }
     public static final class id {
-        public static final int TextView01=0x7f0a0019;
         public static final int action_forgot_password=0x7f0a0020;
         public static final int action_settings=0x7f0a001f;
         public static final int category_name=0x7f0a000f;
@@ -85,6 +86,7 @@ public final class R {
         public static final int sign_in_button=0x7f0a000a;
         public static final int six_weeks_average=0x7f0a000d;
         public static final int teacher_name=0x7f0a000c;
+        public static final int welcome=0x7f0a0019;
     }
     public static final class layout {
         public static final int activity_class_swipe=0x7f030000;
@@ -99,9 +101,10 @@ public final class R {
         public static final int main_grade_summary=0x7f030009;
         public static final int main_grade_summary_linear_layout=0x7f03000a;
         public static final int main_grade_summary_score=0x7f03000b;
-        public static final int tab_new=0x7f03000c;
-        public static final int tab_summary=0x7f03000d;
-        public static final int tab_year_summary=0x7f03000e;
+        public static final int main_student_name_if_multiple_students=0x7f03000c;
+        public static final int tab_new=0x7f03000d;
+        public static final int tab_summary=0x7f03000e;
+        public static final int tab_year_summary=0x7f03000f;
     }
     public static final class menu {
         public static final int class_swipe_actions=0x7f090000;
@@ -110,44 +113,46 @@ public final class R {
         public static final int main_activity=0x7f090003;
     }
     public static final class string {
-        public static final int action_forgot_password=0x7f07001a;
+        public static final int action_forgot_password=0x7f07001c;
         public static final int action_settings=0x7f070001;
-        public static final int action_sign_in_register=0x7f070018;
-        public static final int action_sign_in_short=0x7f070019;
+        public static final int action_sign_in_register=0x7f07001a;
+        public static final int action_sign_in_short=0x7f07001b;
         public static final int app_name=0x7f070000;
-        public static final int auto_login=0x7f070023;
-        public static final int class_swipe_loading=0x7f070009;
-        public static final int credits=0x7f07000a;
-        public static final int daily=0x7f070006;
-        public static final int default_category_name=0x7f07000f;
-        public static final int default_description=0x7f07000e;
-        public static final int error_field_required=0x7f070021;
-        public static final int error_incorrect_password=0x7f070020;
-        public static final int error_invalid_email=0x7f07001e;
-        public static final int error_invalid_password=0x7f07001f;
-        public static final int hello_world=0x7f07000d;
-        public static final int log_out=0x7f07000b;
-        public static final int login_progress_downloading_data=0x7f07001d;
-        public static final int login_progress_gradebook=0x7f07001c;
-        public static final int login_progress_mypisd=0x7f07001b;
-        public static final int major=0x7f070007;
-        public static final int next_six_weeks=0x7f070011;
-        public static final int previous_six_weeks=0x7f070010;
+        public static final int auto_login=0x7f070025;
+        public static final int class_swipe_loading=0x7f070008;
+        public static final int credits=0x7f070009;
+        public static final int daily=0x7f070005;
+        public static final int default_category_name=0x7f070011;
+        public static final int default_description=0x7f070010;
+        public static final int error_field_required=0x7f070023;
+        public static final int error_incorrect_password=0x7f070022;
+        public static final int error_invalid_email=0x7f070020;
+        public static final int error_invalid_password=0x7f070021;
+        public static final int hello_world=0x7f07000c;
+        public static final int log_out=0x7f07000a;
+        public static final int login_progress_downloading_data=0x7f07001f;
+        public static final int login_progress_gradebook=0x7f07001e;
+        public static final int login_progress_mypisd=0x7f07001d;
+        public static final int main_section_0_title=0x7f070002;
+        public static final int main_section_2_title=0x7f070003;
+        public static final int major=0x7f070006;
+        public static final int next_six_weeks=0x7f070013;
+        public static final int previous_six_weeks=0x7f070012;
         /**  Strings related to login 
          */
-        public static final int prompt_email=0x7f070016;
-        public static final int prompt_password=0x7f070017;
-        public static final int remember_password=0x7f070022;
-        public static final int teacher_name=0x7f070005;
-        public static final int title_activity_class_swipe=0x7f070008;
-        public static final int title_activity_credit=0x7f07000c;
-        public static final int title_activity_login=0x7f070012;
-        public static final int title_section1=0x7f070002;
-        public static final int title_section2=0x7f070003;
-        public static final int title_section3=0x7f070004;
-        public static final int user_agreement=0x7f070015;
-        public static final int user_agreement_old=0x7f070014;
-        public static final int user_agreement_title=0x7f070013;
+        public static final int prompt_email=0x7f070018;
+        public static final int prompt_password=0x7f070019;
+        public static final int refresh=0x7f07000d;
+        public static final int remember_password=0x7f070024;
+        public static final int teacher_name=0x7f070004;
+        public static final int title_activity_class_swipe=0x7f070007;
+        public static final int title_activity_credit=0x7f07000b;
+        public static final int title_activity_login=0x7f070014;
+        public static final int user_agreement=0x7f070017;
+        public static final int user_agreement_old=0x7f070016;
+        public static final int user_agreement_title=0x7f070015;
+        public static final int welcome=0x7f07000e;
+        public static final int welcome_multiple_students=0x7f07000f;
     }
     public static final class style {
         /** 

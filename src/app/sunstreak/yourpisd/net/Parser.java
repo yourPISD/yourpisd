@@ -297,7 +297,13 @@ public class Parser {
 			classAverages.add(getClassId(row));
 			
 			for (int j = 0; j < 8; j++) {
-				int col = termToColumn(j);
+				int col = 0;
+				try {
+					col = termToColumn(j);
+				} catch (IndexOutOfBoundsException e) {
+					continue;
+				}
+				
 				Element column = columns.get(col);
 				String text = column.text();
 				classAverages.add(text.equals("") ? -1 : Integer.parseInt(column.text()));
@@ -400,6 +406,41 @@ public class Parser {
 			}
 //		}
 		return null;
+	}
+	
+
+	/**
+	 * 
+	 * @param html the source code for ANY page in Gradebook (usually Default.aspx)
+	 * @return
+	 */
+	public static List<String[]> parseStudents (String html) {
+		List<String[]> list = new ArrayList<String[]>();
+		
+		Element doc = Jsoup.parse(html);
+		Element studentList = doc.getElementById("ctl00_ctl00_ContentPlaceHolder_uxStudentlist");
+		
+		
+		// Only one student
+		if (studentList.text().isEmpty()) {
+			System.out.println("one student");
+			// {studentId, studentName}
+			list.add(new String[] {doc.getElementById("ctl00_ctl00_ContentPlaceHolder_uxStudentId").attr("value"), 
+					doc.getElementById("ctl00_ctl00_ContentPlaceHolder_uxMultiple").text()});
+			return list;
+		}
+		// Multiple students
+		else {
+			System.out.println("more than one students");
+			for (Element a : studentList.getElementsByTag("a")) {
+				String name = a.text();
+				System.out.println(name);
+				String onClick = a.attr("onClick");
+				String studentId = onClick.substring(onClick.indexOf('\'') + 1, onClick.lastIndexOf('\''));
+				list.add(new String[] {studentId, name});
+			}
+			return list;
+		}
 	}
 	
 }

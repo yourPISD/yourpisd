@@ -17,10 +17,10 @@
             android:background="@color/gray">
 
             <TextView
-                android:id="@+id/TextView01"
+                android:id="@+id/welcome"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Welcome to yourPISD"
+                android:text="@string/welcome"
                 android:textSize="25sp" />
             
         </LinearLayout>

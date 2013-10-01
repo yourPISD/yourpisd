@@ -17,6 +17,7 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -26,7 +27,7 @@ import android.widget.TextView;
 import app.sunstreak.yourpisd.net.DataGrabber;
 
 
-public class MainActivity extends FragmentActivity implements View.OnClickListener {
+public class MainActivity extends FragmentActivity {
 
 	public static final int CURRENT_TERM_INDEX = TermFinder.getCurrentTermIndex();
 	static int classCount;
@@ -53,14 +54,9 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		// Makes sure that there IS a datagrabber to insert. Now, what if there were multiple
-		// versions of DataGrabber....? I wonder what would happen.
-		//		Intent intent = getIntent();
-		//		{
-		//			DataGrabber myDG = (DataGrabber) intent.getParcelableExtra("DataGrabber");
-		//			dg = myDG;
-		//		}
-		dg = ( (DataGrabber) getApplication() );
+
+		dg = (DataGrabber) getApplication();
+
 
 		// Create the adapter that will return a fragment for each of the three
 		// primary sections of the app.
@@ -70,14 +66,43 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		// Set up the ViewPager with the sections adapter.
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 		mViewPager.setAdapter(mSectionsPagerAdapter);
-		// Opens Grade Summary (index 1) on open.
-		mViewPager.setCurrentItem(1);
+
+
+		// For parents with multiple students, show the profile cards first.
+		// If we are coming back from ClassSwipeActivity, go to requested section (should be section #1).
+		if (dg.MULTIPLE_STUDENTS) {
+			if (getIntent().hasExtra("mainActivitySection") )
+				mViewPager.setCurrentItem(getIntent().getExtras().getInt("mainActivitySection"));
+			else
+				mViewPager.setCurrentItem(0);
+		}
+		// Otherwise, show the current six weeks grades list.
+		else
+			mViewPager.setCurrentItem(1);
+
+		mViewPager.setOffscreenPageLimit(2);
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main_activity, menu);
+
+		// Create list of students in Menu.
+		if (dg.MULTIPLE_STUDENTS) {
+			for (int i = 0; i < dg.getStudents().size(); i++) {
+				String name = dg.getStudents().get(i).name;
+				MenuItem item = menu.add(name);
+
+				// Set the currently enabled student un-clickable.
+				if (i == dg.studentIndex)
+					item.setEnabled(false);
+
+				item.setOnMenuItemClickListener(new StudentChooserListener(i));
+				item.setVisible(true);
+			}
+		}
+
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -127,19 +152,27 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		}
 
 		@Override
+		public int getItemPosition(Object object) {
+			return POSITION_NONE; 
+		} 
+
+		@Override
 		public CharSequence getPageTitle(int position) {
 			Locale l = Locale.getDefault();
 			switch (position) {
 			case 0:
-				return "Profile";
+				return getResources().getString(R.string.main_section_0_title);
 			case 1:
-				return TermFinder.Term.values()[CURRENT_TERM_INDEX].name.toUpperCase(l);
+				return TermFinder.Term.values()[CURRENT_TERM_INDEX].name;
 			case 2:
-				return "Semester Summary";
+				return getResources().getString(R.string.main_section_2_title);
 			default:
 				return null;
 			}
 		}
+
+
+
 	}
 
 	/**
@@ -154,8 +187,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		public static final String ARG_OBJECT = "object";
 		private View rootView;
 		private int position;
-
-		LinearLayout card;
+		LinearLayout[] profileCards = new LinearLayout[dg.getStudents().size()];
 
 		public MainActivityFragment() {
 		}
@@ -182,78 +214,110 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
 
 			rootView = inflater.inflate(tabLayout, container, false);
+	
+
+			if (position == 0) {
+
+				LinearLayout bigLayout = (LinearLayout) rootView.findViewById(R.id.overall);
+				
+				if (dg.MULTIPLE_STUDENTS) {
+					TextView instructions = new TextView(getActivity());
+					instructions.setText(R.string.welcome_multiple_students);
+					// Han can you format this better?
+					bigLayout.addView(instructions, 1);
+				}
+
+				profileCards = new LinearLayout[dg.getStudents().size()];
+				
+				for (int i = 0; i < dg.getStudents().size(); i++) {
+
+					profileCards[i] = new LinearLayout(getActivity());
+
+					TextView name = new TextView(getActivity());
+					name.setTextSize(25);
+					name.setText(dg.getStudents().get(i).name);
+
+					profileCards[i].addView(name);
+					profileCards[i].setOnClickListener(new StudentChooserListener(i));
+					
+					profileCards[i].setBackgroundResource(R.drawable.dropshadow);
+
+					bigLayout.addView(profileCards[i]);
+					
+					StudentPictureTask spTask = new StudentPictureTask();
+					spTask.execute(i);
+				}
+
+				if (dg.MULTIPLE_STUDENTS)
+					colorStudents();
+
+			}
 
 			if (position == 1)
 			{
-					    		
+
 				LinearLayout bigLayout = (LinearLayout) rootView.findViewById(R.id.container);
 
+				// Add current student's name
+				if (dg.MULTIPLE_STUDENTS) {
+					LinearLayout studentName = (LinearLayout) inflater.inflate(R.layout.main_student_name_if_multiple_students, bigLayout, false);
+					( (TextView) studentName.findViewById(R.id.name) ).setText(dg.getStudents().get(dg.studentIndex).name);
+					bigLayout.addView(studentName);
+				}
 
-
-				int[][] gradeSummary = dg.getGradeSummary();
+				int[][] gradeSummary = dg.getStudents().get(dg.studentIndex).getGradeSummary();
 
 				classCount = gradeSummary.length;
 				averages = new LinearLayout[classCount];
 
-				int[] classMatch = new int[classCount];
-				int classesMatched = 0;
-
-				while (classesMatched < classCount) {
-					for (int i = classesMatched; i < dg.getClassIds().length; i++) {
-						if (dg.getClassIds()[i] == gradeSummary[classesMatched][0]) {
-							classMatch[classesMatched] = i;
-							classesMatched++;
-							break;
-						}
-					}
-				}
-
-				dg.setClassMatch(classMatch);
+				int[] classMatch = dg.getStudents().get(dg.studentIndex).getClassMatch();
 
 				for (int i = 0; i < classCount; i++) {
 
 					int jsonIndex = classMatch[i];
 
-					
+
 					LinearLayout card = (LinearLayout) inflater.inflate(R.layout.main_grade_summary, bigLayout, false);
 					TextView className = (TextView) card.findViewById(R.id.name);
-					String name = dg.getClassName(jsonIndex);
+					String name = dg.getStudents().get(dg.studentIndex).getClassName(jsonIndex);
 					className.setText(name);
 
-					int avg = gradeSummary[i][1 + 0];
-					String average = avg == -1 ? "" : avg + "";
-					TextView grade = (TextView) card.findViewById(R.id.grade);
-					averages[i]=card;
-					
-					card.setOnClickListener(new ClassSwipeOpenerListener(i, CURRENT_TERM_INDEX));
 
-					grade.setText(average);
+					int avg = dg.getStudents().get(dg.studentIndex).getGradeSummary()[i][1 + CURRENT_TERM_INDEX];
+
+					// No need to increase overdraw if there is nothing to display
+					if (avg != -1) {
+						String average = avg + "";
+						TextView grade = (TextView) card.findViewById(R.id.grade);
+						averages[i]=card;
+						grade.setText(average);
+					}
+
+					card.setOnClickListener(new ClassSwipeOpenerListener(dg.studentIndex, i, CURRENT_TERM_INDEX));
+
 
 					bigLayout.addView(card);
-
-
-
-
 				}
 
 				return rootView;
 			}	
 
 
-			if (position == 0) {
-				StudentPictureTask spTask = new StudentPictureTask();
-				spTask.execute();
-			}
-
 			if (position == 2) {
 
 				LinearLayout bigLayout = (LinearLayout) rootView.findViewById(R.id.layout_year_summary);
 
-				int[] classMatch = dg.getClassMatch();
-				int[][] gradeSummary = dg.getGradeSummary();
+				// Add current student's name
+				if (dg.MULTIPLE_STUDENTS) {
+					LinearLayout studentName = (LinearLayout) inflater.inflate(R.layout.main_student_name_if_multiple_students, bigLayout, false);
+					( (TextView) studentName.findViewById(R.id.name) ).setText(dg.getStudents().get(dg.studentIndex).name);
+					bigLayout.addView(studentName);
+				}
+
+				int[] classMatch = dg.getStudents().get(dg.studentIndex).getClassMatch();
+				int[][] gradeSummary = dg.getStudents().get(dg.studentIndex).getGradeSummary();
 
 				for (int classIndex = 0; classIndex < classCount; classIndex++) {
-
 
 					int jsonIndex = classMatch[classIndex];
 
@@ -261,27 +325,27 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
 					TextView className = (TextView) classSummary.findViewById(R.id.class_name);
 
-					className.setText(dg.getClassName(jsonIndex));
+					className.setText(dg.getStudents().get(dg.studentIndex).getClassName(jsonIndex));
 
 					LinearLayout summary = (LinearLayout) classSummary.findViewById(R.id.layout_six_weeks_summary);
 
 					for (int termIndex = 1; termIndex < gradeSummary[classIndex].length; termIndex++) {
 
-
-		
 						TextView termGrade = new TextView(getActivity());
 						termGrade.setTextSize(25);
 						termGrade.setPadding(10, 10, 10, 10);
 						termGrade.setClickable(true);
-						
 
-						
-						termGrade.setOnClickListener(new ClassSwipeOpenerListener(classIndex, termIndex - 1));
-						
+						termGrade.setOnClickListener(new ClassSwipeOpenerListener(dg.studentIndex, classIndex, termIndex - 1));
+						termGrade.setBackgroundResource(R.drawable.dropshadow_white_to_blue);
+
 						int avg = gradeSummary[classIndex][termIndex];
-						String average = avg == -1 ? "" : "" + avg;
-						termGrade.setText(average);
-						summary.addView(termGrade);
+						if (avg != -1) {
+							String average = avg  + "";
+							termGrade.setText(average);
+							summary.addView(termGrade);
+						}
+						
 
 
 					}
@@ -293,12 +357,15 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 			return rootView;
 
 		}
-		public class StudentPictureTask extends AsyncTask<Void, Void, Bitmap> {
+
+		public class StudentPictureTask extends AsyncTask<Integer, Void, Bitmap> {
+
+			int taskStudentIndex;
 
 			@Override
-			protected Bitmap doInBackground(Void... arg0) {	
-				return dg.getStudentPicture();
-
+			protected Bitmap doInBackground(Integer... args) {	
+				taskStudentIndex = args[0];
+				return dg.getStudents().get(taskStudentIndex).getStudentPicture();
 			}
 
 			@Override
@@ -306,7 +373,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 				LinearLayout lv = (LinearLayout)rootView.findViewById(R.id.overall);
 				ImageView profilePic = new ImageView(getActivity());
 
-				card = new LinearLayout(getActivity());
 
 				Drawable picture = new BitmapDrawable(getResources(), result);
 				profilePic.setImageDrawable(picture);
@@ -315,69 +381,91 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 						LinearLayout.LayoutParams.WRAP_CONTENT);
 				profileLP.setMargins(10, 10, 10, 10);
 				profilePic.setLayoutParams(profileLP);
-
-
-				card.addView(profilePic);
-				card.setBackgroundDrawable(getResources().getDrawable(R.drawable.dropshadow));
-				StudentNameTask snTask = new StudentNameTask();
-				snTask.execute();
-				lv.addView(card);
+				
+				profileCards[taskStudentIndex].addView(profilePic, 0);
 			}
 
 		}
-		public class StudentNameTask extends AsyncTask<Void, Void, String> {
 
-			@Override
-			protected String doInBackground(Void... arg0) {	
-				return dg.getStudentName();
-
-			}
-
-			@Override
-			protected void onPostExecute (final String result) {
-				TextView name = new TextView(getActivity());
-				name.setTextSize(25);
-				name.setText(result);
-				card.addView(name);
-			}
-
-		}
-		
-		
 		class ClassSwipeOpenerListener implements OnClickListener {
-			
+
+			int studentIndex;
 			int classIndex;
 			int termIndex;
-			
-			ClassSwipeOpenerListener (int classIndex, int termIndex) {
+
+			ClassSwipeOpenerListener (int studentIndex, int classIndex, int termIndex) {
+				this.studentIndex = studentIndex;
 				this.classIndex = classIndex;
 				this.termIndex = termIndex;
 			}
-			
+
 			public void onClick(View arg0) {
 				Intent intent = new Intent (getActivity(), ClassSwipeActivity.class);
+				intent.putExtra("studentIndex", this.studentIndex);
 				intent.putExtra("classCount", classCount);
-				intent.putExtra("classIndex", classIndex);
-				intent.putExtra("termIndex", termIndex);
+				intent.putExtra("classIndex", this.classIndex);
+				intent.putExtra("termIndex", this.termIndex);
 				startActivity(intent);
 			}
-			
+
+		}
+
+
+
+		class StudentChooserListener implements OnClickListener {
+			int studentIndex;
+
+			StudentChooserListener(int studentIndex) {
+				this.studentIndex = studentIndex;
+			}
+
+			@Override
+			public void onClick(View v) {
+				dg.studentIndex = this.studentIndex;
+				colorStudents();
+
+				((MainActivity)getActivity()).refresh();
+			}
+
+		}
+
+
+		public void colorStudents() {
+			for (int i = 0; i < profileCards.length; i++) {
+				// Display the chosen student in a different color.
+				if (i == dg.studentIndex)
+					profileCards[i].setBackgroundResource(R.drawable.dropshadow_yellow_to_blue);
+				else
+					profileCards[i].setBackgroundResource(R.drawable.dropshadow_white_to_blue);
+			}
 		}
 
 	}
 
+	public void refresh() {
 
+		this.mSectionsPagerAdapter.notifyDataSetChanged();
 
-	@Override
-	public void onClick(View v) {
-		System.out.println(v.getId());
-		Intent intent = new Intent (this, ClassSwipeActivity.class);
-		intent.putExtra("classCount", classCount);
-		intent.putExtra("classIndex", v.getId());
-		intent.putExtra("termIndex", CURRENT_TERM_INDEX);
-		startActivity(intent);
+		invalidateOptionsMenu();
+
 	}
 
+	class StudentChooserListener implements OnMenuItemClickListener {
 
-	
+		int studentIndex;
+
+		StudentChooserListener (int studentIndex) {
+			this.studentIndex = studentIndex;
+		}
+
+		@Override
+		public boolean onMenuItemClick(MenuItem arg0) {
+			dg.studentIndex = this.studentIndex;
+
+			refresh();
+			return true;
+		}
+
+	}
+
 }

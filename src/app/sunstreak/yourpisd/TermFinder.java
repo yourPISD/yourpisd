@@ -41,7 +41,7 @@ public class TermFinder {
 	public static final SimpleDateFormat dfm = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
 
 	
-	static int getCurrentTermIndex() {
+	public static int getCurrentTermIndex() {
 		
 		Date d = Calendar.getInstance().getTime();
 		

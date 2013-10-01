@@ -4,10 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:background="@drawable/dropshadow_white_to_blue"
+    android:background="@drawable/dropshadow"
     android:paddingTop="10dp"
     android:paddingBottom="15dp"
-    android:clickable="true"
     >
 
     <TextView
@@ -16,23 +15,12 @@
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
         android:layout_weight="1"
-        android:fontFamily="sans-serif-light"
-        android:paddingTop="4dp"
+        android:fontFamily="sans-serif"
         android:paddingBottom="3dp"
         android:paddingLeft="3dp"
+        android:paddingTop="4dp"
         android:text="@string/default_description"
         android:textSize="20sp"
-        android:textStyle="normal" />
-
-    <TextView
-        android:id="@+id/grade"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="5dp"
-        android:fontFamily="sans-serif-light"
-        android:textSize="28sp" />
+        android:textStyle="normal|bold" />
 
 </LinearLayout>
