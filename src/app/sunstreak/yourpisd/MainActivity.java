@@ -2,9 +2,9 @@ package app.sunstreak.yourpisd;
 
 import java.util.Locale;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -188,7 +188,7 @@ public class MainActivity extends FragmentActivity {
 		private View rootView;
 		private int position;
 		LinearLayout[] profileCards = new LinearLayout[dg.getStudents().size()];
-
+		private boolean test = true;
 		public MainActivityFragment() {
 		}
 
@@ -222,15 +222,20 @@ public class MainActivity extends FragmentActivity {
 				
 				if (dg.MULTIPLE_STUDENTS) {
 					TextView instructions = new TextView(getActivity());
+					instructions.setPadding(5, 5, 5, 5);
+					instructions.setTypeface(Typeface.createFromAsset(getActivity().getAssets()
+							,"Roboto-Light.ttf"));
 					instructions.setText(R.string.welcome_multiple_students);
 					// Han can you format this better?
 					bigLayout.addView(instructions, 1);
 				}
 
 				profileCards = new LinearLayout[dg.getStudents().size()];
-				
-				for (int i = 0; i < dg.getStudents().size(); i++) {
 
+				for (int i = 0; i < dg.getStudents().size(); i++) {
+					
+						
+					
 					profileCards[i] = new LinearLayout(getActivity());
 
 					TextView name = new TextView(getActivity());
@@ -244,13 +249,32 @@ public class MainActivity extends FragmentActivity {
 
 					bigLayout.addView(profileCards[i]);
 					
-					StudentPictureTask spTask = new StudentPictureTask();
+					if(test)
+					{
+						StudentPictureTask spTask = new StudentPictureTask();
 					spTask.execute(i);
+					}
+					else
+					{
+						LinearLayout lv = (LinearLayout)rootView.findViewById(R.id.overall);
+						ImageView profilePic = new ImageView(getActivity());
+
+
+						Drawable picture = new BitmapDrawable(getResources(), pics[i]);
+						profilePic.setImageDrawable(picture);
+						LinearLayout.LayoutParams profileLP = new LinearLayout.LayoutParams(
+								LinearLayout.LayoutParams.WRAP_CONTENT,
+								LinearLayout.LayoutParams.WRAP_CONTENT);
+						profileLP.setMargins(10, 10, 10, 10);
+						profilePic.setLayoutParams(profileLP);
+						
+						profileCards[i].addView(profilePic, 0);
+					}
 				}
 
 				if (dg.MULTIPLE_STUDENTS)
 					colorStudents();
-
+				test = false;
 			}
 
 			if (position == 1)
@@ -328,17 +352,16 @@ public class MainActivity extends FragmentActivity {
 					className.setText(dg.getStudents().get(dg.studentIndex).getClassName(jsonIndex));
 
 					LinearLayout summary = (LinearLayout) classSummary.findViewById(R.id.layout_six_weeks_summary);
-
+					summary.setPadding(20, 5, 5, 5);
 					for (int termIndex = 1; termIndex < gradeSummary[classIndex].length; termIndex++) {
 
 						TextView termGrade = new TextView(getActivity());
-						termGrade.setTextSize(25);
-						termGrade.setPadding(10, 10, 10, 10);
+						termGrade.setTextSize(30);
+						termGrade.setPadding(15, 15, 15, 15);
 						termGrade.setClickable(true);
-
+						termGrade.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 						termGrade.setOnClickListener(new ClassSwipeOpenerListener(dg.studentIndex, classIndex, termIndex - 1));
-						termGrade.setBackgroundResource(R.drawable.dropshadow_white_to_blue);
-
+						termGrade.setBackgroundResource(R.drawable.divider);
 						int avg = gradeSummary[classIndex][termIndex];
 						if (avg != -1) {
 							String average = avg  + "";
@@ -357,7 +380,7 @@ public class MainActivity extends FragmentActivity {
 			return rootView;
 
 		}
-
+		static Bitmap[] pics = new Bitmap[dg.getStudents().size()];
 		public class StudentPictureTask extends AsyncTask<Integer, Void, Bitmap> {
 
 			int taskStudentIndex;
@@ -365,6 +388,7 @@ public class MainActivity extends FragmentActivity {
 			@Override
 			protected Bitmap doInBackground(Integer... args) {	
 				taskStudentIndex = args[0];
+				pics[taskStudentIndex]= dg.getStudents().get(taskStudentIndex).getStudentPicture();
 				return dg.getStudents().get(taskStudentIndex).getStudentPicture();
 			}
 
@@ -425,6 +449,8 @@ public class MainActivity extends FragmentActivity {
 				colorStudents();
 
 				((MainActivity)getActivity()).refresh();
+
+				
 			}
 
 		}
