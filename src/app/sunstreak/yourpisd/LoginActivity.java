@@ -287,6 +287,7 @@ public class LoginActivity extends Activity {
 		encryptedPass = Base64.encodeToString(mPasswordView.getText().toString()
 				.getBytes(), Base64.DEFAULT );
 		mPassword = mPasswordView.getText().toString();
+		mDomain = Domain.values()[mDomainSpinner.getSelectedItemPosition()];
 
 		boolean cancel = false;
 		View focusView = null;
@@ -404,9 +405,8 @@ public class LoginActivity extends Activity {
 						// Simulate network access.
 				    	dg = (DataGrabber) getApplication();
 				    	dg.clearData();
-//						dg = new DataGrabber(
 						dg.setData (
-								Domain.valueOf(mDomainSpinner.getSelectedItem().toString()),
+								mDomain,
 								mEmail,
 								mPassword);
 						
@@ -431,24 +431,32 @@ public class LoginActivity extends Activity {
 						// Try logging into Gradebook 5 times.
 						{
 							String[] ptc = dg.getPassthroughCredentials();
-							boolean loginAttempt = false;
+							int loginAttempt = 0;
 							int counter = 0;
 							do {
 								
 									try {
-										Thread.sleep(3500);
-										System.out.println("sleeping 3.5s");
+										// Only sleep extra if student account.
+										if (mDomain == Domain.valueOf("STUDENT")) {
+											System.out.println("sleeping 3.5s");
+											Thread.sleep(3500);
+										}
 									} catch (InterruptedException e) {
 										e.printStackTrace();
 									}
 
 							
 							loginAttempt = dg.loginGradebook(ptc[0], ptc[1], mEmail, mPassword);
+							
+							// Internet connection lost
+							if (loginAttempt == -10)
+								return -3;
+							
 							counter++;
-						} while (counter < 7 && loginAttempt == false);
+						} while (counter < 7 && loginAttempt != 1);
 
-						// If even 5 tries was not enough and still getting NotSet.
-						if (loginAttempt == false)
+						// If even 7 tries was not enough and still getting NotSet.
+						if (loginAttempt == -1)
 							return -2;
 					}
 

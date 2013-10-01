@@ -359,7 +359,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 					// for every grade in this term [any category]
 					for(int i = 0; i< mClassGrade.getJSONArray("terms")
-							.getJSONObject(0).getJSONArray("grades").length(); i++)
+							.getJSONObject(termIndex).getJSONArray("grades").length(); i++)
 					{
 						// only if this grade is in the category which we're looking for
 						if (mClassGrade.getJSONArray("terms").getJSONObject(termIndex)

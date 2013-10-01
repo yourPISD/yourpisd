@@ -18,7 +18,10 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 
 import android.app.Application;
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.SparseArray;
 
 
@@ -518,16 +521,20 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 	 * @param uID
 	 * @param email
 	 * @param password
-	 * @return boolean success
+	 * @return -10 for internet failure, -1 for other failure, 1 for success
 	 * @throws MalformedURLException
 	 * @throws IllegalUrlException
 	 * @throws IOException
 	 * @throws PISDException
 	 */
-	public boolean loginGradebook(String userType, String uID, String email, String password) throws MalformedURLException, IllegalUrlException, IOException, PISDException {
+	public int loginGradebook(String userType, String uID, String email, String password) throws MalformedURLException, IllegalUrlException, IOException, PISDException {
 
 
-
+		ConnectivityManager connMgr = (ConnectivityManager) 
+				getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+		if (networkInfo == null || !networkInfo.isConnected())
+			return -10;
 
 		// commented request paramater is allowed for parent account, not allowed for student account. never required.
 		String url = "https://parentviewer.pisd.edu/EP/PIV_Passthrough.aspx?action=trans&uT=" + userType + "&uID=" + uID /*+ "&submit=Login+to+Parent+Viewer"*/;
@@ -559,7 +566,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 		else {
 			System.out.println("Bad username/password 2!");
 			gradebookLogin--;
-			return false;
+			return -1;
 		}
 
 
@@ -609,7 +616,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 
 		if (pageUniqueId == null) {
 			System.out.println("Some error. pageUniqueId is null");
-			return false;
+			return -1;
 		}
 
 
@@ -618,7 +625,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 		}
 
 
-		return true;
+		return 1;
 	}
 
 
