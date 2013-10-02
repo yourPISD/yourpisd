@@ -111,6 +111,7 @@ public class MainActivity extends FragmentActivity {
 		// Handle item selection
 		switch (item.getItemId()) {
 		case R.id.log_out:
+			dg.clearData();
 			Intent intent = new Intent(this, LoginActivity.class);
 			startActivity(intent);
 			return true;
@@ -352,16 +353,16 @@ public class MainActivity extends FragmentActivity {
 					className.setText(dg.getStudents().get(dg.studentIndex).getClassName(jsonIndex));
 
 					LinearLayout summary = (LinearLayout) classSummary.findViewById(R.id.layout_six_weeks_summary);
-					summary.setPadding(20, 5, 5, 5);
+					summary.setPadding(20, 5, 15, 5);
 					for (int termIndex = 1; termIndex < gradeSummary[classIndex].length; termIndex++) {
 
 						TextView termGrade = new TextView(getActivity());
 						termGrade.setTextSize(30);
-						termGrade.setPadding(15, 15, 15, 15);
 						termGrade.setClickable(true);
 						termGrade.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 						termGrade.setOnClickListener(new ClassSwipeOpenerListener(dg.studentIndex, classIndex, termIndex - 1));
 						termGrade.setBackgroundResource(R.drawable.divider);
+						termGrade.setPadding(15, 5, 5, 5);
 						int avg = gradeSummary[classIndex][termIndex];
 						if (avg != -1) {
 							String average = avg  + "";

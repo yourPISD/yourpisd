@@ -9,10 +9,21 @@
     tools:context=".CreditActivity" >
 
     <TextView
+        android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-light"
         android:text="App developed by Han Li and Sidharth Kapur from Plano West Senior High School, Plano, TX."
-        android:fontFamily="sans-serif-light" 
-        android:textSize="20sp"/>
+        android:textSize="20sp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textView1"
+        android:layout_below="@+id/textView1"
+        android:layout_marginTop="27dp"
+        android:fontFamily="sans-serif-light"
+        android:text="Special thanks to Richard Wang for the icon."
+        android:textSize="20sp" />
 
 </RelativeLayout>

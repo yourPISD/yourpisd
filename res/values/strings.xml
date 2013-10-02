@@ -10,7 +10,7 @@
     <string name="major">Major Evaluations:</string>
     <string name="title_activity_class_swipe">Details</string>
     <string name="class_swipe_loading">Loading &#8230;</string>
-    <string name="credits">credits</string>
+    <string name="credits">Credits</string>
     <string name="log_out">Log out</string>
     <string name="title_activity_credit">CreditActivity</string>
     <string name="hello_world">Hello world!</string>
