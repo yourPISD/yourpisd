@@ -185,6 +185,7 @@ public class MainActivity extends FragmentActivity {
 		 * The fragment argument representing the section number for this
 		 * fragment.
 		 */
+		static double[] max;
 		public static final String ARG_OBJECT = "object";
 		private View rootView;
 		private int position;
@@ -253,7 +254,7 @@ public class MainActivity extends FragmentActivity {
 					if(test)
 					{
 						StudentPictureTask spTask = new StudentPictureTask();
-					spTask.execute(i);
+						spTask.execute(i);
 					}
 					else
 					{
@@ -276,6 +277,13 @@ public class MainActivity extends FragmentActivity {
 				if (dg.MULTIPLE_STUDENTS)
 					colorStudents();
 				test = false;
+				LinearLayout gpa = new LinearLayout(getActivity());
+				gpa.setBackgroundResource(R.drawable.dropshadow);
+				TextView textGPA = new TextView(getActivity());
+				textGPA.setText("GPA: 5.0000");
+				textGPA.setTextSize(20);
+				gpa.addView(textGPA);
+				bigLayout.addView(gpa);
 			}
 
 			if (position == 1)
@@ -296,7 +304,7 @@ public class MainActivity extends FragmentActivity {
 				averages = new LinearLayout[classCount];
 
 				int[] classMatch = dg.getStudents().get(dg.studentIndex).getClassMatch();
-
+				max = new double[classCount];
 				for (int i = 0; i < classCount; i++) {
 
 					int jsonIndex = classMatch[i];
@@ -305,10 +313,32 @@ public class MainActivity extends FragmentActivity {
 					LinearLayout card = (LinearLayout) inflater.inflate(R.layout.main_grade_summary, bigLayout, false);
 					TextView className = (TextView) card.findViewById(R.id.name);
 					String name = dg.getStudents().get(dg.studentIndex).getClassName(jsonIndex);
+					String[] split = name.split("//s");
+					for(int j= split.length-1; j>=0; j--)
+					{
+						if(split[j].equalsIgnoreCase("AP"))
+						{
+							max[i] = 5.0;
+							break;
+						}
+							
+						else if(split[j].equalsIgnoreCase("H"))
+						{
+							max[j] = 4.5;
+							break;
+						}
+							
+						else
+						{
+							max[j] = 4.0;
+							break;
+						}
+							
+					}
 					className.setText(name);
 
 
-					int avg = dg.getStudents().get(dg.studentIndex).getGradeSummary()[i][1 + CURRENT_TERM_INDEX];
+					int avg = gradeSummary[i][1 + CURRENT_TERM_INDEX];
 
 					// No need to increase overdraw if there is nothing to display
 					if (avg != -1) {
