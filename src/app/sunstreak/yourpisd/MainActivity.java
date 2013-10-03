@@ -190,7 +190,7 @@ public class MainActivity extends FragmentActivity {
 		private View rootView;
 		private int position;
 		LinearLayout[] profileCards = new LinearLayout[dg.getStudents().size()];
-		private boolean test = true;
+		private boolean pictureNotLoaded = true;
 		public MainActivityFragment() {
 		}
 
@@ -251,7 +251,7 @@ public class MainActivity extends FragmentActivity {
 
 					bigLayout.addView(profileCards[i]);
 					
-					if(test)
+					if(pictureNotLoaded)
 					{
 						StudentPictureTask spTask = new StudentPictureTask();
 						spTask.execute(i);
@@ -276,7 +276,7 @@ public class MainActivity extends FragmentActivity {
 
 				if (dg.MULTIPLE_STUDENTS)
 					colorStudents();
-				test = false;
+					
 				LinearLayout gpa = new LinearLayout(getActivity());
 				gpa.setBackgroundResource(R.drawable.dropshadow);
 				TextView textGPA = new TextView(getActivity());
@@ -337,7 +337,6 @@ public class MainActivity extends FragmentActivity {
 					}
 					className.setText(name);
 
-
 					int avg = gradeSummary[i][1 + CURRENT_TERM_INDEX];
 
 					// No need to increase overdraw if there is nothing to display
@@ -347,13 +346,11 @@ public class MainActivity extends FragmentActivity {
 						averages[i]=card;
 						grade.setText(average);
 					}
-
+					
 					card.setOnClickListener(new ClassSwipeOpenerListener(dg.studentIndex, i, CURRENT_TERM_INDEX));
-
 
 					bigLayout.addView(card);
 				}
-
 				return rootView;
 			}	
 
@@ -399,19 +396,15 @@ public class MainActivity extends FragmentActivity {
 							termGrade.setText(average);
 							summary.addView(termGrade);
 						}
-						
-
-
 					}
-
 					bigLayout.addView(classSummary);
 				}
 			}
-
 			return rootView;
-
 		}
+		
 		static Bitmap[] pics = new Bitmap[dg.getStudents().size()];
+		
 		public class StudentPictureTask extends AsyncTask<Integer, Void, Bitmap> {
 
 			int taskStudentIndex;
@@ -438,8 +431,9 @@ public class MainActivity extends FragmentActivity {
 				profilePic.setLayoutParams(profileLP);
 				
 				profileCards[taskStudentIndex].addView(profilePic, 0);
+				
+				pictureNotLoaded = false;
 			}
-
 		}
 
 		class ClassSwipeOpenerListener implements OnClickListener {
@@ -462,7 +456,6 @@ public class MainActivity extends FragmentActivity {
 				intent.putExtra("termIndex", this.termIndex);
 				startActivity(intent);
 			}
-
 		}
 
 
@@ -480,8 +473,6 @@ public class MainActivity extends FragmentActivity {
 				colorStudents();
 
 				((MainActivity)getActivity()).refresh();
-
-				
 			}
 
 		}
@@ -500,11 +491,8 @@ public class MainActivity extends FragmentActivity {
 	}
 
 	public void refresh() {
-
 		this.mSectionsPagerAdapter.notifyDataSetChanged();
-
 		invalidateOptionsMenu();
-
 	}
 
 	class StudentChooserListener implements OnMenuItemClickListener {
@@ -522,7 +510,5 @@ public class MainActivity extends FragmentActivity {
 			refresh();
 			return true;
 		}
-
 	}
-
 }
