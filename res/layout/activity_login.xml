@@ -42,11 +42,15 @@
 
             <Spinner
                 android:id="@+id/domain_spinner"
+                android:fontFamily="sans-serif-light"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
             <EditText
                 android:id="@+id/email"
+                android:fontFamily="sans-serif-light"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/prompt_email"
@@ -56,6 +60,8 @@
 
             <EditText
                 android:id="@+id/password"
+                android:fontFamily="sans-serif-light"
+                android:paddingBottom="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/prompt_password"
@@ -68,6 +74,8 @@
 
             <CheckBox
                 android:id="@+id/remember_password"
+                android:fontFamily="sans-serif-light"
+                android:paddingTop="5dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/remember_password" />

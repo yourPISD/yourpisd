@@ -222,6 +222,10 @@ public class LoginActivity extends Activity {
 		mEmailView.setText(sharedPrefs.getString("email", mEmail));
 		mPasswordView.setText(new String(Base64.decode(sharedPrefs.getString("e_password", "")
 				, Base64.DEFAULT )));
+		if(mPasswordView.getText().equals(""))
+		{
+			mPasswordView.requestFocus();
+		}
 //		mPasswordView.setText(sharedPrefs.getString("password", ""));
 		
 		
