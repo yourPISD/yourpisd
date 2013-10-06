@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="title_activity_login">Sign in</string>
+    <string name="title_activity_login">Log in</string>
     <string name="user_agreement_title">User Agreement</string>
     <string name="user_agreement_old">    This app is provided as-is and we will not be responsible for any damage to your phone.\nBy clicking agree, you (the user), will conform to the following requirements made by the us (the developers). By entering your username and password in the fields, the user is giving us permission in parsing their information for displaying in the app. The app is secure; however, the user assumes full responsibility regarding his information usage and potential damages(extremely unlikely).	</string>
 	<string name="user_agreement">Clicking "Agree" constitutes your agreement to the following conditions:\n

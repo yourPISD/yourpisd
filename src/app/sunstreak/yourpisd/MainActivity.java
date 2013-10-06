@@ -14,6 +14,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,12 +24,12 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 import app.sunstreak.yourpisd.net.DataGrabber;
 
 
-public class MainActivity extends FragmentActivity {
-
+public class MainActivity extends FragmentActivity { 
 	public static final int CURRENT_TERM_INDEX = TermFinder.getCurrentTermIndex();
 	static int classCount;
 	static LinearLayout[] averages;
@@ -241,6 +242,7 @@ public class MainActivity extends FragmentActivity {
 					profileCards[i] = new LinearLayout(getActivity());
 
 					TextView name = new TextView(getActivity());
+					name.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 					name.setTextSize(25);
 					name.setText(dg.getStudents().get(i).name);
 
@@ -280,8 +282,10 @@ public class MainActivity extends FragmentActivity {
 				LinearLayout gpa = new LinearLayout(getActivity());
 				gpa.setBackgroundResource(R.drawable.dropshadow);
 				TextView textGPA = new TextView(getActivity());
-				textGPA.setText("GPA: 5.0000");
+				textGPA.setText("GPA: 5.00000000");
+				textGPA.setPadding(10, 10, 10, 10);
 				textGPA.setTextSize(20);
+				textGPA.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 				gpa.addView(textGPA);
 				bigLayout.addView(gpa);
 			}
@@ -365,7 +369,45 @@ public class MainActivity extends FragmentActivity {
 					( (TextView) studentName.findViewById(R.id.name) ).setText(dg.getStudents().get(dg.studentIndex).name);
 					bigLayout.addView(studentName);
 				}
-
+				LinearLayout weekNames = new LinearLayout(getActivity());
+				weekNames.setBackgroundResource(R.drawable.dropshadow);
+				TextView[] weeks = new TextView[5];
+				weekNames.setPadding(25, 5, 15, 20);
+				for(int i = 0; i< weeks.length; i++)
+				{
+					weeks[i] = new TextView(getActivity());
+					weeks[i].setTextSize(25);
+					weeks[i].setText(i+1+"");
+					if(i == 0)
+						weeks[i].setText("1st");
+					if(i == 1)
+						weeks[i].setText("2nd");
+					if(i == 2)
+						weeks[i].setText("3rd");
+					if(i == 3)
+					{
+						weeks[i].setText("Exam");
+						weeks[i].setTextSize(20);
+					}
+						
+					if(i == 4)
+					{
+						weeks[i].setText("Avg");
+						weeks[i].setTextSize(20);
+					}
+						
+					weeks[i].setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
+					
+					
+					weeks[i].setPadding(5, 5, 5, 5);
+					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(120, LayoutParams.WRAP_CONTENT);
+				    llp.setMargins(0, 0, 5, 0);
+				    weeks[i].setLayoutParams(llp);
+				    weeks[i].setGravity(Gravity.CENTER);
+				    weekNames.addView(weeks[i]);
+				}
+				
+				bigLayout.addView(weekNames);
 				int[] classMatch = dg.getStudents().get(dg.studentIndex).getClassMatch();
 				int[][] gradeSummary = dg.getStudents().get(dg.studentIndex).getGradeSummary();
 
@@ -380,7 +422,9 @@ public class MainActivity extends FragmentActivity {
 					className.setText(dg.getStudents().get(dg.studentIndex).getClassName(jsonIndex));
 
 					LinearLayout summary = (LinearLayout) classSummary.findViewById(R.id.layout_six_weeks_summary);
-					summary.setPadding(20, 5, 15, 5);
+					summary.setPadding(20, 5, 15, 10);
+					double sum = 0;
+					int count = 0;
 					for (int termIndex = 1; termIndex < gradeSummary[classIndex].length; termIndex++) {
 
 						TextView termGrade = new TextView(getActivity());
@@ -388,14 +432,46 @@ public class MainActivity extends FragmentActivity {
 						termGrade.setClickable(true);
 						termGrade.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 						termGrade.setOnClickListener(new ClassSwipeOpenerListener(dg.studentIndex, classIndex, termIndex - 1));
-						termGrade.setBackgroundResource(R.drawable.divider);
-						termGrade.setPadding(15, 5, 5, 5);
+						termGrade.setBackgroundResource(R.drawable.grade_summary_click);
+						termGrade.setPadding(5, 5, 5, 5);
+						LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(120, LayoutParams.WRAP_CONTENT);
+					    llp.setMargins(0, 0, 5, 0);
+					    termGrade.setLayoutParams(llp);
+						
 						int avg = gradeSummary[classIndex][termIndex];
-						if (avg != -1) {
-							String average = avg  + "";
-							termGrade.setText(average);
+						if(termIndex == 6)
+						{
+							break;
+						}
+						if(termIndex==5)
+						{
+							
+							double average = sum/count;
+							String averageText = Math.round(average)+"";
+							if(average==-1)
+							{
+								averageText = "";
+							}
+							termGrade.setGravity(Gravity.CENTER);
+							termGrade.setText(averageText);
 							summary.addView(termGrade);
 						}
+						else
+						{
+							String average = avg  + "";
+							if (avg == -1) {
+								average = "";
+							}
+							else
+							{
+								sum+=avg;
+								count++;
+							}
+							termGrade.setText(average);
+							termGrade.setGravity(Gravity.CENTER);
+							summary.addView(termGrade);
+						}
+						
 					}
 					bigLayout.addView(classSummary);
 				}

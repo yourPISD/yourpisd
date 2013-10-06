@@ -1,6 +1,7 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".LoginActivity" >
+    tools:context=".LoginActivity" 
+    >
 
     <!-- Login progress -->
 
@@ -27,6 +28,7 @@
             android:fontFamily="sans-serif-light"
             android:text="@string/login_progress_mypisd"
             android:textAppearance="?android:attr/textAppearanceMedium" />
+
     </LinearLayout>
 
     <!-- Login form -->
@@ -34,12 +36,16 @@
     <ScrollView
         android:id="@+id/login_form"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent" 
+        android:fillViewport="true">
 
         <LinearLayout
             style="@style/LoginFormContainer"
-            android:orientation="vertical" >
-
+            android:orientation="vertical" 
+           	>
+			<LinearLayout
+    		android:focusable="true" android:focusableInTouchMode="true"
+    		android:layout_width="0px" android:layout_height="0px"/>
             <Spinner
                 android:id="@+id/domain_spinner"
                 android:fontFamily="sans-serif-light"
@@ -49,10 +55,8 @@
             <EditText
                 android:id="@+id/email"
                 android:fontFamily="sans-serif-light"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:hint="@string/prompt_email"
                 android:inputType="textEmailAddress"
                 android:maxLines="1"
@@ -61,9 +65,8 @@
             <EditText
                 android:id="@+id/password"
                 android:fontFamily="sans-serif-light"
-                android:paddingBottom="10dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:hint="@string/prompt_password"
                 android:imeActionId="@+id/login"
                 android:imeActionLabel="@string/action_sign_in_short"
@@ -75,7 +78,7 @@
             <CheckBox
                 android:id="@+id/remember_password"
                 android:fontFamily="sans-serif-light"
-                android:paddingTop="5dp"
+                android:layout_marginTop ="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/remember_password" />
@@ -92,13 +95,30 @@
 			
             <Button
                 android:id="@+id/sign_in_button"
-                android:layout_width="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="10dp"
                 android:paddingLeft="32dp"
                 android:paddingRight="32dp"
                 android:text="@string/action_sign_in_register" />
+            <ImageView
+                android:layout_width= "wrap_content"
+                android:layout_height= "wrap_content"
+                android:paddingTop = "50dp"
+                android:layout_gravity="center"
+                android:src="@drawable/logo"
+                />
+            <TextView
+            android:layout_weight="1"
+            android:gravity="bottom|center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-light"
+            android:text="©Sunstreak Applications 2013"
+            android:textSize="18sp"
+        	/>
         </LinearLayout>
     </ScrollView>
 

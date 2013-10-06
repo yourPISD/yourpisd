@@ -353,20 +353,10 @@ public class LoginActivity extends Activity {
 			int shortAnimTime = getResources().getInteger(
 					android.R.integer.config_shortAnimTime);
 
-			mLoginStatusView.setVisibility(View.VISIBLE);
-			mLoginStatusView.animate().setDuration(shortAnimTime)
-					.alpha(show ? 1 : 0)
-					.setListener(new AnimatorListenerAdapter() {
-						@Override
-						public void onAnimationEnd(Animator animation) {
-							mLoginStatusView.setVisibility(show ? View.VISIBLE
-									: View.GONE);
-						}
-					});
-
+			
 			mLoginFormView.setVisibility(View.VISIBLE);
 			mLoginFormView.animate().setDuration(shortAnimTime)
-					.alpha(show ? 0 : 1)
+					.translationY(-200).alpha(show?0:1)
 					.setListener(new AnimatorListenerAdapter() {
 						@Override
 						public void onAnimationEnd(Animator animation) {
@@ -374,6 +364,36 @@ public class LoginActivity extends Activity {
 									: View.VISIBLE);
 						}
 					});
+			mLoginStatusView.setVisibility(View.VISIBLE);
+			mLoginStatusView.animate().setDuration(shortAnimTime)
+					.alpha(show ? 1:0)
+					.setListener(new AnimatorListenerAdapter() {
+						@Override
+						public void onAnimationEnd(Animator animation) {
+//							mLoginStatusView.setVisibility(show ? View.VISIBLE
+//									: View.GONE);
+						}
+					});
+//			mLoginStatusView.animate().setDuration(shortAnimTime)
+//					.alpha(show ? 1 : 0)
+//					.setListener(new AnimatorListenerAdapter() {
+//						@Override
+//						public void onAnimationEnd(Animator animation) {
+//							mLoginStatusView.setVisibility(show ? View.VISIBLE
+//									: View.GONE);
+//						}
+//					});
+
+//			mLoginFormView.setVisibility(View.VISIBLE);
+//			mLoginFormView.animate().setDuration(shortAnimTime)
+//					.alpha(show ? 0 : 1)
+//					.setListener(new AnimatorListenerAdapter() {
+//						@Override
+//						public void onAnimationEnd(Animator animation) {
+//							mLoginFormView.setVisibility(show ? View.GONE
+//									: View.VISIBLE);
+//						}
+//					});
 			
 
 		} else {
@@ -485,9 +505,19 @@ public class LoginActivity extends Activity {
 
 
 			Intent startMain = new Intent(LoginActivity.this, MainActivity.class);
+			
 			startActivity(startMain);
-//			overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
 			finish();
+//			overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+			try
+			{
+				Thread.sleep(50);
+			}
+			catch(InterruptedException e)
+			{
+				
+			}
+			
 			return 1;
 		}
 

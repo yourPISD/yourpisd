@@ -25,8 +25,8 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
-import app.sunstreak.yourpisd.R;
 import app.sunstreak.yourpisd.net.DataGrabber;
 
 
@@ -316,7 +316,8 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 			TextView teacher = (TextView) rootView.findViewById(R.id.teacher_name);
 			TextView sixWeeksAverage = (TextView) rootView.findViewById(R.id.six_weeks_average);
-
+			RelativeLayout desc = (RelativeLayout) rootView.findViewById(R.id.descriptions);
+			desc.setVisibility(View.VISIBLE);
 			LinearLayout classDescriptionLinearLayout = (LinearLayout) rootView.findViewById(R.id.class_description_linear_layout);
 
 			try {
@@ -324,13 +325,15 @@ public class ClassSwipeActivity extends FragmentActivity {
 				// Maybe the extra print time somehow fixes it...
 				System.out.println(mClassGrade);
 				teacher.setText(mClassGrade.getString("teacher"));
-
+				
 				int avg = mClassGrade.getJSONArray("terms").getJSONObject(termIndex).optInt("average", -1);
 				if (avg != -1) {
 					String average = avg + "";
 					sixWeeksAverage.setText(average);
+
 				} else
 					sixWeeksAverage.setVisibility(TextView.INVISIBLE);
+				
 				
 
 				JSONArray terms = mClassGrade.getJSONArray("terms");
