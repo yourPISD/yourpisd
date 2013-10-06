@@ -423,7 +423,6 @@ public class Parser {
 		
 		// Only one student
 		if (studentList.text().isEmpty()) {
-			System.out.println("one student");
 			// {studentId, studentName}
 			list.add(new String[] {doc.getElementById("ctl00_ctl00_ContentPlaceHolder_uxStudentId").attr("value"), 
 					doc.getElementById("ctl00_ctl00_ContentPlaceHolder_uxMultiple").text()});
@@ -431,10 +430,8 @@ public class Parser {
 		}
 		// Multiple students
 		else {
-			System.out.println("more than one students");
 			for (Element a : studentList.getElementsByTag("a")) {
 				String name = a.text();
-				System.out.println(name);
 				String onClick = a.attr("onClick");
 				String studentId = onClick.substring(onClick.indexOf('\'') + 1, onClick.lastIndexOf('\''));
 				list.add(new String[] {studentId, name});
