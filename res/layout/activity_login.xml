@@ -55,6 +55,13 @@
                 android:layout_height="wrap_content" />
                 -->
 
+			<ImageView
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_gravity="center"
+			    android:layout_margin="5dp"
+			    android:src="@drawable/logo" />
+
             <EditText
                 android:id="@+id/email"
                 android:fontFamily="sans-serif-light"
@@ -106,14 +113,14 @@
                 android:paddingLeft="32dp"
                 android:paddingRight="32dp"
                 android:text="@string/action_sign_in_register" />
-            <ImageView
+            <!--  <ImageView
                 android:layout_weight="1"
                 android:layout_width= "wrap_content"
                 android:layout_height= "wrap_content"
                 android:paddingTop = "50dp"
                 android:layout_gravity="center"
                 android:src="@drawable/logo"
-                />
+                />-->
             <!-- <TextView
             android:layout_weight="0"
             android:gravity="bottom|center"

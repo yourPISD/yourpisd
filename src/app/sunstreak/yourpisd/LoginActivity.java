@@ -356,8 +356,8 @@ public class LoginActivity extends Activity {
 			.setListener(new AnimatorListenerAdapter() {
 				@Override
 				public void onAnimationEnd(Animator animation) {
-					//							mLoginFormView.setVisibility(show ? View.GONE
-					//									: View.VISIBLE);
+					mLoginFormView.setVisibility(show ? View.GONE
+							: View.VISIBLE);
 					mLoginFormView.animate().setDuration(0)
 					.translationY(0);
 				}
@@ -522,14 +522,15 @@ public class LoginActivity extends Activity {
 		@Override
 		protected void onPostExecute(final Integer success) {
 
-			// Un-lock the screen orientation
-			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+			
 
 			mAuthTask = null;
 			showProgress(false);
 
 			switch (success) {
 			case 1:
+				// Un-lock the screen orientation
+				setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
 				//				finish();
 				//				Intent startMain = new Intent(LoginActivity.this, MainActivity.class);
 				//				startActivity(startMain);

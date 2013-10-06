@@ -16,6 +16,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -406,7 +407,9 @@ public class MainActivity extends FragmentActivity {
 					
 					
 					weeks[i].setPadding(5, 5, 5, 5);
-					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(120, LayoutParams.WRAP_CONTENT);
+					int width = (int) TypedValue.applyDimension(
+							TypedValue.COMPLEX_UNIT_DIP, 65, getResources().getDisplayMetrics());
+					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(width, LayoutParams.WRAP_CONTENT);
 				    llp.setMargins(0, 0, 5, 0);
 				    weeks[i].setLayoutParams(llp);
 				    weeks[i].setGravity(Gravity.CENTER);
@@ -437,10 +440,12 @@ public class MainActivity extends FragmentActivity {
 						termGrade.setTextSize(30);
 						termGrade.setClickable(true);
 						termGrade.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
-						termGrade.setOnClickListener(new ClassSwipeOpenerListener(dg.studentIndex, classIndex, termIndex - 1));
-						termGrade.setBackgroundResource(R.drawable.grade_summary_click);
+//						termGrade.setOnClickListener(new ClassSwipeOpenerListener(dg.studentIndex, classIndex, termIndex - 1));
+//						termGrade.setBackgroundResource(R.drawable.grade_summary_click);
 						termGrade.setPadding(5, 5, 5, 5);
-						LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(120, LayoutParams.WRAP_CONTENT);
+						int width = (int) TypedValue.applyDimension(
+								TypedValue.COMPLEX_UNIT_DIP, 65, getResources().getDisplayMetrics());
+						LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(width, LayoutParams.WRAP_CONTENT);
 					    llp.setMargins(0, 0, 5, 0);
 					    termGrade.setLayoutParams(llp);
 						
@@ -464,6 +469,8 @@ public class MainActivity extends FragmentActivity {
 						}
 						else
 						{
+							termGrade.setOnClickListener(new ClassSwipeOpenerListener(dg.studentIndex, classIndex, termIndex - 1));
+							termGrade.setBackgroundResource(R.drawable.grade_summary_click);
 							String average = avg  + "";
 							if (avg == -1) {
 								average = "";
