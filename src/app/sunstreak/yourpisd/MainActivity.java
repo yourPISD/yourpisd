@@ -16,6 +16,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
@@ -40,6 +41,7 @@ public class MainActivity extends FragmentActivity {
 	static LinearLayout[] averages;
 	static DataGrabber dg;
 	static Bitmap proPic;
+	static int width;
 
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -59,7 +61,10 @@ public class MainActivity extends FragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-
+		DisplayMetrics displaymetrics = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+		int height = displaymetrics.heightPixels;
+		width = displaymetrics.widthPixels;
 
 		dg = (DataGrabber) getApplication();
 
@@ -191,6 +196,7 @@ public class MainActivity extends FragmentActivity {
 		 * The fragment argument representing the section number for this
 		 * fragment.
 		 */
+		
 		static double[] max;
 		public static final String ARG_OBJECT = "object";
 		private View rootView;
@@ -205,7 +211,7 @@ public class MainActivity extends FragmentActivity {
 				Bundle savedInstanceState) {
 			Bundle args = getArguments();
 			position = args.getInt(ARG_OBJECT);
-
+			
 			int tabLayout = 0;
 			switch (position) {
 			case 0:
@@ -407,9 +413,9 @@ public class MainActivity extends FragmentActivity {
 					
 					
 					weeks[i].setPadding(5, 5, 5, 5);
-					int width = (int) TypedValue.applyDimension(
-							TypedValue.COMPLEX_UNIT_DIP, 65, getResources().getDisplayMetrics());
-					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(width, LayoutParams.WRAP_CONTENT);
+//					int width = (int) TypedValue.applyDimension(
+//							TypedValue.COMPLEX_UNIT_DIP, 65, getResources().getDisplayMetrics());
+					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(width/6, LayoutParams.WRAP_CONTENT);
 				    llp.setMargins(0, 0, 5, 0);
 				    weeks[i].setLayoutParams(llp);
 				    weeks[i].setGravity(Gravity.CENTER);
@@ -443,9 +449,10 @@ public class MainActivity extends FragmentActivity {
 //						termGrade.setOnClickListener(new ClassSwipeOpenerListener(dg.studentIndex, classIndex, termIndex - 1));
 //						termGrade.setBackgroundResource(R.drawable.grade_summary_click);
 						termGrade.setPadding(5, 5, 5, 5);
-						int width = (int) TypedValue.applyDimension(
-								TypedValue.COMPLEX_UNIT_DIP, 65, getResources().getDisplayMetrics());
-						LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(width, LayoutParams.WRAP_CONTENT);
+//						int width = (int) TypedValue.applyDimension(
+//								TypedValue.COMPLEX_UNIT_DIP, 65, getResources().getDisplayMetrics());
+						
+						LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(width/6, LayoutParams.WRAP_CONTENT);
 					    llp.setMargins(0, 0, 5, 0);
 					    termGrade.setLayoutParams(llp);
 						
