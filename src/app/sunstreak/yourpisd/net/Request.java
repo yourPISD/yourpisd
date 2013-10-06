@@ -1,9 +1,6 @@
 package app.sunstreak.yourpisd.net;
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -33,17 +30,17 @@ public class Request {
 		return redirectLocation;
 	}
 
-	public static Object[] sendGet(String url) throws IllegalUrlException, MalformedURLException, IOException {
+	public static Object[] sendGet(String url) throws MalformedURLException, IOException {
 		return sendGet (url, new ArrayList<String>());
 	}
 	
 
-	public static Object[] sendGet(String url, boolean isSecure) throws IllegalUrlException, MalformedURLException, IOException {
+	public static Object[] sendGet(String url, boolean isSecure) throws MalformedURLException, IOException {
 		return sendGet (url, new ArrayList<String>(), null, isSecure);
 	}
 	
 
-	public static Object[] sendGet(String url, ArrayList<String> cookies) throws IllegalUrlException, MalformedURLException, IOException {
+	public static Object[] sendGet(String url, ArrayList<String> cookies) throws MalformedURLException, IOException {
 			return sendGet (url, cookies, null, isSecure(url));
 	}
 	
@@ -167,13 +164,13 @@ public class Request {
 	
 
 	
-	public static Object[] sendPost(String url, String postParams, ArrayList<String> cookies) throws IllegalUrlException, MalformedURLException, IOException {
+	public static Object[] sendPost(String url, String postParams, ArrayList<String> cookies) throws MalformedURLException, IOException {
 		
 		return sendPost (url, cookies, null, isSecure(url), postParams);
 		
 	}
 	
-	public static Object[] sendPost(String url, String postParams, ArrayList<String> cookies, ArrayList<String[]> requestProperties) throws IllegalUrlException, MalformedURLException, IOException {
+	public static Object[] sendPost(String url, String postParams, ArrayList<String> cookies, ArrayList<String[]> requestProperties) throws MalformedURLException, IOException {
 		if (isSecure(url))
 			return sendPost (url, cookies, requestProperties, true, postParams);
 		else
@@ -314,13 +311,13 @@ public class Request {
 	/**
 	 * returns true if begins with https, false if begins with http. Otherwise, throws IllegalUrlException.
 	 */
-	public static boolean isSecure (String url) throws IllegalUrlException {
+	public static boolean isSecure (String url) throws MalformedURLException {
 		if (url.substring(0,5).equals("https"))
 			return true;
 		else if (url.substring(0,4).equals("http"))
 			return false;
 		else
-			throw new IllegalUrlException("Not a valid url: " + url);
+			throw new MalformedURLException("Not a valid url: " + url);
 	}
 	
 	

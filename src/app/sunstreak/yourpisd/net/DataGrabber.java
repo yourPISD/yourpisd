@@ -6,9 +6,7 @@ import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import org.json.JSONArray;
@@ -120,9 +118,6 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 			} catch (IOException e) {
 				e.printStackTrace();
 				return null;
-			} catch (IllegalUrlException e) {
-				e.printStackTrace();
-				return null;
 			}
 		}
 
@@ -166,7 +161,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 		}
 
 
-		public String getDetailedReport (int classId, int termId, int studentId) throws MalformedURLException, IllegalUrlException, IOException {
+		public String getDetailedReport (int classId, int termId, int studentId) throws MalformedURLException, IOException {
 
 
 			String url = "https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/StudentAssignments.aspx?" + 
@@ -229,8 +224,6 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 				html = getDetailedReport(classId, termId, studentId);
 
 			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (IllegalUrlException e) {
 				e.printStackTrace();
 			} catch (JSONException e) {
 				e.printStackTrace();
@@ -389,17 +382,22 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 	}
 
 	public void setData (Domain domain, String username, String password) {
-		//	public DataGrabber (Domain domain, String username, String password) {
 		this.domain = domain;
 		this.username = username;
 		this.password = password;
-
-		/*
-		 * to accept expired certificate of login1.mypisd.net
-		 */
-		//acceptAllCertificates();
 	}
 
+	public void setData (String username, String password) {
+		this.username = username;
+		this.password = password;
+		
+		// Find out whether student or parent using the username.
+		if (username.contains("@mypisd.net") || !username.contains("@"))
+			this.domain = Domain.STUDENT;
+		else
+			this.domain = Domain.PARENT;
+	}
+	
 	/**
 	 * Logs in to Editure/New Age portal. Retrieves passthroughCredentials.
 	 * Precondition: username and password are defined.
@@ -412,7 +410,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 	 * @return 1 if success, -1 if parent failure, -2 if student failure, 0 if domain value is not 0 or 1
 	 */
 	public int login(/*Domain dom, String username, String password*/)
-			throws MalformedURLException, IllegalUrlException, IOException, PISDException, InterruptedException, ExecutionException {
+			throws MalformedURLException, IOException, InterruptedException, ExecutionException {
 
 		String response;
 		int responseCode;
@@ -527,7 +525,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 	 * @throws IOException
 	 * @throws PISDException
 	 */
-	public int loginGradebook(String userType, String uID, String email, String password) throws MalformedURLException, IllegalUrlException, IOException, PISDException {
+	public int loginGradebook(String userType, String uID, String email, String password) throws MalformedURLException, IOException {
 
 
 		ConnectivityManager connMgr = (ConnectivityManager) 

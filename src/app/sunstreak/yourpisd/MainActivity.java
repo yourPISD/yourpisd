@@ -2,8 +2,10 @@ package app.sunstreak.yourpisd;
 
 import java.util.Locale;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -14,6 +16,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -22,6 +25,7 @@ import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
@@ -360,7 +364,7 @@ public class MainActivity extends FragmentActivity {
 
 
 			if (position == 2) {
-
+				
 				LinearLayout bigLayout = (LinearLayout) rootView.findViewById(R.id.layout_year_summary);
 
 				// Add current student's name
@@ -377,23 +381,25 @@ public class MainActivity extends FragmentActivity {
 				{
 					weeks[i] = new TextView(getActivity());
 					weeks[i].setTextSize(25);
-					weeks[i].setText(i+1+"");
-					if(i == 0)
+//					weeks[i].setText(i+1+"");
+					switch(i) {
+					case 0:
 						weeks[i].setText("1st");
-					if(i == 1)
+						break;
+					case 1:
 						weeks[i].setText("2nd");
-					if(i == 2)
+						break;
+					case 2:
 						weeks[i].setText("3rd");
-					if(i == 3)
-					{
+						break;
+					case 3:
 						weeks[i].setText("Exam");
 						weeks[i].setTextSize(20);
-					}
-						
-					if(i == 4)
-					{
+						break;
+					case 4:
 						weeks[i].setText("Avg");
 						weeks[i].setTextSize(20);
+						break;
 					}
 						
 					weeks[i].setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
@@ -571,6 +577,22 @@ public class MainActivity extends FragmentActivity {
 		invalidateOptionsMenu();
 	}
 
+	public int screenHeight() {
+		WindowManager wm = (WindowManager)getSystemService(Context.WINDOW_SERVICE);
+		Display display = wm.getDefaultDisplay();
+		Point size = new Point();
+		display.getSize(size); 
+		return size.x;
+	}
+	
+	public int screenWidth() {
+		WindowManager wm = (WindowManager)getSystemService(Context.WINDOW_SERVICE);
+		Display display = wm.getDefaultDisplay();
+		Point size = new Point();
+		display.getSize(size); 
+		return size.y;
+	}
+	
 	class StudentChooserListener implements OnMenuItemClickListener {
 
 		int studentIndex;

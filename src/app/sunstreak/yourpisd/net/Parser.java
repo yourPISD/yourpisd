@@ -70,12 +70,12 @@ public class Parser {
 		return new String[] {uT, uID};
 	}
 	
-	public static int studentIdPinnacle (ArrayList<String> cookies) throws PISDException {
+	public static int studentIdPinnacle (ArrayList<String> cookies) {
 //		System.out.println("Cookies size = " + cookies.size());
 		for (String c : cookies)
 			if (c.substring(0,c.indexOf('=')).equals("PinnacleWeb.StudentId"))
 				return Integer.parseInt(c.substring(c.indexOf('=')+1));
-		throw new PISDException ("Student ID not found. Cookies: " + cookies.toString());
+		throw new RuntimeException ("Student ID not found. Cookies: " + cookies.toString());
 	}
 	
 	public static JSONArray detailedReport (String html) throws JSONException {
