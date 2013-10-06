@@ -41,7 +41,8 @@ public class MainActivity extends FragmentActivity {
 	static LinearLayout[] averages;
 	static DataGrabber dg;
 	static Bitmap proPic;
-	static int width;
+	static int SCREEN_HEIGHT;
+	static int SCREEN_WIDTH;
 
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -61,10 +62,12 @@ public class MainActivity extends FragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+		// Find the screen height/width
 		DisplayMetrics displaymetrics = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-		int height = displaymetrics.heightPixels;
-		width = displaymetrics.widthPixels;
+		SCREEN_HEIGHT = displaymetrics.heightPixels;
+		SCREEN_WIDTH = displaymetrics.widthPixels;
 
 		dg = (DataGrabber) getApplication();
 
@@ -387,8 +390,8 @@ public class MainActivity extends FragmentActivity {
 				for(int i = 0; i< weeks.length; i++)
 				{
 					weeks[i] = new TextView(getActivity());
-					weeks[i].setTextSize(25);
-//					weeks[i].setText(i+1+"");
+//					weeks[i].setTextSize(25);
+					weeks[i].setTextSize(SCREEN_WIDTH / 28);
 					switch(i) {
 					case 0:
 						weeks[i].setText("1st");
@@ -401,11 +404,9 @@ public class MainActivity extends FragmentActivity {
 						break;
 					case 3:
 						weeks[i].setText("Exam");
-						weeks[i].setTextSize(20);
 						break;
 					case 4:
 						weeks[i].setText("Avg");
-						weeks[i].setTextSize(20);
 						break;
 					}
 						
@@ -413,9 +414,7 @@ public class MainActivity extends FragmentActivity {
 					
 					
 					weeks[i].setPadding(5, 5, 5, 5);
-//					int width = (int) TypedValue.applyDimension(
-//							TypedValue.COMPLEX_UNIT_DIP, 65, getResources().getDisplayMetrics());
-					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(width/6, LayoutParams.WRAP_CONTENT);
+					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(SCREEN_WIDTH/6, LayoutParams.WRAP_CONTENT);
 				    llp.setMargins(0, 0, 5, 0);
 				    weeks[i].setLayoutParams(llp);
 				    weeks[i].setGravity(Gravity.CENTER);
@@ -443,16 +442,14 @@ public class MainActivity extends FragmentActivity {
 					for (int termIndex = 1; termIndex < gradeSummary[classIndex].length; termIndex++) {
 
 						TextView termGrade = new TextView(getActivity());
-						termGrade.setTextSize(30);
+						termGrade.setTextSize(SCREEN_WIDTH / 18);
 						termGrade.setClickable(true);
 						termGrade.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 //						termGrade.setOnClickListener(new ClassSwipeOpenerListener(dg.studentIndex, classIndex, termIndex - 1));
 //						termGrade.setBackgroundResource(R.drawable.grade_summary_click);
 						termGrade.setPadding(5, 5, 5, 5);
-//						int width = (int) TypedValue.applyDimension(
-//								TypedValue.COMPLEX_UNIT_DIP, 65, getResources().getDisplayMetrics());
 						
-						LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(width/6, LayoutParams.WRAP_CONTENT);
+						LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(SCREEN_WIDTH/6, LayoutParams.WRAP_CONTENT);
 					    llp.setMargins(0, 0, 5, 0);
 					    termGrade.setLayoutParams(llp);
 						
