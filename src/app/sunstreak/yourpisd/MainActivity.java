@@ -239,12 +239,16 @@ public class MainActivity extends FragmentActivity {
 				
 				if (dg.MULTIPLE_STUDENTS) {
 					TextView instructions = new TextView(getActivity());
-					instructions.setPadding(5, 5, 5, 5);
+					LinearLayout instruct = new LinearLayout(getActivity());
+					
+					instructions.setPadding(15, 15, 15, 15);
 					instructions.setTypeface(Typeface.createFromAsset(getActivity().getAssets()
 							,"Roboto-Light.ttf"));
 					instructions.setText(R.string.welcome_multiple_students);
+					instruct.setBackgroundResource(R.drawable.dropshadow);
 					// Han can you format this better?
-					bigLayout.addView(instructions, 1);
+					instruct.addView(instructions);
+					bigLayout.addView(instruct, 1);
 				}
 
 				profileCards = new LinearLayout[dg.getStudents().size()];
@@ -252,15 +256,24 @@ public class MainActivity extends FragmentActivity {
 				for (int i = 0; i < dg.getStudents().size(); i++) {
 					
 						
-					
+					LinearLayout box = new LinearLayout(getActivity());
+					box.setOrientation(LinearLayout.VERTICAL);
 					profileCards[i] = new LinearLayout(getActivity());
 
 					TextView name = new TextView(getActivity());
 					name.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 					name.setTextSize(25);
 					name.setText(dg.getStudents().get(i).name);
-
-					profileCards[i].addView(name);
+					TextView textGPA = new TextView(getActivity());
+					System.out.println(String.format("%9f",dg.getStudents().get(i).getGPA()));
+					textGPA.setText("GPA: " + String.format("%9f",dg.getStudents().get(i).getGPA()));
+			
+					textGPA.setTextSize(25);
+					textGPA.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
+					
+					box.addView(name);
+					box.addView(textGPA);
+					profileCards[i].addView(box);
 					profileCards[i].setOnClickListener(new StudentChooserListener(i));
 					
 					profileCards[i].setBackgroundResource(R.drawable.dropshadow);
@@ -290,16 +303,16 @@ public class MainActivity extends FragmentActivity {
 					}
 					
 					
-					TextView textGPA = new TextView(getActivity());
-					textGPA.setText(" GPA: " + String.format("%9f",dg.getStudents().get(i).getGPA()));
-					textGPA.setPadding(10, 10, 10, 10);
-					textGPA.setHeight(70);
-					textGPA.setGravity(Gravity.CENTER_VERTICAL);
-					textGPA.setTextSize(20);
-					textGPA.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
-					textGPA.setBackgroundResource(R.drawable.dropshadow);
+//					TextView textGPA = new TextView(getActivity());
+//					textGPA.setText(" GPA: " + String.format("%9f",dg.getStudents().get(i).getGPA()));
+//					textGPA.setPadding(10, 10, 10, 50);
+//					textGPA.setHeight(70);
+//					textGPA.setGravity(Gravity.CENTER_VERTICAL);
+//					textGPA.setTextSize(25);
+//					textGPA.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 					
-					bigLayout.addView(textGPA);
+					
+//					bigLayout.addView(textGPA);
 					
 				}
 
@@ -372,7 +385,7 @@ public class MainActivity extends FragmentActivity {
 				{
 					weeks[i] = new TextView(getActivity());
 //					weeks[i].setTextSize(25);
-					weeks[i].setTextSize(SCREEN_WIDTH / 28);
+					weeks[i].setTextSize(SCREEN_WIDTH / 30);
 					switch(i) {
 					case 0:
 						weeks[i].setText("1st");
@@ -395,7 +408,7 @@ public class MainActivity extends FragmentActivity {
 					
 					
 					weeks[i].setPadding(5, 5, 5, 5);
-					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(SCREEN_WIDTH/6, LayoutParams.WRAP_CONTENT);
+					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams((int)(SCREEN_WIDTH/5.5), LayoutParams.WRAP_CONTENT);
 				    llp.setMargins(0, 0, 5, 0);
 				    weeks[i].setLayoutParams(llp);
 				    weeks[i].setGravity(Gravity.CENTER);
@@ -423,14 +436,14 @@ public class MainActivity extends FragmentActivity {
 					for (int termIndex = 1; termIndex < gradeSummary[classIndex].length; termIndex++) {
 
 						TextView termGrade = new TextView(getActivity());
-						termGrade.setTextSize(SCREEN_WIDTH / 18);
+						termGrade.setTextSize(SCREEN_WIDTH / 25);
 						termGrade.setClickable(true);
 						termGrade.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 //						termGrade.setOnClickListener(new ClassSwipeOpenerListener(dg.studentIndex, classIndex, termIndex - 1));
 //						termGrade.setBackgroundResource(R.drawable.grade_summary_click);
 						termGrade.setPadding(5, 5, 5, 5);
 						
-						LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(SCREEN_WIDTH/6, LayoutParams.WRAP_CONTENT);
+						LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams((int)(SCREEN_WIDTH/5.5), LayoutParams.WRAP_CONTENT);
 					    llp.setMargins(0, 0, 5, 0);
 					    termGrade.setLayoutParams(llp);
 						
@@ -444,7 +457,7 @@ public class MainActivity extends FragmentActivity {
 							
 							double average = sum/count;
 							String averageText = Math.round(average)+"";
-							if(average==-1)
+							if(Math.round(average)==0)
 							{
 								averageText = "";
 							}
