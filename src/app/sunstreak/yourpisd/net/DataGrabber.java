@@ -340,6 +340,81 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 				matchClasses();
 			return classMatch;
 		}
+		
+		public double getGPA () {
+			if (gradeSummary == null)
+				return -1;
+			if (classMatch == null)
+				return -2;
+			
+			double pointSum = 0;
+			int pointCount = 0;
+			
+			for (int i = 0; i < gradeSummary.length; i++) {
+				double sum = 0;
+				double count = 0;
+				for (int j = 1; j < 5; j++) {
+					if (gradeSummary[i][j] != -1) {
+						sum += gradeSummary[i][j];
+						count++;
+					}
+				}
+				if (count > 0) {
+					int grade = (int) Math.round (sum / count);
+					// Failed class
+					if (grade < 70) {
+						// Do not increment pointSum because the student received a GPA of 0.
+						pointCount++;
+					}
+					else {
+						pointCount++;
+						double classGPA = maxGPA (getClassName(classMatch[i])) - gpaDifference (grade);
+						System.out.println(classGPA);
+						pointSum += classGPA;
+					}
+				}
+			}
+			
+			return pointSum / pointCount;
+		}
+		
+		public double maxGPA (String className) {
+			String[] split = className.split("[\\s()\\d]+");
+			
+			for (int i = split.length - 1; i >= 0; i--) {
+				if (split[i].equals("AP"))
+					return 5;
+				if (split[i].equals("H"))
+					return 4.5;
+			}
+			return 4;
+		}
+		
+		public double gpaDifference (int grade) {
+			if (grade<= 100 & grade>= 97)
+				return 0;
+			if (grade >= 93)
+				return 0.2;
+			if (grade >= 90)
+				return 0.4;
+			if (grade >= 87)
+				return 0.6;
+			if (grade >= 83)
+				return 0.8;
+			if (grade >= 80)
+				return 1.0;
+			if (grade >= 77)
+				return 1.2;
+			if (grade >= 73)
+				return 1.4;
+			if (grade >= 71)
+				return 1.6;
+			if (grade == 70)
+				return 2;
+			
+			// Grade below 70 or above 100
+			return -1;
+		}
 
 	}
 

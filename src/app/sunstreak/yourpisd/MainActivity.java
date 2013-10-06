@@ -288,20 +288,23 @@ public class MainActivity extends FragmentActivity {
 						
 						profileCards[i].addView(profilePic, 0);
 					}
+					
+					
+					TextView textGPA = new TextView(getActivity());
+					textGPA.setText(" GPA: " + String.format("%9f",dg.getStudents().get(i).getGPA()));
+					textGPA.setPadding(10, 10, 10, 10);
+					textGPA.setHeight(70);
+					textGPA.setGravity(Gravity.CENTER_VERTICAL);
+					textGPA.setTextSize(20);
+					textGPA.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
+					textGPA.setBackgroundResource(R.drawable.dropshadow);
+					
+					bigLayout.addView(textGPA);
+					
 				}
 
 				if (dg.MULTIPLE_STUDENTS)
 					colorStudents();
-					
-				LinearLayout gpa = new LinearLayout(getActivity());
-				gpa.setBackgroundResource(R.drawable.dropshadow);
-				TextView textGPA = new TextView(getActivity());
-				textGPA.setText("GPA: 5.00000000");
-				textGPA.setPadding(10, 10, 10, 10);
-				textGPA.setTextSize(20);
-				textGPA.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
-				gpa.addView(textGPA);
-				bigLayout.addView(gpa);
 			}
 
 			if (position == 1)
@@ -331,28 +334,6 @@ public class MainActivity extends FragmentActivity {
 					LinearLayout card = (LinearLayout) inflater.inflate(R.layout.main_grade_summary, bigLayout, false);
 					TextView className = (TextView) card.findViewById(R.id.name);
 					String name = dg.getStudents().get(dg.studentIndex).getClassName(jsonIndex);
-					String[] split = name.split("//s");
-					for(int j= split.length-1; j>=0; j--)
-					{
-						if(split[j].equalsIgnoreCase("AP"))
-						{
-							max[i] = 5.0;
-							break;
-						}
-							
-						else if(split[j].equalsIgnoreCase("H"))
-						{
-							max[j] = 4.5;
-							break;
-						}
-							
-						else
-						{
-							max[j] = 4.0;
-							break;
-						}
-							
-					}
 					className.setText(name);
 
 					int avg = gradeSummary[i][1 + CURRENT_TERM_INDEX];
