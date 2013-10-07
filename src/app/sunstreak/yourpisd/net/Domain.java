@@ -13,7 +13,8 @@ public enum Domain {
 	STUDENT (
 			"https://sso.portal.mypisd.net/cas/login?service=http%3A%2F%2Fportal.mypisd.net%2Fc%2Fportal%2Flogin",
 			"https://sso.portal.mypisd.net/cas/login?service=http%3A%2F%2Fportal.mypisd.net%2Fc%2Fportal%2Flogin",
-			1);
+			1),
+	TEST (null, null, 2);
 	/*
 	 * Elementary schools
 	 */

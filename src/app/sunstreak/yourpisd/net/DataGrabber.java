@@ -2,11 +2,13 @@ package app.sunstreak.yourpisd.net;
 
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 
 import org.json.JSONArray;
@@ -18,9 +20,12 @@ import org.jsoup.nodes.Element;
 import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Environment;
 import android.util.SparseArray;
+import app.sunstreak.yourpisd.R;
 
 
 public class DataGrabber /*implements Parcelable*/ extends Application {
@@ -161,7 +166,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 		}
 
 
-		public String getDetailedReport (int classId, int termId, int studentId) throws MalformedURLException, IOException {
+		private String getDetailedReport (int classId, int termId, int studentId) throws MalformedURLException, IOException {
 
 
 			String url = "https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/StudentAssignments.aspx?" + 
@@ -340,16 +345,16 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 				matchClasses();
 			return classMatch;
 		}
-		
+
 		public double getGPA () {
 			if (gradeSummary == null)
 				return -1;
 			if (classMatch == null)
 				return -2;
-			
+
 			double pointSum = 0;
 			int pointCount = 0;
-			
+
 			for (int i = 0; i < gradeSummary.length; i++) {
 				double sum = 0;
 				double count = 0;
@@ -374,13 +379,13 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 					}
 				}
 			}
-			
+
 			return pointSum / pointCount;
 		}
-		
+
 		public double maxGPA (String className) {
 			String[] split = className.split("[\\s()\\d]+");
-			
+
 			for (int i = split.length - 1; i >= 0; i--) {
 				if (split[i].equals("AP"))
 					return 5;
@@ -389,7 +394,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 			}
 			return 4;
 		}
-		
+
 		public double gpaDifference (int grade) {
 			if (grade<= 100 & grade>= 97)
 				return 0;
@@ -411,7 +416,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 				return 1.6;
 			if (grade == 70)
 				return 2;
-			
+
 			// Grade below 70 or above 100
 			return -1;
 		}
@@ -465,14 +470,21 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 	public void setData (String username, String password) {
 		this.username = username;
 		this.password = password;
-		
+
 		// Find out whether student or parent using the username.
-		if (username.contains("@mypisd.net") || !username.contains("@"))
+		if (username.equals("test")) {
+			this.domain = Domain.TEST;
+			students = getTestStudents();
+			passthroughCredentials = new String[] {"", ""};
+			gradebookCredentials = new String[] {"", ""};
+			MULTIPLE_STUDENTS = true;
+		}
+		else if (username.contains("@mypisd.net") || !username.contains("@"))
 			this.domain = Domain.STUDENT;
 		else
 			this.domain = Domain.PARENT;
 	}
-	
+
 	/**
 	 * Logs in to Editure/New Age portal. Retrieves passthroughCredentials.
 	 * Precondition: username and password are defined.
@@ -490,8 +502,8 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 		String response;
 		int responseCode;
 
-		switch (domain.index) {
-		case 0:	// Parent
+		switch (domain) {
+		case PARENT:
 			Object[] cookieAuth = Request.sendPost(
 					domain.loginAddress, 
 					"password=" + URLEncoder.encode(password,"UTF-8") + "&username=" + URLEncoder.encode(username,"UTF-8") + "&Submit=Login", 
@@ -516,7 +528,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 				editureLogin = -1;
 				return -1;
 			}
-		case 1: // Student
+		case STUDENT: 
 			Object[] portalDefaultPage = Request.sendGet(
 					domain.loginAddress,
 					cookies);
@@ -581,7 +593,11 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 				e.printStackTrace();
 				return -2;
 			}
-
+		case TEST:
+			Thread.sleep(500);
+			System.out.println("Test login");
+			editureLogin = 1;
+			return 1;
 		default:
 			return 0;
 		}
@@ -602,6 +618,15 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 	 */
 	public int loginGradebook(String userType, String uID, String email, String password) throws MalformedURLException, IOException {
 
+		if (domain == Domain.TEST) {
+			try {
+				Thread.sleep(500);
+				System.out.println("Test login gradebook");
+			} catch (InterruptedException e) {
+			}
+			gradebookLogin = 1;
+			return 1;
+		}
 
 		ConnectivityManager connMgr = (ConnectivityManager) 
 				getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -746,8 +771,137 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 	public String[] getPassthroughCredentials() {
 		return passthroughCredentials;
 	}
-	
+
 	public List<Student> getStudents() {
 		return students;
 	}
+
+	private List<Student> getTestStudents() {
+
+		
+		class TestStudent extends Student{
+
+			public TestStudent(int studentId, String studentName) {
+				
+				super(studentId, studentName);
+				
+				InputStream is = null;
+
+				switch (studentId) {
+				case 0:
+					is = getResources().openRawResource(R.raw.student_0_class_grades);
+					break;
+				case 1:
+					is = getResources().openRawResource(R.raw.student_1_class_grades);
+					break;
+				}
+
+				if (is == null) {
+					System.out.println("is = null");
+					return;
+				}
+					
+				
+				Scanner sc = new Scanner(is).useDelimiter("\\A");
+				String json = sc.hasNext() ? sc.next() : "";
+				
+				System.out.println(json);
+
+				try {
+					classList = new JSONArray(json);
+					
+					System.out.println("classList = " + classList);
+
+					classGrades = new SparseArray<SparseArray<JSONObject>>();
+
+					for (int i = 0; i < classList.length(); i++) {
+						classGrades.put(i, new SparseArray<JSONObject>());
+						for (int j = 0; j < classList.getJSONObject(i).getJSONArray("terms").length(); j++) {
+							classGrades.get(i).put(j, classList.getJSONObject(i));
+						}
+					}
+				} catch (JSONException e) {
+					e.printStackTrace();
+					return;
+				}
+				
+			}
+
+			public void getClassList() {
+				
+			}
+
+			public JSONObject getClassGrade(int classIndex, int termIndex) {
+				return classGrades.get(classIndex).get(termIndex);
+			}
+			
+			public int[][] loadGradeSummary() {
+				InputStream is;
+
+				switch (studentId) {
+				case 0:
+					is = getResources().openRawResource(R.raw.student_0_grade_summary);
+					break;
+				case 1:
+					is = getResources().openRawResource(R.raw.student_1_grade_summary);
+					break;
+				default:
+					return null;
+				}
+
+				Scanner sc = new Scanner(is);
+
+				gradeSummary = new int[7][7];
+				for (int i = 0; i < 7; i++) {
+					for (int j = 0; j < 7; j++) {
+						gradeSummary[i][j] = sc.nextInt();
+					}
+				}
+
+				return gradeSummary;
+			}
+
+			public int[] getClassIds() {
+				return new int[] {0, 1, 2, 3, 4, 5, 6};
+			}
+
+			public int[] getTermIds(int classId) throws JSONException {
+				return new int[] {0, 1, 2, 3, 4, 5};
+			}
+
+
+
+			public int[][] getGradeSummary () {
+				if (gradeSummary == null)
+					loadGradeSummary();
+
+				return gradeSummary;
+			}
+
+
+			public Bitmap getStudentPicture() {
+
+				switch (studentId) {
+				case 0:
+					return BitmapFactory.decodeResource(getResources(), R.drawable.student_0);
+				case 1:
+					return BitmapFactory.decodeResource(getResources(), R.drawable.student_1);
+				default:
+					return null;
+				}
+			}
+
+			public void matchClasses() {
+				classMatch = new int[] {0, 1, 2, 3, 4, 5, 6};
+			}
+
+		}
+		
+		List<Student> students = new ArrayList<Student>();
+		students.add(new TestStudent(0, "Griffin, Stewie (0)"));
+		students.add(new TestStudent(1, "Griffin, Meg (1)"));
+		
+		return students;
+	}
+
 }
