@@ -49,13 +49,14 @@ public final class R {
         public static final int ic_cool_icon=0x7f02000d;
         public static final int ic_launcher=0x7f02000e;
         public static final int logo=0x7f02000f;
-        public static final int navigation_collapse=0x7f020010;
-        public static final int navigation_expand=0x7f020011;
-        public static final int navigation_next_item=0x7f020012;
-        public static final int navigation_previous_item=0x7f020013;
-        public static final int shadow=0x7f020014;
-        public static final int student_0=0x7f020015;
-        public static final int student_1=0x7f020016;
+        public static final int logotext=0x7f020010;
+        public static final int navigation_collapse=0x7f020011;
+        public static final int navigation_expand=0x7f020012;
+        public static final int navigation_next_item=0x7f020013;
+        public static final int navigation_previous_item=0x7f020014;
+        public static final int shadow=0x7f020015;
+        public static final int student_0=0x7f020016;
+        public static final int student_1=0x7f020017;
     }
     public static final class id {
         public static final int action_settings=0x7f0b0023;
@@ -64,7 +65,7 @@ public final class R {
         public static final int class_description_linear_layout=0x7f0b000e;
         public static final int class_name=0x7f0b0019;
         public static final int container=0x7f0b001f;
-        public static final int copyright=0x7f0b0005;
+        public static final int copyright=0x7f0b0004;
         public static final int credits=0x7f0b0025;
         public static final int description=0x7f0b0015;
         public static final int descriptions=0x7f0b000f;
@@ -78,7 +79,7 @@ public final class R {
         public static final int login_form=0x7f0b0008;
         public static final int login_status=0x7f0b0006;
         public static final int login_status_message=0x7f0b0007;
-        public static final int logo=0x7f0b0004;
+        public static final int logo=0x7f0b0005;
         public static final int name=0x7f0b0018;
         public static final int next_six_weeks=0x7f0b0022;
         public static final int overall=0x7f0b001c;

@@ -43,7 +43,7 @@
         </activity>
         <activity
             android:name="app.sunstreak.yourpisd.CreditActivity"
-            android:label="@string/title_activity_credit" >
+            android:label="About" >
         </activity>
     </application>
 

@@ -27,15 +27,6 @@
         android:text="Special thanks to Richard Wang for the icon."
         android:textSize="20sp" />
 
-    <ImageView
-        android:id="@+id/logo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/textView2"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="48dp"
-        android:src="@drawable/logo" />
-
     <TextView
         android:id="@+id/copyright"
         android:layout_width="match_parent"
@@ -46,5 +37,15 @@
         android:text="©Sunstreak Applications 2013"
         android:gravity="center"
         android:textSize="20sp" />
+
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_below="@+id/textView2"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="46dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/logotext" />
 
 </RelativeLayout>
