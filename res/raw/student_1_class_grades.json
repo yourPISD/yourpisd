@@ -510,7 +510,7 @@
         "teacher": "Fitzgerald, F. Scott"
     },
     {
-        "title": "DIPLOMACY H(03)",
+        "title": "ECONOMETRICS H(03)",
         "enrollmentId": 0,
         "classId": 0,
         "terms": [
@@ -677,7 +677,7 @@
                 "termId": 5
             }
         ],
-        "teacher": "Kissinger, Henry"
+        "teacher": "Freeman, Milton"
     },
     {
         "title": "STRING ORCH(04)",
@@ -848,6 +848,176 @@
             }
         ],
         "teacher": "Simon, Paul"
+    },
+	{
+        "title": "PHILOSOPHY(05)",
+        "enrollmentId": 0,
+        "classId": 0,
+        "terms": [
+            {
+                "grades": [
+                    {
+                        "Category": "Daily Work",
+                        "Description": "Daily Grade 1",
+                        "Grade": 90
+                    },
+                    {
+                        "Category": "Daily Work",
+                        "Description": "Daily Grade 2",
+                        "Grade": 80
+                    },
+                    {
+                        "Category": "Daily Work",
+                        "Description": "Daily Grade 3",
+                        "Grade": 70
+                    },
+                    {
+                        "Category": "Major Evaluations",
+                        "Description": "Test 1",
+                        "Grade": 50
+                    },
+                    {
+                        "Category": "Major Evaluations",
+                        "Description": "Test 2",
+                        "Grade": 100
+                    }
+                ],
+                "showInViewer": true,
+                "categoryGrades": [
+                    {
+                        "Category": "Daily Work",
+                        "Weight": 25,
+                        "Percent": 80
+                    },
+                    {
+                        "Category": "Major Evaluations",
+                        "Weight": 75,
+                        "Percent": 75
+                    }
+                ],
+                "termId": 0
+            },
+            {
+                "grades": [
+                    {
+                        "Category": "Daily Work",
+                        "Description": "Daily Grade 1",
+                        "Grade": 90
+                    },
+                    {
+                        "Category": "Daily Work",
+                        "Description": "Daily Grade 2",
+                        "Grade": 80
+                    },
+                    {
+                        "Category": "Daily Work",
+                        "Description": "Daily Grade 3",
+                        "Grade": 70
+                    },
+                    {
+                        "Category": "Major Evaluations",
+                        "Description": "Test 1",
+                        "Grade": 50
+                    },
+                    {
+                        "Category": "Major Evaluations",
+                        "Description": "Test 2",
+                        "Grade": 100
+                    }
+                ],
+                "showInViewer": true,
+                "categoryGrades": [
+                    {
+                        "Category": "Daily Work",
+                        "Weight": 25,
+                        "Percent": 80
+                    },
+                    {
+                        "Category": "Major Evaluations",
+                        "Weight": 75,
+                        "Percent": 75
+                    }
+                ],
+                "termId": 1
+            },
+            {
+                "grades": [],
+                "showInViewer": true,
+                "categoryGrades": [
+                    {
+                        "Category": "Daily Work",
+                        "Weight": 25,
+                        "Points / Max pts.": "0 / 0",
+                        "Percent": 0
+                    },
+                    {
+                        "Category": "Major Evaluations",
+                        "Weight": 75,
+                        "Points / Max pts.": "0 / 0",
+                        "Percent": 0
+                    }
+                ],
+                "termId": 2
+            },
+            {
+                "grades": [],
+                "showInViewer": true,
+                "categoryGrades": [
+                    {
+                        "Category": "Daily Work",
+                        "Weight": 25,
+                        "Points / Max pts.": "0 / 0",
+                        "Percent": 0
+                    },
+                    {
+                        "Category": "Major Evaluations",
+                        "Weight": 75,
+                        "Points / Max pts.": "0 / 0",
+                        "Percent": 0
+                    }
+                ],
+                "termId": 3
+            },
+            {
+                "grades": [],
+                "showInViewer": true,
+                "categoryGrades": [
+                    {
+                        "Category": "Daily Work",
+                        "Weight": 25,
+                        "Points / Max pts.": "0 / 0",
+                        "Percent": 0
+                    },
+                    {
+                        "Category": "Major Evaluations",
+                        "Weight": 75,
+                        "Points / Max pts.": "0 / 0",
+                        "Percent": 0
+                    }
+                ],
+                "termId": 4
+            },
+            {
+                "grades": [],
+                "showInViewer": true,
+                "categoryGrades": [
+                    {
+                        "Category": "Daily Work",
+                        "Weight": 25,
+                        "Points / Max pts.": "0 / 0",
+                        "Percent": 0
+                    },
+                    {
+                        "Category": "Major Evaluations",
+                        "Weight": 75,
+                        "Points / Max pts.": "0 / 0",
+                        "Percent": 0
+                    }
+                ],
+                "termId": 5
+            }
+        ],
+        "teacher": "Sagan, Carl"
     },
     {
         "title": "COMP SCI AP(06)",
