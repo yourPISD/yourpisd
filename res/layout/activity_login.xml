@@ -1,7 +1,6 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".LoginActivity" 
-    >
+    tools:context=".LoginActivity" >
 
     <!-- Login progress -->
 
@@ -28,7 +27,6 @@
             android:fontFamily="sans-serif-light"
             android:text="@string/login_progress_mypisd"
             android:textAppearance="?android:attr/textAppearanceMedium" />
-
     </LinearLayout>
 
     <!-- Login form -->
@@ -36,37 +34,31 @@
     <ScrollView
         android:id="@+id/login_form"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" 
-        android:fillViewport="true">
+        android:layout_height="match_parent"
+        android:fillViewport="true" >
 
         <LinearLayout
             style="@style/LoginFormContainer"
-            android:orientation="vertical" 
-           	>
-			<LinearLayout
-    		android:focusable="true" android:focusableInTouchMode="true"
-    		android:layout_width="0px" android:layout_height="0px"/>
-			
-			<!-- 
-            <Spinner
-                android:id="@+id/domain_spinner"
-                android:fontFamily="sans-serif-light"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-                -->
+            android:orientation="vertical" >
 
-			<ImageView
-			    android:layout_width="150dp"
-			    android:layout_height="150dp"
-			    android:layout_gravity="center"
-			    android:layout_margin="5dp"
-			    android:src="@drawable/logotext" />
+            <LinearLayout
+                android:layout_width="0px"
+                android:layout_height="0px"
+                android:focusable="true"
+                android:focusableInTouchMode="true" />
+
+            <ImageView
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_gravity="center"
+                android:layout_margin="5dp"
+                android:src="@drawable/logotext" />
 
             <EditText
                 android:id="@+id/email"
-                android:fontFamily="sans-serif-light"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                android:fontFamily="sans-serif-light"
                 android:hint="@string/prompt_email"
                 android:inputType="textEmailAddress"
                 android:maxLines="1"
@@ -74,9 +66,9 @@
 
             <EditText
                 android:id="@+id/password"
-                android:fontFamily="sans-serif-light"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                android:fontFamily="sans-serif-light"
                 android:hint="@string/prompt_password"
                 android:imeActionId="@+id/login"
                 android:imeActionLabel="@string/action_sign_in_short"
@@ -87,55 +79,30 @@
 
             <CheckBox
                 android:id="@+id/remember_password"
-                android:fontFamily="sans-serif-light"
-                android:layout_marginTop ="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:fontFamily="sans-serif-light"
                 android:text="@string/remember_password" />
+
             <CheckBox
                 android:id="@+id/auto_login"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
                 android:fontFamily="sans-serif-light"
-                android:layout_marginTop ="0dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="@string/auto_login" />
-            <!-- 
-            
-            <CheckBox
-                android:id="@+id/auto_login"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/auto_login" />
-			-->
-			
-			
+
             <Button
                 android:id="@+id/sign_in_button"
-                android:fontFamily="sans-serif-light"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
                 android:layout_marginTop="10dp"
+                android:fontFamily="sans-serif-light"
                 android:paddingLeft="32dp"
                 android:paddingRight="32dp"
                 android:text="@string/action_sign_in_register" />
-            <!--  <ImageView
-                android:layout_weight="1"
-                android:layout_width= "wrap_content"
-                android:layout_height= "wrap_content"
-                android:paddingTop = "50dp"
-                android:layout_gravity="center"
-                android:src="@drawable/logo"
-                />-->
-            <!-- <TextView
-            android:layout_weight="0"
-            android:gravity="bottom|center"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-light"
-            android:text="©Sunstreak Applications 2013"
-            android:textSize="18sp"
-        	/> -->
         </LinearLayout>
     </ScrollView>
 

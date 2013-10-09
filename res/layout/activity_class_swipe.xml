@@ -3,13 +3,9 @@
     android:id="@+id/pager"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gray"
     tools:context=".ClassSwipeActivity" >
 
-    <!--
-    This title strip will display the currently visible page title, as well as the page
-    titles for adjacent pages.
-    -->
+<!-- This title strip will display the currently visible page title, as well as the page titles for adjacent pages. -->
 
     <android.support.v4.view.PagerTabStrip
         android:id="@+id/pager_title_strip"

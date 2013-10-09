@@ -355,11 +355,13 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 					LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 					LinearLayout categoryLayout = (LinearLayout) inflater.inflate(R.layout.class_swipe_category_card, classDescriptionLinearLayout, false);
-					LinearLayout gradesListLayout = (LinearLayout) categoryLayout.findViewById(R.id.layout_grades_list);
+					
 
 					// Name of the category ("Daily Work", etc)
 					String categoryName = mClassGrade.getJSONArray("terms").getJSONObject(termIndex)
 							.getJSONArray("categoryGrades").getJSONObject(category).getString("Category");
+					
+					int layoutCounter = 0;
 
 					// for every grade in this term [any category]
 					for(int i = 0; i< mClassGrade.getJSONArray("terms")
@@ -384,7 +386,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 									.getJSONObject(i).optString("Grade", "") + "";
 							grade.setText(gradeValue);
 
-							gradesListLayout.addView(innerLayout);
+							categoryLayout.addView(innerLayout, layoutCounter++);
 						}
 
 					}

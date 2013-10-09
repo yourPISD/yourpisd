@@ -9,40 +9,40 @@
     tools:context=".CreditActivity" >
 
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/credit_developers"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif-light"
-        android:text="App developed by Han Li and Sidharth Kapur from Plano West Senior High School, Plano, TX."
+        android:text="@string/credit_developers"
         android:textSize="20sp" />
 
     <TextView
+        android:id="@+id/credit_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/textView1"
-        android:id="@+id/textView2"
-        android:layout_below="@+id/textView1"
+        android:layout_alignLeft="@id/credit_developers"
+        android:layout_below="@id/credit_developers"
         android:layout_marginTop="27dp"
         android:fontFamily="sans-serif-light"
-        android:text="Special thanks to Richard Wang for the icon."
+        android:text="@string/credit_icon"
         android:textSize="20sp" />
 
     <TextView
         android:id="@+id/copyright"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/textView2"
+        android:layout_alignLeft="@id/credit_icon"
         android:layout_alignParentBottom="true"
         android:fontFamily="sans-serif-light"
-        android:text="©Sunstreak Applications 2013"
         android:gravity="center"
+        android:text="@string/copyright"
         android:textSize="20sp" />
 
     <ImageView
         android:id="@+id/logo"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:layout_below="@+id/textView2"
+        android:layout_below="@id/credit_icon"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="46dp"
         android:scaleType="fitCenter"
