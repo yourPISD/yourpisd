@@ -183,6 +183,8 @@ public class LoginActivity extends Activity {
 		});
 		mRememberPassword = sharedPrefs.getBoolean("remember_password", false);
 		mRememberPasswordCheckBox.setChecked(mRememberPassword);
+		autoLoginBoolean = sharedPrefs.getBoolean("autologin", false);
+		autoLogin.setChecked(autoLoginBoolean);
 
 
 		// Set up the auto_login CheckBox

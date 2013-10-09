@@ -194,6 +194,12 @@ public final class R {
 
 
     
+ API 11 theme customizations can go here. 
+
+        <item name="android:background">@color/transparent</item>
+        <item name="android:windowBackground">@color/transparent</item>
+        <item name="android:colorBackground">@color/transparent</item>
+        
 
         Base application theme for API 14+. This theme completely replaces
         AppBaseTheme from BOTH res/values/styles.xml and
@@ -202,6 +208,12 @@ public final class R {
 
 
     
+ API 14 theme customizations can go here. 
+
+        <item name="android:background">@color/transparent</item>
+        <item name="android:windowBackground">@color/transparent</item>
+        <item name="android:colorBackground">@color/transparent</item>
+        
          */
         public static final int AppBaseTheme=0x7f090000;
         /**  Application theme. 
