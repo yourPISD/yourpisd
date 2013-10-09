@@ -74,10 +74,13 @@ public class LoginActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		final SharedPreferences sharedPrefs = this.getPreferences(Context.MODE_PRIVATE);
 		setContentView(R.layout.activity_login);
+		final SharedPreferences sharedPrefs = this.getPreferences(Context.MODE_PRIVATE);
 		if(sharedPrefs.getBoolean("autologin", false))
 		{
+			mEmail = sharedPrefs.getString("email", mEmail);
+			mPassword = new String(Base64.decode(sharedPrefs.getString("e_password", "")
+				, Base64.DEFAULT ));
 			showProgress(true);
 			mAuthTask = new UserLoginTask();
 			mAuthTask.execute((Void) null);
@@ -177,7 +180,7 @@ public class LoginActivity extends Activity {
 		autoLogin.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			public void onCheckedChanged(CompoundButton button, boolean isChecked) {
 				autoLoginBoolean = isChecked;
-
+				mRememberPasswordCheckBox.setChecked(isChecked);
 			}
 
 		});
