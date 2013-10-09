@@ -126,6 +126,9 @@ public class MainActivity extends FragmentActivity {
 		switch (item.getItemId()) {
 		case R.id.log_out:
 			dg.clearData();
+			SharedPreferences.Editor editor = sharedPrefs.edit();
+			editor.putBoolean("autologin", false);
+
 			Intent intent = new Intent(this, LoginActivity.class);
 			startActivity(intent);
 			return true;
