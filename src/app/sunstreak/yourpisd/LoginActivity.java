@@ -58,6 +58,7 @@ public class LoginActivity extends Activity {
 	private String mPassword;
 	private String encryptedPass;
 	private boolean mRememberPassword;
+	private boolean autoLoginBoolean;
 	//	private boolean mAutoLogin;
 
 	// UI references.
@@ -73,9 +74,14 @@ public class LoginActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		final SharedPreferences sharedPrefs = this.getPreferences(Context.MODE_PRIVATE);
 		setContentView(R.layout.activity_login);
-
+		if(sharedPrefs.getBoolean("autologin", false))
+		{
+			showProgress(true);
+			mAuthTask = new UserLoginTask();
+			mAuthTask.execute((Void) null);
+		}
 
 		mLoginFormView = findViewById(R.id.login_form);
 		mLoginStatusView = findViewById(R.id.login_status);
@@ -101,7 +107,7 @@ public class LoginActivity extends Activity {
 			// Keep going.
 		}
 
-		final SharedPreferences sharedPrefs = this.getPreferences(Context.MODE_PRIVATE);
+		
 		PackageInfo pInfo;
 
 		if (sharedPrefs.getBoolean("patched", false)) {
@@ -163,6 +169,15 @@ public class LoginActivity extends Activity {
 						mAutoLoginCheckBox.setEnabled(false);
 					}
 				 */
+			}
+
+		});
+		
+		CheckBox autoLogin = (CheckBox) findViewById(R.id.auto_login);
+		autoLogin.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			public void onCheckedChanged(CompoundButton button, boolean isChecked) {
+				autoLoginBoolean = isChecked;
+
 			}
 
 		});
@@ -325,6 +340,7 @@ public class LoginActivity extends Activity {
 			editor.putString("email", mEmail);
 			editor.putString("e_password", mRememberPassword? encryptedPass: "");
 			editor.putBoolean("remember_password", mRememberPassword);
+			editor.putBoolean("autologin", autoLoginBoolean);
 			//			editor.putBoolean("auto_login", mAutoLogin);
 			editor.commit();
 
