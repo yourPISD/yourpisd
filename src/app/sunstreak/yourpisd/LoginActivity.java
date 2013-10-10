@@ -87,6 +87,7 @@ public class LoginActivity extends Activity {
 		try {
 			boolean refresh = getIntent().getExtras().getBoolean("Refresh");
 
+				
 			if (refresh) {
 				mEmail = ((DataGrabber) getApplication()).getUsername();
 				mPassword = ((DataGrabber) getApplication()).getPassword();
@@ -108,6 +109,8 @@ public class LoginActivity extends Activity {
 						(InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 				imm.hideSoftInputFromWindow(mPasswordView.getWindowToken(), 0);
 			}
+			else
+				mLoginFormView.setVisibility(View.VISIBLE);
 		} catch (NullPointerException e) {
 			// Keep going.
 		}
@@ -232,7 +235,7 @@ public class LoginActivity extends Activity {
 						return false;
 					}
 				});
-
+		mLoginFormView.setVisibility(View.VISIBLE);
 		// Login if auto-login is checked.
 		if (mAutoLogin)
 			attemptLogin();
@@ -363,7 +366,7 @@ public class LoginActivity extends Activity {
 			//					});
 
 
-		} else {
+		} else if(getIntent().getExtras().getBoolean("Refresh")){
 			// The ViewPropertyAnimator APIs are not available, so simply show
 			// and hide the relevant UI components.
 			mLoginStatusView.setVisibility(show ? View.VISIBLE : View.GONE);

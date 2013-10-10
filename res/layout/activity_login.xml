@@ -35,7 +35,9 @@
         android:id="@+id/login_form"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true" >
+        android:fillViewport="true" 
+        android:visibility="gone" 
+        >
 
         <LinearLayout
             style="@style/LoginFormContainer"

@@ -133,6 +133,7 @@ public class MainActivity extends FragmentActivity {
 
 			Intent intent = new Intent(this, LoginActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.putExtra("show", true);
 			startActivity(intent);
 			return true;
 		case R.id.credits:
