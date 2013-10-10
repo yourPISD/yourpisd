@@ -4,6 +4,7 @@ import java.util.Locale;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Typeface;
@@ -126,10 +127,12 @@ public class MainActivity extends FragmentActivity {
 		switch (item.getItemId()) {
 		case R.id.log_out:
 			dg.clearData();
-			SharedPreferences.Editor editor = sharedPrefs.edit();
-			editor.putBoolean("autologin", false);
+			SharedPreferences.Editor editor = getSharedPreferences("LoginActivity", Context.MODE_PRIVATE).edit();
+			editor.putBoolean("auto_login", false);
+			editor.commit();
 
 			Intent intent = new Intent(this, LoginActivity.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
 			return true;
 		case R.id.credits:

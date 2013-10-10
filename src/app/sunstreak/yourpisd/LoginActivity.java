@@ -58,8 +58,7 @@ public class LoginActivity extends Activity {
 	private String mPassword;
 	private String encryptedPass;
 	private boolean mRememberPassword;
-	private boolean autoLoginBoolean;
-	//	private boolean mAutoLogin;
+	private boolean mAutoLogin;
 
 	// UI references.
 	private EditText mEmailView;
@@ -67,37 +66,40 @@ public class LoginActivity extends Activity {
 	private View mLoginFormView;
 	private View mLoginStatusView;
 	private TextView mLoginStatusMessageView;
-	//	private Spinner mDomainSpinner;
 	private CheckBox mRememberPasswordCheckBox;
-	//	private CheckBox mAutoLoginCheckBox;
+	private CheckBox mAutoLoginCheckBox;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_login);
-		final SharedPreferences sharedPrefs = this.getPreferences(Context.MODE_PRIVATE);
-		if(sharedPrefs.getBoolean("autologin", false))
-		{
-			mEmail = sharedPrefs.getString("email", mEmail);
-			mPassword = new String(Base64.decode(sharedPrefs.getString("e_password", "")
-				, Base64.DEFAULT ));
-			showProgress(true);
-			mAuthTask = new UserLoginTask();
-			mAuthTask.execute((Void) null);
-		}
+		final SharedPreferences sharedPrefs = getPreferences(Context.MODE_PRIVATE);
 
 		mLoginFormView = findViewById(R.id.login_form);
 		mLoginStatusView = findViewById(R.id.login_status);
 		mLoginStatusMessageView = (TextView) findViewById(R.id.login_status_message);
+		
+
+		mAutoLogin = sharedPrefs.getBoolean("auto_login", false);
+		System.out.println(mAutoLogin);
 
 
 		try {
+			boolean refresh = getIntent().getExtras().getBoolean("Refresh");
 
-			if (getIntent().getExtras().getBoolean("Refresh") == true) {
-				//				mDomain = ((DataGrabber) getApplication()).getDomain();
+			if (refresh) {
 				mEmail = ((DataGrabber) getApplication()).getUsername();
 				mPassword = ((DataGrabber) getApplication()).getPassword();
+				/*
+			}
+			else if (mAutoLogin) {
+				mEmail = sharedPrefs.getString("email", mEmail);
+				mPassword = new String(Base64.decode(sharedPrefs.getString("e_password", "")
+						, Base64.DEFAULT ));
+			}
 
+			if (refresh || mAutoLogin) {
+				*/
 				showProgress(true);
 				mAuthTask = new UserLoginTask();
 				mAuthTask.execute((Void) null);
@@ -110,8 +112,7 @@ public class LoginActivity extends Activity {
 			// Keep going.
 		}
 
-		
-		PackageInfo pInfo;
+
 
 		if (sharedPrefs.getBoolean("patched", false)) {
 			SharedPreferences.Editor editor = sharedPrefs.edit();
@@ -150,74 +151,37 @@ public class LoginActivity extends Activity {
 
 
 
-		// Set up the Spinner.
-		//		List<String> SpinnerArray =  new ArrayList<String>();
-		//		for (Domain d : Domain.values()) {
-		//			SpinnerArray.add(d.name());
-		//		}
-		//	    ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, SpinnerArray);
-		//	    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		//	    mDomainSpinner = (Spinner) findViewById(R.id.domain_spinner);
-		//	    mDomainSpinner.setAdapter(adapter);
-		//	    mDomainSpinner.setSelection(1);
 
 		// Set up the remember_password CheckBox
 		mRememberPasswordCheckBox = (CheckBox) findViewById(R.id.remember_password);
 		mRememberPasswordCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			public void onCheckedChanged(CompoundButton button, boolean isChecked) {
 				mRememberPassword = isChecked;
-				/*
-					if (!mRememberPassword) {
-						mAutoLoginCheckBox.setChecked(false);
-						mAutoLoginCheckBox.setEnabled(false);
-					}
-				 */
 			}
 
 		});
-		
-		CheckBox autoLogin = (CheckBox) findViewById(R.id.auto_login);
-		autoLogin.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			public void onCheckedChanged(CompoundButton button, boolean isChecked) {
-				autoLoginBoolean = isChecked;
-				mRememberPasswordCheckBox.setChecked(isChecked);
-			}
 
-		});
+
 		mRememberPassword = sharedPrefs.getBoolean("remember_password", false);
 		mRememberPasswordCheckBox.setChecked(mRememberPassword);
-		autoLoginBoolean = sharedPrefs.getBoolean("autologin", false);
-		autoLogin.setChecked(autoLoginBoolean);
 
 
 		// Set up the auto_login CheckBox
-		/*
 		mAutoLoginCheckBox = (CheckBox) findViewById(R.id.auto_login);
-		mAutoLoginCheckBox.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				mAutoLogin = mAutoLoginCheckBox.isChecked();
-			}
-
-		});
-		mAutoLogin = sharedPrefs.getBoolean("auto_login", false);
 		mAutoLoginCheckBox.setChecked(mAutoLogin);
 		mAutoLoginCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			public void onCheckedChanged(CompoundButton button, boolean isChecked) {
 				mAutoLogin = isChecked;
+				if (isChecked) {
+					mRememberPasswordCheckBox.setChecked(true);
+				}
 			}
 
 		});
-		 */
 
 		// Set up the login form.
 		mEmail = getIntent().getStringExtra(EXTRA_EMAIL);
 		mEmailView = (EditText) findViewById(R.id.email);
-		//		if(mDomainSpinner.getSelectedItem().toString().equals("PARENT"))
-		//			mEmailView.setHint("Email");
-		//		if(mDomainSpinner.getSelectedItem().toString().equals("STUDENT"))
-		//			mEmailView.setHint("Username (first.last.1)");
-		//mEmailView.setText(mEmail);
 
 		mPasswordView = (EditText) findViewById(R.id.password);
 		mPasswordView
@@ -238,19 +202,13 @@ public class LoginActivity extends Activity {
 		mEmailView.setText(sharedPrefs.getString("email", mEmail));
 		mPasswordView.setText(new String(Base64.decode(sharedPrefs.getString("e_password", "")
 				, Base64.DEFAULT )));
+		// If the password was not saved, give focus to the password.
 		if(mPasswordView.getText().equals(""))
-		{
 			mPasswordView.requestFocus();
-		}
-		//		mPasswordView.setText(sharedPrefs.getString("password", ""));
 
 
 
-		//		try {
-		//			mDomainSpinner.setSelection(sharedPrefs.getInt("domain", 0));
-		//		} catch (IndexOutOfBoundsException e) {
-		//			// Do not set the index.
-		//		}
+
 		mLoginFormView = findViewById(R.id.login_form);
 		mLoginStatusView = findViewById(R.id.login_status);
 		mLoginStatusMessageView = (TextView) findViewById(R.id.login_status_message);
@@ -275,10 +233,9 @@ public class LoginActivity extends Activity {
 					}
 				});
 
-		/*
+		// Login if auto-login is checked.
 		if (mAutoLogin)
 			attemptLogin();
-		 */
 	}
 
 	@Override
@@ -307,7 +264,6 @@ public class LoginActivity extends Activity {
 		encryptedPass = Base64.encodeToString(mPasswordView.getText().toString()
 				.getBytes(), Base64.DEFAULT );
 		mPassword = mPasswordView.getText().toString();
-		//		mDomain = Domain.values()[mDomainSpinner.getSelectedItemPosition()];
 
 		boolean cancel = false;
 		View focusView = null;
@@ -319,18 +275,12 @@ public class LoginActivity extends Activity {
 			cancel = true;
 		}
 
-		// Check for a valid email address.
+		// Check for a valid username.
 		if (TextUtils.isEmpty(mEmail)) {
 			mEmailView.setError(getString(R.string.error_field_required));
 			focusView = mEmailView;
 			cancel = true;
 		}
-		//requires @ if parent account selected
-		//		else if (mDomainSpinner.getSelectedItem().toString().equals("PARENT") && !mEmail.contains("@")) {
-		//			mEmailView.setError(getString(R.string.error_invalid_email));
-		//			focusView = mEmailView;
-		//			cancel = true;
-		//		}
 
 		if (cancel) {
 			// There was an error; don't attempt login and focus the first
@@ -341,12 +291,10 @@ public class LoginActivity extends Activity {
 			// perform the user login attempt.
 			SharedPreferences sharedPrefs = this.getPreferences(Context.MODE_PRIVATE);
 			SharedPreferences.Editor editor = sharedPrefs.edit();
-			//			editor.putInt("domain", mDomainSpinner.getSelectedItemPosition());
 			editor.putString("email", mEmail);
 			editor.putString("e_password", mRememberPassword? encryptedPass: "");
 			editor.putBoolean("remember_password", mRememberPassword);
-			editor.putBoolean("autologin", autoLoginBoolean);
-			//			editor.putBoolean("auto_login", mAutoLogin);
+			editor.putBoolean("auto_login", mAutoLogin);
 			editor.commit();
 
 			// Modified from default.
@@ -543,7 +491,7 @@ public class LoginActivity extends Activity {
 		@Override
 		protected void onPostExecute(final Integer success) {
 
-			
+
 
 			mAuthTask = null;
 			showProgress(false);

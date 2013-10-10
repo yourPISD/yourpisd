@@ -805,13 +805,8 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 				Scanner sc = new Scanner(is).useDelimiter("\\A");
 				String json = sc.hasNext() ? sc.next() : "";
 				
-				System.out.println(json);
-
 				try {
 					classList = new JSONArray(json);
-					
-					System.out.println("classList = " + classList);
-
 					classGrades = new SparseArray<SparseArray<JSONObject>>();
 
 					for (int i = 0; i < classList.length(); i++) {

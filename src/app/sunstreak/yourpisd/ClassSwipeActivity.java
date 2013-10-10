@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -149,6 +150,9 @@ public class ClassSwipeActivity extends FragmentActivity {
 		// Handle item selection
 		switch (item.getItemId()) {
 		case R.id.log_out:
+			SharedPreferences.Editor editor = getPreferences(Context.MODE_PRIVATE).edit();
+			editor.putBoolean("auto_login", false);
+			editor.commit();
 			intent = new Intent(this, LoginActivity.class);
 			// Clear all activities between this and LoginActivity
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
