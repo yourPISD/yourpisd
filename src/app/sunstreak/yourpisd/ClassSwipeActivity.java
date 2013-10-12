@@ -2,17 +2,7 @@ package app.sunstreak.yourpisd;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeField;
-import org.joda.time.Instant;
-import org.joda.time.Interval;
-import org.joda.time.Period;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.DateTimeFormatterBuilder;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -27,6 +17,15 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.text.Layout.Alignment;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.style.AbsoluteSizeSpan;
+import android.text.style.AlignmentSpan;
+import android.text.style.ImageSpan;
+import android.text.style.ScaleXSpan;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -168,14 +167,14 @@ public class ClassSwipeActivity extends FragmentActivity {
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
 			return true;
-		/*
+			/*
 		case R.id.refresh:
 			Intent refreshIntent = new Intent(this, LoginActivity.class);
 			refreshIntent.putExtra("Refresh", true);
 			startActivity(refreshIntent);
 			finish();
 			return true;
-		*/
+			 */
 		case R.id.previous_six_weeks:
 			intent = new Intent(this, ClassSwipeActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -186,8 +185,8 @@ public class ClassSwipeActivity extends FragmentActivity {
 			intent.putExtra("termIndex", termIndex - 1 >= 0 ? termIndex - 1 : 0);
 			startActivity(intent);
 
-//			overridePendingTransition(R.anim.slide_in_down, R.anim.slide_out_up);
-			
+			//			overridePendingTransition(R.anim.slide_in_down, R.anim.slide_out_up);
+
 			return true;
 		case R.id.next_six_weeks:
 			intent = new Intent(this, ClassSwipeActivity.class);
@@ -198,7 +197,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 			// Don't go too positive!
 			intent.putExtra("termIndex", termIndex + 1 <= 7 ? termIndex + 1 : 7);
 			startActivity(intent);
-//			overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_down);
+			//			overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_down);
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -275,7 +274,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 			position = getArguments().getInt(ARG_SECTION_NUMBER);
 			classIndex = dg.getCurrentStudent().getClassMatch()[position];
-		
+
 			rootView = inflater.inflate(R.layout.class_description, container, false);
 
 			if ( dg.getCurrentStudent().hasClassGrade(classIndex, termIndex) ) {
@@ -334,19 +333,19 @@ public class ClassSwipeActivity extends FragmentActivity {
 				// The following line prevents force close. Idk why.
 				// Maybe the extra print time somehow fixes it...
 				System.out.println(mClassGrade);
-				
+
 				teacher.setText(dg.getCurrentStudent().getClassList().getJSONObject(classIndex).optString("teacher"));
-				
+
 				int avg = mClassGrade.optInt("average", -1);
 				if (avg != -1) {
 					String average = avg + "";
 					sixWeeksAverage.setText(average);
 				} else
 					sixWeeksAverage.setVisibility(TextView.INVISIBLE);
-				
-				
 
-				
+
+
+
 
 				// Add current student's name
 				if (dg.MULTIPLE_STUDENTS) {
@@ -364,11 +363,11 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 					LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 					LinearLayout categoryLayout = (LinearLayout) inflater.inflate(R.layout.class_swipe_category_card, classDescriptionLinearLayout, false);
-					
+
 
 					// Name of the category ("Daily Work", etc)
 					String categoryName = mClassGrade.getJSONArray("categoryGrades").getJSONObject(category).getString("Category");
-					
+
 					int layoutCounter = 0;
 
 					// for every grade in this term [any category]
@@ -389,6 +388,35 @@ public class ClassSwipeActivity extends FragmentActivity {
 							String gradeValue = mClassGrade.getJSONArray("grades")
 									.getJSONObject(i).optString("Grade", "") + "";
 							grade.setText(gradeValue);
+
+
+//							TextView grade = new TextView(getActivity());
+//
+//							final SpannableStringBuilder ssb = new SpannableStringBuilder();
+//							final int flag = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE;
+//							int start;
+//							int end;
+//
+//							// Description
+//							start = ssb.length();
+//							ssb.append(mClassGrade.getJSONArray("grades")
+//									.getJSONObject(i).getString("Description"));
+//							end = ssb.length();
+//							int px = (int) (20 * getResources().getDisplayMetrics().density);
+//							ssb.setSpan(new AbsoluteSizeSpan(px), start, end, flag);
+//							ssb.setSpan(new AlignmentSpan.Standard(Alignment.ALIGN_NORMAL), start, end, flag);
+//
+//							// Grade
+//							start = ssb.length();
+//							ssb.append(mClassGrade.getJSONArray("grades")
+//									.getJSONObject(i).optString("Grade", "") + "");
+//							end = ssb.length();
+//							px = (int) (25 * getResources().getDisplayMetrics().density);
+//							ssb.setSpan(new AbsoluteSizeSpan(px), start, end, flag);
+//							ssb.setSpan(new AlignmentSpan.Standard(Alignment.ALIGN_OPPOSITE), start, end, flag);
+//
+//							grade.setText(ssb); 
+//							grade.setBackgroundResource(R.drawable.divider);
 
 							categoryLayout.addView(innerLayout, layoutCounter++);
 						}
@@ -411,10 +439,10 @@ public class ClassSwipeActivity extends FragmentActivity {
 					categoryLayout.startAnimation(animation);
 				}
 
-				
+
 				TextView lastUpdatedView = new TextView(getActivity());
 				lastUpdatedView.setText(DateHandler.timeSince(mClassGrade.getLong("lastUpdated")));
-				
+
 				classDescriptionLinearLayout.addView(lastUpdatedView);
 
 
