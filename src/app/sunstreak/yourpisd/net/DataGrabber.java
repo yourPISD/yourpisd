@@ -1,16 +1,19 @@
 package app.sunstreak.yourpisd.net;
 
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 
+import org.joda.time.Instant;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,10 +26,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Environment;
 import android.util.SparseArray;
 import app.sunstreak.yourpisd.R;
-
 
 public class DataGrabber /*implements Parcelable*/ extends Application {
 
@@ -52,7 +53,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 		int[][] gradeSummary;
 		int[] classIds;
 		int[] classMatch;
-		SparseArray<SparseArray<JSONObject>> classGrades = new SparseArray<SparseArray<JSONObject>>();
+		SparseArray<JSONObject> classGrades = new SparseArray<JSONObject>();
 		//		Map<Integer[], JSONObject> classGrades = new HashMap<Integer[], JSONObject>();
 		Bitmap studentPictureBitmap;
 
@@ -63,7 +64,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 					+ tempName.substring(0, tempName.indexOf(","));
 		}
 
-		public void getClassList() throws IOException {
+		public void loadClassList() throws IOException {
 
 			String postParams = "{\"studentId\":\"" + studentId + "\"}";
 
@@ -87,6 +88,10 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 				e.printStackTrace();
 			}
 
+		}
+		
+		public JSONArray getClassList() {
+			return classList;
 		}
 
 		/**
@@ -168,15 +173,10 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 
 		private String getDetailedReport (int classId, int termId, int studentId) throws MalformedURLException, IOException {
 
-
 			String url = "https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/StudentAssignments.aspx?" + 
 					"&EnrollmentId=" + 	classId + 
 					"&TermId=" + termId + 
 					"&ReportType=0&StudentId=" + studentId;
-
-
-
-
 
 			Object[] report = Request.sendGet(url,	cookies);
 			String response = (String) report[0];
@@ -201,16 +201,11 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 			return gradeSummary;
 		}
 
-		//		public void putClassGrade (int classIndex, int termIndex, JSONObject classGrade) {
-		//			if (classGrades.get(classIndex) == null)
-		//				classGrades.put(classIndex, new SparseArray<JSONObject>() );
-		//
-		//			classGrades.get(classIndex).put(termIndex, classGrade);
-		//		}
-
-
 		public boolean hasClassGrade (int classIndex, int termIndex) {
-			return classGrades.indexOfKey(classIndex) > 0 && classGrades.get(classIndex).indexOfKey(termIndex) > 0;
+			return classGrades.indexOfKey(classIndex) > 0 
+					&& 
+					classGrades.get(classIndex).optJSONArray("terms")
+					.optJSONObject(termIndex).optLong("lastUpdated", -1) != -1;
 		}
 
 		public JSONObject getClassGrade( int classIndex, int termIndex )  {
@@ -219,7 +214,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 
 
 			if (hasClassGrade(classIndex, termIndex))
-				return classGrades.get(classIndex).get(termIndex);
+				return classGrades.get(classIndex).optJSONArray("terms").optJSONObject(termIndex);
 
 
 			try {
@@ -233,9 +228,6 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
-
-
-
 
 			//Parse the teacher name if not already there.
 			try {
@@ -254,24 +246,33 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 			JSONObject classGrade; 
 
 			try {
-				classGrade = classList.getJSONObject( classIndex );
+				classGrade = new JSONObject(classList.getJSONObject( classIndex ).toString());
 
 				JSONArray termGrades = Parser.detailedReport(html);
 				Object[] termCategory = Parser.termCategoryGrades(html);
 				JSONArray termCategoryGrades = (JSONArray) termCategory[0];
 
 				if ((Integer)termCategory[1] != -1)
-					classGrade.getJSONArray("terms").getJSONObject(termIndex).put("average", termCategory[1]);
+					classGrade.getJSONArray("terms").getJSONObject(termIndex).put("average", termCategory[1].toString());
 
 				classGrade.getJSONArray("terms").getJSONObject(termIndex).put("grades", termGrades);
 				classGrade.getJSONArray("terms").getJSONObject(termIndex).put("categoryGrades", termCategoryGrades);
-
-				if (classGrades.get(classIndex) == null)
-					classGrades.put(classIndex, new SparseArray<JSONObject>());
-
-				classGrades.get(classIndex).put(termIndex, classGrade);
-				System.out.println("classGrade = " + classGrade);
-				return classGrade;
+				
+				Instant in = new Instant();
+//				String time = in.toString();
+//				System.out.println(time);
+				classGrade.getJSONArray("terms").getJSONObject(termIndex).put("lastUpdated", in.getMillis());
+//				classGrade.getJSONArray("terms").getJSONObject(termIndex).put("lastUpdated", "0");
+				
+				System.out.println("cg= " + classGrade);
+				
+				
+				if (classGrades.indexOfKey(classIndex) < 0)
+					classGrades.put(classIndex, classGrade);
+				 
+				
+//				classGrades.get(classIndex).getJSONArray("terms").put(termIndex, classGrade);
+				return classGrade.getJSONArray("terms").getJSONObject(termIndex);
 
 
 			} catch (JSONException e) {
@@ -419,6 +420,19 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 
 			// Grade below 70 or above 100
 			return -1;
+		}
+		
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			sb.append(getClass().getName() + "[");
+			sb.append("studentId=" + studentId + ", ");
+			sb.append("name=" + name + ", ");
+			sb.append("classList=" + classList.toString() + ", ");
+			sb.append(Arrays.toString(gradeSummary) + ", ");
+			sb.append(Arrays.toString(classIds) + ", ");
+			sb.append(Arrays.toString(classMatch) + ", ");
+			
+			return sb.toString();
 		}
 
 	}
@@ -719,7 +733,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 
 
 		for (Student st : students) {
-			st.getClassList();
+			st.loadClassList();
 		}
 
 
@@ -775,16 +789,20 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 	public List<Student> getStudents() {
 		return students;
 	}
+	
+	public Student getCurrentStudent() {
+		return students.get(studentIndex);
+	}
 
 	private List<Student> getTestStudents() {
 
-		
+
 		class TestStudent extends Student{
 
 			public TestStudent(int studentId, String studentName) {
-				
+
 				super(studentId, studentName);
-				
+
 				InputStream is = null;
 
 				switch (studentId) {
@@ -800,36 +818,38 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 					System.out.println("is = null");
 					return;
 				}
-					
-				
+
+
 				Scanner sc = new Scanner(is).useDelimiter("\\A");
 				String json = sc.hasNext() ? sc.next() : "";
-				
+
 				try {
 					classList = new JSONArray(json);
-					classGrades = new SparseArray<SparseArray<JSONObject>>();
+					classGrades = new SparseArray<JSONObject>();
 
 					for (int i = 0; i < classList.length(); i++) {
-						classGrades.put(i, new SparseArray<JSONObject>());
-						for (int j = 0; j < classList.getJSONObject(i).getJSONArray("terms").length(); j++) {
-							classGrades.get(i).put(j, classList.getJSONObject(i));
-						}
+						classGrades.put(i, new JSONObject(classList.getJSONObject(i).toString()));
+						//						for (int j = 0; j < classList.getJSONObject(i).getJSONArray("terms").length(); j++) {
+						//							classGrades.get(i).put(j, classList.getJSONObject(i));
+						//						}
 					}
 				} catch (JSONException e) {
 					e.printStackTrace();
 					return;
 				}
-				
+
 			}
 
-			public void getClassList() {
-				
+			public void loadClassList() {
+
 			}
 
 			public JSONObject getClassGrade(int classIndex, int termIndex) {
-				return classGrades.get(classIndex).get(termIndex);
+				return classGrades.get(classIndex).optJSONArray("terms").optJSONObject(termIndex);
 			}
 			
+
+
 			public int[][] loadGradeSummary() {
 				InputStream is;
 
@@ -891,12 +911,48 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 			}
 
 		}
-		
+
 		List<Student> students = new ArrayList<Student>();
 		students.add(new TestStudent(0, "Griffin, Stewie (0)"));
 		students.add(new TestStudent(1, "Griffin, Meg (1)"));
-		
+
 		return students;
 	}
 
+	public void writeToFile() {
+		writeDetailsToFile();
+		writeDataToFile();
+	}
+	
+	private void writeDetailsToFile() {
+		String filename = "DATA_GRABBER_DETAILS";
+		String string = domain.toString() + "\n" + username + "\n" + password;
+		FileOutputStream outputStream;
+
+		try {
+		  outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+		  outputStream.write(string.getBytes());
+		  outputStream.close();
+		} catch (Exception e) {
+		  e.printStackTrace();
+		}
+	}
+	
+	private void writeDataToFile() {
+		String filename = "DATA_GRABBER_DATA";
+		String string = "";
+		for (Student st : students) {
+			string += st.classGrades.toString() + "\n";
+		}
+		FileOutputStream outputStream;
+
+		try {
+		  outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+		  outputStream.write(string.getBytes());
+		  outputStream.close();
+		} catch (Exception e) {
+		  e.printStackTrace();
+		}
+	}
+	
 }

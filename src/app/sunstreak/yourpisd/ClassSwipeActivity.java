@@ -2,7 +2,16 @@ package app.sunstreak.yourpisd;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeField;
+import org.joda.time.Instant;
+import org.joda.time.Interval;
+import org.joda.time.Period;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.DateTimeFormatterBuilder;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,6 +38,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import app.sunstreak.yourpisd.net.DataGrabber;
+import app.sunstreak.yourpisd.net.DateHandler;
 
 
 @SuppressLint("ValidFragment")
@@ -221,7 +231,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 		@Override
 		public CharSequence getPageTitle(int position) {
-			return dg.getStudents().get(dg.studentIndex).getClassName(dg.getStudents().get(dg.studentIndex).getClassMatch()[position]);
+			return dg.getCurrentStudent().getClassName(dg.getCurrentStudent().getClassMatch()[position]);
 		}
 	}
 
@@ -264,18 +274,15 @@ public class ClassSwipeActivity extends FragmentActivity {
 				Bundle savedInstanceState)  {
 
 			position = getArguments().getInt(ARG_SECTION_NUMBER);
-			classIndex = dg.getStudents().get(dg.studentIndex).getClassMatch()[position];
-
-
-
+			classIndex = dg.getCurrentStudent().getClassMatch()[position];
+		
 			rootView = inflater.inflate(R.layout.class_description, container, false);
 
-
-			if ( dg.getStudents().get(dg.studentIndex).hasClassGrade(classIndex, termIndex) ) {
+			if ( dg.getCurrentStudent().hasClassGrade(classIndex, termIndex) ) {
 				System.out.println(dg.studentIndex + " " + classIndex + " " + termIndex);
-				System.out.println(dg.getStudents().get(dg.studentIndex).name);
-				System.out.println(dg.getStudents().get(dg.studentIndex).getClassGrade(classIndex, termIndex));
-				mClassGrade = dg.getStudents().get(dg.studentIndex).getClassGrade(classIndex, termIndex);
+				System.out.println(dg.getCurrentStudent().name);
+				mClassGrade = dg.getCurrentStudent().getClassGrade(classIndex, termIndex);
+				System.out.println(mClassGrade);
 				setUiElements();
 			} else {
 				mClassGradeTask = new ClassGradeTask();
@@ -307,7 +314,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 			@Override
 			protected JSONObject doInBackground(Integer... integers) {
 				try {
-					return dg.getStudents().get(dg.studentIndex).getClassGrade(integers[0], integers[1]);
+					return dg.getCurrentStudent().getClassGrade(integers[0], integers[1]);
 				} catch (Exception e) {
 					e.printStackTrace();
 					return null;
@@ -316,8 +323,6 @@ public class ClassSwipeActivity extends FragmentActivity {
 		}
 
 		public void setUiElements () {
-
-
 
 			TextView teacher = (TextView) rootView.findViewById(R.id.teacher_name);
 			TextView sixWeeksAverage = (TextView) rootView.findViewById(R.id.six_weeks_average);
@@ -329,30 +334,30 @@ public class ClassSwipeActivity extends FragmentActivity {
 				// The following line prevents force close. Idk why.
 				// Maybe the extra print time somehow fixes it...
 				System.out.println(mClassGrade);
-				teacher.setText(mClassGrade.getString("teacher"));
 				
-				int avg = mClassGrade.getJSONArray("terms").getJSONObject(termIndex).optInt("average", -1);
+				teacher.setText(dg.getCurrentStudent().getClassList().getJSONObject(classIndex).optString("teacher"));
+				
+				int avg = mClassGrade.optInt("average", -1);
 				if (avg != -1) {
 					String average = avg + "";
 					sixWeeksAverage.setText(average);
-
 				} else
 					sixWeeksAverage.setVisibility(TextView.INVISIBLE);
 				
 				
 
-				JSONArray terms = mClassGrade.getJSONArray("terms");
+				
 
 				// Add current student's name
 				if (dg.MULTIPLE_STUDENTS) {
 					LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 					LinearLayout studentName = (LinearLayout) inflater.inflate(R.layout.main_student_name_if_multiple_students, classDescriptionLinearLayout, false);
-					( (TextView) studentName.findViewById(R.id.name) ).setText(dg.getStudents().get(dg.studentIndex).name);
+					( (TextView) studentName.findViewById(R.id.name) ).setText(dg.getCurrentStudent().name);
 					classDescriptionLinearLayout.addView(studentName);
 				}
 
 				for (int category = 0;
-						category < terms.getJSONObject(termIndex).getJSONArray("categoryGrades").length();
+						category < mClassGrade.getJSONArray("categoryGrades").length();
 						category++)
 				{
 
@@ -362,31 +367,26 @@ public class ClassSwipeActivity extends FragmentActivity {
 					
 
 					// Name of the category ("Daily Work", etc)
-					String categoryName = mClassGrade.getJSONArray("terms").getJSONObject(termIndex)
-							.getJSONArray("categoryGrades").getJSONObject(category).getString("Category");
+					String categoryName = mClassGrade.getJSONArray("categoryGrades").getJSONObject(category).getString("Category");
 					
 					int layoutCounter = 0;
 
 					// for every grade in this term [any category]
-					for(int i = 0; i< mClassGrade.getJSONArray("terms")
-							.getJSONObject(termIndex).getJSONArray("grades").length(); i++)
+					for(int i = 0; i< mClassGrade.getJSONArray("grades").length(); i++)
 					{
 						// only if this grade is in the category which we're looking for
-						if (mClassGrade.getJSONArray("terms").getJSONObject(termIndex)
-								.getJSONArray("grades").getJSONObject(i).getString("Category")
+						if (mClassGrade.getJSONArray("grades").getJSONObject(i).getString("Category")
 								.equals(categoryName))
 						{
 							LinearLayout innerLayout = (LinearLayout) inflater.inflate(R.layout.class_swipe_grade_view, categoryLayout, false);
 
 							TextView descriptionView = (TextView) innerLayout.findViewById(R.id.description);
-							String description = "" + mClassGrade.getJSONArray("terms")
-									.getJSONObject(termIndex).getJSONArray("grades")
+							String description = "" + mClassGrade.getJSONArray("grades")
 									.getJSONObject(i).getString("Description");
 							descriptionView.setText(description);
 
 							TextView grade = (TextView) innerLayout.findViewById(R.id.grade);
-							String gradeValue = mClassGrade.getJSONArray("terms")
-									.getJSONObject(termIndex).getJSONArray("grades")
+							String gradeValue = mClassGrade.getJSONArray("grades")
 									.getJSONObject(i).optString("Grade", "") + "";
 							grade.setText(gradeValue);
 
@@ -401,8 +401,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 					categoryNameView.setText(categoryName);
 
 					TextView scoreView = (TextView) categoryLayout.findViewById(R.id.category_score);
-					String categoryScore = mClassGrade.getJSONArray("terms")
-							.getJSONObject(termIndex).getJSONArray("categoryGrades")
+					String categoryScore = mClassGrade.getJSONArray("categoryGrades")
 							.getJSONObject(category).optString("Letter", "") + "";
 					scoreView.setText(categoryScore);
 
@@ -412,15 +411,17 @@ public class ClassSwipeActivity extends FragmentActivity {
 					categoryLayout.startAnimation(animation);
 				}
 
+				
+				TextView lastUpdatedView = new TextView(getActivity());
+				lastUpdatedView.setText(DateHandler.timeSince(mClassGrade.getLong("lastUpdated")));
+				
+				classDescriptionLinearLayout.addView(lastUpdatedView);
 
 
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
-
-
 		}
-
 	}
 
 
