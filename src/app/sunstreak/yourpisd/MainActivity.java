@@ -2,6 +2,8 @@ package app.sunstreak.yourpisd;
 
 import java.util.Locale;
 
+import org.json.JSONArray;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -17,8 +19,9 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.text.Html;
+import android.text.Spanned;
 import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -34,6 +37,7 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 import app.sunstreak.yourpisd.net.DataGrabber;
+import app.sunstreak.yourpisd.net.DateHandler;
 
 
 public class MainActivity extends FragmentActivity { 
@@ -207,7 +211,6 @@ public class MainActivity extends FragmentActivity {
 		 * fragment.
 		 */
 		
-		static double[] max;
 		public static final String ARG_OBJECT = "object";
 		private View rootView;
 		private int position;
@@ -263,24 +266,22 @@ public class MainActivity extends FragmentActivity {
 				for (int i = 0; i < dg.getStudents().size(); i++) {
 					
 						
-					LinearLayout box = new LinearLayout(getActivity());
-					box.setOrientation(LinearLayout.VERTICAL);
+//					LinearLayout box = new LinearLayout(getActivity());
+//					box.setOrientation(LinearLayout.VERTICAL);
 					profileCards[i] = new LinearLayout(getActivity());
 
 					TextView name = new TextView(getActivity());
 					name.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 					name.setTextSize(25);
-					name.setText(dg.getStudents().get(i).name);
-					TextView textGPA = new TextView(getActivity());
-					System.out.println(String.format("%9f",dg.getStudents().get(i).getGPA()));
-					textGPA.setText("GPA: " + String.format("%9f",dg.getStudents().get(i).getGPA()));
-			
-					textGPA.setTextSize(25);
-					textGPA.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 					
-					box.addView(name);
-					box.addView(textGPA);
-					profileCards[i].addView(box);
+					Spanned profileCardText = Html.fromHtml (dg.getStudents().get(i).name 
+							+ "<br><br>GPA: " 
+							+ String.format("%9f",dg.getStudents().get(i).getGPA()));
+					
+					name.setText(profileCardText);
+
+					profileCards[i].addView(name);
+					profileCards[i].setGravity(Gravity.CENTER_VERTICAL);
 					profileCards[i].setOnClickListener(new StudentChooserListener(i));
 					
 					profileCards[i].setBackgroundResource(R.drawable.dropshadow);
@@ -309,18 +310,6 @@ public class MainActivity extends FragmentActivity {
 						profileCards[i].addView(profilePic, 0);
 					}
 					
-					
-//					TextView textGPA = new TextView(getActivity());
-//					textGPA.setText(" GPA: " + String.format("%9f",dg.getStudents().get(i).getGPA()));
-//					textGPA.setPadding(10, 10, 10, 50);
-//					textGPA.setHeight(70);
-//					textGPA.setGravity(Gravity.CENTER_VERTICAL);
-//					textGPA.setTextSize(25);
-//					textGPA.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
-					
-					
-//					bigLayout.addView(textGPA);
-					
 				}
 
 				if (dg.MULTIPLE_STUDENTS)
@@ -339,37 +328,47 @@ public class MainActivity extends FragmentActivity {
 					bigLayout.addView(studentName);
 				}
 
-				int[][] gradeSummary = dg.getStudents().get(dg.studentIndex).getGradeSummary();
+//				int[][] gradeSummary = dg.getCurrentStudent().getGradeSummary();
 
-				classCount = gradeSummary.length;
+				int[] classMatch = dg.getCurrentStudent().getClassMatch();
+				
+//				classCount = gradeSummary.length;
+				classCount = classMatch.length;
+				
 				averages = new LinearLayout[classCount];
+				
+				JSONArray classList = dg.getCurrentStudent().getClassList();
 
-				int[] classMatch = dg.getStudents().get(dg.studentIndex).getClassMatch();
-				max = new double[classCount];
 				for (int i = 0; i < classCount; i++) {
-
+					
 					int jsonIndex = classMatch[i];
 
-
-					LinearLayout card = (LinearLayout) inflater.inflate(R.layout.main_grade_summary, bigLayout, false);
-					TextView className = (TextView) card.findViewById(R.id.name);
+					averages[i] = (LinearLayout) inflater.inflate(R.layout.main_grade_summary, bigLayout, false);
+					TextView className = (TextView) averages[i].findViewById(R.id.name);
 					String name = dg.getStudents().get(dg.studentIndex).getClassName(jsonIndex);
 					className.setText(name);
 
-					int avg = gradeSummary[i][1 + CURRENT_TERM_INDEX];
+					int avg = classList.optJSONObject(jsonIndex).optJSONArray("terms")
+							.optJSONObject(CURRENT_TERM_INDEX).optInt("average", -1);
 
 					// No need to increase overdraw if there is nothing to display
 					if (avg != -1) {
 						String average = avg + "";
-						TextView grade = (TextView) card.findViewById(R.id.grade);
-						averages[i]=card;
+						TextView grade = (TextView) averages[i].findViewById(R.id.grade);
 						grade.setText(average);
 					}
 					
-					card.setOnClickListener(new ClassSwipeOpenerListener(dg.studentIndex, i, CURRENT_TERM_INDEX));
+					averages[i].setOnClickListener(new ClassSwipeOpenerListener(dg.studentIndex, i, CURRENT_TERM_INDEX));
 
-					bigLayout.addView(card);
+					bigLayout.addView(averages[i]);
 				}
+				
+				TextView summaryLastUpdated = new TextView(getActivity());
+				String lastUpdatedString = DateHandler.timeSince(dg.getCurrentStudent().getClassList().optJSONObject(0).optLong("summaryLastUpdated"));
+				summaryLastUpdated.setText(lastUpdatedString);
+				
+				bigLayout.addView(summaryLastUpdated);
+				
 				return rootView;
 			}	
 
@@ -423,9 +422,11 @@ public class MainActivity extends FragmentActivity {
 				}
 				
 				bigLayout.addView(weekNames);
-				int[] classMatch = dg.getStudents().get(dg.studentIndex).getClassMatch();
-				int[][] gradeSummary = dg.getStudents().get(dg.studentIndex).getGradeSummary();
+				int[] classMatch = dg.getCurrentStudent().getClassMatch();
+//				int[][] gradeSummary = dg.getStudents().get(dg.studentIndex).getGradeSummary();
 
+				JSONArray classList = dg.getCurrentStudent().getClassList();
+				
 				for (int classIndex = 0; classIndex < classCount; classIndex++) {
 
 					int jsonIndex = classMatch[classIndex];
@@ -437,24 +438,29 @@ public class MainActivity extends FragmentActivity {
 					className.setText(dg.getStudents().get(dg.studentIndex).getClassName(jsonIndex));
 
 					LinearLayout summary = (LinearLayout) classSummary.findViewById(R.id.layout_six_weeks_summary);
-					summary.setPadding(20, 5, 15, 10);
+//					summary.setPadding(20, 5, 15, 10);
+					summary.setPadding(15,0,15,18);
 					double sum = 0;
 					int count = 0;
-					for (int termIndex = 1; termIndex < gradeSummary[classIndex].length; termIndex++) {
+					for (int termIndex = 0; 
+							termIndex < classList.optJSONObject(jsonIndex).optJSONArray("terms").length(); 
+							termIndex++) {
 
 						TextView termGrade = new TextView(getActivity());
-						termGrade.setTextSize(SCREEN_WIDTH / 25);
+						termGrade.setTextSize(SCREEN_WIDTH / 23);
 						termGrade.setClickable(true);
 						termGrade.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 //						termGrade.setOnClickListener(new ClassSwipeOpenerListener(dg.studentIndex, classIndex, termIndex - 1));
 //						termGrade.setBackgroundResource(R.drawable.grade_summary_click);
-						termGrade.setPadding(5, 5, 5, 5);
+//						termGrade.setPadding(5, 5, 5, 5);
 						
-						LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams((int)(SCREEN_WIDTH/5.5), LayoutParams.WRAP_CONTENT);
-					    llp.setMargins(0, 0, 5, 0);
+						int width = (int)((SCREEN_WIDTH - 30)/5);
+//						System.out.println(width);
+						LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(width, LayoutParams.WRAP_CONTENT);
+					    llp.setMargins(0, 0, 0, 0);
 					    termGrade.setLayoutParams(llp);
 						
-						int avg = gradeSummary[classIndex][termIndex];
+						int avg = classList.optJSONObject(jsonIndex).optJSONArray("terms").optJSONObject(termIndex).optInt("average", -1);
 						if(termIndex == 6)
 						{
 							break;
@@ -474,18 +480,14 @@ public class MainActivity extends FragmentActivity {
 						}
 						else
 						{
-							termGrade.setOnClickListener(new ClassSwipeOpenerListener(dg.studentIndex, classIndex, termIndex - 1));
+							termGrade.setOnClickListener(new ClassSwipeOpenerListener(dg.studentIndex, classIndex, termIndex));
 							termGrade.setBackgroundResource(R.drawable.grade_summary_click);
-							String average = avg  + "";
-							if (avg == -1) {
-								average = "";
-							}
-							else
-							{
+							if (avg != -1) {
+								termGrade.setText(avg + "");
 								sum+=avg;
 								count++;
 							}
-							termGrade.setText(average);
+							
 							termGrade.setGravity(Gravity.CENTER);
 							summary.addView(termGrade);
 						}
@@ -493,6 +495,13 @@ public class MainActivity extends FragmentActivity {
 					}
 					bigLayout.addView(classSummary);
 				}
+				
+				TextView summaryLastUpdated = new TextView(getActivity());
+				String lastUpdatedString = DateHandler.timeSince(dg.getCurrentStudent().getClassList().optJSONObject(0).optLong("summaryLastUpdated"));
+				summaryLastUpdated.setText(lastUpdatedString);
+				
+				bigLayout.addView(summaryLastUpdated);
+				
 			}
 			return rootView;
 		}

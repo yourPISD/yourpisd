@@ -462,7 +462,7 @@ public class LoginActivity extends Activity {
 
 					for (DataGrabber.Student st : dg.getStudents()) {
 						st.loadGradeSummary();
-						st.matchClasses();
+//						st.matchClasses();
 					}
 
 				} else {

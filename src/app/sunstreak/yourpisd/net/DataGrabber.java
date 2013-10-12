@@ -4,6 +4,8 @@ package app.sunstreak.yourpisd.net;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
@@ -45,12 +47,11 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 		return password;
 	}
 
-	public class Student {
+	public class Student implements Serializable {
 
 		public final int studentId;
 		public final String name;
 		JSONArray classList;
-		int[][] gradeSummary;
 		int[] classIds;
 		int[] classMatch;
 		SparseArray<JSONObject> classGrades = new SparseArray<JSONObject>();
@@ -89,7 +90,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 			}
 
 		}
-		
+
 		public JSONArray getClassList() {
 			return classList;
 		}
@@ -122,10 +123,28 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 				 * puts averages in classList, under each term.
 				 */
 				Element doc = Jsoup.parse(response);
-				gradeSummary = Parser.gradeSummary(doc, classList);
+				int[][] gradeSummary = Parser.gradeSummary(doc, classList);
+
+				matchClasses(gradeSummary);
+
+				for (int classIndex = 0; classIndex < gradeSummary.length; classIndex++) {
+					int jsonIndex = classMatch[classIndex];
+					for (int termIndex = 0; termIndex < gradeSummary[classIndex].length - 1; termIndex++) {
+						int average = gradeSummary[classIndex][termIndex + 1];
+						if (average != -1)
+							classList.getJSONObject(jsonIndex).getJSONArray("terms").getJSONObject(termIndex)
+							.put("average", average);
+					}
+				}
+
+				// Last updated time of summary --> goes in this awkward place
+				classList.getJSONObject(0).put("summaryLastUpdated", new Instant().getMillis());
 
 				return gradeSummary;
 			} catch (IOException e) {
+				e.printStackTrace();
+				return null;
+			} catch (JSONException e) {
 				e.printStackTrace();
 				return null;
 			}
@@ -189,17 +208,20 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 			return response;
 		}
 
-
-
-		public int[][] getGradeSummary () {
-			if (gradeSummary == null)
-				try {
-					loadGradeSummary();
-				} catch (JSONException e) {
-					return null;
-				}
-			return gradeSummary;
+		public boolean hasGradeSummary() {
+			return classList.optJSONObject(0).optLong("summaryLastUpdated", -1) != -1;
 		}
+
+//		public int[][] getGradeSummary () {
+//
+//			if (!hasGradeSummary())
+//				try {
+//					loadGradeSummary();
+//				} catch (JSONException e) {
+//					return null;
+//				}
+//		return gradeSummary;
+//		}
 
 		public boolean hasClassGrade (int classIndex, int termIndex) {
 			return classGrades.indexOfKey(classIndex) > 0 
@@ -257,21 +279,21 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 
 				classGrade.getJSONArray("terms").getJSONObject(termIndex).put("grades", termGrades);
 				classGrade.getJSONArray("terms").getJSONObject(termIndex).put("categoryGrades", termCategoryGrades);
-				
+
 				Instant in = new Instant();
-//				String time = in.toString();
-//				System.out.println(time);
+				//				String time = in.toString();
+				//				System.out.println(time);
 				classGrade.getJSONArray("terms").getJSONObject(termIndex).put("lastUpdated", in.getMillis());
-//				classGrade.getJSONArray("terms").getJSONObject(termIndex).put("lastUpdated", "0");
-				
+				//				classGrade.getJSONArray("terms").getJSONObject(termIndex).put("lastUpdated", "0");
+
 				System.out.println("cg= " + classGrade);
-				
-				
+
+
 				if (classGrades.indexOfKey(classIndex) < 0)
 					classGrades.put(classIndex, classGrade);
-				 
-				
-//				classGrades.get(classIndex).getJSONArray("terms").put(termIndex, classGrade);
+
+
+				//				classGrades.get(classIndex).getJSONArray("terms").put(termIndex, classGrade);
 				return classGrade.getJSONArray("terms").getJSONObject(termIndex);
 
 
@@ -316,11 +338,11 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 			return studentPictureBitmap;
 		}
 
-		public void matchClasses() {
+		public void matchClasses(int[][] gradeSummary) {
 
 			getClassIds();
 
-			int[][] gradeSummary = getGradeSummary();
+			//			int[][] gradeSummary = getGradeSummary();
 
 			int classCount = gradeSummary.length;
 
@@ -342,26 +364,25 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 
 
 		public int[] getClassMatch () {
-			if (classMatch == null)
-				matchClasses();
 			return classMatch;
 		}
 
 		public double getGPA () {
-			if (gradeSummary == null)
-				return -1;
 			if (classMatch == null)
 				return -2;
 
 			double pointSum = 0;
 			int pointCount = 0;
 
-			for (int i = 0; i < gradeSummary.length; i++) {
+			for (int classIndex = 0; classIndex < classMatch.length; classIndex++) {
+				
+				int jsonIndex = classMatch[classIndex];
+				
 				double sum = 0;
 				double count = 0;
-				for (int j = 1; j < 5; j++) {
-					if (gradeSummary[i][j] != -1) {
-						sum += gradeSummary[i][j];
+				for (int termIndex = 0; termIndex < 4; termIndex++) {
+					if (classList.optJSONObject(jsonIndex).optJSONArray("terms").optJSONObject(termIndex).optInt("average", -1) != -1) {
+						sum += classList.optJSONObject(jsonIndex).optJSONArray("terms").optJSONObject(termIndex).optInt("average");
 						count++;
 					}
 				}
@@ -374,7 +395,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 					}
 					else {
 						pointCount++;
-						double classGPA = maxGPA (getClassName(classMatch[i])) - gpaDifference (grade);
+						double classGPA = maxGPA(classIndex) - gpaDifference(grade);
 						System.out.println(classGPA);
 						pointSum += classGPA;
 					}
@@ -382,6 +403,10 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 			}
 
 			return pointSum / pointCount;
+		}
+
+		public double maxGPA (int classIndex) {
+			return maxGPA(getClassName(classMatch[classIndex]));
 		}
 
 		public double maxGPA (String className) {
@@ -421,18 +446,17 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 			// Grade below 70 or above 100
 			return -1;
 		}
-		
-		public String toString() {
-			StringBuilder sb = new StringBuilder();
-			sb.append(getClass().getName() + "[");
-			sb.append("studentId=" + studentId + ", ");
-			sb.append("name=" + name + ", ");
-			sb.append("classList=" + classList.toString() + ", ");
-			sb.append(Arrays.toString(gradeSummary) + ", ");
-			sb.append(Arrays.toString(classIds) + ", ");
-			sb.append(Arrays.toString(classMatch) + ", ");
-			
-			return sb.toString();
+
+
+		private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+			out.write(studentId);
+			out.writeUTF(name);
+			out.writeUTF(classList.toString());
+
+		}
+
+		private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+
 		}
 
 	}
@@ -789,7 +813,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 	public List<Student> getStudents() {
 		return students;
 	}
-	
+
 	public Student getCurrentStudent() {
 		return students.get(studentIndex);
 	}
@@ -847,10 +871,13 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 			public JSONObject getClassGrade(int classIndex, int termIndex) {
 				return classGrades.get(classIndex).optJSONArray("terms").optJSONObject(termIndex);
 			}
-			
 
+			public int[] getClassMatch() {
+				return getClassIds();
+			}
 
 			public int[][] loadGradeSummary() {
+				/*
 				InputStream is;
 
 				switch (studentId) {
@@ -866,14 +893,18 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 
 				Scanner sc = new Scanner(is);
 
-				gradeSummary = new int[7][7];
+				int[][] gradeSummary = new int[7][7];
 				for (int i = 0; i < 7; i++) {
 					for (int j = 0; j < 7; j++) {
 						gradeSummary[i][j] = sc.nextInt();
 					}
 				}
 
+				matchClasses(gradeSummary);
+				
 				return gradeSummary;
+				*/
+				return null;
 			}
 
 			public int[] getClassIds() {
@@ -886,12 +917,12 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 
 
 
-			public int[][] getGradeSummary () {
-				if (gradeSummary == null)
-					loadGradeSummary();
-
-				return gradeSummary;
-			}
+//			public int[][] getGradeSummary () {
+//				if (gradeSummary == null)
+//					loadGradeSummary();
+//
+//				return gradeSummary;
+//			}
 
 
 			public Bitmap getStudentPicture() {
@@ -923,21 +954,21 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 		writeDetailsToFile();
 		writeDataToFile();
 	}
-	
+
 	private void writeDetailsToFile() {
 		String filename = "DATA_GRABBER_DETAILS";
 		String string = domain.toString() + "\n" + username + "\n" + password;
 		FileOutputStream outputStream;
 
 		try {
-		  outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-		  outputStream.write(string.getBytes());
-		  outputStream.close();
+			outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+			outputStream.write(string.getBytes());
+			outputStream.close();
 		} catch (Exception e) {
-		  e.printStackTrace();
+			e.printStackTrace();
 		}
 	}
-	
+
 	private void writeDataToFile() {
 		String filename = "DATA_GRABBER_DATA";
 		String string = "";
@@ -947,12 +978,12 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 		FileOutputStream outputStream;
 
 		try {
-		  outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-		  outputStream.write(string.getBytes());
-		  outputStream.close();
+			outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+			outputStream.write(string.getBytes());
+			outputStream.close();
 		} catch (Exception e) {
-		  e.printStackTrace();
+			e.printStackTrace();
 		}
 	}
-	
+
 }

@@ -17,8 +17,10 @@
             android:background="@drawable/cardtest"
             android:fontFamily="sans-serif-light"
             android:padding="15dp"
+            android:layout_margin="8dp"
             android:text="@string/welcome"
-            android:textSize="25sp" />
+            android:textSize="25sp"
+            android:gravity="center" />
     </LinearLayout>
 
 </ScrollView>

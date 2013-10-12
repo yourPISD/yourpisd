@@ -1,8 +1,10 @@
 [
     {
+		"summaryLastUpdated":5000,
         "title": "NON-EUCLID GEOM H(00)",
         "enrollmentId": 0,
         "classId": 0,
+		"average": 76,
         "terms": [
             {
                 "grades": [
@@ -173,6 +175,7 @@
         "title": "QUANT MECH AP(01)",
         "enrollmentId": 1,
         "classId": 1,
+		"average": 76,
         "terms": [
             {
                 "grades": [
@@ -343,6 +346,7 @@
         "title": "AMER LIT AP(02)",
         "enrollmentId": 2,
         "classId": 2,
+		"average": 76,
         "terms": [
             {
                 "grades": [
@@ -513,6 +517,7 @@
         "title": "ECONOMETRICS H(03)",
         "enrollmentId": 0,
         "classId": 0,
+		"average": 76,
         "terms": [
             {
                 "grades": [
@@ -683,6 +688,7 @@
         "title": "STRING ORCH(04)",
         "enrollmentId": 0,
         "classId": 0,
+		"average": 76,
         "terms": [
             {
                 "grades": [
@@ -853,6 +859,7 @@
         "title": "PHILOSOPHY(05)",
         "enrollmentId": 0,
         "classId": 0,
+		"average": 76,
         "terms": [
             {
                 "grades": [
@@ -1023,6 +1030,7 @@
         "title": "COMP SCI AP(06)",
         "enrollmentId": 0,
         "classId": 0,
+		"average": 76,
         "terms": [
             {
                 "grades": [

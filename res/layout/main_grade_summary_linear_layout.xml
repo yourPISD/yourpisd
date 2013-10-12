@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/dropshadow"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:padding="0dp" >
 
     <TextView
         android:id="@+id/class_name"
@@ -12,7 +13,7 @@
         android:layout_margin="10dp"
         android:layout_weight="1"
         android:fontFamily="sans-serif-light"
-        android:text="Class Name"
+        android:padding="10dp"
         android:textSize="25sp"
         android:textStyle="bold" />
 
@@ -20,9 +21,8 @@
         android:id="@+id/layout_six_weeks_summary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="0dp"
         android:orientation="horizontal" >
-
-        
     </LinearLayout>
 
 </LinearLayout>
