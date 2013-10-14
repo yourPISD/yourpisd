@@ -1,13 +1,10 @@
 package app.sunstreak.yourpisd.net;
 
 
-import java.io.EOFException;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
@@ -28,15 +25,13 @@ import org.jsoup.nodes.Element;
 import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.util.Base64;
 import android.util.SparseArray;
 import app.sunstreak.yourpisd.R;
 
-public class DataGrabber extends Application implements Serializable {
+public class DataGrabber /*implements Parcelable*/ extends Application {
 
 
 
@@ -54,9 +49,8 @@ public class DataGrabber extends Application implements Serializable {
 
 	public class Student implements Serializable {
 
-		public /*final*/ int studentId;
-		public /*final*/ String name;
-		private String gpa;
+		public final int studentId;
+		public final String name;
 		JSONArray classList;
 		int[] classIds;
 		int[] classMatch;
@@ -146,7 +140,6 @@ public class DataGrabber extends Application implements Serializable {
 				// Last updated time of summary --> goes in this awkward place
 				classList.getJSONObject(0).put("summaryLastUpdated", new Instant().getMillis());
 
-				writeToFile();
 				return gradeSummary;
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -219,16 +212,16 @@ public class DataGrabber extends Application implements Serializable {
 			return classList.optJSONObject(0).optLong("summaryLastUpdated", -1) != -1;
 		}
 
-		//		public int[][] getGradeSummary () {
-		//
-		//			if (!hasGradeSummary())
-		//				try {
-		//					loadGradeSummary();
-		//				} catch (JSONException e) {
-		//					return null;
-		//				}
-		//		return gradeSummary;
-		//		}
+//		public int[][] getGradeSummary () {
+//
+//			if (!hasGradeSummary())
+//				try {
+//					loadGradeSummary();
+//				} catch (JSONException e) {
+//					return null;
+//				}
+//		return gradeSummary;
+//		}
 
 		public boolean hasClassGrade (int classIndex, int termIndex) {
 			return classGrades.indexOfKey(classIndex) > 0 
@@ -301,7 +294,6 @@ public class DataGrabber extends Application implements Serializable {
 
 
 				//				classGrades.get(classIndex).getJSONArray("terms").put(termIndex, classGrade);
-				writeToFile();
 				return classGrade.getJSONArray("terms").getJSONObject(termIndex);
 
 
@@ -337,8 +329,6 @@ public class DataGrabber extends Application implements Serializable {
 			studentPictureBitmap = (Bitmap) response[0];
 			int responseCode = (Integer) response[1];
 			cookies = (ArrayList<String>) cookies;
-
-			writeToFile();
 		}
 
 		public Bitmap getStudentPicture() {
@@ -377,13 +367,7 @@ public class DataGrabber extends Application implements Serializable {
 			return classMatch;
 		}
 
-		public String getGPA() {
-			if (gpa == null)
-				calculateGPA();
-			return gpa;
-		}
-
-		private double calculateGPA () {
+		public double getGPA () {
 			if (classMatch == null)
 				return -2;
 
@@ -391,9 +375,9 @@ public class DataGrabber extends Application implements Serializable {
 			int pointCount = 0;
 
 			for (int classIndex = 0; classIndex < classMatch.length; classIndex++) {
-
+				
 				int jsonIndex = classMatch[classIndex];
-
+				
 				double sum = 0;
 				double count = 0;
 				for (int termIndex = 0; termIndex < 4; termIndex++) {
@@ -412,12 +396,12 @@ public class DataGrabber extends Application implements Serializable {
 					else {
 						pointCount++;
 						double classGPA = maxGPA(classIndex) - gpaDifference(grade);
+						System.out.println(classGPA);
 						pointSum += classGPA;
 					}
 				}
 			}
 
-			gpa = String.format("%9f",pointSum / pointCount);
 			return pointSum / pointCount;
 		}
 
@@ -468,60 +452,12 @@ public class DataGrabber extends Application implements Serializable {
 			out.write(studentId);
 			out.writeUTF(name);
 			out.writeUTF(classList.toString());
-			out.writeObject(classIds);
-			out.writeObject(classMatch);
-
-			out.writeBoolean(studentPictureBitmap != null);
-			if (studentPictureBitmap != null)
-				studentPictureBitmap.compress(CompressFormat.JPEG, 100, out);
-
-			out.writeInt(classGrades.size());
-			out.writeUTF(serializeSparseArray(classGrades));
 
 		}
 
 		private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-			studentId = in.readInt();
-			name = in.readUTF();
 
-			try {
-				classList = new JSONArray(in.readUTF());
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-
-			classIds = (int[]) in.readObject();
-			classMatch = (int[]) in.readObject();
-
-			// If picture is not null.
-			if (in.readBoolean())
-				studentPictureBitmap = BitmapFactory.decodeStream(in);
-
-			try {
-				classGrades = new SparseArray<JSONObject>();
-				int classGradesSize = in.readInt();
-				Scanner sc = new Scanner(in.readUTF());
-				while(sc.hasNext()) {
-					int key = sc.nextInt();
-					JSONObject value = new JSONObject(sc.next());
-					classGrades.put(key, value);
-				}
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-		
 		}
-		
-		public void printEverything() {
-			System.out.println(studentId);
-			System.out.println(name);
-			System.out.println(classList);
-			System.out.println(Arrays.toString(classIds));
-			System.out.println(Arrays.toString(classMatch));
-			System.out.println(studentPictureBitmap != null);
-			System.out.println(classGrades);
-		}
-
 
 	}
 
@@ -824,7 +760,6 @@ public class DataGrabber extends Application implements Serializable {
 			st.loadClassList();
 		}
 
-		writeToFile();
 
 		return 1;
 	}
@@ -927,8 +862,6 @@ public class DataGrabber extends Application implements Serializable {
 					return;
 				}
 
-				classMatch = new int[] {0, 1, 2, 3, 4, 5, 6};
-
 			}
 
 			public void loadClassList() {
@@ -944,6 +877,33 @@ public class DataGrabber extends Application implements Serializable {
 			}
 
 			public int[][] loadGradeSummary() {
+				/*
+				InputStream is;
+
+				switch (studentId) {
+				case 0:
+					is = getResources().openRawResource(R.raw.student_0_grade_summary);
+					break;
+				case 1:
+					is = getResources().openRawResource(R.raw.student_1_grade_summary);
+					break;
+				default:
+					return null;
+				}
+
+				Scanner sc = new Scanner(is);
+
+				int[][] gradeSummary = new int[7][7];
+				for (int i = 0; i < 7; i++) {
+					for (int j = 0; j < 7; j++) {
+						gradeSummary[i][j] = sc.nextInt();
+					}
+				}
+
+				matchClasses(gradeSummary);
+				
+				return gradeSummary;
+				*/
 				return null;
 			}
 
@@ -955,25 +915,30 @@ public class DataGrabber extends Application implements Serializable {
 				return new int[] {0, 1, 2, 3, 4, 5};
 			}
 
-			private void loadStudentPicture() {
+
+
+//			public int[][] getGradeSummary () {
+//				if (gradeSummary == null)
+//					loadGradeSummary();
+//
+//				return gradeSummary;
+//			}
+
+
+			public Bitmap getStudentPicture() {
+
 				switch (studentId) {
 				case 0:
-					studentPictureBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.student_0);
-					break;
+					return BitmapFactory.decodeResource(getResources(), R.drawable.student_0);
 				case 1:
-					studentPictureBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.student_1);
-					break;
+					return BitmapFactory.decodeResource(getResources(), R.drawable.student_1);
+				default:
+					return null;
 				}
 			}
 
-			public Bitmap getStudentPicture() {
-				if (studentPictureBitmap == null)
-					loadStudentPicture();
-
-				return studentPictureBitmap;
-			}
-
 			public void matchClasses() {
+				classMatch = new int[] {0, 1, 2, 3, 4, 5, 6};
 			}
 
 		}
@@ -988,21 +953,17 @@ public class DataGrabber extends Application implements Serializable {
 	public void writeToFile() {
 		writeDetailsToFile();
 		writeDataToFile();
-		System.out.println("written to file");
 	}
 
 	private void writeDetailsToFile() {
 		String filename = "DATA_GRABBER_DETAILS";
-		String string = domain.toString() 
-				+ "\n" 
-				+ Base64.encodeToString(username.getBytes(), Base64.DEFAULT) 
-				+ "\n" 
-				+ Base64.encodeToString(password.getBytes(), Base64.DEFAULT);
-		FileOutputStream fos;
+		String string = domain.toString() + "\n" + username + "\n" + password;
+		FileOutputStream outputStream;
+
 		try {
-			fos = openFileOutput(filename, Context.MODE_PRIVATE);
-			fos.write(string.getBytes());
-			fos.close();
+			outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+			outputStream.write(string.getBytes());
+			outputStream.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -1010,75 +971,19 @@ public class DataGrabber extends Application implements Serializable {
 
 	private void writeDataToFile() {
 		String filename = "DATA_GRABBER_DATA";
-		FileOutputStream fos;
-		ObjectOutputStream oos;
+		String string = "";
+		for (Student st : students) {
+			string += st.classGrades.toString() + "\n";
+		}
+		FileOutputStream outputStream;
+
 		try {
-			fos = openFileOutput(filename, Context.MODE_PRIVATE);
-			oos = new ObjectOutputStream(fos);
-			for (Student st : students)
-				oos.writeObject(st);
-			oos.close();
+			outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+			outputStream.write(string.getBytes());
+			outputStream.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	public int restoreFromFile() {
-		// bitwise & : 1&1 = 1. -1&1 or -1&-1 = -1.
-		int a = restoreDetailsFromFile();
-		int b = restoreDataFromFile();
-		System.out.println(a+ " " + b);
-		System.out.println("students size = " + students.size());
-		for (Student st : students)
-			st.printEverything();
-		
-		return a == 1 & b == 1 ? 1 : -1;
-	}
-
-	private int restoreDetailsFromFile() {
-		String filename = "DATA_GRABBER_DETAILS";
-		try {
-			FileInputStream fis = openFileInput(filename);
-			Scanner sc = new Scanner(fis);
-			domain = Domain.valueOf(sc.next());
-			username = new String(Base64.decode(sc.next(), Base64.DEFAULT));
-			password = new String(Base64.decode(sc.next(), Base64.DEFAULT));
-			return 1;
-		} catch (IOException e) {
-			return -1;
-		}
-	}
-
-	private int restoreDataFromFile() {
-		String filename = "DATA_GRABBER_DATA";
-		try {
-			FileInputStream fis = openFileInput(filename);
-			ObjectInputStream oos = new ObjectInputStream(fis);
-			try {
-				while (true) {
-					students.add((Student) oos.readObject());
-					System.out.println("read one student");
-				}
-			} catch (EOFException ex) {
-				return 1;
-			} catch (ClassNotFoundException ex) {
-				return -1;
-			}
-		} catch (IOException e) {
-			return -1;
-		}
-	}
-
-
-	public static <E> String serializeSparseArray (SparseArray<E> array) {
-		String result = "";
-		for (int index = 0; index < array.size(); index++) {
-			result += array.keyAt(index);
-			result += "\n";
-			result += array.get(array.keyAt(index)).toString();
-			result += "\n";
-		}
-		return result;
 	}
 
 }

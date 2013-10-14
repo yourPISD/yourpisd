@@ -474,10 +474,9 @@ public class LoginActivity extends Activity {
 			}
 
 
-//			Intent startMain = new Intent(LoginActivity.this, MainActivity.class);
-//
-//			startActivity(startMain);
-			setResult(1);
+			Intent startMain = new Intent(LoginActivity.this, MainActivity.class);
+
+			startActivity(startMain);
 			finish();
 			//			overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
 			try

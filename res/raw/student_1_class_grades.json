@@ -1,13 +1,12 @@
 [
     {
-        "summaryLastUpdated": 5000,
+		"summaryLastUpdated":5000,
         "title": "NON-EUCLID GEOM H(00)",
         "enrollmentId": 0,
         "classId": 0,
+		"average": 76,
         "terms": [
             {
-                "lastUpdated": 5000,
-                "average": 76,
                 "grades": [
                     {
                         "Category": "Daily Work",
@@ -40,19 +39,17 @@
                     {
                         "Category": "Daily Work",
                         "Weight": 25,
-                        "Letter": 80
+                        "Percent": 80
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
-                        "Letter": 75
+                        "Percent": 75
                     }
                 ],
                 "termId": 0
             },
             {
-                "lastUpdated": 5000,
-                "average": 76,
                 "grades": [
                     {
                         "Category": "Daily Work",
@@ -85,12 +82,12 @@
                     {
                         "Category": "Daily Work",
                         "Weight": 25,
-                        "Letter": 80
+                        "Percent": 80
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
-                        "Letter": 75
+                        "Percent": 75
                     }
                 ],
                 "termId": 1
@@ -103,13 +100,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 2
@@ -122,13 +119,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 3
@@ -141,13 +138,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 4
@@ -160,13 +157,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 5
@@ -178,10 +175,9 @@
         "title": "QUANT MECH AP(01)",
         "enrollmentId": 1,
         "classId": 1,
+		"average": 76,
         "terms": [
             {
-                "lastUpdated": 5000,
-                "average": 76,
                 "grades": [
                     {
                         "Category": "Daily Work",
@@ -214,19 +210,17 @@
                     {
                         "Category": "Daily Work",
                         "Weight": 25,
-                        "Letter": 80
+                        "Percent": 80
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
-                        "Letter": 75
+                        "Percent": 75
                     }
                 ],
                 "termId": 0
             },
             {
-                "lastUpdated": 5000,
-                "average": 76,
                 "grades": [
                     {
                         "Category": "Daily Work",
@@ -259,12 +253,12 @@
                     {
                         "Category": "Daily Work",
                         "Weight": 25,
-                        "Letter": 80
+                        "Percent": 80
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
-                        "Letter": 75
+                        "Percent": 75
                     }
                 ],
                 "termId": 1
@@ -277,13 +271,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 2
@@ -296,13 +290,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 3
@@ -315,13 +309,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 4
@@ -334,13 +328,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 5
@@ -352,10 +346,9 @@
         "title": "AMER LIT AP(02)",
         "enrollmentId": 2,
         "classId": 2,
+		"average": 76,
         "terms": [
             {
-                "lastUpdated": 5000,
-                "average": 76,
                 "grades": [
                     {
                         "Category": "Daily Work",
@@ -388,19 +381,17 @@
                     {
                         "Category": "Daily Work",
                         "Weight": 25,
-                        "Letter": 80
+                        "Percent": 80
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
-                        "Letter": 75
+                        "Percent": 75
                     }
                 ],
                 "termId": 0
             },
             {
-                "lastUpdated": 5000,
-                "average": 76,
                 "grades": [
                     {
                         "Category": "Daily Work",
@@ -433,12 +424,12 @@
                     {
                         "Category": "Daily Work",
                         "Weight": 25,
-                        "Letter": 80
+                        "Percent": 80
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
-                        "Letter": 75
+                        "Percent": 75
                     }
                 ],
                 "termId": 1
@@ -451,13 +442,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 2
@@ -470,13 +461,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 3
@@ -489,13 +480,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 4
@@ -508,13 +499,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 5
@@ -526,10 +517,9 @@
         "title": "ECONOMETRICS H(03)",
         "enrollmentId": 0,
         "classId": 0,
+		"average": 76,
         "terms": [
             {
-                "lastUpdated": 5000,
-                "average": 76,
                 "grades": [
                     {
                         "Category": "Daily Work",
@@ -562,19 +552,17 @@
                     {
                         "Category": "Daily Work",
                         "Weight": 25,
-                        "Letter": 80
+                        "Percent": 80
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
-                        "Letter": 75
+                        "Percent": 75
                     }
                 ],
                 "termId": 0
             },
             {
-                "lastUpdated": 5000,
-                "average": 76,
                 "grades": [
                     {
                         "Category": "Daily Work",
@@ -607,12 +595,12 @@
                     {
                         "Category": "Daily Work",
                         "Weight": 25,
-                        "Letter": 80
+                        "Percent": 80
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
-                        "Letter": 75
+                        "Percent": 75
                     }
                 ],
                 "termId": 1
@@ -625,13 +613,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 2
@@ -644,13 +632,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 3
@@ -663,13 +651,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 4
@@ -682,13 +670,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 5
@@ -700,10 +688,9 @@
         "title": "STRING ORCH(04)",
         "enrollmentId": 0,
         "classId": 0,
+		"average": 76,
         "terms": [
             {
-                "lastUpdated": 5000,
-                "average": 76,
                 "grades": [
                     {
                         "Category": "Daily Work",
@@ -736,19 +723,17 @@
                     {
                         "Category": "Daily Work",
                         "Weight": 25,
-                        "Letter": 80
+                        "Percent": 80
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
-                        "Letter": 75
+                        "Percent": 75
                     }
                 ],
                 "termId": 0
             },
             {
-                "lastUpdated": 5000,
-                "average": 76,
                 "grades": [
                     {
                         "Category": "Daily Work",
@@ -781,12 +766,12 @@
                     {
                         "Category": "Daily Work",
                         "Weight": 25,
-                        "Letter": 80
+                        "Percent": 80
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
-                        "Letter": 75
+                        "Percent": 75
                     }
                 ],
                 "termId": 1
@@ -799,13 +784,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 2
@@ -818,13 +803,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 3
@@ -837,13 +822,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 4
@@ -856,13 +841,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 5
@@ -870,14 +855,13 @@
         ],
         "teacher": "Simon, Paul"
     },
-    {
+	{
         "title": "PHILOSOPHY(05)",
         "enrollmentId": 0,
         "classId": 0,
+		"average": 76,
         "terms": [
             {
-                "lastUpdated": 5000,
-                "average": 76,
                 "grades": [
                     {
                         "Category": "Daily Work",
@@ -910,19 +894,17 @@
                     {
                         "Category": "Daily Work",
                         "Weight": 25,
-                        "Letter": 80
+                        "Percent": 80
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
-                        "Letter": 75
+                        "Percent": 75
                     }
                 ],
                 "termId": 0
             },
             {
-                "lastUpdated": 5000,
-                "average": 76,
                 "grades": [
                     {
                         "Category": "Daily Work",
@@ -955,12 +937,12 @@
                     {
                         "Category": "Daily Work",
                         "Weight": 25,
-                        "Letter": 80
+                        "Percent": 80
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
-                        "Letter": 75
+                        "Percent": 75
                     }
                 ],
                 "termId": 1
@@ -973,13 +955,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 2
@@ -992,13 +974,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 3
@@ -1011,13 +993,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 4
@@ -1030,13 +1012,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 5
@@ -1048,10 +1030,9 @@
         "title": "COMP SCI AP(06)",
         "enrollmentId": 0,
         "classId": 0,
+		"average": 76,
         "terms": [
             {
-                "lastUpdated": 5000,
-                "average": 76,
                 "grades": [
                     {
                         "Category": "Daily Work",
@@ -1084,19 +1065,17 @@
                     {
                         "Category": "Daily Work",
                         "Weight": 25,
-                        "Letter": 80
+                        "Percent": 80
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
-                        "Letter": 75
+                        "Percent": 75
                     }
                 ],
                 "termId": 0
             },
             {
-                "lastUpdated": 5000,
-                "average": 76,
                 "grades": [
                     {
                         "Category": "Daily Work",
@@ -1129,12 +1108,12 @@
                     {
                         "Category": "Daily Work",
                         "Weight": 25,
-                        "Letter": 80
+                        "Percent": 80
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
-                        "Letter": 75
+                        "Percent": 75
                     }
                 ],
                 "termId": 1
@@ -1147,13 +1126,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 2
@@ -1166,13 +1145,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 3
@@ -1185,13 +1164,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 4
@@ -1204,13 +1183,13 @@
                         "Category": "Daily Work",
                         "Weight": 25,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     },
                     {
                         "Category": "Major Evaluations",
                         "Weight": 75,
                         "Points / Max pts.": "0 / 0",
-                        "Letter": 0
+                        "Percent": 0
                     }
                 ],
                 "termId": 5
@@ -1218,4 +1197,5 @@
         ],
         "teacher": "Page, Larry"
     }
+    
 ]
