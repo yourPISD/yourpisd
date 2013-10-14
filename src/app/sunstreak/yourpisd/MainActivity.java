@@ -75,6 +75,16 @@ public class MainActivity extends FragmentActivity {
 		SCREEN_WIDTH = displaymetrics.widthPixels;
 
 		dg = (DataGrabber) getApplication();
+		
+		// Just opened the application.
+		if (dg.getDomain() == null || true) {
+			final int success = dg.restoreFromFile();
+			// File doesn't work
+			if (success != 1) {
+				Intent loginAgain = new Intent(MainActivity.this, LoginActivity.class);
+				startActivityForResult(loginAgain, 1);
+			}
+		}
 
 
 		// Create the adapter that will return a fragment for each of the three
@@ -135,10 +145,15 @@ public class MainActivity extends FragmentActivity {
 			editor.putBoolean("auto_login", false);
 			editor.commit();
 
-			Intent intent = new Intent(this, LoginActivity.class);
-			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			intent.putExtra("show", true);
-			startActivity(intent);
+			Intent loginAgain = new Intent(MainActivity.this, LoginActivity.class);
+			startActivityForResult(loginAgain, 1);
+			
+//			Intent intent = new Intent(this, LoginActivity.class);
+//			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//			intent.putExtra("show", true);
+//			startActivity(intent);
+			
+			
 			return true;
 		case R.id.credits:
 			Intent intentCred1 = new Intent(this, CreditActivity.class);
@@ -149,6 +164,12 @@ public class MainActivity extends FragmentActivity {
 		}
 	}
 
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		dg = (DataGrabber) getApplication();
+		mSectionsPagerAdapter.notifyDataSetChanged();
+	}
+	
 	/**
 	 * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
 	 * one of the sections/tabs/pages.
@@ -276,7 +297,7 @@ public class MainActivity extends FragmentActivity {
 
 					Spanned profileCardText = Html.fromHtml (dg.getStudents().get(i).name 
 							+ "<br><br>GPA: " 
-							+ String.format("%9f",dg.getStudents().get(i).getGPA()));
+							+ dg.getStudents().get(i).getGPA());
 
 					name.setText(profileCardText);
 
