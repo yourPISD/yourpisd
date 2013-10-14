@@ -442,7 +442,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 				TextView lastUpdatedView = new TextView(getActivity());
 				lastUpdatedView.setText(DateHandler.timeSince(mClassGrade.getLong("lastUpdated")));
-
+				lastUpdatedView.setPadding(10, 0, 0, 0);
 				classDescriptionLinearLayout.addView(lastUpdatedView);
 
 

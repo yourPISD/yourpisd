@@ -366,7 +366,7 @@ public class MainActivity extends FragmentActivity {
 				TextView summaryLastUpdated = new TextView(getActivity());
 				String lastUpdatedString = DateHandler.timeSince(dg.getCurrentStudent().getClassList().optJSONObject(0).optLong("summaryLastUpdated"));
 				summaryLastUpdated.setText(lastUpdatedString);
-
+				summaryLastUpdated.setPadding(10, 0, 0, 0);
 				bigLayout.addView(summaryLastUpdated);
 
 				return rootView;
@@ -456,7 +456,7 @@ public class MainActivity extends FragmentActivity {
 							break;
 
 						TextView termGrade = new TextView(getActivity());
-						termGrade.setTextSize(SCREEN_WIDTH / 18);
+						termGrade.setTextSize(SCREEN_WIDTH / 20);
 						termGrade.setClickable(true);
 						termGrade.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 						//						termGrade.setOnClickListener(new ClassSwipeOpenerListener(dg.studentIndex, classIndex, termIndex - 1));
@@ -478,7 +478,11 @@ public class MainActivity extends FragmentActivity {
 							sum+=avg;
 							count++;
 						}
-
+						//might be too excessive to do this for every six weeks
+//						if(avg>=90)
+//							termGrade.setTextColor(getResources().getColor(R.color.green));
+//						else
+//							termGrade.setTextColor(getResources().getColor(R.color.red));
 						termGrade.setGravity(Gravity.CENTER);
 						summary.addView(termGrade);
 
@@ -496,11 +500,17 @@ public class MainActivity extends FragmentActivity {
 						llp.setMargins(0, 0, 0, 0);
 						termGrade.setLayoutParams(llp);
 						
-						termGrade.setTextSize(SCREEN_WIDTH / 18);
+						termGrade.setTextSize(SCREEN_WIDTH / 20);
 						termGrade.setClickable(true);
 						termGrade.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 						termGrade.setGravity(Gravity.CENTER);
 						termGrade.setText(averageText);
+						//color coded grades yay first comment lol
+						if(Integer.parseInt(averageText)>=90)
+							termGrade.setTextColor(getResources().getColor(R.color.green));
+						else
+							termGrade.setTextColor(getResources().getColor(R.color.red));
+						
 						summary.addView(termGrade);
 					}
 
@@ -510,7 +520,7 @@ public class MainActivity extends FragmentActivity {
 				TextView summaryLastUpdated = new TextView(getActivity());
 				String lastUpdatedString = DateHandler.timeSince(dg.getCurrentStudent().getClassList().optJSONObject(0).optLong("summaryLastUpdated"));
 				summaryLastUpdated.setText(lastUpdatedString);
-
+				summaryLastUpdated.setPadding(10, 0, 0, 0);
 				bigLayout.addView(summaryLastUpdated);
 
 			}
