@@ -456,7 +456,7 @@ public class MainActivity extends FragmentActivity {
 							break;
 
 						TextView termGrade = new TextView(getActivity());
-						termGrade.setTextSize(SCREEN_WIDTH / 20);
+						termGrade.setTextSize(getResources().getDimension(R.dimen.text_size_medium));
 						termGrade.setClickable(true);
 						termGrade.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 						//						termGrade.setOnClickListener(new ClassSwipeOpenerListener(dg.studentIndex, classIndex, termIndex - 1));
@@ -491,8 +491,8 @@ public class MainActivity extends FragmentActivity {
 
 					// Display the average.
 					if(count > 0) {
-						double average = sum/count;
-						String averageText = Math.round(average)+"";
+						double average = Math.round(sum/count);
+						String averageText = (int)average+"";
 						TextView termGrade = new TextView(getActivity());
 						
 						int width = (int)((SCREEN_WIDTH - 30)/5);
@@ -500,16 +500,13 @@ public class MainActivity extends FragmentActivity {
 						llp.setMargins(0, 0, 0, 0);
 						termGrade.setLayoutParams(llp);
 						
-						termGrade.setTextSize(SCREEN_WIDTH / 20);
+						termGrade.setTextSize(getResources().getDimension(R.dimen.text_size_medium));
 						termGrade.setClickable(true);
 						termGrade.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 						termGrade.setGravity(Gravity.CENTER);
 						termGrade.setText(averageText);
 						//color coded grades yay first comment lol
-						if(Integer.parseInt(averageText)>=90)
-							termGrade.setTextColor(getResources().getColor(R.color.green));
-						else
-							termGrade.setTextColor(getResources().getColor(R.color.red));
+						termGrade.setTextColor(gradeColor((int) average));
 						
 						summary.addView(termGrade);
 					}
@@ -611,6 +608,17 @@ public class MainActivity extends FragmentActivity {
 					profileCards[i].setBackgroundResource(R.drawable.dropshadow_white_to_blue);
 			}
 		}
+		
+		public int gradeColor (int grade) {
+			if (grade > 100)
+				return getResources().getColor(R.color.black);
+			if (grade >= 90)
+				return getResources().getColor(R.color.green);
+			if (grade >= 80)
+				return getResources().getColor(R.color.yellow);
+			
+			return getResources().getColor(R.color.red);
+		}
 
 	}
 
@@ -634,6 +642,8 @@ public class MainActivity extends FragmentActivity {
 		display.getSize(size); 
 		return size.y;
 	}
+	
+
 
 	class StudentChooserListener implements OnMenuItemClickListener {
 

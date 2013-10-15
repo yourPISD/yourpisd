@@ -49,6 +49,10 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 
 	public class Student implements Serializable {
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -2202613018998649709L;
 		public final int studentId;
 		public final String name;
 		JSONArray classList;
@@ -396,7 +400,6 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 					else {
 						pointCount++;
 						double classGPA = maxGPA(classIndex) - gpaDifference(grade);
-						System.out.println(classGPA);
 						pointSum += classGPA;
 					}
 				}
@@ -822,6 +825,11 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 
 
 		class TestStudent extends Student{
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 4870831615938950349L;
 
 			public TestStudent(int studentId, String studentName) {
 
