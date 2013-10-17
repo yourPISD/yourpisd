@@ -4,17 +4,18 @@
     android:layout_height="fill_parent" 
     android:background="@color/gray">
 
+    <!--  
     <LinearLayout
         android:id="@+id/class_description_linear_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-
+	-->
+	
         <RelativeLayout
             android:id="@+id/descriptions"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone" >
+            android:layout_height="wrap_content">
 
             <TextView
                 android:id="@+id/teacher_name"
@@ -37,6 +38,9 @@
                 android:padding="15dp"
                 android:textSize="28sp" />
         </RelativeLayout>
+        
+    <!-- 
     </LinearLayout>
+    -->
 
 </ScrollView>

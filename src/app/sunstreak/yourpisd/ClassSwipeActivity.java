@@ -326,9 +326,11 @@ public class ClassSwipeActivity extends FragmentActivity {
 			TextView teacher = (TextView) rootView.findViewById(R.id.teacher_name);
 			TextView sixWeeksAverage = (TextView) rootView.findViewById(R.id.six_weeks_average);
 			RelativeLayout desc = (RelativeLayout) rootView.findViewById(R.id.descriptions);
-			desc.setVisibility(View.VISIBLE);
-			LinearLayout classDescriptionLinearLayout = (LinearLayout) rootView.findViewById(R.id.class_description_linear_layout);
-
+//			desc.setVisibility(View.VISIBLE);
+//			LinearLayout classDescriptionLinearLayout = (LinearLayout) rootView.findViewById(R.id.class_description_linear_layout);
+			
+			int lastIdAdded = R.id.teacher_name;
+			
 			try {
 				// The following line prevents force close. Idk why.
 				// Maybe the extra print time somehow fixes it...
@@ -350,25 +352,26 @@ public class ClassSwipeActivity extends FragmentActivity {
 				// Add current student's name
 				if (dg.MULTIPLE_STUDENTS) {
 					LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-					LinearLayout studentName = (LinearLayout) inflater.inflate(R.layout.main_student_name_if_multiple_students, classDescriptionLinearLayout, false);
-					( (TextView) studentName.findViewById(R.id.name) ).setText(dg.getCurrentStudent().name);
-					classDescriptionLinearLayout.addView(studentName);
+					LinearLayout studentName = (LinearLayout) inflater.inflate(R.layout.main_student_name_if_multiple_students, desc, false);
+					((TextView) studentName.findViewById(R.id.name)).setText(dg.getCurrentStudent().name);
+					RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+							RelativeLayout.LayoutParams.MATCH_PARENT,
+							RelativeLayout.LayoutParams.WRAP_CONTENT);
+					lp.addRule(RelativeLayout.BELOW, lastIdAdded);
+					lastIdAdded = R.id.name;
+					desc.addView(studentName);
 				}
 
 				for (int category = 0;
 						category < mClassGrade.getJSONArray("categoryGrades").length();
 						category++)
 				{
-
-
 					LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-					LinearLayout categoryLayout = (LinearLayout) inflater.inflate(R.layout.class_swipe_category_card, classDescriptionLinearLayout, false);
-
-
+					
 					// Name of the category ("Daily Work", etc)
 					String categoryName = mClassGrade.getJSONArray("categoryGrades").getJSONObject(category).getString("Category");
 
-					int layoutCounter = 0;
+//					int layoutCounter = 0;
 
 					// for every grade in this term [any category]
 					for(int i = 0; i< mClassGrade.getJSONArray("grades").length(); i++)
@@ -377,8 +380,9 @@ public class ClassSwipeActivity extends FragmentActivity {
 						if (mClassGrade.getJSONArray("grades").getJSONObject(i).getString("Category")
 								.equals(categoryName))
 						{
-							LinearLayout innerLayout = (LinearLayout) inflater.inflate(R.layout.class_swipe_grade_view, categoryLayout, false);
-
+							LinearLayout innerLayout = (LinearLayout) inflater.inflate(R.layout.class_swipe_grade_view, desc, false);
+							
+							
 							TextView descriptionView = (TextView) innerLayout.findViewById(R.id.description);
 							String description = "" + mClassGrade.getJSONArray("grades")
 									.getJSONObject(i).getString("Description");
@@ -388,43 +392,22 @@ public class ClassSwipeActivity extends FragmentActivity {
 							String gradeValue = mClassGrade.getJSONArray("grades")
 									.getJSONObject(i).optString("Grade", "") + "";
 							grade.setText(gradeValue);
+							
+							RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+									RelativeLayout.LayoutParams.MATCH_PARENT,
+									RelativeLayout.LayoutParams.WRAP_CONTENT);
+							lp.addRule(RelativeLayout.BELOW, lastIdAdded);
 
-
-//							TextView grade = new TextView(getActivity());
-//
-//							final SpannableStringBuilder ssb = new SpannableStringBuilder();
-//							final int flag = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE;
-//							int start;
-//							int end;
-//
-//							// Description
-//							start = ssb.length();
-//							ssb.append(mClassGrade.getJSONArray("grades")
-//									.getJSONObject(i).getString("Description"));
-//							end = ssb.length();
-//							int px = (int) (20 * getResources().getDisplayMetrics().density);
-//							ssb.setSpan(new AbsoluteSizeSpan(px), start, end, flag);
-//							ssb.setSpan(new AlignmentSpan.Standard(Alignment.ALIGN_NORMAL), start, end, flag);
-//
-//							// Grade
-//							start = ssb.length();
-//							ssb.append(mClassGrade.getJSONArray("grades")
-//									.getJSONObject(i).optString("Grade", "") + "");
-//							end = ssb.length();
-//							px = (int) (25 * getResources().getDisplayMetrics().density);
-//							ssb.setSpan(new AbsoluteSizeSpan(px), start, end, flag);
-//							ssb.setSpan(new AlignmentSpan.Standard(Alignment.ALIGN_OPPOSITE), start, end, flag);
-//
-//							grade.setText(ssb); 
-//							grade.setBackgroundResource(R.drawable.divider);
-
-							categoryLayout.addView(innerLayout, layoutCounter++);
+							// Add the view to the RelativeLayout
+							innerLayout.setId(lastIdAdded + 1);
+							desc.addView(innerLayout, lp);
+							lastIdAdded++;
 						}
 
 					}
-
-
-
+					// Create a category summary view
+					LinearLayout categoryLayout = (LinearLayout) inflater.inflate(R.layout.class_swipe_category_card, desc, false);
+					
 					TextView categoryNameView = (TextView) categoryLayout.findViewById(R.id.category_name);
 					categoryNameView.setText(categoryName);
 
@@ -433,7 +416,16 @@ public class ClassSwipeActivity extends FragmentActivity {
 							.getJSONObject(category).optString("Letter", "") + "";
 					scoreView.setText(categoryScore);
 
-					classDescriptionLinearLayout.addView(categoryLayout);
+					RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+							RelativeLayout.LayoutParams.MATCH_PARENT,
+							RelativeLayout.LayoutParams.WRAP_CONTENT);
+					lp.addRule(RelativeLayout.BELOW, lastIdAdded);
+					
+					// Add the view to the RelativeLayout
+					categoryLayout.setId(lastIdAdded + 1);
+					desc.addView(categoryLayout, lp);
+					lastIdAdded++;
+					
 					Animation animation = AnimationUtils.loadAnimation(getActivity(), R.anim.slide_in_right);
 					animation.setStartOffset(0);
 					categoryLayout.startAnimation(animation);
@@ -443,7 +435,11 @@ public class ClassSwipeActivity extends FragmentActivity {
 				TextView lastUpdatedView = new TextView(getActivity());
 				lastUpdatedView.setText(DateHandler.timeSince(mClassGrade.getLong("lastUpdated")));
 				lastUpdatedView.setPadding(10, 0, 0, 0);
-				classDescriptionLinearLayout.addView(lastUpdatedView);
+				RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+						RelativeLayout.LayoutParams.WRAP_CONTENT,
+						RelativeLayout.LayoutParams.WRAP_CONTENT);
+				lp.addRule(RelativeLayout.BELOW, lastIdAdded);
+				desc.addView(lastUpdatedView, lp);
 
 
 			} catch (JSONException e) {
@@ -477,6 +473,10 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 		}
 
+	}
+	
+	private class id {
+		public static final int category_card = 1290415;
 	}
 
 }

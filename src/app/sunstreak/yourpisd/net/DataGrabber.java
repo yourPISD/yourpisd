@@ -542,12 +542,22 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 
 		String response;
 		int responseCode;
+		String postParams;
 
 		switch (domain) {
 		case PARENT:
+			postParams = 
+				"__LASTFOCUS=&__EVENTTARGET=&__EVENTARGUMENT=" +
+				"&__VIEWSTATE=%2FwEPDwULLTEwNjY5NzA4NTBkZMM%2FuYdqyffE27bFnREF10B%2FRqD4" +
+				"&__SCROLLPOSITIONX=0&__SCROLLPOSITIONY=0" +
+				"&__EVENTVALIDATION=%2FwEWBAK6wtGnBgLEhsriDQLHoumWCgLyjYGEDNS0X%2BIS%2B22%2FGghXXv5nzic%2Bj46b" +
+				"&ctl00%24ContentPlaceHolder1%24portalLogin%24UserName=" + URLEncoder.encode(username, "UTF-8") +
+				"&ctl00%24ContentPlaceHolder1%24portalLogin%24Password=" + URLEncoder.encode(password,"UTF-8") +
+				"&ctl00%24ContentPlaceHolder1%24portalLogin%24LoginButton=Login";
 			Object[] cookieAuth = Request.sendPost(
 					domain.loginAddress, 
-					"password=" + URLEncoder.encode(password,"UTF-8") + "&username=" + URLEncoder.encode(username,"UTF-8") + "&Submit=Login", 
+					postParams,
+					/*"password=" + URLEncoder.encode(password,"UTF-8") + "&username=" + URLEncoder.encode(username,"UTF-8") + "&Submit=Login",*/ 
 					cookies);
 
 			response = (String) cookieAuth[0];
@@ -596,7 +606,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 
 			String lt = Parser.portalLt(response);
 
-			String postParams = "username=" + URLEncoder.encode(username, "UTF-8") + 
+			postParams = "username=" + URLEncoder.encode(username, "UTF-8") + 
 					"&password=" + URLEncoder.encode(password, "UTF-8") + 
 					"&lt=" + lt +
 					"&_eventId=submit";

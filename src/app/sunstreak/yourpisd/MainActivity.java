@@ -35,6 +35,7 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import app.sunstreak.yourpisd.net.DataGrabber;
 import app.sunstreak.yourpisd.net.DateHandler;
@@ -214,7 +215,7 @@ public class MainActivity extends FragmentActivity {
 		public static final String ARG_OBJECT = "object";
 		private View rootView;
 		private int position;
-		LinearLayout[] profileCards = new LinearLayout[dg.getStudents().size()];
+		RelativeLayout[] profileCards;
 		private boolean pictureNotLoaded = true;
 		public MainActivityFragment() {
 		}
@@ -256,32 +257,48 @@ public class MainActivity extends FragmentActivity {
 							,"Roboto-Light.ttf"));
 					instructions.setText(R.string.welcome_multiple_students);
 					instruct.setBackgroundResource(R.drawable.dropshadow);
-					// Han can you format this better?
 					instruct.addView(instructions);
 					bigLayout.addView(instruct, 1);
 				}
 
-				profileCards = new LinearLayout[dg.getStudents().size()];
+				profileCards = new RelativeLayout[dg.getStudents().size()];
 
 				for (int i = 0; i < dg.getStudents().size(); i++) {
-
-
-					//					LinearLayout box = new LinearLayout(getActivity());
-					//					box.setOrientation(LinearLayout.VERTICAL);
-					profileCards[i] = new LinearLayout(getActivity());
-
+					profileCards[i] = new RelativeLayout(getActivity());
+					
+					ImageView profilePic = new ImageView(getActivity());
+					profilePic.setId(MainActivity.id.profile_picture);
+					
 					TextView name = new TextView(getActivity());
 					name.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 					name.setTextSize(25);
+					name.setText(dg.getStudents().get(i).name);
+					name.setId(id.name);
+					name.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+					name.setGravity(Gravity.CENTER_HORIZONTAL);
+					
+					RelativeLayout.LayoutParams lpName = new RelativeLayout.LayoutParams(
+							RelativeLayout.LayoutParams.MATCH_PARENT,
+							RelativeLayout.LayoutParams.WRAP_CONTENT);
+					lpName.addRule(RelativeLayout.RIGHT_OF, profilePic.getId());
+					
+					TextView gpa = new TextView(getActivity());
+					gpa.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
+					gpa.setTextSize(25);
+					gpa.setText(String.format("%9f",dg.getStudents().get(i).getGPA()));
+					gpa.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+					gpa.setGravity(Gravity.CENTER_HORIZONTAL);
 
-					Spanned profileCardText = Html.fromHtml (dg.getStudents().get(i).name 
-							+ "<br><br>GPA: " 
-							+ String.format("%9f",dg.getStudents().get(i).getGPA()));
-
-					name.setText(profileCardText);
-
-					profileCards[i].addView(name);
-					profileCards[i].setGravity(Gravity.CENTER_VERTICAL);
+					RelativeLayout.LayoutParams lpGPA = new RelativeLayout.LayoutParams(
+							RelativeLayout.LayoutParams.MATCH_PARENT,
+							RelativeLayout.LayoutParams.WRAP_CONTENT);
+					lpGPA.addRule(RelativeLayout.BELOW, id.name);
+					lpGPA.addRule(RelativeLayout.RIGHT_OF, id.profile_picture);
+					
+					profileCards[i].addView(profilePic);
+					profileCards[i].addView(name, lpName);
+					profileCards[i].addView(gpa, lpGPA);
+//					profileCards[i].setGravity(Gravity.CENTER_VERTICAL);
 					profileCards[i].setOnClickListener(new StudentChooserListener(i));
 
 					profileCards[i].setBackgroundResource(R.drawable.dropshadow);
@@ -295,19 +312,8 @@ public class MainActivity extends FragmentActivity {
 					}
 					else
 					{
-						LinearLayout lv = (LinearLayout)rootView.findViewById(R.id.overall);
-						ImageView profilePic = new ImageView(getActivity());
-
-
 						Drawable picture = new BitmapDrawable(getResources(), pics[i]);
 						profilePic.setImageDrawable(picture);
-						LinearLayout.LayoutParams profileLP = new LinearLayout.LayoutParams(
-								LinearLayout.LayoutParams.WRAP_CONTENT,
-								LinearLayout.LayoutParams.WRAP_CONTENT);
-						profileLP.setMargins(10, 10, 10, 10);
-						profilePic.setLayoutParams(profileLP);
-
-						profileCards[i].addView(profilePic, 0);
 					}
 
 				}
@@ -328,11 +334,8 @@ public class MainActivity extends FragmentActivity {
 					bigLayout.addView(studentName);
 				}
 
-				//				int[][] gradeSummary = dg.getCurrentStudent().getGradeSummary();
-
 				int[] classMatch = dg.getCurrentStudent().getClassMatch();
 
-				//				classCount = gradeSummary.length;
 				classCount = classMatch.length;
 
 				averages = new LinearLayout[classCount];
@@ -427,7 +430,6 @@ public class MainActivity extends FragmentActivity {
 
 				bigLayout.addView(weekNames);
 				int[] classMatch = dg.getCurrentStudent().getClassMatch();
-				//				int[][] gradeSummary = dg.getStudents().get(dg.studentIndex).getGradeSummary();
 
 				JSONArray classList = dg.getCurrentStudent().getClassList();
 
@@ -539,20 +541,9 @@ public class MainActivity extends FragmentActivity {
 
 			@Override
 			protected void onPostExecute (final Bitmap result) {
-				LinearLayout lv = (LinearLayout)rootView.findViewById(R.id.overall);
-				ImageView profilePic = new ImageView(getActivity());
-
-
-				Drawable picture = new BitmapDrawable(getResources(), result);
-				profilePic.setImageDrawable(picture);
-				LinearLayout.LayoutParams profileLP = new LinearLayout.LayoutParams(
-						LinearLayout.LayoutParams.WRAP_CONTENT,
-						LinearLayout.LayoutParams.WRAP_CONTENT);
-				profileLP.setMargins(10, 10, 10, 10);
-				profilePic.setLayoutParams(profileLP);
-
-				profileCards[taskStudentIndex].addView(profilePic, 0);
-
+				ImageView profilePic = (ImageView) profileCards[taskStudentIndex].findViewById(MainActivity.id.profile_picture);
+				profilePic.setImageBitmap(result);
+				
 				pictureNotLoaded = false;
 			}
 		}
@@ -661,4 +652,10 @@ public class MainActivity extends FragmentActivity {
 			return true;
 		}
 	}
+	
+	private class id {
+		public static final int profile_picture = 688;
+		public static final int name = 1329482;
+	}
+	
 }
