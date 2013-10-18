@@ -437,10 +437,12 @@ public class ClassSwipeActivity extends FragmentActivity {
 							LinearLayout.LayoutParams.MATCH_PARENT,
 							LinearLayout.LayoutParams.WRAP_CONTENT);
 //					lp1.addRule(RelativeLayout.BELOW, id);
-					desc.addView(card, lp1);
-					Animation animation = AnimationUtils.loadAnimation(getActivity(), R.anim.slide_in_right);
+					Animation animation = AnimationUtils.loadAnimation(getActivity(), R.anim.slide_from_down_rotate);
 					animation.setStartOffset(0);
+					desc.addView(card, lp1);
+					
 					card.startAnimation(animation);
+					
 					id = lastIdAdded;
 				}
 
@@ -461,7 +463,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 		}
 	}
 
-
+	
 	class StudentSelectListener implements MenuItem.OnMenuItemClickListener {
 
 		int menuStudentIndex;
