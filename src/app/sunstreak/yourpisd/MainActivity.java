@@ -145,6 +145,12 @@ public class MainActivity extends FragmentActivity {
 			Intent intentCred1 = new Intent(this, CreditActivity.class);
 			startActivity(intentCred1);
 			return true;
+//		case R.id.refresh:
+//			dg.clearData();
+//			Intent intentR = new Intent(this, LoginActivity.class);
+//			intentR.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//			intentR.putExtra("Refresh", true);
+//			startActivity(intentR);
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -271,7 +277,7 @@ public class MainActivity extends FragmentActivity {
 					
 					TextView name = new TextView(getActivity());
 					name.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
-					name.setTextSize(25);
+					name.setTextSize(22);
 					name.setText(dg.getStudents().get(i).name);
 					name.setId(id.name);
 					name.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
@@ -284,7 +290,7 @@ public class MainActivity extends FragmentActivity {
 					
 					TextView gpa = new TextView(getActivity());
 					gpa.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
-					gpa.setTextSize(25);
+					gpa.setTextSize(22);
 					gpa.setText(String.format("%9f",dg.getStudents().get(i).getGPA()));
 					gpa.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 					gpa.setGravity(Gravity.CENTER_HORIZONTAL);
@@ -396,6 +402,7 @@ public class MainActivity extends FragmentActivity {
 				{
 					weeks[i] = new TextView(getActivity());
 					//					weeks[i].setTextSize(25);
+//					weeks[i].setTextSize(SCREEN_WIDTH / 30);
 					weeks[i].setTextSize(SCREEN_WIDTH / 30);
 					switch(i) {
 					case 0:

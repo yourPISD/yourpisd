@@ -322,14 +322,16 @@ public class ClassSwipeActivity extends FragmentActivity {
 		}
 
 		public void setUiElements () {
-
+			int lastIdAdded = R.id.teacher_name;
 			TextView teacher = (TextView) rootView.findViewById(R.id.teacher_name);
 			TextView sixWeeksAverage = (TextView) rootView.findViewById(R.id.six_weeks_average);
-			RelativeLayout desc = (RelativeLayout) rootView.findViewById(R.id.descriptions);
+			LinearLayout desc = (LinearLayout) rootView.findViewById(R.id.descriptions);
+			teacher.setVisibility(View.VISIBLE);
+			sixWeeksAverage.setVisibility(View.VISIBLE);
 //			desc.setVisibility(View.VISIBLE);
 //			LinearLayout classDescriptionLinearLayout = (LinearLayout) rootView.findViewById(R.id.class_description_linear_layout);
+			int id = lastIdAdded;
 			
-			int lastIdAdded = R.id.teacher_name;
 			
 			try {
 				// The following line prevents force close. Idk why.
@@ -360,12 +362,15 @@ public class ClassSwipeActivity extends FragmentActivity {
 					lp.addRule(RelativeLayout.BELOW, lastIdAdded);
 					lastIdAdded = R.id.name;
 					desc.addView(studentName);
+					id = lastIdAdded;
 				}
-
 				for (int category = 0;
 						category < mClassGrade.getJSONArray("categoryGrades").length();
 						category++)
 				{
+					RelativeLayout card = new RelativeLayout(getActivity());
+					card.setBackgroundResource(R.drawable.dropshadow);
+
 					LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 					
 					// Name of the category ("Daily Work", etc)
@@ -400,7 +405,8 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 							// Add the view to the RelativeLayout
 							innerLayout.setId(lastIdAdded + 1);
-							desc.addView(innerLayout, lp);
+//							desc.addView(innerLayout, lp);
+							card.addView(innerLayout, lp);
 							lastIdAdded++;
 						}
 
@@ -423,23 +429,30 @@ public class ClassSwipeActivity extends FragmentActivity {
 					
 					// Add the view to the RelativeLayout
 					categoryLayout.setId(lastIdAdded + 1);
-					desc.addView(categoryLayout, lp);
+					card.addView(categoryLayout, lp);
+//					desc.addView(categoryLayout, lp);
 					lastIdAdded++;
 					
+					LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(
+							LinearLayout.LayoutParams.MATCH_PARENT,
+							LinearLayout.LayoutParams.WRAP_CONTENT);
+//					lp1.addRule(RelativeLayout.BELOW, id);
+					desc.addView(card, lp1);
 					Animation animation = AnimationUtils.loadAnimation(getActivity(), R.anim.slide_in_right);
 					animation.setStartOffset(0);
-					categoryLayout.startAnimation(animation);
+					card.startAnimation(animation);
+					id = lastIdAdded;
 				}
 
 
-				TextView lastUpdatedView = new TextView(getActivity());
-				lastUpdatedView.setText(DateHandler.timeSince(mClassGrade.getLong("lastUpdated")));
-				lastUpdatedView.setPadding(10, 0, 0, 0);
-				RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-						RelativeLayout.LayoutParams.WRAP_CONTENT,
-						RelativeLayout.LayoutParams.WRAP_CONTENT);
-				lp.addRule(RelativeLayout.BELOW, lastIdAdded);
-				desc.addView(lastUpdatedView, lp);
+//				TextView lastUpdatedView = new TextView(getActivity());
+//				lastUpdatedView.setText(DateHandler.timeSince(mClassGrade.getLong("lastUpdated")));
+//				lastUpdatedView.setPadding(10, 0, 0, 0);
+//				RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+//						RelativeLayout.LayoutParams.WRAP_CONTENT,
+//						RelativeLayout.LayoutParams.WRAP_CONTENT);
+//				lp.addRule(RelativeLayout.BELOW, lastIdAdded);
+//				desc.addView(lastUpdatedView, lp);
 
 
 			} catch (JSONException e) {

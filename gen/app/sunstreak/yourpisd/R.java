@@ -36,6 +36,11 @@ public final class R {
          */
         public static final int activity_horizontal_margin=0x7f070000;
         public static final int activity_vertical_margin=0x7f070001;
+        /** 
+         Customize dimensions originally defined in res/values/dimens.xml (such as
+         screen margins) for sw600dp devices (e.g. 7" tablets) here.
+    
+         */
         public static final int text_size_medium=0x7f070002;
     }
     public static final class drawable {
@@ -54,57 +59,59 @@ public final class R {
         public static final int gradeclick=0x7f02000c;
         public static final int ic_action_next=0x7f02000d;
         public static final int ic_action_prev=0x7f02000e;
-        public static final int ic_alerts_and_states_warning=0x7f02000f;
-        public static final int ic_cool_icon=0x7f020010;
-        public static final int ic_launcher=0x7f020011;
-        public static final int logo=0x7f020012;
-        public static final int logotext=0x7f020013;
-        public static final int navigation_collapse=0x7f020014;
-        public static final int navigation_expand=0x7f020015;
-        public static final int navigation_next_item=0x7f020016;
-        public static final int navigation_previous_item=0x7f020017;
-        public static final int shadow=0x7f020018;
-        public static final int student_0=0x7f020019;
-        public static final int student_1=0x7f02001a;
+        public static final int ic_action_refresh=0x7f02000f;
+        public static final int ic_alerts_and_states_warning=0x7f020010;
+        public static final int ic_cool_icon=0x7f020011;
+        public static final int ic_launcher=0x7f020012;
+        public static final int logo=0x7f020013;
+        public static final int logotext=0x7f020014;
+        public static final int navigation_collapse=0x7f020015;
+        public static final int navigation_expand=0x7f020016;
+        public static final int navigation_next_item=0x7f020017;
+        public static final int navigation_previous_item=0x7f020018;
+        public static final int shadow=0x7f020019;
+        public static final int student_0=0x7f02001a;
+        public static final int student_1=0x7f02001b;
     }
     public static final class id {
-        public static final int action_settings=0x7f0b0022;
+        public static final int action_settings=0x7f0b0023;
         public static final int auto_login=0x7f0b000d;
-        public static final int category_name=0x7f0b0012;
-        public static final int category_score=0x7f0b0013;
-        public static final int class_name=0x7f0b0018;
-        public static final int container=0x7f0b001e;
+        public static final int category_name=0x7f0b0013;
+        public static final int category_score=0x7f0b0014;
+        public static final int class_name=0x7f0b0019;
+        public static final int container=0x7f0b001f;
         public static final int copyright=0x7f0b0004;
         public static final int credit_developers=0x7f0b0002;
         public static final int credit_icon=0x7f0b0003;
-        public static final int credits=0x7f0b0024;
-        public static final int description=0x7f0b0014;
-        public static final int descriptions=0x7f0b000f;
+        public static final int credits=0x7f0b0025;
+        public static final int description=0x7f0b0015;
+        public static final int descriptions=0x7f0b0012;
         public static final int email=0x7f0b0009;
-        public static final int grade=0x7f0b0015;
-        public static final int layout_six_weeks_summary=0x7f0b0019;
-        public static final int layout_year_summary=0x7f0b001f;
-        public static final int log_out=0x7f0b0023;
+        public static final int grade=0x7f0b0016;
+        public static final int info=0x7f0b000f;
+        public static final int layout_six_weeks_summary=0x7f0b001a;
+        public static final int layout_year_summary=0x7f0b0020;
+        public static final int log_out=0x7f0b0024;
         public static final int login=0x7f0b000b;
         public static final int login_form=0x7f0b0008;
         public static final int login_status=0x7f0b0006;
         public static final int login_status_message=0x7f0b0007;
         public static final int logo=0x7f0b0005;
-        public static final int name=0x7f0b0017;
-        public static final int next_six_weeks=0x7f0b0021;
-        public static final int overall=0x7f0b001b;
+        public static final int name=0x7f0b0018;
+        public static final int next_six_weeks=0x7f0b0022;
+        public static final int overall=0x7f0b001c;
         public static final int pager=0x7f0b0000;
         public static final int pager_title_strip=0x7f0b0001;
         public static final int password=0x7f0b000a;
-        public static final int previous_six_weeks=0x7f0b0020;
+        public static final int previous_six_weeks=0x7f0b0021;
         public static final int remember_password=0x7f0b000c;
-        public static final int scroll=0x7f0b001d;
-        public static final int scrollView1=0x7f0b001a;
-        public static final int section_label=0x7f0b0016;
+        public static final int scroll=0x7f0b001e;
+        public static final int scrollView1=0x7f0b001b;
+        public static final int section_label=0x7f0b0017;
         public static final int sign_in_button=0x7f0b000e;
         public static final int six_weeks_average=0x7f0b0011;
         public static final int teacher_name=0x7f0b0010;
-        public static final int welcome=0x7f0b001c;
+        public static final int welcome=0x7f0b001d;
     }
     public static final class layout {
         public static final int activity_class_swipe=0x7f030000;

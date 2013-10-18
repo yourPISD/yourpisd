@@ -21,7 +21,7 @@
         android:paddingBottom="3dp"
         android:paddingLeft="3dp"
         android:text="@string/default_description"
-        android:textSize="20sp"
+        android:textSize="22sp"
         android:textStyle="normal" />
 
     <TextView
@@ -33,6 +33,6 @@
         android:layout_marginRight="10dp"
         android:layout_marginTop="5dp"
         android:fontFamily="sans-serif-light"
-        android:textSize="28sp" />
+        android:textSize="29sp" />
 
 </LinearLayout>
