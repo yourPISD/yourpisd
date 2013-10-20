@@ -413,10 +413,13 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 		}
 
 		public double maxGPA (String className) {
-			String[] split = className.split("[\\s()\\d]+");
+			if (className.contains("PHYS IB SL") || className.contains("MATH STDY IB"))
+				return 4.5;
+		
+			String[] split = className.split("[\\s()\\d\\]+");
 
 			for (int i = split.length - 1; i >= 0; i--) {
-				if (split[i].equals("AP"))
+				if (split[i].equals("AP") || split[i].equals("IB"))
 					return 5;
 				if (split[i].equals("H"))
 					return 4.5;
