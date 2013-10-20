@@ -15,10 +15,10 @@
             android:id="@+id/welcome"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/cardtest"
+            android:background="@drawable/dropshadow"
             android:fontFamily="sans-serif-light"
-            android:padding="15dp"
-            android:layout_margin="7dp"
+            android:padding="20dp"
+            
             android:text="@string/welcome"
             android:textSize="22sp"
             android:gravity="center" />

@@ -280,8 +280,8 @@ public class MainActivity extends FragmentActivity {
 					name.setTextSize(22);
 					name.setText(dg.getStudents().get(i).name);
 					name.setId(id.name);
-					name.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-					name.setGravity(Gravity.CENTER_HORIZONTAL);
+					name.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+					name.setGravity(Gravity.CENTER);
 					
 					RelativeLayout.LayoutParams lpName = new RelativeLayout.LayoutParams(
 							RelativeLayout.LayoutParams.MATCH_PARENT,
@@ -292,8 +292,8 @@ public class MainActivity extends FragmentActivity {
 					gpa.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 					gpa.setTextSize(22);
 					gpa.setText(String.format("%9f",dg.getStudents().get(i).getGPA()));
-					gpa.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-					gpa.setGravity(Gravity.CENTER_HORIZONTAL);
+					gpa.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+					gpa.setGravity(Gravity.CENTER);
 
 					RelativeLayout.LayoutParams lpGPA = new RelativeLayout.LayoutParams(
 							RelativeLayout.LayoutParams.MATCH_PARENT,
