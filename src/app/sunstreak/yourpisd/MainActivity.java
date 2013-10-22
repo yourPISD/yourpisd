@@ -288,22 +288,28 @@ public class MainActivity extends FragmentActivity {
 							RelativeLayout.LayoutParams.WRAP_CONTENT);
 					lpName.addRule(RelativeLayout.RIGHT_OF, profilePic.getId());
 					
-					TextView gpa = new TextView(getActivity());
-					gpa.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
-					gpa.setTextSize(22);
-					gpa.setText(String.format("%9f",dg.getStudents().get(i).getGPA()));
-					gpa.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-					gpa.setGravity(Gravity.CENTER);
+					double gpaValue = dg.getStudents().get(i).getGPA();
+					if (!Double.isNaN(gpaValue)) {
+						TextView gpa = new TextView(getActivity());
+						gpa.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
+						gpa.setTextSize(22);
+						gpa.setText(String.format("GPA: %.5f",gpaValue));
+						gpa.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+						gpa.setGravity(Gravity.CENTER);
 
-					RelativeLayout.LayoutParams lpGPA = new RelativeLayout.LayoutParams(
-							RelativeLayout.LayoutParams.MATCH_PARENT,
-							RelativeLayout.LayoutParams.WRAP_CONTENT);
-					lpGPA.addRule(RelativeLayout.BELOW, id.name);
-					lpGPA.addRule(RelativeLayout.RIGHT_OF, id.profile_picture);
+						RelativeLayout.LayoutParams lpGPA = new RelativeLayout.LayoutParams(
+								RelativeLayout.LayoutParams.MATCH_PARENT,
+								RelativeLayout.LayoutParams.WRAP_CONTENT);
+						lpGPA.addRule(RelativeLayout.BELOW, id.name);
+						lpGPA.addRule(RelativeLayout.RIGHT_OF, id.profile_picture);
+						
+
+						profileCards[i].addView(gpa, lpGPA);
+					}
+					
 					
 					profileCards[i].addView(profilePic);
 					profileCards[i].addView(name, lpName);
-					profileCards[i].addView(gpa, lpGPA);
 //					profileCards[i].setGravity(Gravity.CENTER_VERTICAL);
 					profileCards[i].setOnClickListener(new StudentChooserListener(i));
 

@@ -47,12 +47,8 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 		return password;
 	}
 
-	public class Student implements Serializable {
+	public class Student {
 
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = -2202613018998649709L;
 		public final int studentId;
 		public final String name;
 		JSONArray classList;
@@ -453,18 +449,6 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 			return -1;
 		}
 
-
-		private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-			out.write(studentId);
-			out.writeUTF(name);
-			out.writeUTF(classList.toString());
-
-		}
-
-		private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-
-		}
-
 	}
 
 	Domain domain;
@@ -839,13 +823,8 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 
 		class TestStudent extends Student{
 
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = 4870831615938950349L;
 
 			public TestStudent(int studentId, String studentName) {
-
 				super(studentId, studentName);
 
 				InputStream is = null;
@@ -882,6 +861,8 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 					e.printStackTrace();
 					return;
 				}
+				
+				classMatch = new int[] {0, 1, 2, 3, 4, 5, 6};
 
 			}
 
@@ -891,10 +872,6 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 
 			public JSONObject getClassGrade(int classIndex, int termIndex) {
 				return classGrades.get(classIndex).optJSONArray("terms").optJSONObject(termIndex);
-			}
-
-			public int[] getClassMatch() {
-				return getClassIds();
 			}
 
 			public int[][] loadGradeSummary() {
@@ -958,10 +935,6 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 				}
 			}
 
-			public void matchClasses() {
-				classMatch = new int[] {0, 1, 2, 3, 4, 5, 6};
-			}
-
 		}
 
 		List<Student> students = new ArrayList<Student>();
@@ -970,7 +943,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 
 		return students;
 	}
-
+/*
 	public void writeToFile() {
 		writeDetailsToFile();
 		writeDataToFile();
@@ -1006,5 +979,5 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 			e.printStackTrace();
 		}
 	}
-
+*/
 }
