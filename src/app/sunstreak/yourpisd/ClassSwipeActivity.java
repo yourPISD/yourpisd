@@ -110,7 +110,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 		mViewPager.setAdapter(mSectionsPagerAdapter);
 		mViewPager.setCurrentItem(receivedClassIndex);
-		mViewPager.setOffscreenPageLimit(7);
+		mViewPager.setOffscreenPageLimit(5);
 
 
 	}

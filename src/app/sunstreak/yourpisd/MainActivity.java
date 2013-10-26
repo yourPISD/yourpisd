@@ -101,6 +101,10 @@ public class MainActivity extends FragmentActivity {
 			mViewPager.setCurrentItem(1);
 
 		mViewPager.setOffscreenPageLimit(2);
+		//actual code to launch, uncomment when releasing
+//		AppRater.app_launched(this);
+		//testing purposes
+		AppRater.showRateDialog(this, null);
 	}
 
 	@Override
