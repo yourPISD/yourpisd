@@ -1,9 +1,9 @@
 package app.sunstreak.yourpisd.net;
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
@@ -137,7 +137,7 @@ public class Request {
 				}
 		}
 		
-		System.out.println("Success! " + (System.currentTimeMillis() - startTime) + "ms");
+		System.out.println("Success! " + (System.currentTimeMillis() - startTime) + "ms " + responseCode);
 		
 	 
 		BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -149,13 +149,9 @@ public class Request {
 		}
 		in.close();
 	 
-		// Get the response cookies
-		//setCookies(conn.getHeaderFields().get("Set-Cookie"));
-		
-		// Do not clear cookies each time!
-		//cookies = new ArrayList<String>();
-//		System.out.println("Cookie-size: " + cs.getCookies().size());
+
 		for (HttpCookie c : cs.getCookies()) {
+//			System.out.println(c);
 			cookies.add(c.toString());
 		}
 		
@@ -222,6 +218,7 @@ public class Request {
 						conn.addRequestProperty(property[0], property[1]);
 				
 				conn.addRequestProperty("User-Agent", USER_AGENT);
+//				conn.addRequestProperty("Content-Length", "" + postParams.getBytes().length);
 				
 				// Concatenates the cookies into one cookie string, seperated by semicolons.
 				if (cookies != null && cookies.size()>0) {
@@ -239,10 +236,14 @@ public class Request {
 				
 		
 				
-				DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
-				wr.writeBytes(postParams);
+//				DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+//				wr.writeBytes(postParams);
+//				wr.flush();
+//				wr.close();
+				
+				OutputStream wr = conn.getOutputStream();
+				wr.write(postParams.getBytes());
 				wr.flush();
-				wr.close();
 				
 				
 				if (isSecure) {
@@ -255,8 +256,7 @@ public class Request {
 				
 				success = true;
 				
-				// Bad practice.
-				redirectLocation = conn.getHeaderField("Location");
+				redirectLocation = conn.getHeaderFields().containsKey("Location") ? conn.getHeaderField("Location") : null;
 				
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
@@ -280,8 +280,7 @@ public class Request {
 			}
 		}
 
-		System.out.println("Success! " + (System.currentTimeMillis() - startTime) + "ms");
-
+		System.out.println("Success! " + (System.currentTimeMillis() - startTime) + "ms " + responseCode);
 
 	 
 		BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -293,14 +292,8 @@ public class Request {
 		}
 		in.close();
 	 
-		// Get the response cookies
-		//setCookies(conn.getHeaderFields().get("Set-Cookie"));
-		
-		// Do not clear cookies each time!
-		//cookies = new ArrayList<String>();
-//		System.out.println("Cookie-size: " + cs.getCookies().size());
 		for (HttpCookie c : cs.getCookies()) {
-//			System.out.println(c.toString());
+//			System.out.println(c);
 			cookies.add(c.toString());
 		}
 		

@@ -2,6 +2,8 @@ package app.sunstreak.yourpisd.net;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -88,14 +90,9 @@ public class Parser {
 		
 		for (Element tr : tableRows) {
 			JSONObject assignment = new JSONObject();
-			
-//			I don't want the numbers!
-//				//stores the displayed index of the assignment (starting from 1) for (optional) chronological display.
-//				assignment.put("Number", Integer.parseInt(tr.getElementsByTag("th").text()));
-			
+						
 			Elements columns = tr.getElementsByTag("td");
 			
-
 			for (int i = 0; i < columns.size(); i++) {
 				String value = columns.get(i).text();
 				// do not store empty values!
@@ -114,6 +111,20 @@ public class Parser {
 					}
 				}
 			}
+			
+			String assignmentDetailLink = tr.getElementsByTag("a").get(0).attr("href");
+			Matcher matcher = Pattern.compile(".+" +
+					"assignmentId=(\\d+)" +
+					"&H=S" +
+					"&GradebookId=(\\d+)" +
+					"&TermId=\\d+" +
+					"&StudentId=\\d+&")
+					.matcher(assignmentDetailLink);
+			matcher.find();
+			int assignmentId = Integer.parseInt(matcher.group(1));
+			int gradebookId = Integer.parseInt(matcher.group(2));
+			assignment.put("assignmentId", assignmentId);
+			assignment.put("gradebookId", gradebookId);
 			grades.put(assignment);
 		}
 //		System.out.println((grades));

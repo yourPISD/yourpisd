@@ -533,24 +533,46 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 
 		switch (domain) {
 		case PARENT:
-			postParams = 
-				"__LASTFOCUS=&__EVENTTARGET=&__EVENTARGUMENT=" +
-				"&__VIEWSTATE=%2FwEPDwULLTEwNjY5NzA4NTBkZMM%2FuYdqyffE27bFnREF10B%2FRqD4" +
-				"&__SCROLLPOSITIONX=0&__SCROLLPOSITIONY=0" +
-				"&__EVENTVALIDATION=%2FwEWBAK6wtGnBgLEhsriDQLHoumWCgLyjYGEDNS0X%2BIS%2B22%2FGghXXv5nzic%2Bj46b" +
-				"&ctl00%24ContentPlaceHolder1%24portalLogin%24UserName=" + URLEncoder.encode(username, "UTF-8") +
-				"&ctl00%24ContentPlaceHolder1%24portalLogin%24Password=" + URLEncoder.encode(password,"UTF-8") +
-				"&ctl00%24ContentPlaceHolder1%24portalLogin%24LoginButton=Login";
-			Object[] cookieAuth = Request.sendPost(
-					domain.loginAddress, 
-					postParams,
-					/*"password=" + URLEncoder.encode(password,"UTF-8") + "&username=" + URLEncoder.encode(username,"UTF-8") + "&Submit=Login",*/ 
-					cookies);
+			
+			String[][] requestProperties1 = new String[][] {
+					{"Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"},
+					{"Accept-Encoding","gzip,deflate,sdch"},
+					{"Accept-Language","en-US,en;q=0.8,es;q=0.6"},
+					{"Connection","keep-alive"},
+					{"Content-Type","application/x-www-form-urlencoded"},
+			};
 
+			ArrayList<String[]> rp1 = new ArrayList<String[]>(java.util.Arrays.asList(requestProperties1));
+			
+			postParams = 
+					"__LASTFOCUS=" +
+					"&__EVENTTARGET=" +
+					"&__EVENTARGUMENT=" +
+					"&__VIEWSTATE=%2FwEPDwULLTEwNjY5NzA4NTBkZMM%2FuYdqyffE27bFnREF10B%2FRqD4" +
+					"&__SCROLLPOSITIONX=0" +
+					"&__SCROLLPOSITIONY=0" +
+					"&__EVENTVALIDATION=%2FwEWBAK6wtGnBgLEhsriDQLHoumWCgLyjYGEDNS0X%2BIS%2B22%2FGghXXv5nzic%2Bj46b" +
+					"&ctl00%24ContentPlaceHolder1%24portalLogin%24UserName=" + URLEncoder.encode(username, "UTF-8") +
+					"&ctl00%24ContentPlaceHolder1%24portalLogin%24Password=" + URLEncoder.encode(password, "UTF-8") +
+					"&ctl00%24ContentPlaceHolder1%24portalLogin%24LoginButton=Login";
+			Object[] login = Request.sendPost(
+					"https://parentviewer.pisd.edu/Login.aspx", 
+					postParams, 
+					cookies,
+					rp1);
+			response = (String) login[0];
+			responseCode = (Integer) login[1];
+			cookies = (ArrayList<String>) login[2];
+			
+			postParams = "username=" + URLEncoder.encode(username, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8");
+			Object[] cookieAuth = Request.sendPost(
+					"http://parent.mypisd.net/CookieAuth?domain=www.parent.mypisd.net", 
+					postParams, 
+					cookies);
 			response = (String) cookieAuth[0];
 			responseCode = (Integer) cookieAuth[1];
 			cookies = (ArrayList<String>) cookieAuth[2];
-
+			
 			if (Parser.accessGrantedEditure(response)) {
 				System.out.println("Editure access granted!");
 				editureLogin = 1;
@@ -581,9 +603,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 					{"Accept-Language","en-US,en;q=0.8,es;q=0.6"},
 					{"Cache-Control","max-age=0"},
 					{"Connection","keep-alive"},
-					//{"Content-Length","75"},
 					{"Content-Type","application/x-www-form-urlencoded"},
-					//{"Cookie","JSESSIONID=22DDAFA488B9D839F082FE26EFE8B38B"},
 					{"Host","sso.portal.mypisd.net"},
 					{"Origin","https://sso.portal.mypisd.net"},
 					{"Referer","https://sso.portal.mypisd.net/cas/login?service=http%3A%2F%2Fportal.mypisd.net%2Fc%2Fportal%2Flogin"}
