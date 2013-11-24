@@ -19,8 +19,6 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.text.Html;
-import android.text.Spanned;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.Gravity;
@@ -32,6 +30,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
@@ -184,8 +183,7 @@ public class MainActivity extends FragmentActivity {
 
 		@Override
 		public int getCount() {
-			// Show 2 total pages.
-			return 3;
+			return 4;
 		}
 
 		@Override
@@ -203,6 +201,8 @@ public class MainActivity extends FragmentActivity {
 				return TermFinder.Term.values()[CURRENT_TERM_INDEX].name;
 			case 2:
 				return getResources().getString(R.string.main_section_2_title);
+			case 3:
+				return getResources().getString(R.string.main_section_3_title);
 			default:
 				return null;
 			}
@@ -245,7 +245,8 @@ public class MainActivity extends FragmentActivity {
 				tabLayout = R.layout.tab_summary;
 				break;
 			case 2:
-				tabLayout = R.layout.tab_year_summary;
+			case 3:
+				tabLayout = R.layout.tab_summary;
 				break;
 			}
 
@@ -394,7 +395,7 @@ public class MainActivity extends FragmentActivity {
 
 			if (position == 2) {
 
-				LinearLayout bigLayout = (LinearLayout) rootView.findViewById(R.id.layout_year_summary);
+				LinearLayout bigLayout = (LinearLayout) rootView.findViewById(R.id.container);
 
 				// Add current student's name
 				if (dg.MULTIPLE_STUDENTS) {
@@ -539,6 +540,90 @@ public class MainActivity extends FragmentActivity {
 				summaryLastUpdated.setPadding(10, 0, 0, 0);
 				bigLayout.addView(summaryLastUpdated);
 
+			}
+			if (position == 3) {
+				LinearLayout layout = (LinearLayout) rootView.findViewById(R.id.container);
+				for (int classIndex = 0; classIndex < classCount; classIndex++) {
+					
+					int jsonIndex = dg.getCurrentStudent().getClassMatch()[classIndex];
+					
+					LinearLayout classLayout = new LinearLayout(getActivity());
+					classLayout.setBackgroundResource(R.drawable.dropshadow);
+					classLayout.setOrientation(LinearLayout.HORIZONTAL);
+					
+					LinearLayout.LayoutParams textLP = new LinearLayout.LayoutParams(
+							LinearLayout.LayoutParams.WRAP_CONTENT,
+							LinearLayout.LayoutParams.WRAP_CONTENT,
+							1);
+					
+
+					
+					TextView tv = new TextView(getActivity());
+					tv.setText(dg.getCurrentStudent().getShortClassName(jsonIndex));
+					tv.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
+					tv.setTextSize(getResources().getDimension(R.dimen.text_size_medium));
+					tv.setLayoutParams(textLP);
+					
+					final TierView goal = new TierView(getActivity());
+					goal.setTextSize(getResources().getDimension(R.dimen.text_size_medium));
+					
+					View minus = new View(getActivity());
+					View plus = new View(getActivity());
+					minus.setBackgroundResource(R.drawable.navigation_previous_item);
+					plus.setBackgroundResource(R.drawable.navigation_next_item);
+					LinearLayout.LayoutParams buttonLP = new LinearLayout.LayoutParams(
+							LinearLayout.LayoutParams.WRAP_CONTENT, 
+							LinearLayout.LayoutParams.WRAP_CONTENT);
+					minus.setLayoutParams(buttonLP);
+					plus.setLayoutParams(buttonLP);
+					minus.getLayoutParams().width=50;
+					minus.getLayoutParams().height=50;
+					plus.getLayoutParams().width=50;
+					minus.getLayoutParams().width=50;
+					
+					final TextView examScore = new TextView(getActivity());
+					examScore.setTextSize(getResources().getDimension(R.dimen.text_size_medium));
+					examScore.setText("" + dg.getCurrentStudent().examScoreRequired(classIndex, TierView.RANGES[goal.index]));
+					if (Integer.parseInt(examScore.getText().toString()) > 100)
+						examScore.setTextColor(getResources().getColor(R.color.red));
+					
+					class PlusMinusOnClickListener implements OnClickListener {
+						int classIndex;
+						int delta;
+						PlusMinusOnClickListener(int classIndex, int delta) {
+							this.classIndex = classIndex;
+							this.delta = delta;
+						}
+						@Override
+						public void onClick(View v) {
+							if (delta==1)
+								goal.increment();
+							else if (delta==-1)
+								goal.decrement();
+							examScore.setText("" + dg.getCurrentStudent().examScoreRequired(classIndex, TierView.RANGES[goal.index]));
+							if (Integer.parseInt(examScore.getText().toString()) > 100)
+								examScore.setTextColor(getResources().getColor(R.color.red));
+							else
+								examScore.setTextColor(getResources().getColor(R.color.black));
+						}
+					}
+					
+					minus.setOnClickListener(new PlusMinusOnClickListener(classIndex, -1));
+					plus.setOnClickListener(new PlusMinusOnClickListener(classIndex, 1));
+					
+					// Don't show classes that don't have grades in the 3rd six weeks
+					// (ex. James Hannah & senior release, etc.)
+					if (examScore.getText().equals("-1"))
+						continue;
+					
+//					rl.addView(tv, new RelativeLayout.LayoutParams(source))
+					classLayout.addView(minus);
+					classLayout.addView(goal);
+					classLayout.addView(plus);
+					classLayout.addView(tv);
+					classLayout.addView(examScore);
+					layout.addView(classLayout);
+				}
 			}
 			return rootView;
 		}

@@ -1,16 +1,12 @@
 package app.sunstreak.yourpisd.net;
 
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
@@ -212,16 +208,16 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 			return classList.optJSONObject(0).optLong("summaryLastUpdated", -1) != -1;
 		}
 
-//		public int[][] getGradeSummary () {
-//
-//			if (!hasGradeSummary())
-//				try {
-//					loadGradeSummary();
-//				} catch (JSONException e) {
-//					return null;
-//				}
-//		return gradeSummary;
-//		}
+		//		public int[][] getGradeSummary () {
+		//
+		//			if (!hasGradeSummary())
+		//				try {
+		//					loadGradeSummary();
+		//				} catch (JSONException e) {
+		//					return null;
+		//				}
+		//		return gradeSummary;
+		//		}
 
 		public boolean hasClassGrade (int classIndex, int termIndex) {
 			return classGrades.indexOfKey(classIndex) > 0 
@@ -315,6 +311,13 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 					return "jsonException";
 				}
 		}
+		
+		public String getShortClassName (int classIndex) {
+			String name = getClassName(classIndex);
+			if (name.indexOf('(') != -1)
+				return name.substring(0, name.indexOf('('));
+			return name;
+		}
 
 		private void loadStudentPicture() {
 			ArrayList<String[]> requestProperties = new ArrayList<String[]>();
@@ -375,9 +378,9 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 			int pointCount = 0;
 
 			for (int classIndex = 0; classIndex < classMatch.length; classIndex++) {
-				
+
 				int jsonIndex = classMatch[classIndex];
-				
+
 				double sum = 0;
 				double count = 0;
 				for (int termIndex = 0; termIndex < 4; termIndex++) {
@@ -411,7 +414,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 		public double maxGPA (String className) {
 			if (className.contains("PHYS IB SL") || className.contains("MATH STDY IB"))
 				return 4.5;
-		
+
 			String[] split = className.split("[\\s()\\d\\/]+");
 
 			for (int i = split.length - 1; i >= 0; i--) {
@@ -447,6 +450,23 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 
 			// Grade below 70 or above 100
 			return -1;
+		}
+
+		public int examScoreRequired (int classIndex, int gradeDesired) {
+			if (classMatch==null)
+				throw new RuntimeException("Class match is null!");
+			try {
+				double sum = 0;
+				for (int i = 0; i < 3; i++) {
+					sum += classList.getJSONObject(classMatch[classIndex]).getJSONArray("terms")
+							.getJSONObject(i).getInt("average");
+				}
+				sum = ((double)gradeDesired - 0.5) * 4 - sum;
+				return (int) Math.ceil(sum);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return -1;
+			}
 		}
 
 	}
@@ -533,7 +553,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 
 		switch (domain) {
 		case PARENT:
-			
+
 			String[][] requestProperties1 = new String[][] {
 					{"Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"},
 					{"Accept-Encoding","gzip,deflate,sdch"},
@@ -543,18 +563,18 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 			};
 
 			ArrayList<String[]> rp1 = new ArrayList<String[]>(java.util.Arrays.asList(requestProperties1));
-			
+
 			postParams = 
 					"__LASTFOCUS=" +
-					"&__EVENTTARGET=" +
-					"&__EVENTARGUMENT=" +
-					"&__VIEWSTATE=%2FwEPDwULLTEwNjY5NzA4NTBkZMM%2FuYdqyffE27bFnREF10B%2FRqD4" +
-					"&__SCROLLPOSITIONX=0" +
-					"&__SCROLLPOSITIONY=0" +
-					"&__EVENTVALIDATION=%2FwEWBAK6wtGnBgLEhsriDQLHoumWCgLyjYGEDNS0X%2BIS%2B22%2FGghXXv5nzic%2Bj46b" +
-					"&ctl00%24ContentPlaceHolder1%24portalLogin%24UserName=" + URLEncoder.encode(username, "UTF-8") +
-					"&ctl00%24ContentPlaceHolder1%24portalLogin%24Password=" + URLEncoder.encode(password, "UTF-8") +
-					"&ctl00%24ContentPlaceHolder1%24portalLogin%24LoginButton=Login";
+							"&__EVENTTARGET=" +
+							"&__EVENTARGUMENT=" +
+							"&__VIEWSTATE=%2FwEPDwULLTEwNjY5NzA4NTBkZMM%2FuYdqyffE27bFnREF10B%2FRqD4" +
+							"&__SCROLLPOSITIONX=0" +
+							"&__SCROLLPOSITIONY=0" +
+							"&__EVENTVALIDATION=%2FwEWBAK6wtGnBgLEhsriDQLHoumWCgLyjYGEDNS0X%2BIS%2B22%2FGghXXv5nzic%2Bj46b" +
+							"&ctl00%24ContentPlaceHolder1%24portalLogin%24UserName=" + URLEncoder.encode(username, "UTF-8") +
+							"&ctl00%24ContentPlaceHolder1%24portalLogin%24Password=" + URLEncoder.encode(password, "UTF-8") +
+							"&ctl00%24ContentPlaceHolder1%24portalLogin%24LoginButton=Login";
 			Object[] login = Request.sendPost(
 					"https://parentviewer.pisd.edu/Login.aspx", 
 					postParams, 
@@ -563,7 +583,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 			response = (String) login[0];
 			responseCode = (Integer) login[1];
 			cookies = (ArrayList<String>) login[2];
-			
+
 			postParams = "username=" + URLEncoder.encode(username, "UTF-8") + "&password=" + URLEncoder.encode(password, "UTF-8");
 			Object[] cookieAuth = Request.sendPost(
 					"http://parent.mypisd.net/CookieAuth?domain=www.parent.mypisd.net", 
@@ -572,7 +592,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 			response = (String) cookieAuth[0];
 			responseCode = (Integer) cookieAuth[1];
 			cookies = (ArrayList<String>) cookieAuth[2];
-			
+
 			if (Parser.accessGrantedEditure(response)) {
 				System.out.println("Editure access granted!");
 				editureLogin = 1;
@@ -881,7 +901,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 					e.printStackTrace();
 					return;
 				}
-				
+
 				classMatch = new int[] {0, 1, 2, 3, 4, 5, 6};
 
 			}
@@ -919,9 +939,9 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 				}
 
 				matchClasses(gradeSummary);
-				
+
 				return gradeSummary;
-				*/
+				 */
 				return null;
 			}
 
@@ -935,12 +955,12 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 
 
 
-//			public int[][] getGradeSummary () {
-//				if (gradeSummary == null)
-//					loadGradeSummary();
-//
-//				return gradeSummary;
-//			}
+			//			public int[][] getGradeSummary () {
+			//				if (gradeSummary == null)
+			//					loadGradeSummary();
+			//
+			//				return gradeSummary;
+			//			}
 
 
 			public Bitmap getStudentPicture() {
@@ -963,7 +983,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 
 		return students;
 	}
-/*
+	/*
 	public void writeToFile() {
 		writeDetailsToFile();
 		writeDataToFile();
@@ -999,5 +1019,5 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 			e.printStackTrace();
 		}
 	}
-*/
+	 */
 }
