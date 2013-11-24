@@ -17,15 +17,6 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.text.Layout.Alignment;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
-import android.text.style.AbsoluteSizeSpan;
-import android.text.style.AlignmentSpan;
-import android.text.style.ImageSpan;
-import android.text.style.ScaleXSpan;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,10 +25,10 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import app.sunstreak.yourpisd.net.DataGrabber;
-import app.sunstreak.yourpisd.net.DateHandler;
 
 
 @SuppressLint("ValidFragment")
@@ -167,14 +158,8 @@ public class ClassSwipeActivity extends FragmentActivity {
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
 			return true;
-			/*
-		case R.id.refresh:
-			Intent refreshIntent = new Intent(this, LoginActivity.class);
-			refreshIntent.putExtra("Refresh", true);
-			startActivity(refreshIntent);
-			finish();
-			return true;
-			 */
+			
+			 
 		case R.id.previous_six_weeks:
 			intent = new Intent(this, ClassSwipeActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -323,6 +308,8 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 		public void setUiElements () {
 			int lastIdAdded = R.id.teacher_name;
+			ProgressBar loadingCircle = (ProgressBar) rootView.findViewById(R.id.loading_classes);
+			loadingCircle.setVisibility(View.GONE);
 			TextView teacher = (TextView) rootView.findViewById(R.id.teacher_name);
 			TextView sixWeeksAverage = (TextView) rootView.findViewById(R.id.six_weeks_average);
 			LinearLayout desc = (LinearLayout) rootView.findViewById(R.id.descriptions);

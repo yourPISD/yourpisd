@@ -2,21 +2,21 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@color/gray" 
-    android:fillViewport="true">
+    android:background="@color/gray"
+    android:fillViewport="true" >
 
     <!--
     <LinearLayout
         android:id="@+id/class_description_linear_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        > -->
+        >
+    -->
 
     <RelativeLayout
         android:id="@+id/info"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" 
-        >
+        android:layout_height="wrap_content" >
 
         <TextView
             android:id="@+id/teacher_name"
@@ -27,8 +27,8 @@
             android:fontFamily="sans-serif-light"
             android:padding="15dp"
             android:text="@string/teacher_name"
-            android:textSize="28sp" 
-            android:visibility="gone"/>
+            android:textSize="28sp"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/six_weeks_average"
@@ -38,8 +38,17 @@
             android:background="@drawable/dropshadow"
             android:fontFamily="sans-serif-light"
             android:padding="15dp"
-            android:textSize="28sp" 
-            android:visibility="gone"/>
+            android:textSize="28sp"
+            android:visibility="gone" />
+
+        <ProgressBar
+            android:id="@+id/loading_classes"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:indeterminate="true"
+            android:visibility="visible" />
 
         <LinearLayout
             android:id="@+id/descriptions"
@@ -50,6 +59,6 @@
         </LinearLayout>
     </RelativeLayout>
 
-<!--     </LinearLayout> -->
+    <!-- </LinearLayout> -->
 
 </ScrollView>
