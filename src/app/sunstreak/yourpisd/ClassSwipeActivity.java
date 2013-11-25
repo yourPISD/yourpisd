@@ -17,15 +17,6 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.text.Layout.Alignment;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
-import android.text.style.AbsoluteSizeSpan;
-import android.text.style.AlignmentSpan;
-import android.text.style.ImageSpan;
-import android.text.style.ScaleXSpan;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,10 +25,10 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import app.sunstreak.yourpisd.net.DataGrabber;
-import app.sunstreak.yourpisd.net.DateHandler;
 
 
 @SuppressLint("ValidFragment")
@@ -322,6 +313,8 @@ public class ClassSwipeActivity extends FragmentActivity {
 		}
 
 		public void setUiElements () {
+			ProgressBar loadingCircle = (ProgressBar) rootView.findViewById(R.id.loading);
+			loadingCircle.setVisibility(View.GONE);
 			int lastIdAdded = R.id.teacher_name;
 			TextView teacher = (TextView) rootView.findViewById(R.id.teacher_name);
 			TextView sixWeeksAverage = (TextView) rootView.findViewById(R.id.six_weeks_average);

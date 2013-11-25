@@ -30,12 +30,15 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.Button;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.RelativeLayout;
+import android.widget.TextSwitcher;
 import android.widget.TextView;
+import android.widget.ViewSwitcher.ViewFactory;
 import app.sunstreak.yourpisd.net.DataGrabber;
 import app.sunstreak.yourpisd.net.DateHandler;
 
@@ -235,7 +238,7 @@ public class MainActivity extends FragmentActivity {
 				Bundle savedInstanceState) {
 			Bundle args = getArguments();
 			position = args.getInt(ARG_OBJECT);
-
+			final Typeface robotoNew = Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf");
 			int tabLayout = 0;
 			switch (position) {
 			case 0:
@@ -542,51 +545,99 @@ public class MainActivity extends FragmentActivity {
 
 			}
 			if (position == 3) {
+				
 				LinearLayout layout = (LinearLayout) rootView.findViewById(R.id.container);
 				for (int classIndex = 0; classIndex < classCount; classIndex++) {
 					
 					int jsonIndex = dg.getCurrentStudent().getClassMatch()[classIndex];
-					
+					LinearLayout group = new LinearLayout(getActivity());
+					group.setOrientation(LinearLayout.VERTICAL);
 					LinearLayout classLayout = new LinearLayout(getActivity());
-					classLayout.setBackgroundResource(R.drawable.dropshadow);
+					classLayout.setPadding(5, 5, 5, 5);
+					group.setBackgroundResource(R.drawable.dropshadow);
 					classLayout.setOrientation(LinearLayout.HORIZONTAL);
 					
 					LinearLayout.LayoutParams textLP = new LinearLayout.LayoutParams(
 							LinearLayout.LayoutParams.WRAP_CONTENT,
 							LinearLayout.LayoutParams.WRAP_CONTENT,
 							1);
-					
-
+					LinearLayout calculator = new LinearLayout(getActivity());
+					calculator.setOrientation(LinearLayout.HORIZONTAL);
+					calculator.setPadding(10, 10, 10, 10);
 					
 					TextView tv = new TextView(getActivity());
 					tv.setText(dg.getCurrentStudent().getShortClassName(jsonIndex));
-					tv.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
-					tv.setTextSize(getResources().getDimension(R.dimen.text_size_medium));
+					tv.setTypeface(robotoNew);
+					tv.setTextSize(getResources().getDimension(R.dimen.text_size_medium)-5);
 					tv.setLayoutParams(textLP);
+					tv.setPadding(10, 10, 10, 10);
 					
+					// Declare the in and out animations and initialize them  
+                    final Animation upin = AnimationUtils.loadAnimation(getActivity(), R.anim.in_from_right);
+                    final Animation upout = AnimationUtils.loadAnimation(getActivity(), R.anim.out_to_left);
+                    final Animation downin = AnimationUtils.loadAnimation(getActivity(), R.anim.in_from_left);
+                    final Animation downout = AnimationUtils.loadAnimation(getActivity(), R.anim.out_to_right);
+					final TextSwitcher ts = new TextSwitcher(getActivity());
+					ts.setInAnimation(upin);
+					ts.setOutAnimation(upout);
 					final TierView goal = new TierView(getActivity());
-					goal.setTextSize(getResources().getDimension(R.dimen.text_size_medium));
+					final String[] values = {"Pass", "C-", "C", "C+", "B-", "B", "B+", "A-", "A", "A+"};
+					final int defaultIndex = 9;
+					ts.setFactory(new ViewFactory() {
+                        
+                        public View makeView() {
+                            // TODO Auto-generated method stub
+                            // create new textView and set the properties like clolr, size etc
+                            TextView tv = new TextView(getActivity());
+                            tv.setWidth(70);
+                            tv.setTypeface(robotoNew);
+                            tv.setTextSize(25);
+                            tv.setText(values[defaultIndex]);
+                            tv.setGravity(Gravity.CENTER);
+                            return tv;
+           
+                        }
+                    });
 					
+					goal.setTextSize(getResources().getDimension(R.dimen.text_size_medium));
+					goal.setTypeface(robotoNew);
+					//this doesn't work, weird, maybe you can get it
+						goal.setWidth(300);
 					View minus = new View(getActivity());
+					
 					View plus = new View(getActivity());
+					
 					minus.setBackgroundResource(R.drawable.navigation_previous_item);
 					plus.setBackgroundResource(R.drawable.navigation_next_item);
+
 					LinearLayout.LayoutParams buttonLP = new LinearLayout.LayoutParams(
 							LinearLayout.LayoutParams.WRAP_CONTENT, 
 							LinearLayout.LayoutParams.WRAP_CONTENT);
 					minus.setLayoutParams(buttonLP);
+					buttonLP = new LinearLayout.LayoutParams(
+							LinearLayout.LayoutParams.WRAP_CONTENT, 
+							LinearLayout.LayoutParams.WRAP_CONTENT);
 					plus.setLayoutParams(buttonLP);
-					minus.getLayoutParams().width=50;
-					minus.getLayoutParams().height=50;
-					plus.getLayoutParams().width=50;
-					minus.getLayoutParams().width=50;
+					
+					minus.getLayoutParams().width=75;
+					minus.getLayoutParams().height=100;
+					plus.getLayoutParams().width = 75;
+					plus.getLayoutParams().height=100;
 					
 					final TextView examScore = new TextView(getActivity());
+					examScore.setWidth(150);
+					examScore.setPadding(10,10,10,10);
 					examScore.setTextSize(getResources().getDimension(R.dimen.text_size_medium));
+					examScore.setTypeface(robotoNew);
+					examScore.setGravity(Gravity.RIGHT);
 					examScore.setText("" + dg.getCurrentStudent().examScoreRequired(classIndex, TierView.RANGES[goal.index]));
 					if (Integer.parseInt(examScore.getText().toString()) > 100)
 						examScore.setTextColor(getResources().getColor(R.color.red));
-					
+					TextView filler = new TextView(getActivity());
+					LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+							LinearLayout.LayoutParams.WRAP_CONTENT,
+							LinearLayout.LayoutParams.WRAP_CONTENT,1);
+					filler.setLayoutParams(lp);
 					class PlusMinusOnClickListener implements OnClickListener {
 						int classIndex;
 						int delta;
@@ -597,9 +648,24 @@ public class MainActivity extends FragmentActivity {
 						@Override
 						public void onClick(View v) {
 							if (delta==1)
-								goal.increment();
+							{
+								ts.setInAnimation(upin);
+								ts.setOutAnimation(upout);
+								if(goal.increment())
+									ts.setText(values[goal.index]);
+							}
+								
 							else if (delta==-1)
-								goal.decrement();
+							{
+								ts.setInAnimation(downin);
+								ts.setOutAnimation(downout);
+								if(goal.decrement())
+								{
+									ts.setText(values[goal.index]);
+								}
+								
+							}
+								
 							examScore.setText("" + dg.getCurrentStudent().examScoreRequired(classIndex, TierView.RANGES[goal.index]));
 							if (Integer.parseInt(examScore.getText().toString()) > 100)
 								examScore.setTextColor(getResources().getColor(R.color.red));
@@ -616,13 +682,17 @@ public class MainActivity extends FragmentActivity {
 					if (examScore.getText().equals("-1"))
 						continue;
 					
+					
 //					rl.addView(tv, new RelativeLayout.LayoutParams(source))
-					classLayout.addView(minus);
-					classLayout.addView(goal);
-					classLayout.addView(plus);
 					classLayout.addView(tv);
-					classLayout.addView(examScore);
-					layout.addView(classLayout);
+					calculator.addView(minus);
+					calculator.addView(ts);
+					calculator.addView(plus);
+					calculator.addView(filler);
+					calculator.addView(examScore);
+					group.addView(classLayout);
+					group.addView(calculator);
+					layout.addView(group);
 				}
 			}
 			return rootView;

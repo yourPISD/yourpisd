@@ -23,14 +23,24 @@ public class TierView extends TextView {
 		setText(VALUES[index]);
 	}
 	
-	public void increment() {
+	public boolean increment() {
 		if (index < VALUES.length - 1)
+		{
 			setText(VALUES[++index]);
+			return true;
+		}
+		return false;
+			
 	}
 	
-	public void decrement() {
+	public boolean decrement() {
 		if (index > 0)
+		{
 			setText(VALUES[--index]);
+			return true;
+		}
+		return false;
+			
 	}
 
 }
