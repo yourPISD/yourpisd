@@ -106,7 +106,7 @@ public class MainActivity extends FragmentActivity {
 		//actual code to launch, uncomment when releasing
 		AppRater.app_launched(this);
 		//testing purposes
-//		AppRater.showRateDialog(this, null);
+		//		AppRater.showRateDialog(this, null);
 	}
 
 	@Override
@@ -151,12 +151,12 @@ public class MainActivity extends FragmentActivity {
 			Intent intentCred1 = new Intent(this, CreditActivity.class);
 			startActivity(intentCred1);
 			return true;
-//		case R.id.refresh:
-//			dg.clearData();
-//			Intent intentR = new Intent(this, LoginActivity.class);
-//			intentR.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//			intentR.putExtra("Refresh", true);
-//			startActivity(intentR);
+			//		case R.id.refresh:
+			//			dg.clearData();
+			//			Intent intentR = new Intent(this, LoginActivity.class);
+			//			intentR.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			//			intentR.putExtra("Refresh", true);
+			//			startActivity(intentR);
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -279,10 +279,10 @@ public class MainActivity extends FragmentActivity {
 
 				for (int i = 0; i < dg.getStudents().size(); i++) {
 					profileCards[i] = new RelativeLayout(getActivity());
-					
+
 					ImageView profilePic = new ImageView(getActivity());
 					profilePic.setId(MainActivity.id.profile_picture);
-					
+
 					TextView name = new TextView(getActivity());
 					name.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 					name.setTextSize(22);
@@ -290,12 +290,12 @@ public class MainActivity extends FragmentActivity {
 					name.setId(id.name);
 					name.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 					name.setGravity(Gravity.CENTER);
-					
+
 					RelativeLayout.LayoutParams lpName = new RelativeLayout.LayoutParams(
 							RelativeLayout.LayoutParams.MATCH_PARENT,
 							RelativeLayout.LayoutParams.WRAP_CONTENT);
 					lpName.addRule(RelativeLayout.RIGHT_OF, profilePic.getId());
-					
+
 					double gpaValue = dg.getStudents().get(i).getGPA();
 					if (!Double.isNaN(gpaValue)) {
 						TextView gpa = new TextView(getActivity());
@@ -310,15 +310,15 @@ public class MainActivity extends FragmentActivity {
 								RelativeLayout.LayoutParams.WRAP_CONTENT);
 						lpGPA.addRule(RelativeLayout.BELOW, id.name);
 						lpGPA.addRule(RelativeLayout.RIGHT_OF, id.profile_picture);
-						
+
 
 						profileCards[i].addView(gpa, lpGPA);
 					}
-					
-					
+
+
 					profileCards[i].addView(profilePic);
 					profileCards[i].addView(name, lpName);
-//					profileCards[i].setGravity(Gravity.CENTER_VERTICAL);
+					//					profileCards[i].setGravity(Gravity.CENTER_VERTICAL);
 					profileCards[i].setOnClickListener(new StudentChooserListener(i));
 
 					profileCards[i].setBackgroundResource(R.drawable.dropshadow);
@@ -416,7 +416,7 @@ public class MainActivity extends FragmentActivity {
 				{
 					weeks[i] = new TextView(getActivity());
 					//					weeks[i].setTextSize(25);
-//					weeks[i].setTextSize(SCREEN_WIDTH / 30);
+					//					weeks[i].setTextSize(SCREEN_WIDTH / 30);
 					weeks[i].setTextSize(SCREEN_WIDTH / 30);
 					switch(i) {
 					case 0:
@@ -502,10 +502,10 @@ public class MainActivity extends FragmentActivity {
 							count++;
 						}
 						//might be too excessive to do this for every six weeks
-//						if(avg>=90)
-//							termGrade.setTextColor(getResources().getColor(R.color.green));
-//						else
-//							termGrade.setTextColor(getResources().getColor(R.color.red));
+						//						if(avg>=90)
+						//							termGrade.setTextColor(getResources().getColor(R.color.green));
+						//						else
+						//							termGrade.setTextColor(getResources().getColor(R.color.red));
 						termGrade.setGravity(Gravity.CENTER);
 						summary.addView(termGrade);
 
@@ -517,12 +517,12 @@ public class MainActivity extends FragmentActivity {
 						double average = Math.round(sum/count);
 						String averageText = (int)average+"";
 						TextView termGrade = new TextView(getActivity());
-						
+
 						int width = (int)((SCREEN_WIDTH - 30)/5);
 						LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(width, LayoutParams.WRAP_CONTENT);
 						llp.setMargins(0, 0, 0, 0);
 						termGrade.setLayoutParams(llp);
-						
+
 						termGrade.setTextSize(getResources().getDimension(R.dimen.text_size_medium));
 						termGrade.setClickable(true);
 						termGrade.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
@@ -530,7 +530,7 @@ public class MainActivity extends FragmentActivity {
 						termGrade.setText(averageText);
 						//color coded grades yay first comment lol
 						termGrade.setTextColor(gradeColor((int) average));
-						
+
 						summary.addView(termGrade);
 					}
 
@@ -545,85 +545,29 @@ public class MainActivity extends FragmentActivity {
 
 			}
 			if (position == 3) {
-				
+
 				LinearLayout layout = (LinearLayout) rootView.findViewById(R.id.container);
 				for (int classIndex = 0; classIndex < classCount; classIndex++) {
-					
+
 					int jsonIndex = dg.getCurrentStudent().getClassMatch()[classIndex];
-					LinearLayout group = new LinearLayout(getActivity());
-					group.setOrientation(LinearLayout.VERTICAL);
-					LinearLayout classLayout = new LinearLayout(getActivity());
-					classLayout.setPadding(5, 5, 5, 5);
+
+					RelativeLayout group = new RelativeLayout(getActivity());
 					group.setBackgroundResource(R.drawable.dropshadow);
-					classLayout.setOrientation(LinearLayout.HORIZONTAL);
 					
-					LinearLayout.LayoutParams textLP = new LinearLayout.LayoutParams(
-							LinearLayout.LayoutParams.WRAP_CONTENT,
-							LinearLayout.LayoutParams.WRAP_CONTENT,
-							1);
-					LinearLayout calculator = new LinearLayout(getActivity());
-					calculator.setOrientation(LinearLayout.HORIZONTAL);
-					calculator.setPadding(10, 10, 10, 10);
-					
-					TextView tv = new TextView(getActivity());
-					tv.setText(dg.getCurrentStudent().getShortClassName(jsonIndex));
-					tv.setTypeface(robotoNew);
-					tv.setTextSize(getResources().getDimension(R.dimen.text_size_medium)-5);
-					tv.setLayoutParams(textLP);
-					tv.setPadding(10, 10, 10, 10);
-					
-					// Declare the in and out animations and initialize them  
-                    final Animation upin = AnimationUtils.loadAnimation(getActivity(), R.anim.in_from_right);
-                    final Animation upout = AnimationUtils.loadAnimation(getActivity(), R.anim.out_to_left);
-                    final Animation downin = AnimationUtils.loadAnimation(getActivity(), R.anim.in_from_left);
-                    final Animation downout = AnimationUtils.loadAnimation(getActivity(), R.anim.out_to_right);
-					final TextSwitcher ts = new TextSwitcher(getActivity());
-					ts.setInAnimation(upin);
-					ts.setOutAnimation(upout);
-					final TierView goal = new TierView(getActivity());
-					final String[] values = {"Pass", "C-", "C", "C+", "B-", "B", "B+", "A-", "A", "A+"};
-					final int defaultIndex = 9;
-					ts.setFactory(new ViewFactory() {
-                        
-                        public View makeView() {
-                            // TODO Auto-generated method stub
-                            // create new textView and set the properties like clolr, size etc
-                            TextView tv = new TextView(getActivity());
-                            tv.setWidth(70);
-                            tv.setTypeface(robotoNew);
-                            tv.setTextSize(25);
-                            tv.setText(values[defaultIndex]);
-                            tv.setGravity(Gravity.CENTER);
-                            return tv;
-           
-                        }
-                    });
-					
-					goal.setTextSize(getResources().getDimension(R.dimen.text_size_medium));
-					goal.setTypeface(robotoNew);
-					//this doesn't work, weird, maybe you can get it
-						goal.setWidth(300);
+					TextView className = new TextView(getActivity());
+					className.setText(dg.getCurrentStudent().getShortClassName(jsonIndex));
+					className.setTypeface(robotoNew);
+					className.setTextSize(getResources().getDimension(R.dimen.text_size_medium)-5);
+					className.setPadding(10, 10, 10, 10);
+
+					final TierView goal = new TierView(getActivity(), robotoNew);
+
 					View minus = new View(getActivity());
-					
 					View plus = new View(getActivity());
-					
+
 					minus.setBackgroundResource(R.drawable.navigation_previous_item);
 					plus.setBackgroundResource(R.drawable.navigation_next_item);
 
-					LinearLayout.LayoutParams buttonLP = new LinearLayout.LayoutParams(
-							LinearLayout.LayoutParams.WRAP_CONTENT, 
-							LinearLayout.LayoutParams.WRAP_CONTENT);
-					minus.setLayoutParams(buttonLP);
-					buttonLP = new LinearLayout.LayoutParams(
-							LinearLayout.LayoutParams.WRAP_CONTENT, 
-							LinearLayout.LayoutParams.WRAP_CONTENT);
-					plus.setLayoutParams(buttonLP);
-					
-					minus.getLayoutParams().width=75;
-					minus.getLayoutParams().height=100;
-					plus.getLayoutParams().width = 75;
-					plus.getLayoutParams().height=100;
-					
 					final TextView examScore = new TextView(getActivity());
 					examScore.setWidth(150);
 					examScore.setPadding(10,10,10,10);
@@ -631,13 +575,10 @@ public class MainActivity extends FragmentActivity {
 					examScore.setTypeface(robotoNew);
 					examScore.setGravity(Gravity.RIGHT);
 					examScore.setText("" + dg.getCurrentStudent().examScoreRequired(classIndex, TierView.RANGES[goal.index]));
+					
 					if (Integer.parseInt(examScore.getText().toString()) > 100)
 						examScore.setTextColor(getResources().getColor(R.color.red));
-					TextView filler = new TextView(getActivity());
-					LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-							LinearLayout.LayoutParams.WRAP_CONTENT,
-							LinearLayout.LayoutParams.WRAP_CONTENT,1);
-					filler.setLayoutParams(lp);
+					
 					class PlusMinusOnClickListener implements OnClickListener {
 						int classIndex;
 						int delta;
@@ -648,24 +589,12 @@ public class MainActivity extends FragmentActivity {
 						@Override
 						public void onClick(View v) {
 							if (delta==1)
-							{
-								ts.setInAnimation(upin);
-								ts.setOutAnimation(upout);
-								if(goal.increment())
-									ts.setText(values[goal.index]);
-							}
-								
+								goal.increment();
 							else if (delta==-1)
-							{
-								ts.setInAnimation(downin);
-								ts.setOutAnimation(downout);
-								if(goal.decrement())
-								{
-									ts.setText(values[goal.index]);
-								}
-								
-							}
-								
+								goal.decrement();
+							else
+								return;
+
 							examScore.setText("" + dg.getCurrentStudent().examScoreRequired(classIndex, TierView.RANGES[goal.index]));
 							if (Integer.parseInt(examScore.getText().toString()) > 100)
 								examScore.setTextColor(getResources().getColor(R.color.red));
@@ -673,25 +602,86 @@ public class MainActivity extends FragmentActivity {
 								examScore.setTextColor(getResources().getColor(R.color.black));
 						}
 					}
-					
+
 					minus.setOnClickListener(new PlusMinusOnClickListener(classIndex, -1));
 					plus.setOnClickListener(new PlusMinusOnClickListener(classIndex, 1));
-					
+
 					// Don't show classes that don't have grades in the 3rd six weeks
 					// (ex. James Hannah & senior release, etc.)
 					if (examScore.getText().equals("-1"))
 						continue;
+
+
+					// Assign position to class name
+					RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+							RelativeLayout.LayoutParams.WRAP_CONTENT,
+							RelativeLayout.LayoutParams.WRAP_CONTENT);
+					layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+					layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+					
+					className.setLayoutParams(layoutParams);
+					className.setId(234254);
+
+					// Put minus under class name
+					layoutParams = new RelativeLayout.LayoutParams(
+							RelativeLayout.LayoutParams.WRAP_CONTENT,
+							RelativeLayout.LayoutParams.WRAP_CONTENT);
+					layoutParams.addRule(RelativeLayout.BELOW, className.getId());
+					layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+
+					minus.setLayoutParams(layoutParams);
+					minus.setId(2345235);
+
+					// Put goal to right of minus
+					layoutParams = new RelativeLayout.LayoutParams(
+							RelativeLayout.LayoutParams.WRAP_CONTENT,
+							RelativeLayout.LayoutParams.WRAP_CONTENT);
+					layoutParams.addRule(RelativeLayout.RIGHT_OF, minus.getId());
+					layoutParams.addRule(RelativeLayout.BELOW, className.getId());
+					layoutParams.setMargins(0, 8, 0, 8);
+					goal.setLayoutParams(layoutParams);
+					goal.setId(123491);
+					
+					// Put plus to right of goal
+					layoutParams = new RelativeLayout.LayoutParams(
+							RelativeLayout.LayoutParams.WRAP_CONTENT,
+							RelativeLayout.LayoutParams.WRAP_CONTENT);
+					layoutParams.addRule(RelativeLayout.RIGHT_OF, goal.getId());
+					layoutParams.addRule(RelativeLayout.BELOW, className.getId());
+					
+					plus.setLayoutParams(layoutParams);
+					
+					// Assign size of plus and minus
+					minus.getLayoutParams().width=3 * (int)getResources().getDimension(R.dimen.text_size_medium);
+					minus.getLayoutParams().height=3 * (int)getResources().getDimension(R.dimen.text_size_medium);
+					plus.getLayoutParams().width = 3 * (int)getResources().getDimension(R.dimen.text_size_medium);
+					plus.getLayoutParams().height=3 * (int)getResources().getDimension(R.dimen.text_size_medium);
+					
+					layoutParams = new RelativeLayout.LayoutParams(
+							RelativeLayout.LayoutParams.WRAP_CONTENT,
+							RelativeLayout.LayoutParams.WRAP_CONTENT);
+					layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+					layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+
+					examScore.setLayoutParams(layoutParams);
 					
 					
-//					rl.addView(tv, new RelativeLayout.LayoutParams(source))
-					classLayout.addView(tv);
-					calculator.addView(minus);
-					calculator.addView(ts);
-					calculator.addView(plus);
-					calculator.addView(filler);
-					calculator.addView(examScore);
-					group.addView(classLayout);
-					group.addView(calculator);
+//					classLayout.addView(tv);
+//					calculator.addView(minus);
+//					calculator.addView(goal);
+//					calculator.addView(plus);
+//					calculator.addView(filler);
+//					calculator.addView(examScore);
+//					group.addView(classLayout);
+//					group.addView(calculator);
+					group.addView(className);
+					
+					group.addView(examScore);
+					
+					group.addView(minus);
+					group.addView(goal);
+					group.addView(plus);
+					
 					layout.addView(group);
 				}
 			}
@@ -715,7 +705,7 @@ public class MainActivity extends FragmentActivity {
 			protected void onPostExecute (final Bitmap result) {
 				ImageView profilePic = (ImageView) profileCards[taskStudentIndex].findViewById(MainActivity.id.profile_picture);
 				profilePic.setImageBitmap(result);
-				
+
 				pictureNotLoaded = false;
 			}
 		}
@@ -771,7 +761,7 @@ public class MainActivity extends FragmentActivity {
 					profileCards[i].setBackgroundResource(R.drawable.dropshadow_white_to_blue);
 			}
 		}
-		
+
 		public int gradeColor (int grade) {
 			if (grade > 100)
 				return getResources().getColor(R.color.black);
@@ -779,7 +769,7 @@ public class MainActivity extends FragmentActivity {
 				return getResources().getColor(R.color.green);
 			if (grade >= 80)
 				return getResources().getColor(R.color.yellow);
-			
+
 			return getResources().getColor(R.color.red);
 		}
 
@@ -805,7 +795,7 @@ public class MainActivity extends FragmentActivity {
 		display.getSize(size); 
 		return size.y;
 	}
-	
+
 
 
 	class StudentChooserListener implements OnMenuItemClickListener {
@@ -824,10 +814,10 @@ public class MainActivity extends FragmentActivity {
 			return true;
 		}
 	}
-	
+
 	private class id {
 		public static final int profile_picture = 688;
 		public static final int name = 1329482;
 	}
-	
+
 }
