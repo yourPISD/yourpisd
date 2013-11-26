@@ -22,10 +22,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import app.sunstreak.yourpisd.net.DataGrabber;
@@ -61,6 +61,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.activity_class_swipe);
 
 
@@ -246,7 +247,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 
 		public DescriptionFragment() {
-
+			getActivity().setProgressBarIndeterminateVisibility(true);
 		}
 
 
@@ -262,7 +263,6 @@ public class ClassSwipeActivity extends FragmentActivity {
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState)  {
-
 			position = getArguments().getInt(ARG_SECTION_NUMBER);
 			classIndex = dg.getCurrentStudent().getClassMatch()[position];
 
@@ -313,8 +313,9 @@ public class ClassSwipeActivity extends FragmentActivity {
 		}
 
 		public void setUiElements () {
-			ProgressBar loadingCircle = (ProgressBar) rootView.findViewById(R.id.loading);
-			loadingCircle.setVisibility(View.GONE);
+//			ProgressBar loadingCircle = (ProgressBar) rootView.findViewById(R.id.loading);
+//			loadingCircle.setVisibility(View.GONE);
+			getActivity().setProgressBarIndeterminateVisibility(false);
 			int lastIdAdded = R.id.teacher_name;
 			TextView teacher = (TextView) rootView.findViewById(R.id.teacher_name);
 			TextView sixWeeksAverage = (TextView) rootView.findViewById(R.id.six_weeks_average);
@@ -453,6 +454,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
+			
 		}
 	}
 

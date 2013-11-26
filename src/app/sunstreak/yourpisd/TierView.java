@@ -42,7 +42,7 @@ public class TierView extends TextSwitcher {
 	public TierView(Context context, int index) {
 		super(context);
 		this.index = index;
-		setText(VALUES[index]);
+		setText(VALUES[this.index]);
 	}
 	
 	public boolean increment() {

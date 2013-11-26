@@ -40,13 +40,13 @@
             android:padding="15dp"
             android:textSize="28sp" 
             android:visibility="gone"/>
-		<ProgressBar
+<!--  		<ProgressBar
 		    android:id = "@+id/loading"
 		    android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_centerVertical = "true"
-		    />
+            android:layout_centerVertical = "true" 
+		    /> -->
         <LinearLayout
             android:id="@+id/descriptions"
             android:layout_width="match_parent"

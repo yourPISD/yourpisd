@@ -547,6 +547,35 @@ public class MainActivity extends FragmentActivity {
 			if (position == 3) {
 
 				LinearLayout layout = (LinearLayout) rootView.findViewById(R.id.container);
+				RelativeLayout helpLabel = new RelativeLayout(getActivity());
+				helpLabel.setBackgroundResource(R.drawable.dropshadow);
+				TextView help = new TextView(getActivity());
+				help.setText("Exam Grade needed");
+				help.setTextSize(getResources().getDimension(R.dimen.text_size_medium)-10);
+				help.setTypeface(robotoNew);
+				help.setGravity(Gravity.RIGHT);
+				RelativeLayout.LayoutParams labelParams = new RelativeLayout.LayoutParams(
+						RelativeLayout.LayoutParams.WRAP_CONTENT,
+						RelativeLayout.LayoutParams.WRAP_CONTENT);
+				labelParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+				help.setPadding(0, 20, 20, 20);
+				help.setLayoutParams(labelParams);
+				helpLabel.addView(help);
+				
+				TextView target = new TextView(getActivity());
+				target.setText("Goal");
+				target.setTextSize(getResources().getDimension(R.dimen.text_size_medium)-10);
+				target.setTypeface(robotoNew);
+				target.setGravity(Gravity.LEFT);
+				RelativeLayout.LayoutParams targetParams = new RelativeLayout.LayoutParams(
+						RelativeLayout.LayoutParams.WRAP_CONTENT,
+						RelativeLayout.LayoutParams.WRAP_CONTENT);
+				targetParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+				target.setLayoutParams(targetParams);
+				target.setPadding(20, 20, 0, 20);
+				helpLabel.addView(target);
+				layout.addView(helpLabel);
+				
 				for (int classIndex = 0; classIndex < classCount; classIndex++) {
 
 					int jsonIndex = dg.getCurrentStudent().getClassMatch()[classIndex];
@@ -558,8 +587,7 @@ public class MainActivity extends FragmentActivity {
 					className.setText(dg.getCurrentStudent().getShortClassName(jsonIndex));
 					className.setTypeface(robotoNew);
 					className.setTextSize(getResources().getDimension(R.dimen.text_size_medium)-5);
-					className.setPadding(10, 10, 10, 10);
-
+					className.setPadding(20,20,0,10);
 					final TierView goal = new TierView(getActivity(), robotoNew);
 
 					View minus = new View(getActivity());
@@ -570,15 +598,20 @@ public class MainActivity extends FragmentActivity {
 
 					final TextView examScore = new TextView(getActivity());
 					examScore.setWidth(150);
-					examScore.setPadding(10,10,10,10);
+					examScore.setPadding(0,0,20,0);
 					examScore.setTextSize(getResources().getDimension(R.dimen.text_size_medium));
 					examScore.setTypeface(robotoNew);
 					examScore.setGravity(Gravity.RIGHT);
+					while(dg.getCurrentStudent().examScoreRequired(classIndex, TierView.RANGES[goal.index])>100)
+					{
+						goal.index--;
+						if(goal.index ==0)
+							break;
+					}
 					examScore.setText("" + dg.getCurrentStudent().examScoreRequired(classIndex, TierView.RANGES[goal.index]));
-					
 					if (Integer.parseInt(examScore.getText().toString()) > 100)
 						examScore.setTextColor(getResources().getColor(R.color.red));
-					
+
 					class PlusMinusOnClickListener implements OnClickListener {
 						int classIndex;
 						int delta;
@@ -618,7 +651,7 @@ public class MainActivity extends FragmentActivity {
 							RelativeLayout.LayoutParams.WRAP_CONTENT);
 					layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
 					layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-					
+
 					className.setLayoutParams(layoutParams);
 					className.setId(234254);
 
@@ -641,47 +674,47 @@ public class MainActivity extends FragmentActivity {
 					layoutParams.setMargins(0, 8, 0, 8);
 					goal.setLayoutParams(layoutParams);
 					goal.setId(123491);
-					
+
 					// Put plus to right of goal
 					layoutParams = new RelativeLayout.LayoutParams(
 							RelativeLayout.LayoutParams.WRAP_CONTENT,
 							RelativeLayout.LayoutParams.WRAP_CONTENT);
 					layoutParams.addRule(RelativeLayout.RIGHT_OF, goal.getId());
 					layoutParams.addRule(RelativeLayout.BELOW, className.getId());
-					
+
 					plus.setLayoutParams(layoutParams);
-					
+
 					// Assign size of plus and minus
 					minus.getLayoutParams().width=3 * (int)getResources().getDimension(R.dimen.text_size_medium);
 					minus.getLayoutParams().height=3 * (int)getResources().getDimension(R.dimen.text_size_medium);
 					plus.getLayoutParams().width = 3 * (int)getResources().getDimension(R.dimen.text_size_medium);
 					plus.getLayoutParams().height=3 * (int)getResources().getDimension(R.dimen.text_size_medium);
-					
+					minus.setPadding(0, 0, 0, 30);
 					layoutParams = new RelativeLayout.LayoutParams(
 							RelativeLayout.LayoutParams.WRAP_CONTENT,
 							RelativeLayout.LayoutParams.WRAP_CONTENT);
-					layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+					layoutParams.addRule(RelativeLayout.ALIGN_BOTTOM, goal.getId());
 					layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 
 					examScore.setLayoutParams(layoutParams);
-					
-					
-//					classLayout.addView(tv);
-//					calculator.addView(minus);
-//					calculator.addView(goal);
-//					calculator.addView(plus);
-//					calculator.addView(filler);
-//					calculator.addView(examScore);
-//					group.addView(classLayout);
-//					group.addView(calculator);
+
+
+					//					classLayout.addView(tv);
+					//					calculator.addView(minus);
+					//					calculator.addView(goal);
+					//					calculator.addView(plus);
+					//					calculator.addView(filler);
+					//					calculator.addView(examScore);
+					//					group.addView(classLayout);
+					//					group.addView(calculator);
 					group.addView(className);
-					
+
 					group.addView(examScore);
-					
+
 					group.addView(minus);
 					group.addView(goal);
 					group.addView(plus);
-					
+
 					layout.addView(group);
 				}
 			}
