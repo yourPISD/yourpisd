@@ -247,7 +247,6 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 
 		public DescriptionFragment() {
-			getActivity().setProgressBarIndeterminateVisibility(true);
 		}
 
 
@@ -267,7 +266,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 			classIndex = dg.getCurrentStudent().getClassMatch()[position];
 
 			rootView = inflater.inflate(R.layout.class_description, container, false);
-
+			getActivity().setProgressBarIndeterminateVisibility(true);
 			if ( dg.getCurrentStudent().hasClassGrade(classIndex, termIndex) ) {
 				System.out.println(dg.studentIndex + " " + classIndex + " " + termIndex);
 				System.out.println(dg.getCurrentStudent().name);
