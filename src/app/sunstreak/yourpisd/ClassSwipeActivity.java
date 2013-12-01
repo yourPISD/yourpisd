@@ -31,6 +31,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import app.sunstreak.yourpisd.net.DataGrabber;
 
 
@@ -344,12 +345,36 @@ public class ClassSwipeActivity extends FragmentActivity {
 				@Override
 				public void onClick(View arg0) {
 					try {
-						JSONObject assignmentDetails = dg.getCurrentStudent().getAssignmentDetails(classIndex, termIndex, assignmentId);
-						String assignedDate = assignmentDetails.optString("assignedDate");
-						String dueDate = assignmentDetails.optString("dueDate");
-						String weight = assignmentDetails.optString("weight");
+						JSONObject assignmentDetails;
+						AsyncTask<Integer, Integer, JSONObject> task = new AsyncTask<Integer, Integer, JSONObject>() {
+
+							protected JSONObject doInBackground(Integer... params) {
+								try {
+									return dg.getCurrentStudent().getAssignmentDetails(params[0], params[1], params[2]);
+								} catch (Exception e) {
+									return new JSONObject();
+								}
+							}
+							
+							protected void onPreExecute () {
+								// Show a loading bar or something.
+								// It takes about 2 seconds to load.
+							}
+							
+							protected void onPostExecute (final JSONObject result) {
+								String assignedDate = result.optString("assignedDate");
+								String dueDate = result.optString("dueDate");
+								String weight = result.optString("weight");
+								
+								// Display the information.
+								
+								Toast.makeText(getActivity(), dueDate + " " + weight, Toast.LENGTH_SHORT).show();
+								
+							}
+							
+						};
 						
-						// Display the information
+						task.execute(classIndex, termIndex, assignmentId);
 						
 					} catch (Exception e) {
 						e.printStackTrace();
