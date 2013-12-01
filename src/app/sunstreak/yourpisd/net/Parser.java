@@ -454,15 +454,16 @@ public class Parser {
 	}
 	
 	public static JSONObject parseAssignment (String html) throws JSONException {
-		//Debugging
+		//Debug code
+		/*
 		Element doc = Jsoup.parse(html);
 		System.out.println(doc);
 		Element assignment = doc.getElementById("Assignment");
 		System.out.println(assignment);
 		Elements tds = assignment.getElementsByTag("td");
 		System.out.println(tds);
-		//Original code
-		//Elements tds = Jsoup.parse(html).getElementById("Assignment").getElementsByTag("td");
+		*/
+		Elements tds = Jsoup.parse(html).getElementById("Assignment").getElementsByTag("td");
 		JSONObject ass = new JSONObject();
 		ass.put("assignedDate", tds.get(3).text());
 		ass.put("dueDate", tds.get(5).text());

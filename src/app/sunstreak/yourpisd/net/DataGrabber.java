@@ -211,7 +211,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 					+ "&H=" + domain.hValue
 					+ "&GradebookId=" + studentId
 					+ "&TermId=" + classList.getJSONObject(classMatch[classIndex]).getJSONArray("terms").getJSONObject(termIndex).getInt("termId")
-					+ "&StudentId=26099&",
+					+ "&StudentId=" + studentId + "&",
 					cookies);
 			return Parser.parseAssignment((String)details[0]);
 		}
