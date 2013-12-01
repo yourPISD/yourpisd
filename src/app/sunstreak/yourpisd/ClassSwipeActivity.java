@@ -1,7 +1,5 @@
 package app.sunstreak.yourpisd;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,9 +7,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -31,7 +33,6 @@ import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import app.sunstreak.yourpisd.net.DataGrabber;
 
 
@@ -59,7 +60,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 	static int classesMade = 0;
 	static int termIndex;
 	static boolean doneMakingClasses;
-
+	static Typeface robotoNew;
 	static DataGrabber dg;
 
 	@Override
@@ -67,7 +68,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.activity_class_swipe);
-
+		robotoNew = Typeface.createFromAsset(this.getAssets(),"Roboto-Light.ttf");
 
 
 		receivedClassIndex = getIntent().getExtras().getInt("classIndex");
@@ -347,9 +348,11 @@ public class ClassSwipeActivity extends FragmentActivity {
 					try {
 						JSONObject assignmentDetails;
 						AsyncTask<Integer, Integer, JSONObject> task = new AsyncTask<Integer, Integer, JSONObject>() {
-
+						ProgressDialog dialog = ProgressDialog.show(getActivity(), "", 
+				                    "Loading Grade Details", true);
 							protected JSONObject doInBackground(Integer... params) {
 								try {
+									dialog.show();
 									return dg.getCurrentStudent().getAssignmentDetails(params[0], params[1], params[2]);
 								} catch (Exception e) {
 									return new JSONObject();
@@ -362,13 +365,38 @@ public class ClassSwipeActivity extends FragmentActivity {
 							}
 							
 							protected void onPostExecute (final JSONObject result) {
+								dialog.dismiss();
 								String assignedDate = result.optString("assignedDate");
 								String dueDate = result.optString("dueDate");
 								String weight = result.optString("weight");
 								
 								// Display the information.
+								AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+								CharSequence title = ((TextView)rootView.findViewById(assignmentId).findViewById(2222)).getText();
+								builder.setTitle(title);
+								try
+								{
+									builder.setMessage("Due date: "+ dueDate +"\nWeight: " + weight);
+									
+								}
+								catch(Exception e)
+								{
+									e.printStackTrace();
+								}
 								
-								Toast.makeText(getActivity(), dueDate + " " + weight, Toast.LENGTH_SHORT).show();
+								builder.setCancelable(false)
+								       .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+								           public void onClick(DialogInterface dialog, int id) {
+								        	   dialog.cancel();
+								           }
+								       });
+								AlertDialog alert = builder.create();
+//								TextView message = ((TextView)alert.findViewById(android.R.id.message));
+//								message.setTypeface(robotoNew);
+//								message.setTextSize(getResources().getDimension(R.dimen.text_size_medium));
+//								((TextView)alert.findViewById(android.R.id.title)).setTypeface(robotoNew);
+								alert.show();
+//								Toast.makeText(getActivity(), dueDate + " " + weight, Toast.LENGTH_SHORT).show();
 								
 							}
 							
@@ -444,7 +472,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 							String description = "" + mClassGrade.getJSONArray("grades")
 									.getJSONObject(i).getString("Description");
 							descriptionView.setText(description);
-
+							descriptionView.setId(2222);
 							TextView grade = (TextView) innerLayout.findViewById(R.id.grade);
 							String gradeValue = mClassGrade.getJSONArray("grades")
 									.getJSONObject(i).optString("Grade", "") + "";

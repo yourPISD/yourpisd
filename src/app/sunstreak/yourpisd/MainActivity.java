@@ -19,6 +19,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.Gravity;
@@ -30,15 +31,14 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
-import android.widget.TextSwitcher;
 import android.widget.TextView;
-import android.widget.ViewSwitcher.ViewFactory;
 import app.sunstreak.yourpisd.net.DataGrabber;
 import app.sunstreak.yourpisd.net.DateHandler;
 
@@ -65,12 +65,14 @@ public class MainActivity extends FragmentActivity {
 	 * The {@link ViewPager} that will host the section contents.
 	 */
 	ViewPager mViewPager;
-
+	//sections of the navigation drawer
+	public String[] mList = {"Profile", "Current Six Weeks", "Grade Overview", "Semester Goals"};
+    public DrawerLayout mDrawerLayout;
+    public ListView mDrawerList;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-
 		// Find the screen height/width
 		DisplayMetrics displaymetrics = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
@@ -107,8 +109,23 @@ public class MainActivity extends FragmentActivity {
 		AppRater.app_launched(this);
 		//testing purposes
 		//		AppRater.showRateDialog(this, null);
-	}
+		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
+        // Set the adapter for the list view
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this,
+                R.layout.drawer_list, mList));
+        class DrawerItemClickListener implements ListView.OnItemClickListener {
+    	    @Override
+    	    public void onItemClick(AdapterView parent, View view, int position, long id) {
+    	       mViewPager.setCurrentItem(position);
+    	       mDrawerLayout.closeDrawers();
+    	    }
+        }
+        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+        	
+	}
+        
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -608,6 +625,7 @@ public class MainActivity extends FragmentActivity {
 						if(goal.index ==0)
 							break;
 					}
+					goal.setText("" + TierView.VALUES[goal.index]);
 					examScore.setText("" + dg.getCurrentStudent().examScoreRequired(classIndex, TierView.RANGES[goal.index]));
 					if (Integer.parseInt(examScore.getText().toString()) > 100)
 						examScore.setTextColor(getResources().getColor(R.color.red));
