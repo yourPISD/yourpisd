@@ -17,6 +17,9 @@ public class Parser {
 	
 	public static final String LOGIN_FAILURE_TITLE = "myPISD - Login";
 	public static final String GRADEBOOK_BAD_USERNAME = "NotSet";
+
+	// Cannot be instantiated.
+	private Parser() { }
 	
 	/*
 	 * returns value of pageUniqueId from htm
@@ -33,7 +36,6 @@ public class Parser {
 
 		return null;
 	}
-	
 	
 	/*
 	 * must take in html for [Domain].loginAddress
@@ -449,6 +451,16 @@ public class Parser {
 			}
 			return list;
 		}
+	}
+	
+	public static JSONObject parseAssignment (String html) throws JSONException {
+		Elements tds = Jsoup.parse(html).getElementById("Assignment").getElementsByTag("td");
+		JSONObject ass = new JSONObject();
+		ass.put("assignedDate", tds.get(3).text());
+		ass.put("dueDate", tds.get(5).text());
+		ass.put("weight", tds.get(9).text());
+		System.out.println(ass);
+		return ass;
 	}
 	
 }

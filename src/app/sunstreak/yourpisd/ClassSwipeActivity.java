@@ -1,5 +1,7 @@
 package app.sunstreak.yourpisd;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.Animation;
@@ -325,6 +328,35 @@ public class ClassSwipeActivity extends FragmentActivity {
 //			LinearLayout classDescriptionLinearLayout = (LinearLayout) rootView.findViewById(R.id.class_description_linear_layout);
 			int id = lastIdAdded;
 			
+			class AssignmentDetailListener implements OnClickListener {
+				
+				int classIndex;
+				int termIndex;
+				int assignmentId;
+				
+				
+				AssignmentDetailListener (int classIndex, int termIndex, int assignmentId) {
+					this.classIndex = classIndex;
+					this.termIndex = termIndex;
+					this.assignmentId = assignmentId;
+				}
+
+				@Override
+				public void onClick(View arg0) {
+					try {
+						JSONObject assignmentDetails = dg.getCurrentStudent().getAssignmentDetails(classIndex, termIndex, assignmentId);
+						String assignedDate = assignmentDetails.optString("assignedDate");
+						String dueDate = assignmentDetails.optString("dueDate");
+						String weight = assignmentDetails.optString("weight");
+						
+						// Display the information
+						
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			
 			
 			try {
 				// The following line prevents force close. Idk why.
@@ -380,6 +412,8 @@ public class ClassSwipeActivity extends FragmentActivity {
 						{
 							LinearLayout innerLayout = (LinearLayout) inflater.inflate(R.layout.class_swipe_grade_view, desc, false);
 							
+							innerLayout.setId(mClassGrade.getJSONArray("grades").getJSONObject(i)
+									.getInt("assignmentId"));
 							
 							TextView descriptionView = (TextView) innerLayout.findViewById(R.id.description);
 							String description = "" + mClassGrade.getJSONArray("grades")
@@ -397,10 +431,10 @@ public class ClassSwipeActivity extends FragmentActivity {
 							lp.addRule(RelativeLayout.BELOW, lastIdAdded);
 
 							// Add the view to the RelativeLayout
-							innerLayout.setId(lastIdAdded + 1);
 //							desc.addView(innerLayout, lp);
+							innerLayout.setOnClickListener(new AssignmentDetailListener(classIndex, termIndex, innerLayout.getId()));
 							card.addView(innerLayout, lp);
-							lastIdAdded++;
+							lastIdAdded = innerLayout.getId();
 						}
 
 					}

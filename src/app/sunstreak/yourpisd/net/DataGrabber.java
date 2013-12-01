@@ -152,7 +152,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 				return classIds;
 
 			if (classList == null) {
-				System.out.println("You didn't login!");
+				System.err.println("You didn't login!");
 				return classIds;
 			}
 			try {
@@ -203,6 +203,18 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 			}
 			return response;
 		}
+		
+		public JSONObject getAssignmentDetails(int classIndex, int termIndex, int assignmentId) throws MalformedURLException, IOException, JSONException {
+			Object[] details = Request.sendGet(
+					"https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/AssignmentDetail.aspx?"
+					+ "assignmentId=" + assignmentId
+					+ "&H=" + domain.hValue
+					+ "&GradebookId=" + studentId
+					+ "&TermId=" + classList.getJSONObject(classMatch[classIndex]).getJSONArray("terms").getJSONObject(termIndex).getInt("termId")
+					+ "&StudentId=26099&",
+					cookies);
+			return Parser.parseAssignment((String)details[0]);
+		}
 
 		public boolean hasGradeSummary() {
 			return classList.optJSONObject(0).optLong("summaryLastUpdated", -1) != -1;
@@ -226,7 +238,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 					.optJSONObject(termIndex).optLong("lastUpdated", -1) != -1;
 		}
 
-		public JSONObject getClassGrade( int classIndex, int termIndex )  {
+		public JSONObject getClassGrade( int classIndex, int termIndex ) {
 
 			String html = "";
 
@@ -268,8 +280,8 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 
 				JSONArray termGrades = Parser.detailedReport(html);
 				Object[] termCategory = Parser.termCategoryGrades(html);
+				
 				JSONArray termCategoryGrades = (JSONArray) termCategory[0];
-
 				if ((Integer)termCategory[1] != -1)
 					classGrade.getJSONArray("terms").getJSONObject(termIndex).put("average", termCategory[1].toString());
 
@@ -287,9 +299,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 
 				if (classGrades.indexOfKey(classIndex) < 0)
 					classGrades.put(classIndex, classGrade);
-
-
-				//				classGrades.get(classIndex).getJSONArray("terms").put(termIndex, classGrade);
+				
 				return classGrade.getJSONArray("terms").getJSONObject(termIndex);
 
 
@@ -464,7 +474,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 				sum = ((double)gradeDesired - 0.5) * 4 - sum;
 				return (int) Math.ceil(sum);
 			} catch (Exception e) {
-				e.printStackTrace();
+				// Not enough grades for calculation
 				return -1;
 			}
 		}
