@@ -15,6 +15,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -126,22 +127,20 @@ public class MainActivity extends FragmentActivity {
 		}
 		mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
-		// Load saved goals.
-		goals = new int[dg.getCurrentStudent().getClassMatch().length];
-		Arrays.fill(goals, -1);
-		SharedPreferences sharedPrefs = getSharedPreferences("Goals", Context.MODE_PRIVATE);
-		for (String key : sharedPrefs.getAll().keySet()) {
-			goals[Integer.parseInt(key)] = sharedPrefs.getInt(key, -1);
-		}
+		
 
 	}
 	
 	@Override
 	public void onPause () {
 		SharedPreferences.Editor editor = getSharedPreferences("Goals", Context.MODE_PRIVATE).edit();
-		for (int i = 0; i < goals.length; i++)
+		for (int i = 0; i < goals.length; i++) {
 			editor.putInt(Integer.toString(i), goals[i]);
+			System.out.println(i + " " + goals[i]);
+		}
 		editor.commit();
+		
+		super.onPause();
 	}
 
 	@Override
@@ -289,7 +288,14 @@ public class MainActivity extends FragmentActivity {
 			}
 
 
-
+			// Load saved goals.
+			goals = new int[dg.getCurrentStudent().getClassMatch().length];
+			Arrays.fill(goals, -1);
+			SharedPreferences sharedPrefs = getActivity().getSharedPreferences("Goals", Context.MODE_PRIVATE);
+			for (String key : sharedPrefs.getAll().keySet()) {
+				goals[Integer.parseInt(key)] = sharedPrefs.getInt(key, -1);
+			}
+			
 			rootView = inflater.inflate(tabLayout, container, false);
 
 
@@ -636,15 +642,15 @@ public class MainActivity extends FragmentActivity {
 					plus.setBackgroundResource(R.drawable.navigation_next_item);
 
 					final TextView examScore = new TextView(getActivity());
-					examScore.setWidth(150);
 					examScore.setPadding(0,0,20,0);
 					examScore.setTextSize(getResources().getDimension(R.dimen.text_size_medium));
 					examScore.setTypeface(robotoNew);
 					examScore.setGravity(Gravity.RIGHT);
 
 					// Try to retrieve data from sharedPrefs, otherwise calculate from scratch.
-					if (goals[classIndex] != -1)
+					if (goals[classIndex] != -1) {
 						goal.setText(goals[classIndex]);
+					}
 					else {
 						while(goal.getIndex() != 0 && dg.getCurrentStudent().examScoreRequired(classIndex, TierView.RANGES[goal.getIndex()])>100)
 							goal.decrement();
@@ -652,6 +658,7 @@ public class MainActivity extends FragmentActivity {
 					}
 					
 					examScore.setText("" + dg.getCurrentStudent().examScoreRequired(classIndex, TierView.RANGES[goal.getIndex()]));
+					
 					if (Integer.parseInt(examScore.getText().toString()) > 100)
 						examScore.setTextColor(getResources().getColor(R.color.red));
 
@@ -689,14 +696,12 @@ public class MainActivity extends FragmentActivity {
 					if (examScore.getText().equals("-1"))
 						continue;
 
-
 					// Assign position to class name
 					RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
 							RelativeLayout.LayoutParams.WRAP_CONTENT,
 							RelativeLayout.LayoutParams.WRAP_CONTENT);
 					layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
 					layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-
 					className.setLayoutParams(layoutParams);
 					className.setId(234254);
 
@@ -706,7 +711,6 @@ public class MainActivity extends FragmentActivity {
 							RelativeLayout.LayoutParams.WRAP_CONTENT);
 					layoutParams.addRule(RelativeLayout.BELOW, className.getId());
 					layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-
 					minus.setLayoutParams(layoutParams);
 					minus.setId(2345235);
 
@@ -715,8 +719,9 @@ public class MainActivity extends FragmentActivity {
 							RelativeLayout.LayoutParams.WRAP_CONTENT,
 							RelativeLayout.LayoutParams.WRAP_CONTENT);
 					layoutParams.addRule(RelativeLayout.RIGHT_OF, minus.getId());
-					layoutParams.addRule(RelativeLayout.BELOW, className.getId());
-					layoutParams.setMargins(0, 8, 0, 8);
+					layoutParams.addRule(RelativeLayout.ALIGN_TOP, minus.getId());
+					layoutParams.addRule(RelativeLayout.ALIGN_BOTTOM, minus.getId());
+					layoutParams.setMargins(0, 0, 0, 0);
 					goal.setLayoutParams(layoutParams);
 					goal.setId(123491);
 
@@ -726,7 +731,6 @@ public class MainActivity extends FragmentActivity {
 							RelativeLayout.LayoutParams.WRAP_CONTENT);
 					layoutParams.addRule(RelativeLayout.RIGHT_OF, goal.getId());
 					layoutParams.addRule(RelativeLayout.BELOW, className.getId());
-
 					plus.setLayoutParams(layoutParams);
 
 					// Assign size of plus and minus
@@ -740,9 +744,8 @@ public class MainActivity extends FragmentActivity {
 							RelativeLayout.LayoutParams.WRAP_CONTENT);
 					layoutParams.addRule(RelativeLayout.ALIGN_BOTTOM, goal.getId());
 					layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-
 					examScore.setLayoutParams(layoutParams);
-
+					
 					group.addView(className);
 
 					group.addView(examScore);
@@ -750,16 +753,9 @@ public class MainActivity extends FragmentActivity {
 					group.addView(minus);
 					group.addView(goal);
 					group.addView(plus);
-
-					LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-							new LinearLayout.LayoutParams(
-									RelativeLayout.LayoutParams.WRAP_CONTENT,
-									RelativeLayout.LayoutParams.WRAP_CONTENT));
-					lp.setMargins(10, 0, 10, 0);
-					group.setLayoutParams(lp);
-					group.requestLayout();
-
+					
 					layout.addView(group);
+					
 				}
 			}
 			return rootView;
