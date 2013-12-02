@@ -1,5 +1,6 @@
 package app.sunstreak.yourpisd;
 
+import java.util.Arrays;
 import java.util.Locale;
 
 import org.json.JSONArray;
@@ -47,6 +48,7 @@ public class MainActivity extends FragmentActivity {
 	public static final int CURRENT_TERM_INDEX = TermFinder.getCurrentTermIndex();
 	static int classCount;
 	static LinearLayout[] averages;
+	static int[] goals;
 	static DataGrabber dg;
 	static Bitmap proPic;
 	static int SCREEN_HEIGHT;
@@ -124,6 +126,22 @@ public class MainActivity extends FragmentActivity {
 		}
 		mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
+		// Load saved goals.
+		goals = new int[dg.getCurrentStudent().getClassMatch().length];
+		Arrays.fill(goals, -1);
+		SharedPreferences sharedPrefs = getSharedPreferences("Goals", Context.MODE_PRIVATE);
+		for (String key : sharedPrefs.getAll().keySet()) {
+			goals[Integer.parseInt(key)] = sharedPrefs.getInt(key, -1);
+		}
+
+	}
+	
+	@Override
+	public void onPause () {
+		SharedPreferences.Editor editor = getSharedPreferences("Goals", Context.MODE_PRIVATE).edit();
+		for (int i = 0; i < goals.length; i++)
+			editor.putInt(Integer.toString(i), goals[i]);
+		editor.commit();
 	}
 
 	@Override
@@ -374,6 +392,8 @@ public class MainActivity extends FragmentActivity {
 				int[] classMatch = dg.getCurrentStudent().getClassMatch();
 
 				classCount = classMatch.length;
+				goals = new int[classCount];
+				Arrays.fill(goals, -1);
 
 				averages = new LinearLayout[classCount];
 
@@ -621,14 +641,17 @@ public class MainActivity extends FragmentActivity {
 					examScore.setTextSize(getResources().getDimension(R.dimen.text_size_medium));
 					examScore.setTypeface(robotoNew);
 					examScore.setGravity(Gravity.RIGHT);
-					while(dg.getCurrentStudent().examScoreRequired(classIndex, TierView.RANGES[goal.index])>100)
-					{
-						goal.index--;
-						if(goal.index == 0)
-							break;
+
+					// Try to retrieve data from sharedPrefs, otherwise calculate from scratch.
+					if (goals[classIndex] != -1)
+						goal.setText(goals[classIndex]);
+					else {
+						while(goal.getIndex() != 0 && dg.getCurrentStudent().examScoreRequired(classIndex, TierView.RANGES[goal.getIndex()])>100)
+							goal.decrement();
+						goals[classIndex] = goal.getIndex();
 					}
-					goal.setText("" + TierView.VALUES[goal.index]);
-					examScore.setText("" + dg.getCurrentStudent().examScoreRequired(classIndex, TierView.RANGES[goal.index]));
+					
+					examScore.setText("" + dg.getCurrentStudent().examScoreRequired(classIndex, TierView.RANGES[goal.getIndex()]));
 					if (Integer.parseInt(examScore.getText().toString()) > 100)
 						examScore.setTextColor(getResources().getColor(R.color.red));
 
@@ -645,10 +668,12 @@ public class MainActivity extends FragmentActivity {
 								goal.increment();
 							else if (delta==-1)
 								goal.decrement();
-							else
-								return;
+							
+							goals[classIndex] = goal.getIndex();
 
-							examScore.setText("" + dg.getCurrentStudent().examScoreRequired(classIndex, TierView.RANGES[goal.index]));
+							examScore.setText(
+									"" + dg.getCurrentStudent().examScoreRequired(
+											classIndex, TierView.RANGES[goal.getIndex()]));
 							if (Integer.parseInt(examScore.getText().toString()) > 100)
 								examScore.setTextColor(getResources().getColor(R.color.red));
 							else
@@ -739,6 +764,7 @@ public class MainActivity extends FragmentActivity {
 			}
 			return rootView;
 		}
+
 
 		static Bitmap[] pics = new Bitmap[dg.getStudents().size()];
 

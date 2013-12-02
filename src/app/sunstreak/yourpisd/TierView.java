@@ -20,7 +20,7 @@ public class TierView extends TextSwitcher {
 	private final Animation downIn = AnimationUtils.loadAnimation(getContext(), R.anim.in_from_left);
 	private final Animation downOut = AnimationUtils.loadAnimation(getContext(), R.anim.out_to_right);
 	
-	public int index;
+	private int index;
 	
 	public TierView(final Context context, final Typeface typeface) {
 		super(context);
@@ -43,6 +43,15 @@ public class TierView extends TextSwitcher {
 		super(context);
 		this.index = index;
 		setText(VALUES[this.index]);
+	}
+	
+	public void setText (int index) {
+		this.index = index;
+		setText(VALUES[index]);
+	}
+	
+	public int getIndex () {
+		return index;
 	}
 	
 	public boolean increment() {
