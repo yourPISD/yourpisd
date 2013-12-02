@@ -22,6 +22,7 @@ import android.text.TextUtils;
 import android.util.Base64;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -244,10 +245,27 @@ public class LoginActivity extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		getMenuInflater().inflate(R.menu.login, menu);
+		if (mAuthTask != null)
+			getMenuInflater().inflate(R.menu.login, menu);
+		return true;
+	}
+	
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		if (mAuthTask != null)
+			getMenuInflater().inflate(R.menu.login, menu);
 		return true;
 	}
 
+	public boolean onOptionsItemSelected(MenuItem menuItem) {
+		if (menuItem.getItemId() == R.id.quit) {
+			mAuthTask.cancel(true);
+			return true;
+		}
+		return false;
+	}
+	
 	/**
 	 * Attempts to sign in or register the account specified by the login form.
 	 * If there are form errors (invalid email, missing fields, etc.), the
@@ -385,6 +403,11 @@ public class LoginActivity extends Activity {
 
 		private DataGrabber dg = ((DataGrabber) getApplication());
 
+		@Override
+		protected void onPreExecute() {
+			invalidateOptionsMenu();
+		}
+		
 		@Override
 		protected Integer doInBackground(Void... params) {
 
