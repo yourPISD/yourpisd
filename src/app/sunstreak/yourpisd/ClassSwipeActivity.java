@@ -267,10 +267,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 			rootView = inflater.inflate(R.layout.class_description, container, false);
 			getActivity().setProgressBarIndeterminateVisibility(true);
 			if ( dg.getCurrentStudent().hasClassGrade(classIndex, termIndex) ) {
-				System.out.println(dg.studentIndex + " " + classIndex + " " + termIndex);
-				System.out.println(dg.getCurrentStudent().name);
 				mClassGrade = dg.getCurrentStudent().getClassGrade(classIndex, termIndex);
-				System.out.println(mClassGrade);
 				setUiElements();
 			} else {
 				mClassGradeTask = new ClassGradeTask();
@@ -313,13 +310,13 @@ public class ClassSwipeActivity extends FragmentActivity {
 		public void setUiElements () {
 			getActivity().setProgressBarIndeterminateVisibility(false);
 			
+			RelativeLayout layout = (RelativeLayout) rootView.findViewById(R.id.info);
+			
 			int lastIdAdded = R.id.teacher_name;
-			TextView teacher = (TextView) rootView.findViewById(R.id.teacher_name);
-			TextView sixWeeksAverage = (TextView) rootView.findViewById(R.id.six_weeks_average);
-			LinearLayout desc = (LinearLayout) rootView.findViewById(R.id.descriptions);
+			TextView teacher = (TextView) layout.findViewById(R.id.teacher_name);
+			TextView sixWeeksAverage = (TextView) layout.findViewById(R.id.six_weeks_average);
 			teacher.setVisibility(View.VISIBLE);
 			sixWeeksAverage.setVisibility(View.VISIBLE);
-			int id = lastIdAdded;
 
 			class AssignmentDetailListener implements OnClickListener {
 
@@ -348,7 +345,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 				int avg = mClassGrade.optInt("average", -1);
 				if (avg != -1) {
-					String average = avg + "";
+					String average = Integer.toString(avg);
 					sixWeeksAverage.setText(average);
 				} else
 					sixWeeksAverage.setVisibility(TextView.INVISIBLE);
@@ -356,28 +353,32 @@ public class ClassSwipeActivity extends FragmentActivity {
 				// Add current student's name
 				if (dg.MULTIPLE_STUDENTS) {
 					LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-					LinearLayout studentName = (LinearLayout) inflater.inflate(R.layout.main_student_name_if_multiple_students, desc, false);
+					LinearLayout studentName = (LinearLayout) inflater.inflate(R.layout.main_student_name_if_multiple_students, layout, false);
 					((TextView) studentName.findViewById(R.id.name)).setText(dg.getCurrentStudent().name);
+					
 					RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
 							RelativeLayout.LayoutParams.MATCH_PARENT,
 							RelativeLayout.LayoutParams.WRAP_CONTENT);
 					lp.addRule(RelativeLayout.BELOW, lastIdAdded);
 					lastIdAdded = R.id.name;
-					desc.addView(studentName);
-					id = lastIdAdded;
+					
+					layout.addView(studentName, lp);
 				}
+				
+				LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				
+				
 				for (int category = 0;
 						category < mClassGrade.getJSONArray("categoryGrades").length();
 						category++)
 				{
-					RelativeLayout card = new RelativeLayout(getActivity());
+					LinearLayout card = new LinearLayout(getActivity());
+					card.setOrientation(LinearLayout.VERTICAL);
 					card.setBackgroundResource(R.drawable.dropshadow);
-
-					LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 					// Name of the category ("Daily Work", etc)
 					String categoryName = mClassGrade.getJSONArray("categoryGrades").getJSONObject(category).getString("Category");
-
+					
 					// for every grade in this term [any category]
 					for(int i = 0; i< mClassGrade.getJSONArray("grades").length(); i++)
 					{
@@ -385,7 +386,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 						if (mClassGrade.getJSONArray("grades").getJSONObject(i).getString("Category")
 								.equals(categoryName))
 						{
-							LinearLayout innerLayout = (LinearLayout) inflater.inflate(R.layout.class_swipe_grade_view, desc, false);
+							LinearLayout innerLayout = (LinearLayout) inflater.inflate(R.layout.class_swipe_grade_view, card, false);
 							innerLayout.setId(mClassGrade.getJSONArray("grades").getJSONObject(i)
 									.getInt("assignmentId"));
 
@@ -397,22 +398,17 @@ public class ClassSwipeActivity extends FragmentActivity {
 							
 							TextView grade = (TextView) innerLayout.findViewById(R.id.grade);
 							String gradeValue = mClassGrade.getJSONArray("grades")
-									.getJSONObject(i).optString("Grade", "") + "";
+									.getJSONObject(i).optString("Grade");
 							grade.setText(gradeValue);
 
-							RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-									RelativeLayout.LayoutParams.MATCH_PARENT,
-									RelativeLayout.LayoutParams.WRAP_CONTENT);
-							lp.addRule(RelativeLayout.BELOW, lastIdAdded);
-
 							innerLayout.setOnClickListener(new AssignmentDetailListener(classIndex, termIndex, innerLayout.getId()));
-							card.addView(innerLayout, lp);
-							lastIdAdded = innerLayout.getId();
+							
+							card.addView(innerLayout);
 						}
 
 					}
 					// Create a category summary view
-					LinearLayout categoryLayout = (LinearLayout) inflater.inflate(R.layout.class_swipe_category_card, desc, false);
+					LinearLayout categoryLayout = (LinearLayout) inflater.inflate(R.layout.class_swipe_category_card, card, false);
 
 					TextView categoryNameView = (TextView) categoryLayout.findViewById(R.id.category_name);
 					categoryNameView.setText(categoryName);
@@ -422,26 +418,22 @@ public class ClassSwipeActivity extends FragmentActivity {
 							.getJSONObject(category).optString("Letter");
 					scoreView.setText(categoryScore);
 
-					RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-							RelativeLayout.LayoutParams.MATCH_PARENT,
-							RelativeLayout.LayoutParams.WRAP_CONTENT);
-					lp.addRule(RelativeLayout.BELOW, lastIdAdded);
+					// Add the view to the card
+					card.addView(categoryLayout);
 
-					// Add the view to the RelativeLayout
-					categoryLayout.setId(lastIdAdded + 1);
-					card.addView(categoryLayout, lp);
-					lastIdAdded++;
-
-					LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(
-							LinearLayout.LayoutParams.MATCH_PARENT,
-							LinearLayout.LayoutParams.WRAP_CONTENT);
 					Animation animation = AnimationUtils.loadAnimation(getActivity(), R.anim.slide_from_down_rotate);
 					animation.setStartOffset(0);
-					desc.addView(card, lp1);
-
+					
+					card.setId(lastIdAdded + 1);
+					RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+							LinearLayout.LayoutParams.MATCH_PARENT,
+							LinearLayout.LayoutParams.WRAP_CONTENT);
+					lp.addRule(RelativeLayout.BELOW, lastIdAdded);
+					layout.addView(card, lp);
+					lastIdAdded = card.getId();
+					
 					card.startAnimation(animation);
 
-					id = lastIdAdded;
 				}
 
 
@@ -461,17 +453,17 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 		}
 		
-		class GradeDetailsTask extends AsyncTask<Integer, Integer, JSONObject> {
+		class GradeDetailsTask extends AsyncTask<Integer, Integer, String> {
 			
 			CharSequence title;
 			
 			ProgressDialog dialog;
 			
-			protected JSONObject doInBackground(Integer... params) {
+			protected String doInBackground(Integer... params) {
 				title = ((TextView)rootView.findViewById(params[2]).findViewById(ASSIGNMENT_NAME_ID)).getText();
 				try {
-					return dg.getCurrentStudent().getAssignmentDetails(params[0], params[1], params[2]);
-					
+					String[] array = dg.getCurrentStudent().getAssignmentDetails(params[0], params[1], params[2]);
+					return "Due date: "+ array[0] + DateHandler.daysRelative(array[1]) +"\nWeight: " + array[2];
 				} catch (Exception e) {
 					cancel(true);
 					return null;
@@ -484,20 +476,16 @@ public class ClassSwipeActivity extends FragmentActivity {
 				dialog.show();
 			}
 
-			protected void onPostExecute (final JSONObject result) {
+			protected void onPostExecute (final String result) {
 				dialog.dismiss();
-				String dueDate = result.optString("dueDate");
-				String weight = result.optString("weight");
 
 				// Display the information.
 				AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 				builder.setTitle(title);
 
 				try {
-					String relativeDays = DateHandler.daysRelative(dueDate);
-					builder.setMessage("Due date: "+ dueDate + relativeDays +"\nWeight: " + weight);
+					builder.setMessage(result);
 				} catch(Exception e) {
-					e.printStackTrace();
 					return;
 				}
 

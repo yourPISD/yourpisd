@@ -453,7 +453,7 @@ public class Parser {
 		}
 	}
 	
-	public static JSONObject parseAssignment (String html) throws JSONException {
+	public static String[] parseAssignment (String html) throws JSONException {
 		//Debug code
 		/*
 		Element doc = Jsoup.parse(html);
@@ -464,11 +464,12 @@ public class Parser {
 		System.out.println(tds);
 		*/
 		Elements tds = Jsoup.parse(html).getElementById("Assignment").getElementsByTag("td");
-		JSONObject ass = new JSONObject();
-		ass.put("assignedDate", tds.get(3).text());
-		ass.put("dueDate", tds.get(5).text());
-		ass.put("weight", tds.get(9).text());
-		return ass;
+//		JSONObject ass = new JSONObject();
+//		ass.put("assignedDate", tds.get(3).text());
+//		ass.put("dueDate", tds.get(5).text());
+//		ass.put("weight", tds.get(9).text());
+		//	{assignedDate, dueDate, weight}
+		return new String[] {tds.get(3).text(), tds.get(5).text(), tds.get(9).text()};
 	}
 	
 }

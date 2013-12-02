@@ -204,7 +204,7 @@ public class DataGrabber /*implements Parcelable*/ extends Application {
 			return response;
 		}
 		
-		public JSONObject getAssignmentDetails(int classIndex, int termIndex, int assignmentId) throws MalformedURLException, IOException, JSONException {
+		public String[] getAssignmentDetails(int classIndex, int termIndex, int assignmentId) throws MalformedURLException, IOException, JSONException {
 			Object[] details = Request.sendGet(
 					"https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/AssignmentDetail.aspx?"
 					+ "assignmentId=" + assignmentId
