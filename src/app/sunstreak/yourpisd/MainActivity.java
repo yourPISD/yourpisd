@@ -133,7 +133,7 @@ public class MainActivity extends FragmentActivity {
 	
 	@Override
 	public void onPause () {
-		SharedPreferences.Editor editor = getSharedPreferences("Goals", Context.MODE_PRIVATE).edit();
+		SharedPreferences.Editor editor = getSharedPreferences(dg.getCurrentStudent().studentId + "", Context.MODE_PRIVATE).edit();
 		for (int i = 0; i < goals.length; i++) {
 			editor.putInt(Integer.toString(i), goals[i]);
 			System.out.println(i + " " + goals[i]);
@@ -291,7 +291,7 @@ public class MainActivity extends FragmentActivity {
 			// Load saved goals.
 			goals = new int[dg.getCurrentStudent().getClassMatch().length];
 			Arrays.fill(goals, -1);
-			SharedPreferences sharedPrefs = getActivity().getSharedPreferences("Goals", Context.MODE_PRIVATE);
+			SharedPreferences sharedPrefs = getActivity().getSharedPreferences(dg.getCurrentStudent().studentId + "", Context.MODE_PRIVATE);
 			for (String key : sharedPrefs.getAll().keySet()) {
 				goals[Integer.parseInt(key)] = sharedPrefs.getInt(key, -1);
 			}
