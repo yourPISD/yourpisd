@@ -468,7 +468,6 @@ public class Parser {
 		ass.put("assignedDate", tds.get(3).text());
 		ass.put("dueDate", tds.get(5).text());
 		ass.put("weight", tds.get(9).text());
-		System.out.println(ass);
 		return ass;
 	}
 	

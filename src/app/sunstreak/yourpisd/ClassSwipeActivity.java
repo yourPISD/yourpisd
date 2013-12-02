@@ -34,6 +34,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import app.sunstreak.yourpisd.net.DataGrabber;
+import app.sunstreak.yourpisd.net.DateHandler;
 
 
 @SuppressLint("ValidFragment")
@@ -241,21 +242,13 @@ public class ClassSwipeActivity extends FragmentActivity {
 		 * fragment.
 		 */
 		public static final String ARG_SECTION_NUMBER = "section_number";
+		public static final int ASSIGNMENT_NAME_ID = 2222;
+		
 		private ClassGradeTask mClassGradeTask;
 		private int position;
 		private int classIndex;
 		private JSONObject mClassGrade;
 		private View rootView;
-
-
-
-
-
-		public DescriptionFragment() {
-		}
-
-
-
 
 		@Override
 		public void onPause () {
@@ -267,6 +260,7 @@ public class ClassSwipeActivity extends FragmentActivity {
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState)  {
+			
 			position = getArguments().getInt(ARG_SECTION_NUMBER);
 			classIndex = dg.getCurrentStudent().getClassMatch()[position];
 
@@ -317,26 +311,22 @@ public class ClassSwipeActivity extends FragmentActivity {
 		}
 
 		public void setUiElements () {
-//			ProgressBar loadingCircle = (ProgressBar) rootView.findViewById(R.id.loading);
-//			loadingCircle.setVisibility(View.GONE);
 			getActivity().setProgressBarIndeterminateVisibility(false);
+			
 			int lastIdAdded = R.id.teacher_name;
 			TextView teacher = (TextView) rootView.findViewById(R.id.teacher_name);
 			TextView sixWeeksAverage = (TextView) rootView.findViewById(R.id.six_weeks_average);
 			LinearLayout desc = (LinearLayout) rootView.findViewById(R.id.descriptions);
 			teacher.setVisibility(View.VISIBLE);
 			sixWeeksAverage.setVisibility(View.VISIBLE);
-//			desc.setVisibility(View.VISIBLE);
-//			LinearLayout classDescriptionLinearLayout = (LinearLayout) rootView.findViewById(R.id.class_description_linear_layout);
 			int id = lastIdAdded;
-			
+
 			class AssignmentDetailListener implements OnClickListener {
-				
+
 				int classIndex;
 				int termIndex;
 				int assignmentId;
-				
-				
+
 				AssignmentDetailListener (int classIndex, int termIndex, int assignmentId) {
 					this.classIndex = classIndex;
 					this.termIndex = termIndex;
@@ -345,72 +335,10 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 				@Override
 				public void onClick(View arg0) {
-					try {
-						JSONObject assignmentDetails;
-						AsyncTask<Integer, Integer, JSONObject> task = new AsyncTask<Integer, Integer, JSONObject>() {
-						ProgressDialog dialog = ProgressDialog.show(getActivity(), "", 
-				                    "Loading Grade Details", true);
-							protected JSONObject doInBackground(Integer... params) {
-								try {
-									dialog.show();
-									return dg.getCurrentStudent().getAssignmentDetails(params[0], params[1], params[2]);
-								} catch (Exception e) {
-									return new JSONObject();
-								}
-							}
-							
-							protected void onPreExecute () {
-								// Show a loading bar or something.
-								// It takes about 2 seconds to load.
-							}
-							
-							protected void onPostExecute (final JSONObject result) {
-								dialog.dismiss();
-								String assignedDate = result.optString("assignedDate");
-								String dueDate = result.optString("dueDate");
-								String weight = result.optString("weight");
-								
-								// Display the information.
-								AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-								CharSequence title = ((TextView)rootView.findViewById(assignmentId).findViewById(2222)).getText();
-								builder.setTitle(title);
-								try
-								{
-									builder.setMessage("Due date: "+ dueDate +"\nWeight: " + weight);
-									
-								}
-								catch(Exception e)
-								{
-									e.printStackTrace();
-								}
-								
-								builder.setCancelable(false)
-								       .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-								           public void onClick(DialogInterface dialog, int id) {
-								        	   dialog.cancel();
-								           }
-								       });
-								AlertDialog alert = builder.create();
-//								TextView message = ((TextView)alert.findViewById(android.R.id.message));
-//								message.setTypeface(robotoNew);
-//								message.setTextSize(getResources().getDimension(R.dimen.text_size_medium));
-//								((TextView)alert.findViewById(android.R.id.title)).setTypeface(robotoNew);
-								alert.show();
-//								Toast.makeText(getActivity(), dueDate + " " + weight, Toast.LENGTH_SHORT).show();
-								
-							}
-							
-						};
-						
-						task.execute(classIndex, termIndex, assignmentId);
-						
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
+					new GradeDetailsTask().execute(classIndex, termIndex, assignmentId);
 				}
 			}
-			
-			
+
 			try {
 				// The following line prevents force close. Idk why.
 				// Maybe the extra print time somehow fixes it...
@@ -424,10 +352,6 @@ public class ClassSwipeActivity extends FragmentActivity {
 					sixWeeksAverage.setText(average);
 				} else
 					sixWeeksAverage.setVisibility(TextView.INVISIBLE);
-
-
-
-
 
 				// Add current student's name
 				if (dg.MULTIPLE_STUDENTS) {
@@ -450,11 +374,9 @@ public class ClassSwipeActivity extends FragmentActivity {
 					card.setBackgroundResource(R.drawable.dropshadow);
 
 					LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-					
+
 					// Name of the category ("Daily Work", etc)
 					String categoryName = mClassGrade.getJSONArray("categoryGrades").getJSONObject(category).getString("Category");
-
-//					int layoutCounter = 0;
 
 					// for every grade in this term [any category]
 					for(int i = 0; i< mClassGrade.getJSONArray("grades").length(); i++)
@@ -464,27 +386,25 @@ public class ClassSwipeActivity extends FragmentActivity {
 								.equals(categoryName))
 						{
 							LinearLayout innerLayout = (LinearLayout) inflater.inflate(R.layout.class_swipe_grade_view, desc, false);
-							
 							innerLayout.setId(mClassGrade.getJSONArray("grades").getJSONObject(i)
 									.getInt("assignmentId"));
-							
+
 							TextView descriptionView = (TextView) innerLayout.findViewById(R.id.description);
 							String description = "" + mClassGrade.getJSONArray("grades")
 									.getJSONObject(i).getString("Description");
 							descriptionView.setText(description);
-							descriptionView.setId(2222);
+							descriptionView.setId(ASSIGNMENT_NAME_ID);
+							
 							TextView grade = (TextView) innerLayout.findViewById(R.id.grade);
 							String gradeValue = mClassGrade.getJSONArray("grades")
 									.getJSONObject(i).optString("Grade", "") + "";
 							grade.setText(gradeValue);
-							
+
 							RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
 									RelativeLayout.LayoutParams.MATCH_PARENT,
 									RelativeLayout.LayoutParams.WRAP_CONTENT);
 							lp.addRule(RelativeLayout.BELOW, lastIdAdded);
 
-							// Add the view to the RelativeLayout
-//							desc.addView(innerLayout, lp);
 							innerLayout.setOnClickListener(new AssignmentDetailListener(classIndex, termIndex, innerLayout.getId()));
 							card.addView(innerLayout, lp);
 							lastIdAdded = innerLayout.getId();
@@ -493,58 +413,108 @@ public class ClassSwipeActivity extends FragmentActivity {
 					}
 					// Create a category summary view
 					LinearLayout categoryLayout = (LinearLayout) inflater.inflate(R.layout.class_swipe_category_card, desc, false);
-					
+
 					TextView categoryNameView = (TextView) categoryLayout.findViewById(R.id.category_name);
 					categoryNameView.setText(categoryName);
 
 					TextView scoreView = (TextView) categoryLayout.findViewById(R.id.category_score);
 					String categoryScore = mClassGrade.getJSONArray("categoryGrades")
-							.getJSONObject(category).optString("Letter", "") + "";
+							.getJSONObject(category).optString("Letter");
 					scoreView.setText(categoryScore);
 
 					RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
 							RelativeLayout.LayoutParams.MATCH_PARENT,
 							RelativeLayout.LayoutParams.WRAP_CONTENT);
 					lp.addRule(RelativeLayout.BELOW, lastIdAdded);
-					
+
 					// Add the view to the RelativeLayout
 					categoryLayout.setId(lastIdAdded + 1);
 					card.addView(categoryLayout, lp);
-//					desc.addView(categoryLayout, lp);
 					lastIdAdded++;
-					
+
 					LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(
 							LinearLayout.LayoutParams.MATCH_PARENT,
 							LinearLayout.LayoutParams.WRAP_CONTENT);
-//					lp1.addRule(RelativeLayout.BELOW, id);
 					Animation animation = AnimationUtils.loadAnimation(getActivity(), R.anim.slide_from_down_rotate);
 					animation.setStartOffset(0);
 					desc.addView(card, lp1);
-					
+
 					card.startAnimation(animation);
-					
+
 					id = lastIdAdded;
 				}
 
 
-//				TextView lastUpdatedView = new TextView(getActivity());
-//				lastUpdatedView.setText(DateHandler.timeSince(mClassGrade.getLong("lastUpdated")));
-//				lastUpdatedView.setPadding(10, 0, 0, 0);
-//				RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-//						RelativeLayout.LayoutParams.WRAP_CONTENT,
-//						RelativeLayout.LayoutParams.WRAP_CONTENT);
-//				lp.addRule(RelativeLayout.BELOW, lastIdAdded);
-//				desc.addView(lastUpdatedView, lp);
+				//				TextView lastUpdatedView = new TextView(getActivity());
+				//				lastUpdatedView.setText(DateHandler.timeSince(mClassGrade.getLong("lastUpdated")));
+				//				lastUpdatedView.setPadding(10, 0, 0, 0);
+				//				RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+				//						RelativeLayout.LayoutParams.WRAP_CONTENT,
+				//						RelativeLayout.LayoutParams.WRAP_CONTENT);
+				//				lp.addRule(RelativeLayout.BELOW, lastIdAdded);
+				//				desc.addView(lastUpdatedView, lp);
 
 
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
+
+		}
+		
+		class GradeDetailsTask extends AsyncTask<Integer, Integer, JSONObject> {
 			
+			CharSequence title;
+			
+			ProgressDialog dialog;
+			
+			protected JSONObject doInBackground(Integer... params) {
+				title = ((TextView)rootView.findViewById(params[2]).findViewById(ASSIGNMENT_NAME_ID)).getText();
+				try {
+					return dg.getCurrentStudent().getAssignmentDetails(params[0], params[1], params[2]);
+					
+				} catch (Exception e) {
+					cancel(true);
+					return null;
+				}
+			}
+
+			protected void onPreExecute () {
+				dialog = ProgressDialog.show(getActivity(), "", 
+						"Loading Grade Details", true);
+				dialog.show();
+			}
+
+			protected void onPostExecute (final JSONObject result) {
+				dialog.dismiss();
+				String dueDate = result.optString("dueDate");
+				String weight = result.optString("weight");
+
+				// Display the information.
+				AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+				builder.setTitle(title);
+
+				try {
+					String relativeDays = DateHandler.daysRelative(dueDate);
+					builder.setMessage("Due date: "+ dueDate + relativeDays +"\nWeight: " + weight);
+				} catch(Exception e) {
+					e.printStackTrace();
+					return;
+				}
+
+				builder.setCancelable(false)
+				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.dismiss();
+					}
+				});
+				builder.create().show();
+			}
+
 		}
 	}
 
 	
+
 	class StudentSelectListener implements MenuItem.OnMenuItemClickListener {
 
 		int menuStudentIndex;
@@ -563,16 +533,10 @@ public class ClassSwipeActivity extends FragmentActivity {
 
 			startActivity(intent);
 
-			//	        	overridePendingTransition(R.anim.slide_in_down, R.anim.slide_out_up);
 			return true;
-			//			}
 
 		}
 
 	}
 	
-	private class id {
-		public static final int category_card = 1290415;
-	}
-
 }

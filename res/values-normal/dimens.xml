@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="text_size_medium">18sp</dimen>
+    <dimen name="semester_goals_arrow_size">40sp</dimen>
 </resources>

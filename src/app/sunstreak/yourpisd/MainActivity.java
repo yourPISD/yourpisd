@@ -67,8 +67,8 @@ public class MainActivity extends FragmentActivity {
 	ViewPager mViewPager;
 	//sections of the navigation drawer
 	public String[] mList = {"Profile", "Current Six Weeks", "Grade Overview", "Semester Goals"};
-    public DrawerLayout mDrawerLayout;
-    public ListView mDrawerList;
+	public DrawerLayout mDrawerLayout;
+	public ListView mDrawerList;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -110,22 +110,22 @@ public class MainActivity extends FragmentActivity {
 		//testing purposes
 		//		AppRater.showRateDialog(this, null);
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerList = (ListView) findViewById(R.id.left_drawer);
+		mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
-        // Set the adapter for the list view
-        mDrawerList.setAdapter(new ArrayAdapter<String>(this,
-                R.layout.drawer_list, mList));
-        class DrawerItemClickListener implements ListView.OnItemClickListener {
-    	    @Override
-    	    public void onItemClick(AdapterView parent, View view, int position, long id) {
-    	       mViewPager.setCurrentItem(position);
-    	       mDrawerLayout.closeDrawers();
-    	    }
-        }
-        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
-        	
+		// Set the adapter for the list view
+		mDrawerList.setAdapter(new ArrayAdapter<String>(this,
+				R.layout.drawer_list, mList));
+		class DrawerItemClickListener implements ListView.OnItemClickListener {
+			@Override
+			public void onItemClick(AdapterView parent, View view, int position, long id) {
+				mViewPager.setCurrentItem(position);
+				mDrawerLayout.closeDrawers();
+			}
+		}
+		mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+
 	}
-        
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -564,6 +564,7 @@ public class MainActivity extends FragmentActivity {
 			if (position == 3) {
 
 				LinearLayout layout = (LinearLayout) rootView.findViewById(R.id.container);
+
 				RelativeLayout helpLabel = new RelativeLayout(getActivity());
 				helpLabel.setBackgroundResource(R.drawable.dropshadow);
 				TextView help = new TextView(getActivity());
@@ -578,7 +579,7 @@ public class MainActivity extends FragmentActivity {
 				help.setPadding(0, 20, 20, 20);
 				help.setLayoutParams(labelParams);
 				helpLabel.addView(help);
-				
+
 				TextView target = new TextView(getActivity());
 				target.setText("Goal");
 				target.setTextSize(getResources().getDimension(R.dimen.text_size_medium)-10);
@@ -591,20 +592,21 @@ public class MainActivity extends FragmentActivity {
 				target.setLayoutParams(targetParams);
 				target.setPadding(20, 20, 0, 20);
 				helpLabel.addView(target);
+
 				layout.addView(helpLabel);
-				
+
 				for (int classIndex = 0; classIndex < classCount; classIndex++) {
 
 					int jsonIndex = dg.getCurrentStudent().getClassMatch()[classIndex];
 
 					RelativeLayout group = new RelativeLayout(getActivity());
 					group.setBackgroundResource(R.drawable.dropshadow);
-					
+
 					TextView className = new TextView(getActivity());
 					className.setText(dg.getCurrentStudent().getShortClassName(jsonIndex));
 					className.setTypeface(robotoNew);
 					className.setTextSize(getResources().getDimension(R.dimen.text_size_medium)-5);
-					className.setPadding(20,20,0,10);
+					className.setPadding(20,5,0,0);
 					final TierView goal = new TierView(getActivity(), robotoNew);
 
 					View minus = new View(getActivity());
@@ -622,7 +624,7 @@ public class MainActivity extends FragmentActivity {
 					while(dg.getCurrentStudent().examScoreRequired(classIndex, TierView.RANGES[goal.index])>100)
 					{
 						goal.index--;
-						if(goal.index ==0)
+						if(goal.index == 0)
 							break;
 					}
 					goal.setText("" + TierView.VALUES[goal.index]);
@@ -703,11 +705,11 @@ public class MainActivity extends FragmentActivity {
 					plus.setLayoutParams(layoutParams);
 
 					// Assign size of plus and minus
-					minus.getLayoutParams().width=3 * (int)getResources().getDimension(R.dimen.text_size_medium);
-					minus.getLayoutParams().height=3 * (int)getResources().getDimension(R.dimen.text_size_medium);
-					plus.getLayoutParams().width = 3 * (int)getResources().getDimension(R.dimen.text_size_medium);
-					plus.getLayoutParams().height=3 * (int)getResources().getDimension(R.dimen.text_size_medium);
-					minus.setPadding(0, 0, 0, 30);
+					minus.getLayoutParams().width = (int) getResources().getDimension(R.dimen.semester_goals_arrow_size);
+					minus.getLayoutParams().height = (int) getResources().getDimension(R.dimen.semester_goals_arrow_size);
+					plus.getLayoutParams().width = (int) getResources().getDimension(R.dimen.semester_goals_arrow_size);
+					plus.getLayoutParams().height = (int) getResources().getDimension(R.dimen.semester_goals_arrow_size);
+					//					minus.setPadding(0, 0, 0, 30);
 					layoutParams = new RelativeLayout.LayoutParams(
 							RelativeLayout.LayoutParams.WRAP_CONTENT,
 							RelativeLayout.LayoutParams.WRAP_CONTENT);
@@ -716,15 +718,6 @@ public class MainActivity extends FragmentActivity {
 
 					examScore.setLayoutParams(layoutParams);
 
-
-					//					classLayout.addView(tv);
-					//					calculator.addView(minus);
-					//					calculator.addView(goal);
-					//					calculator.addView(plus);
-					//					calculator.addView(filler);
-					//					calculator.addView(examScore);
-					//					group.addView(classLayout);
-					//					group.addView(calculator);
 					group.addView(className);
 
 					group.addView(examScore);
@@ -732,6 +725,14 @@ public class MainActivity extends FragmentActivity {
 					group.addView(minus);
 					group.addView(goal);
 					group.addView(plus);
+
+					LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+							new LinearLayout.LayoutParams(
+									RelativeLayout.LayoutParams.WRAP_CONTENT,
+									RelativeLayout.LayoutParams.WRAP_CONTENT));
+					lp.setMargins(10, 0, 10, 0);
+					group.setLayoutParams(lp);
+					group.requestLayout();
 
 					layout.addView(group);
 				}
