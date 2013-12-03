@@ -245,26 +245,12 @@ public class LoginActivity extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		if (mAuthTask != null)
-			getMenuInflater().inflate(R.menu.login, menu);
-		return true;
-	}
+		getMenuInflater().inflate(R.menu.login, menu);
 	
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		super.onCreateOptionsMenu(menu);
-		if (mAuthTask != null)
-			getMenuInflater().inflate(R.menu.login, menu);
 		return true;
 	}
 
-	public boolean onOptionsItemSelected(MenuItem menuItem) {
-		if (menuItem.getItemId() == R.id.quit) {
-			mAuthTask.cancel(true);
-			return true;
-		}
-		return false;
-	}
+
 	
 	/**
 	 * Attempts to sign in or register the account specified by the login form.

@@ -88,7 +88,7 @@ public final class R {
         public static final int copyright=0x7f0b0004;
         public static final int credit_developers=0x7f0b0002;
         public static final int credit_icon=0x7f0b0003;
-        public static final int credits=0x7f0b0028;
+        public static final int credits=0x7f0b0027;
         public static final int description=0x7f0b0016;
         public static final int drawer_layout=0x7f0b000f;
         public static final int email=0x7f0b0009;
@@ -97,7 +97,7 @@ public final class R {
         public static final int layout_six_weeks_summary=0x7f0b001c;
         public static final int layout_year_summary=0x7f0b0022;
         public static final int left_drawer=0x7f0b0010;
-        public static final int log_out=0x7f0b0027;
+        public static final int log_out=0x7f0b0026;
         public static final int login=0x7f0b000b;
         public static final int login_form=0x7f0b0008;
         public static final int login_status=0x7f0b0006;
@@ -110,7 +110,6 @@ public final class R {
         public static final int pager_title_strip=0x7f0b0001;
         public static final int password=0x7f0b000a;
         public static final int previous_six_weeks=0x7f0b0023;
-        public static final int quit=0x7f0b0026;
         public static final int remember_password=0x7f0b000c;
         public static final int scroll=0x7f0b0020;
         public static final int scrollView1=0x7f0b001d;
