@@ -5,9 +5,13 @@ import java.util.Locale;
 
 import org.json.JSONArray;
 
+import android.app.ActionBar;
+import android.app.ActionBar.Tab;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Typeface;
@@ -15,7 +19,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -45,7 +49,7 @@ import app.sunstreak.yourpisd.net.DataGrabber;
 import app.sunstreak.yourpisd.net.DateHandler;
 
 
-public class MainActivity extends FragmentActivity { 
+public class MainActivity extends FragmentActivity implements ActionBar.TabListener{ 
 	public static final int CURRENT_TERM_INDEX = TermFinder.getCurrentTermIndex();
 	static int classCount;
 	static LinearLayout[] averages;
@@ -72,6 +76,7 @@ public class MainActivity extends FragmentActivity {
 	public String[] mList = {"Profile", "Current Six Weeks", "Grade Overview", "Semester Goals"};
 	public DrawerLayout mDrawerLayout;
 	public ListView mDrawerList;
+	private ActionBarDrawerToggle mDrawerToggle;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -81,10 +86,8 @@ public class MainActivity extends FragmentActivity {
 		getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
 		SCREEN_HEIGHT = displaymetrics.heightPixels;
 		SCREEN_WIDTH = displaymetrics.widthPixels;
-
 		dg = (DataGrabber) getApplication();
-
-
+		
 		// Create the adapter that will return a fragment for each of the three
 		// primary sections of the app.
 		mSectionsPagerAdapter = new SectionsPagerAdapter(
@@ -92,26 +95,42 @@ public class MainActivity extends FragmentActivity {
 
 		// Set up the ViewPager with the sections adapter.
 		mViewPager = (ViewPager) findViewById(R.id.pager);
-		mViewPager.setAdapter(mSectionsPagerAdapter);
 
-
-		// For parents with multiple students, show the profile cards first.
-		// If we are coming back from ClassSwipeActivity, go to requested section (should be section #1).
-		if (dg.MULTIPLE_STUDENTS) {
-			if (getIntent().hasExtra("mainActivitySection") )
-				mViewPager.setCurrentItem(getIntent().getExtras().getInt("mainActivitySection"));
-			else
-				mViewPager.setCurrentItem(0);
-		}
-		// Otherwise, show the current six weeks grades list.
-		else
-			mViewPager.setCurrentItem(1);
-
-		mViewPager.setOffscreenPageLimit(2);
+								//fixed tab code
+								final ActionBar actionBar = getActionBar();
+								actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+						        actionBar.addTab(actionBar.newTab().setText(getResources().getString(R.string.main_section_0_title))
+						                    .setTabListener(this));
+						        actionBar.addTab(actionBar.newTab().setText(TermFinder.Term.values()[CURRENT_TERM_INDEX].name)
+					                    .setTabListener(this));
+						        actionBar.addTab(actionBar.newTab().setText(getResources().getString(R.string.main_section_2_title))
+					                    .setTabListener(this));
+						        actionBar.addTab(actionBar.newTab().setText(getResources().getString(R.string.main_section_3_title))
+					                    .setTabListener(this));
+						        mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+						        	 
+						            @Override
+						            public void onPageSelected(int position) {
+						                // on changing the page
+						                // make respected tab selected
+						                actionBar.setSelectedNavigationItem(position);
+						            }
+						         
+						            @Override
+						            public void onPageScrolled(int arg0, float arg1, int arg2) {
+						            }
+						         
+						            @Override
+						            public void onPageScrollStateChanged(int arg0) {
+						            }
+						        });
+						        
 		//actual code to launch, uncomment when releasing
 		AppRater.app_launched(this);
 		//testing purposes
 		//		AppRater.showRateDialog(this, null);
+		
+		//navigation drawer
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
@@ -126,11 +145,59 @@ public class MainActivity extends FragmentActivity {
 			}
 		}
 		mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
-
-		
+		mDrawerToggle = new ActionBarDrawerToggle(
+                this,                  /* host Activity */
+                mDrawerLayout,         /* DrawerLayout object */
+                R.drawable.ic_drawer,  /* nav drawer icon to replace 'Up' caret */
+                R.string.drawer_open,  /* "open drawer" description */
+                R.string.drawer_close  /* "close drawer" description */
+                );
+		mDrawerLayout.setDrawerListener(mDrawerToggle);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
+        
+        mViewPager.setAdapter(mSectionsPagerAdapter);
+		// For parents with multiple students, show the profile cards first.
+		// If we are coming back from ClassSwipeActivity, go to requested section (should be section #1).
+		if (dg.MULTIPLE_STUDENTS) {
+			if (getIntent().hasExtra("mainActivitySection") )
+				mViewPager.setCurrentItem(getIntent().getExtras().getInt("mainActivitySection"));
+			else
+				mViewPager.setCurrentItem(0);
+		}
+		// Otherwise, show the current six weeks grades list.
+		else
+			mViewPager.setCurrentItem(1);
 
 	}
-	
+	//fixed tab listener implemented
+	@Override
+	public void onTabReselected(Tab tab, FragmentTransaction ft) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void onTabSelected(Tab tab, FragmentTransaction ft) {
+		mViewPager.setCurrentItem(tab.getPosition());
+		
+	}
+	@Override
+	public void onTabUnselected(Tab tab, FragmentTransaction ft) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        mDrawerToggle.syncState();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
+    }
 	@Override
 	public void onPause () {
 		SharedPreferences.Editor editor = getSharedPreferences(dg.getCurrentStudent().studentId + "", Context.MODE_PRIVATE).edit();
@@ -168,6 +235,12 @@ public class MainActivity extends FragmentActivity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		// Pass the event to ActionBarDrawerToggle, if it returns
+        // true, then it has handled the app icon touch event
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+          return true;
+        }
+        // Handle your other action bar items...
 		// Handle item selection
 		switch (item.getItemId()) {
 		case R.id.log_out:
@@ -893,5 +966,7 @@ public class MainActivity extends FragmentActivity {
 		public static final int profile_picture = 688;
 		public static final int name = 1329482;
 	}
+
+	
 
 }

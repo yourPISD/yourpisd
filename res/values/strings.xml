@@ -26,5 +26,7 @@
     <string name="welcome">Welcome to yourPISD!</string>
     <string name="welcome_multiple_students">Switch between students by clicking 
         below, or using the menu.</string>
+    <string name="drawer_open">Open</string>
+    <string name="drawer_close">Close</string>
 
 </resources>
