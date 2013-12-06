@@ -422,7 +422,7 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 				{
 					LinearLayout card = new LinearLayout(getActivity());
 					card.setOrientation(LinearLayout.VERTICAL);
-					card.setBackgroundResource(R.drawable.dropshadow);
+					card.setBackgroundResource(R.drawable.card);
 
 					// Name of the category ("Daily Work", etc)
 					String categoryName = mClassGrade.getJSONArray("categoryGrades").getJSONObject(category).getString("Category");

@@ -2,8 +2,8 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/scrollView1"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content" 
-    android:background="@color/gray">
+    android:layout_height="wrap_content"
+    android:background="@color/gray" >
 
     <LinearLayout
         android:id="@+id/overall"
@@ -15,13 +15,13 @@
             android:id="@+id/welcome"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/dropshadow"
+            android:layout_margin="10dp"
+            android:background="@drawable/card"
             android:fontFamily="sans-serif-light"
+            android:gravity="center"
             android:padding="20dp"
-            
             android:text="@string/welcome"
-            android:textSize="22sp"
-            android:gravity="center" />
+            android:textSize="22sp" />
     </LinearLayout>
 
 </ScrollView>

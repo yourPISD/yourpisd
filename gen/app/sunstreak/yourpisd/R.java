@@ -50,7 +50,7 @@ public final class R {
     }
     public static final class drawable {
         public static final int background_with_shadow=0x7f020000;
-        public static final int big_card=0x7f020001;
+        public static final int card=0x7f020001;
         public static final int cardtest=0x7f020002;
         public static final int divider=0x7f020003;
         public static final int divider_transparent=0x7f020004;

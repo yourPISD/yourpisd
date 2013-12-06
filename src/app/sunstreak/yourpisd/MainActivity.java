@@ -384,7 +384,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					instructions.setTypeface(Typeface.createFromAsset(getActivity().getAssets()
 							,"Roboto-Light.ttf"));
 					instructions.setText(R.string.welcome_multiple_students);
-					instruct.setBackgroundResource(R.drawable.dropshadow);
+					instruct.setBackgroundResource(R.drawable.card);
 					instruct.addView(instructions);
 					bigLayout.addView(instruct, 1);
 				}
@@ -435,7 +435,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					//					profileCards[i].setGravity(Gravity.CENTER_VERTICAL);
 					profileCards[i].setOnClickListener(new StudentChooserListener(i));
 
-					profileCards[i].setBackgroundResource(R.drawable.dropshadow);
+					profileCards[i].setBackgroundResource(R.drawable.card);
 
 					bigLayout.addView(profileCards[i]);
 
@@ -523,7 +523,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					bigLayout.addView(studentName);
 				}
 				LinearLayout weekNames = new LinearLayout(getActivity());
-				weekNames.setBackgroundResource(R.drawable.dropshadow);
+				weekNames.setBackgroundResource(R.drawable.card);
 				TextView[] weeks = new TextView[5];
 				//				weekNames.setPadding(25, 5, 15, 20);
 				weekNames.setPadding(15,20,0,20);
@@ -665,7 +665,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				LinearLayout layout = (LinearLayout) rootView.findViewById(R.id.container);
 
 				RelativeLayout helpLabel = new RelativeLayout(getActivity());
-				helpLabel.setBackgroundResource(R.drawable.dropshadow);
+				helpLabel.setBackgroundResource(R.drawable.card);
 				TextView help = new TextView(getActivity());
 				help.setText("Exam Grade needed");
 				help.setTextSize(getResources().getDimension(R.dimen.text_size_medium)-10);
@@ -699,7 +699,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					int jsonIndex = dg.getCurrentStudent().getClassMatch()[classIndex];
 
 					RelativeLayout group = new RelativeLayout(getActivity());
-					group.setBackgroundResource(R.drawable.dropshadow);
+					group.setBackgroundResource(R.drawable.card);
 
 					TextView className = new TextView(getActivity());
 					className.setText(dg.getCurrentStudent().getShortClassName(jsonIndex));
