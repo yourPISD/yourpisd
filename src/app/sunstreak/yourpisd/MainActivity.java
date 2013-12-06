@@ -913,9 +913,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			for (int i = 0; i < profileCards.length; i++) {
 				// Display the chosen student in a different color.
 				if (i == dg.studentIndex)
-					profileCards[i].setBackgroundResource(R.drawable.dropshadow_yellow_to_blue);
+					profileCards[i].setBackgroundResource(R.drawable.card_click_blue);
 				else
-					profileCards[i].setBackgroundResource(R.drawable.dropshadow_white_to_blue);
+					profileCards[i].setBackgroundResource(R.drawable.card_click_blue);
 			}
 		}
 

@@ -75,51 +75,46 @@ public final class R {
         public static final int cardtest=0x7f020013;
         public static final int divider=0x7f020014;
         public static final int divider_transparent=0x7f020015;
-        public static final int dropshadow=0x7f020016;
-        public static final int dropshadow_white_to_blue=0x7f020017;
-        public static final int dropshadow_yellow=0x7f020018;
-        public static final int dropshadow_yellow_to_blue=0x7f020019;
-        public static final int dropshadowblue=0x7f02001a;
-        public static final int grade=0x7f02001b;
-        public static final int grade_half_border=0x7f02001c;
-        public static final int grade_summary_click=0x7f02001d;
-        public static final int gradeclick=0x7f02001e;
-        public static final int ic_action_next=0x7f02001f;
-        public static final int ic_action_prev=0x7f020020;
-        public static final int ic_action_refresh=0x7f020021;
-        public static final int ic_alerts_and_states_warning=0x7f020022;
-        public static final int ic_cool_icon=0x7f020023;
-        public static final int ic_drawer=0x7f020024;
-        public static final int ic_launcher=0x7f020025;
-        public static final int list_focused_bluetheme=0x7f020026;
-        public static final int logo=0x7f020027;
-        public static final int logotext=0x7f020028;
-        public static final int menu_dropdown_panel_bluetheme=0x7f020029;
-        public static final int navigation_collapse=0x7f02002a;
-        public static final int navigation_expand=0x7f02002b;
-        public static final int navigation_next_item=0x7f02002c;
-        public static final int navigation_previous_item=0x7f02002d;
-        public static final int pressed_background_bluetheme=0x7f02002e;
-        public static final int progress_bg_bluetheme=0x7f02002f;
-        public static final int progress_horizontal_bluetheme=0x7f020030;
-        public static final int progress_primary_bluetheme=0x7f020031;
-        public static final int progress_secondary_bluetheme=0x7f020032;
-        public static final int selectable_background_bluetheme=0x7f020033;
-        public static final int shadow=0x7f020034;
-        public static final int spinner_ab_default_bluetheme=0x7f020035;
-        public static final int spinner_ab_disabled_bluetheme=0x7f020036;
-        public static final int spinner_ab_focused_bluetheme=0x7f020037;
-        public static final int spinner_ab_pressed_bluetheme=0x7f020038;
-        public static final int spinner_background_ab_bluetheme=0x7f020039;
-        public static final int student_0=0x7f02003a;
-        public static final int student_1=0x7f02003b;
-        public static final int tab_indicator_ab_bluetheme=0x7f02003c;
-        public static final int tab_selected_bluetheme=0x7f02003d;
-        public static final int tab_selected_focused_bluetheme=0x7f02003e;
-        public static final int tab_selected_pressed_bluetheme=0x7f02003f;
-        public static final int tab_unselected_bluetheme=0x7f020040;
-        public static final int tab_unselected_focused_bluetheme=0x7f020041;
-        public static final int tab_unselected_pressed_bluetheme=0x7f020042;
+        public static final int grade=0x7f020016;
+        public static final int grade_half_border=0x7f020017;
+        public static final int grade_summary_click=0x7f020018;
+        public static final int gradeclick=0x7f020019;
+        public static final int ic_action_next=0x7f02001a;
+        public static final int ic_action_prev=0x7f02001b;
+        public static final int ic_action_refresh=0x7f02001c;
+        public static final int ic_alerts_and_states_warning=0x7f02001d;
+        public static final int ic_cool_icon=0x7f02001e;
+        public static final int ic_drawer=0x7f02001f;
+        public static final int ic_launcher=0x7f020020;
+        public static final int list_focused_bluetheme=0x7f020021;
+        public static final int logo=0x7f020022;
+        public static final int logotext=0x7f020023;
+        public static final int menu_dropdown_panel_bluetheme=0x7f020024;
+        public static final int navigation_collapse=0x7f020025;
+        public static final int navigation_expand=0x7f020026;
+        public static final int navigation_next_item=0x7f020027;
+        public static final int navigation_previous_item=0x7f020028;
+        public static final int pressed_background_bluetheme=0x7f020029;
+        public static final int progress_bg_bluetheme=0x7f02002a;
+        public static final int progress_horizontal_bluetheme=0x7f02002b;
+        public static final int progress_primary_bluetheme=0x7f02002c;
+        public static final int progress_secondary_bluetheme=0x7f02002d;
+        public static final int selectable_background_bluetheme=0x7f02002e;
+        public static final int shadow=0x7f02002f;
+        public static final int spinner_ab_default_bluetheme=0x7f020030;
+        public static final int spinner_ab_disabled_bluetheme=0x7f020031;
+        public static final int spinner_ab_focused_bluetheme=0x7f020032;
+        public static final int spinner_ab_pressed_bluetheme=0x7f020033;
+        public static final int spinner_background_ab_bluetheme=0x7f020034;
+        public static final int student_0=0x7f020035;
+        public static final int student_1=0x7f020036;
+        public static final int tab_indicator_ab_bluetheme=0x7f020037;
+        public static final int tab_selected_bluetheme=0x7f020038;
+        public static final int tab_selected_focused_bluetheme=0x7f020039;
+        public static final int tab_selected_pressed_bluetheme=0x7f02003a;
+        public static final int tab_unselected_bluetheme=0x7f02003b;
+        public static final int tab_unselected_focused_bluetheme=0x7f02003c;
+        public static final int tab_unselected_pressed_bluetheme=0x7f02003d;
     }
     public static final class id {
         public static final int action_settings=0x7f0b0024;
@@ -243,10 +238,10 @@ public final class R {
         public static final int welcome_multiple_students=0x7f080011;
     }
     public static final class style {
-        public static final int ActionBar_Solid_Bluetheme=0x7f090004;
-        public static final int ActionBar_Transparent_Bluetheme=0x7f090006;
-        public static final int ActionBarTabStyle_Bluetheme=0x7f090009;
-        public static final int ActionButton_CloseMode_Bluetheme=0x7f09000c;
+        public static final int ActionBar_Solid_Bluetheme=0x7f090002;
+        public static final int ActionBar_Transparent_Bluetheme=0x7f090004;
+        public static final int ActionBarTabStyle_Bluetheme=0x7f090007;
+        public static final int ActionButton_CloseMode_Bluetheme=0x7f09000a;
         /** 
         Base application theme, dependent on API level. This theme is replaced
         by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
@@ -256,49 +251,31 @@ public final class R {
             Theme customizations available in newer API levels can go in
             res/values-vXX/styles.xml, while customizations related to
             backward-compatibility can go here.
-
         
 
         Base application theme for API 11+. This theme completely replaces
         AppBaseTheme from res/values/styles.xml on API 11+ devices.
-
-
     
  API 11 theme customizations can go here. 
-
-        <item name="android:background">@color/transparent</item>
-        <item name="android:windowBackground">@color/transparent</item>
-        <item name="android:colorBackground">@color/transparent</item>
-        
 
         Base application theme for API 14+. This theme completely replaces
         AppBaseTheme from BOTH res/values/styles.xml and
         res/values-v11/styles.xml on API 14+ devices.
-
-
-
     
  API 14 theme customizations can go here. 
-
-        <item name="android:background">@color/transparent</item>
-        <item name="android:windowBackground">@color/transparent</item>
-        <item name="android:colorBackground">@color/transparent</item>
-        
          */
         public static final int AppBaseTheme=0x7f090000;
         /**  Application theme. 
- All customizations that are NOT specific to a particular API-level can go here. 
          */
         public static final int AppTheme=0x7f090001;
-        public static final int DropDownListView_Bluetheme=0x7f090008;
-        public static final int DropDownNav_Bluetheme=0x7f09000a;
-        public static final int LoginFormContainer=0x7f090002;
-        public static final int PopupMenu_Bluetheme=0x7f090007;
-        public static final int ProgressBar_Bluetheme=0x7f09000b;
-        public static final int Theme_Bluetheme=0x7f090003;
+        public static final int DropDownListView_Bluetheme=0x7f090006;
+        public static final int DropDownNav_Bluetheme=0x7f090008;
+        public static final int LoginFormContainer=0x7f09000c;
+        public static final int PopupMenu_Bluetheme=0x7f090005;
+        public static final int ProgressBar_Bluetheme=0x7f090009;
         /**  this style is only referenced in a Light.DarkActionBar based theme 
          */
-        public static final int Theme_Bluetheme_Widget=0x7f09000d;
-        public static final int myTheme_ActionBar_Text=0x7f090005;
+        public static final int Theme_Bluetheme_Widget=0x7f09000b;
+        public static final int myTheme_ActionBar_Text=0x7f090003;
     }
 }
