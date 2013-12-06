@@ -7,8 +7,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.app.AlertDialog;
+import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
+import android.app.ActionBar.Tab;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -38,7 +41,7 @@ import app.sunstreak.yourpisd.net.DateHandler;
 
 
 @SuppressLint("ValidFragment")
-public class ClassSwipeActivity extends FragmentActivity {
+public class ClassSwipeActivity extends FragmentActivity implements ActionBar.TabListener{
 	static List<Fragment> mFragments;
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -107,12 +110,57 @@ public class ClassSwipeActivity extends FragmentActivity {
 		// Set up the ViewPager with the sections adapter.
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 		mViewPager.setAdapter(mSectionsPagerAdapter);
+		final ActionBar actionBar = getActionBar();
+		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+		
+		for(int i = 0; i< classCount; i++)
+		{
+			actionBar.addTab(actionBar.newTab().setText(dg.getCurrentStudent().getClassName(dg.getCurrentStudent().getClassMatch()[i]))
+                    .setTabListener(this));
+		}
+		mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        	 
+	            @Override
+	            public void onPageSelected(int position) {
+	                // on changing the page
+	                // make respected tab selected
+	                actionBar.setSelectedNavigationItem(position);
+	            }
+	         
+	            @Override
+	            public void onPageScrolled(int arg0, float arg1, int arg2) {
+	            }
+	         
+	            @Override
+	            public void onPageScrollStateChanged(int arg0) {
+	            }
+	        });
+		
+		
+		
+		
+		
 		mViewPager.setCurrentItem(receivedClassIndex);
 		mViewPager.setOffscreenPageLimit(5);
 
 
 	}
-
+	//fixed tab listener implemented
+		@Override
+		public void onTabReselected(Tab tab, FragmentTransaction ft) {
+			// TODO Auto-generated method stub
+			
+		}
+		@Override
+		public void onTabSelected(Tab tab, FragmentTransaction ft) {
+			mViewPager.setCurrentItem(tab.getPosition());
+			
+		}
+		@Override
+		public void onTabUnselected(Tab tab, FragmentTransaction ft) {
+			// TODO Auto-generated method stub
+			
+		}
 	@Override
 	protected void onPause() {
 		super.onPause();

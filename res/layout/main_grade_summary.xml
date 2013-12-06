@@ -4,9 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:background="@drawable/dropshadow_white_to_blue"
-    android:paddingTop="10dp"
-    android:paddingBottom="15dp"
+	android:layout_margin = "5dp"
+	android:background = "@drawable/big_card"
+    android:paddingTop="5dp"
+    android:paddingBottom="5dp"
     android:clickable="true"
     >
 
