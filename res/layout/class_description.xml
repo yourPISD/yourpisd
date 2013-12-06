@@ -20,6 +20,7 @@
 
         <TextView
             android:id="@+id/teacher_name"
+            android:layout_margin = "5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
@@ -32,6 +33,7 @@
 
         <TextView
             android:id="@+id/six_weeks_average"
+             android:layout_margin = "5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"

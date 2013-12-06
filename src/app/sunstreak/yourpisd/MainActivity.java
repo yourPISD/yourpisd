@@ -98,9 +98,10 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 								//fixed tab code
 								final ActionBar actionBar = getActionBar();
+
 								actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 						        actionBar.addTab(actionBar.newTab().setText(getResources().getString(R.string.main_section_0_title))
-						                    .setTabListener(this));
+						                .setTabListener(this));
 						        actionBar.addTab(actionBar.newTab().setText(TermFinder.Term.values()[CURRENT_TERM_INDEX].name)
 					                    .setTabListener(this));
 						        actionBar.addTab(actionBar.newTab().setText(getResources().getString(R.string.main_section_2_title))
@@ -674,11 +675,17 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				RelativeLayout.LayoutParams labelParams = new RelativeLayout.LayoutParams(
 						RelativeLayout.LayoutParams.WRAP_CONTENT,
 						RelativeLayout.LayoutParams.WRAP_CONTENT);
+				RelativeLayout.LayoutParams labelParams1 = new RelativeLayout.LayoutParams(
+						RelativeLayout.LayoutParams.WRAP_CONTENT,
+						RelativeLayout.LayoutParams.WRAP_CONTENT);
+				labelParams1.setMargins(5, 5, 5, 5);
+				helpLabel.setLayoutParams(labelParams1);
 				labelParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 				help.setPadding(0, 20, 20, 20);
 				help.setLayoutParams(labelParams);
 				helpLabel.addView(help);
-
+				
+				
 				TextView target = new TextView(getActivity());
 				target.setText("Goal");
 				target.setTextSize(getResources().getDimension(R.dimen.text_size_medium)-10);
@@ -820,12 +827,15 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					examScore.setLayoutParams(layoutParams);
 					
 					group.addView(className);
-
 					group.addView(examScore);
-
 					group.addView(minus);
 					group.addView(goal);
 					group.addView(plus);
+					layoutParams = new RelativeLayout.LayoutParams(
+							RelativeLayout.LayoutParams.WRAP_CONTENT,
+							RelativeLayout.LayoutParams.WRAP_CONTENT);
+					layoutParams.setMargins(5,5,5,5);
+					group.setLayoutParams(layoutParams);
 					
 					layout.addView(group);
 					
