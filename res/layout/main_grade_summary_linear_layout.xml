@@ -2,8 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="5dp"
-    android:background="@drawable/card"
+    android:background="@drawable/card_custom"
     android:orientation="vertical"
     android:padding="0dp" >
 

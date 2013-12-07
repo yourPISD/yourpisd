@@ -344,6 +344,19 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
+			if (dg.getStudents().size() == 0)
+			{
+				dg.clearData();
+				SharedPreferences.Editor editor = getActivity().getSharedPreferences("LoginActivity", Context.MODE_PRIVATE).edit();
+				editor.putBoolean("auto_login", false);
+				editor.commit();
+
+				Intent intent = new Intent(getActivity(), LoginActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				intent.putExtra("show", true);
+				startActivity(intent);
+			}
+			
 			Bundle args = getArguments();
 			position = args.getInt(ARG_OBJECT);
 			final Typeface robotoNew = Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf");
@@ -385,7 +398,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					instructions.setTypeface(Typeface.createFromAsset(getActivity().getAssets()
 							,"Roboto-Light.ttf"));
 					instructions.setText(R.string.welcome_multiple_students);
-					instruct.setBackgroundResource(R.drawable.card);
+					instruct.setBackgroundResource(R.drawable.card_custom);
 					instruct.addView(instructions);
 					bigLayout.addView(instruct, 1);
 				}
@@ -436,7 +449,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					//					profileCards[i].setGravity(Gravity.CENTER_VERTICAL);
 					profileCards[i].setOnClickListener(new StudentChooserListener(i));
 
-					profileCards[i].setBackgroundResource(R.drawable.card);
+					profileCards[i].setBackgroundResource(R.drawable.card_custom);
 
 					bigLayout.addView(profileCards[i]);
 
@@ -524,7 +537,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					bigLayout.addView(studentName);
 				}
 				LinearLayout weekNames = new LinearLayout(getActivity());
-				weekNames.setBackgroundResource(R.drawable.card);
+				weekNames.setBackgroundResource(R.drawable.card_custom);
 				TextView[] weeks = new TextView[5];
 				//				weekNames.setPadding(25, 5, 15, 20);
 				weekNames.setPadding(15,20,0,20);
@@ -594,7 +607,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 						// Support for first semester only.
 						if (termIndex >= 4)
 							break;
-
 						TextView termGrade = new TextView(getActivity());
 						termGrade.setTextSize(getResources().getDimension(R.dimen.text_size_medium));
 						termGrade.setClickable(true);
@@ -606,7 +618,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 						int width = (int)((SCREEN_WIDTH - 30)/5);
 						//						System.out.println(width);
 						LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(width, LayoutParams.WRAP_CONTENT);
-						llp.setMargins(0, 0, 0, 0);
+						if(termIndex == 0)
+								llp.setMargins(10, 0, 0, 0);
 						termGrade.setLayoutParams(llp);
 
 						int avg = classList.optJSONObject(jsonIndex).optJSONArray("terms").optJSONObject(termIndex).optInt("average", -1);
@@ -666,7 +679,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				LinearLayout layout = (LinearLayout) rootView.findViewById(R.id.container);
 
 				RelativeLayout helpLabel = new RelativeLayout(getActivity());
-				helpLabel.setBackgroundResource(R.drawable.card);
+				helpLabel.setBackgroundResource(R.drawable.card_custom);
 				TextView help = new TextView(getActivity());
 				help.setText("Exam Grade needed");
 				help.setTextSize(getResources().getDimension(R.dimen.text_size_medium)-10);
@@ -706,7 +719,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					int jsonIndex = dg.getCurrentStudent().getClassMatch()[classIndex];
 
 					RelativeLayout group = new RelativeLayout(getActivity());
-					group.setBackgroundResource(R.drawable.card);
+					group.setBackgroundResource(R.drawable.card_custom);
 
 					TextView className = new TextView(getActivity());
 					className.setText(dg.getCurrentStudent().getShortClassName(jsonIndex));

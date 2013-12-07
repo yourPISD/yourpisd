@@ -308,7 +308,18 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState)  {
-			
+			if (dg.getStudents().size() == 0)
+			{
+				dg.clearData();
+				SharedPreferences.Editor editor = getActivity().getSharedPreferences("LoginActivity", Context.MODE_PRIVATE).edit();
+				editor.putBoolean("auto_login", false);
+				editor.commit();
+
+				Intent intent = new Intent(getActivity(), LoginActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				intent.putExtra("show", true);
+				startActivity(intent);
+			}
 			position = getArguments().getInt(ARG_SECTION_NUMBER);
 			classIndex = dg.getCurrentStudent().getClassMatch()[position];
 
@@ -422,7 +433,7 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 				{
 					LinearLayout card = new LinearLayout(getActivity());
 					card.setOrientation(LinearLayout.VERTICAL);
-					card.setBackgroundResource(R.drawable.card);
+					card.setBackgroundResource(R.drawable.card_custom);
 
 					// Name of the category ("Daily Work", etc)
 					String categoryName = mClassGrade.getJSONArray("categoryGrades").getJSONObject(category).getString("Category");
