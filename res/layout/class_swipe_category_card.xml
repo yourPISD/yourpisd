@@ -9,7 +9,7 @@
         android:id="@+id/category_name"
         android:layout_width="0dip"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
+        android:layout_margin="5dp"
         android:layout_weight="1"
         android:fontFamily="sans-serif-light"
         android:text="@string/default_category_name"
@@ -20,7 +20,7 @@
         android:id="@+id/category_score"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
+        android:layout_margin="5dp"
         android:fontFamily="sans-serif-light"
         android:textSize="30sp" />
 

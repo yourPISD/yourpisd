@@ -25,7 +25,7 @@
         android:paddingBottom="3dp"
         android:paddingLeft="3dp"
         android:text="@string/default_description"
-        android:textSize="22sp"
+        android:textSize="29sp"
         android:textStyle="normal" />
 
     <TextView

@@ -410,7 +410,11 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 					ImageView profilePic = new ImageView(getActivity());
 					profilePic.setId(MainActivity.id.profile_picture);
-
+					LinearLayout.LayoutParams lpPic = new LinearLayout.LayoutParams(
+							LinearLayout.LayoutParams.MATCH_PARENT,
+							LinearLayout.LayoutParams.WRAP_CONTENT);
+					lpPic.setMargins(5,5,0,0);
+					profilePic.setLayoutParams(lpPic);
 					TextView name = new TextView(getActivity());
 					name.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 					name.setTextSize(22);
@@ -597,7 +601,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 					LinearLayout summary = (LinearLayout) classSummary.findViewById(R.id.layout_six_weeks_summary);
 					//					summary.setPadding(20, 5, 15, 10);
-					summary.setPadding(15,0,15,18);
+					summary.setPadding(15,0,15,14);
 					double sum = 0;
 					int count = 0;
 					for (int termIndex = 0; 
@@ -619,7 +623,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 						//						System.out.println(width);
 						LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(width, LayoutParams.WRAP_CONTENT);
 						if(termIndex == 0)
-								llp.setMargins(10, 0, 0, 0);
+								llp.setMargins(5, 0, 0, 0);
 						termGrade.setLayoutParams(llp);
 
 						int avg = classList.optJSONObject(jsonIndex).optJSONArray("terms").optJSONObject(termIndex).optInt("average", -1);
@@ -694,7 +698,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				labelParams1.setMargins(5, 5, 5, 5);
 				helpLabel.setLayoutParams(labelParams1);
 				labelParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-				help.setPadding(0, 20, 20, 20);
+				help.setPadding(0, 20, 20, 10);
 				help.setLayoutParams(labelParams);
 				helpLabel.addView(help);
 				
@@ -709,7 +713,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 						RelativeLayout.LayoutParams.WRAP_CONTENT);
 				targetParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
 				target.setLayoutParams(targetParams);
-				target.setPadding(20, 20, 0, 20);
+				target.setPadding(20, 20, 0, 10);
 				helpLabel.addView(target);
 
 				layout.addView(helpLabel);
@@ -725,7 +729,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					className.setText(dg.getCurrentStudent().getShortClassName(jsonIndex));
 					className.setTypeface(robotoNew);
 					className.setTextSize(getResources().getDimension(R.dimen.text_size_medium)-5);
-					className.setPadding(20,5,0,0);
+					className.setPadding(20,10,0,0);
 					final TierView goal = new TierView(getActivity(), robotoNew);
 
 					View minus = new View(getActivity());
