@@ -24,6 +24,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.util.DisplayMetrics;
@@ -154,10 +155,12 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                 R.string.drawer_close  /* "close drawer" description */
                 );
 		mDrawerLayout.setDrawerListener(mDrawerToggle);
+		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
         
         mViewPager.setAdapter(mSectionsPagerAdapter);
+        
 		// For parents with multiple students, show the profile cards first.
 		// If we are coming back from ClassSwipeActivity, go to requested section (should be section #1).
 		if (dg.MULTIPLE_STUDENTS) {
@@ -411,7 +414,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					ImageView profilePic = new ImageView(getActivity());
 					profilePic.setId(MainActivity.id.profile_picture);
 					LinearLayout.LayoutParams lpPic = new LinearLayout.LayoutParams(
-							LinearLayout.LayoutParams.MATCH_PARENT,
+							LinearLayout.LayoutParams.WRAP_CONTENT,
 							LinearLayout.LayoutParams.WRAP_CONTENT);
 					lpPic.setMargins(5,5,0,0);
 					profilePic.setLayoutParams(lpPic);
