@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-
-    <dimen name="text_size_medium">20sp</dimen>
-    <dimen name="semester_goals_arrow_size">40sp</dimen>
-    <dimen name="text_size_grade_overview_score">10sp</dimen>
-    <dimen name="text_size_grade_overview_header">9sp</dimen>
-
-</resources>

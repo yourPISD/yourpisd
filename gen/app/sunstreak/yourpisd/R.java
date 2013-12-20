@@ -37,24 +37,15 @@ public final class R {
     }
     public static final class dimen {
         /**  Default screen margins, per the Android Design guidelines. 
-
-         Customize dimensions originally defined in res/values/dimens.xml (such as
-         screen margins) for sw720dp devices (e.g. 10" tablets) in landscape here.
-    
          */
         public static final int activity_horizontal_margin=0x7f070000;
         public static final int activity_vertical_margin=0x7f070001;
-        public static final int semester_goals_arrow_size=0x7f070007;
-        public static final int six_weeks_summary_class_name_text_size=0x7f070003;
-        public static final int six_weeks_summary_grade_text_size=0x7f070004;
-        public static final int text_size_grade_overview_header=0x7f070006;
-        public static final int text_size_grade_overview_score=0x7f070005;
-        /** 
-         Customize dimensions originally defined in res/values/dimens.xml (such as
-         screen margins) for sw600dp devices (e.g. 7" tablets) here.
-    
-         */
-        public static final int text_size_medium=0x7f070002;
+        public static final int semester_goals_arrow_size=0x7f070002;
+        public static final int six_weeks_summary_class_name_text_size=0x7f070004;
+        public static final int six_weeks_summary_grade_text_size=0x7f070005;
+        public static final int text_size_grade_overview_header=0x7f070007;
+        public static final int text_size_grade_overview_score=0x7f070006;
+        public static final int text_size_medium=0x7f070003;
     }
     public static final class drawable {
         public static final int ab_background_textured_bluetheme=0x7f020000;

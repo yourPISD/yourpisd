@@ -4,6 +4,8 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     
+    <dimen name="semester_goals_arrow_size">40sp</dimen>
+    
     <dimen name="text_size_medium">15sp</dimen>
     <dimen name="six_weeks_summary_class_name_text_size">22sp</dimen>
     <dimen name="six_weeks_summary_grade_text_size">29sp</dimen>
