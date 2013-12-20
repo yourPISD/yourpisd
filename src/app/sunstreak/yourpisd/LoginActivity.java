@@ -442,8 +442,8 @@ public class LoginActivity extends Activity {
 							try {
 								// Only sleep extra if student account.
 								if (mDomain == Domain.STUDENT) {
-									System.out.println("sleeping 3.5s");
-									Thread.sleep(3500);
+									System.out.println("sleeping 7s");
+									Thread.sleep(7000);
 								}
 							} catch (InterruptedException e) {
 								e.printStackTrace();

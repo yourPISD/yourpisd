@@ -1,13 +1,14 @@
 package app.sunstreak.yourpisd.net;
 
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 
@@ -18,7 +19,6 @@ import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 
-import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -27,7 +27,7 @@ import android.net.NetworkInfo;
 import android.util.SparseArray;
 import app.sunstreak.yourpisd.R;
 
-public class DataGrabber extends Application {
+public class GenericDataGrabber {
 
 
 
@@ -50,7 +50,7 @@ public class DataGrabber extends Application {
 		JSONArray classList;
 		int[] classIds;
 		int[] classMatch;
-		SparseArray<JSONObject> classGrades = new SparseArray<JSONObject>();
+		Map<Integer,JSONObject> classGrades = new HashMap<Integer,JSONObject>();
 		//		Map<Integer[], JSONObject> classGrades = new HashMap<Integer[], JSONObject>();
 		Bitmap studentPictureBitmap;
 
@@ -232,7 +232,7 @@ public class DataGrabber extends Application {
 		//		}
 
 		public boolean hasClassGrade (int classIndex, int termIndex) {
-			return classGrades.indexOfKey(classIndex) > 0 
+			return classGrades.containsKey(classIndex)
 					&& 
 					classGrades.get(classIndex).optJSONArray("terms")
 					.optJSONObject(termIndex).optLong("lastUpdated", -1) != -1;
@@ -297,7 +297,7 @@ public class DataGrabber extends Application {
 				System.out.println("cg= " + classGrade);
 
 
-				if (classGrades.indexOfKey(classIndex) < 0)
+				if (!classGrades.containsKey(classIndex))
 					classGrades.put(classIndex, classGrade);
 				
 				return classGrade.getJSONArray("terms").getJSONObject(termIndex);
@@ -530,6 +530,7 @@ public class DataGrabber extends Application {
 		this.password = password;
 
 		// Find out whether student or parent using the username.
+		/*
 		if (username.equals("test")) {
 			this.domain = Domain.TEST;
 			students = getTestStudents();
@@ -537,7 +538,8 @@ public class DataGrabber extends Application {
 			gradebookCredentials = new String[] {"", ""};
 			MULTIPLE_STUDENTS = true;
 		}
-		else if (username.contains("@mypisd.net") || !username.contains("@"))
+		else*/
+		if (username.contains("@mypisd.net") || !username.contains("@"))
 			this.domain = Domain.STUDENT;
 		else
 			this.domain = Domain.PARENT;
@@ -716,11 +718,13 @@ public class DataGrabber extends Application {
 			return 1;
 		}
 
+		/*
 		ConnectivityManager connMgr = (ConnectivityManager) 
 				getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 		if (networkInfo == null || !networkInfo.isConnected())
-			return -10;
+			return -10;\
+		*/
 
 		// commented request paramater is allowed for parent account, not allowed for student account. never required.
 		String url = "https://parentviewer.pisd.edu/EP/PIV_Passthrough.aspx?action=trans&uT=" + userType + "&uID=" + uID /*+ "&submit=Login+to+Parent+Viewer"*/;
@@ -867,10 +871,11 @@ public class DataGrabber extends Application {
 	public Student getCurrentStudent() {
 		return students.get(studentIndex);
 	}
-
+	
+	/*
 	private List<Student> getTestStudents() {
 
-
+		
 		class TestStudent extends Student{
 
 
@@ -951,7 +956,7 @@ public class DataGrabber extends Application {
 				matchClasses(gradeSummary);
 
 				return gradeSummary;
-				 */
+				 
 				return null;
 			}
 
@@ -962,16 +967,6 @@ public class DataGrabber extends Application {
 			public int[] getTermIds(int classId) throws JSONException {
 				return new int[] {0, 1, 2, 3, 4, 5};
 			}
-
-
-
-			//			public int[][] getGradeSummary () {
-			//				if (gradeSummary == null)
-			//					loadGradeSummary();
-			//
-			//				return gradeSummary;
-			//			}
-
 
 			public Bitmap getStudentPicture() {
 
@@ -993,41 +988,5 @@ public class DataGrabber extends Application {
 
 		return students;
 	}
-	/*
-	public void writeToFile() {
-		writeDetailsToFile();
-		writeDataToFile();
-	}
-
-	private void writeDetailsToFile() {
-		String filename = "DATA_GRABBER_DETAILS";
-		String string = domain.toString() + "\n" + username + "\n" + password;
-		FileOutputStream outputStream;
-
-		try {
-			outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-			outputStream.write(string.getBytes());
-			outputStream.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void writeDataToFile() {
-		String filename = "DATA_GRABBER_DATA";
-		String string = "";
-		for (Student st : students) {
-			string += st.classGrades.toString() + "\n";
-		}
-		FileOutputStream outputStream;
-
-		try {
-			outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-			outputStream.write(string.getBytes());
-			outputStream.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	 */
+	*/
 }
