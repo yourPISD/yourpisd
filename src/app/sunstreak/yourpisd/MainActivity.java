@@ -53,7 +53,7 @@ import app.sunstreak.yourpisd.net.DateHandler;
 public class MainActivity extends FragmentActivity implements ActionBar.TabListener{ 
 	public static final int CURRENT_TERM_INDEX = TermFinder.getCurrentTermIndex();
 	static int classCount;
-	static LinearLayout[] averages;
+	static RelativeLayout[] averages;
 	static int[] goals;
 	static DataGrabber dg;
 	static Bitmap proPic;
@@ -495,7 +495,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				goals = new int[classCount];
 				Arrays.fill(goals, -1);
 
-				averages = new LinearLayout[classCount];
+				averages = new RelativeLayout[classCount];
 
 				JSONArray classList = dg.getCurrentStudent().getClassList();
 
@@ -503,7 +503,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 					int jsonIndex = classMatch[i];
 
-					averages[i] = (LinearLayout) inflater.inflate(R.layout.main_grade_summary, bigLayout, false);
+					averages[i] = (RelativeLayout) inflater.inflate(R.layout.main_grade_summary, bigLayout, false);
 					TextView className = (TextView) averages[i].findViewById(R.id.name);
 					String name = dg.getStudents().get(dg.studentIndex).getClassName(jsonIndex);
 					className.setText(name);
@@ -546,40 +546,26 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				LinearLayout weekNames = new LinearLayout(getActivity());
 				weekNames.setBackgroundResource(R.drawable.card_custom);
 				TextView[] weeks = new TextView[5];
-				//				weekNames.setPadding(25, 5, 15, 20);
 				weekNames.setPadding(15,20,0,20);
 				weekNames.setGravity(Gravity.CENTER);
 				for(int i = 0; i< weeks.length; i++)
 				{
 					weeks[i] = new TextView(getActivity());
-					//					weeks[i].setTextSize(25);
-					//					weeks[i].setTextSize(SCREEN_WIDTH / 30);
-					weeks[i].setTextSize(SCREEN_WIDTH / 30);
+					weeks[i].setTextSize(getResources().getDimension(R.dimen.text_size_grade_overview_header));
+					System.out.println(weeks[i].getTextSize());
 					switch(i) {
-					case 0:
-						weeks[i].setText("1st");
-						break;
-					case 1:
-						weeks[i].setText("2nd");
-						break;
-					case 2:
-						weeks[i].setText("3rd");
-						break;
-					case 3:
-						weeks[i].setText("Exam");
-						break;
-					case 4:
-						weeks[i].setText("Avg");
-						break;
+					case 0:		weeks[i].setText("1st"); 	break;
+					case 1:		weeks[i].setText("2nd");	break;
+					case 2:		weeks[i].setText("3rd");	break;
+					case 3:		weeks[i].setText("Exam");	break;
+					case 4:		weeks[i].setText("Avg");	break;
 					}
 
 					weeks[i].setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 
 
-					//					weeks[i].setPadding(5, 5, 5, 5);
 					weeks[i].setPadding(0, 0, 0, 0);
 					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams((int)((SCREEN_WIDTH-30) / 5), LayoutParams.WRAP_CONTENT);
-					//				    llp.setMargins(0, 0, 5, 0);
 					llp.setMargins(0, 0, 0, 0);
 					weeks[i].setLayoutParams(llp);
 					weeks[i].setGravity(Gravity.CENTER);
@@ -615,18 +601,14 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 						if (termIndex >= 4)
 							break;
 						TextView termGrade = new TextView(getActivity());
-						termGrade.setTextSize(getResources().getDimension(R.dimen.text_size_medium));
+						termGrade.setTextSize(getResources().getDimension(R.dimen.text_size_grade_overview_score));
 						termGrade.setClickable(true);
 						termGrade.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
-						//						termGrade.setOnClickListener(new ClassSwipeOpenerListener(dg.studentIndex, classIndex, termIndex - 1));
-						//						termGrade.setBackgroundResource(R.drawable.grade_summary_click);
-						//						termGrade.setPadding(5, 5, 5, 5);
 
 						int width = (int)((SCREEN_WIDTH - 30)/5);
-						//						System.out.println(width);
 						LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(width, LayoutParams.WRAP_CONTENT);
 						if(termIndex == 0)
-								llp.setMargins(5, 0, 0, 0);
+							llp.setMargins(15, 0, 0, 0);
 						termGrade.setLayoutParams(llp);
 
 						int avg = classList.optJSONObject(jsonIndex).optJSONArray("terms").optJSONObject(termIndex).optInt("average", -1);
@@ -657,10 +639,10 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 						int width = (int)((SCREEN_WIDTH - 30)/5);
 						LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(width, LayoutParams.WRAP_CONTENT);
-						llp.setMargins(0, 0, 0, 0);
+						llp.setMargins(0, 0, 15, 0);
 						termGrade.setLayoutParams(llp);
 
-						termGrade.setTextSize(getResources().getDimension(R.dimen.text_size_medium));
+						termGrade.setTextSize(getResources().getDimension(R.dimen.text_size_grade_overview_score));
 						termGrade.setClickable(true);
 						termGrade.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 						termGrade.setGravity(Gravity.CENTER);
@@ -688,8 +670,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				RelativeLayout helpLabel = new RelativeLayout(getActivity());
 				helpLabel.setBackgroundResource(R.drawable.card_custom);
 				TextView help = new TextView(getActivity());
-				help.setText("Exam Grade needed");
-				help.setTextSize(getResources().getDimension(R.dimen.text_size_medium)-10);
+				help.setText("Exam Grade Needed");
+				help.setTextSize(getResources().getDimension(R.dimen.text_size_grade_overview_header));
 				help.setTypeface(robotoNew);
 				help.setGravity(Gravity.RIGHT);
 				RelativeLayout.LayoutParams labelParams = new RelativeLayout.LayoutParams(
@@ -705,10 +687,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				help.setLayoutParams(labelParams);
 				helpLabel.addView(help);
 				
-				
 				TextView target = new TextView(getActivity());
 				target.setText("Goal");
-				target.setTextSize(getResources().getDimension(R.dimen.text_size_medium)-10);
+				target.setTextSize(getResources().getDimension(R.dimen.text_size_grade_overview_header));
 				target.setTypeface(robotoNew);
 				target.setGravity(Gravity.LEFT);
 				RelativeLayout.LayoutParams targetParams = new RelativeLayout.LayoutParams(
@@ -731,7 +712,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					TextView className = new TextView(getActivity());
 					className.setText(dg.getCurrentStudent().getShortClassName(jsonIndex));
 					className.setTypeface(robotoNew);
-					className.setTextSize(getResources().getDimension(R.dimen.text_size_medium)-5);
+					className.setTextSize(getResources().getDimension(R.dimen.text_size_grade_overview_header)-5);
 					className.setPadding(20,10,0,0);
 					final TierView goal = new TierView(getActivity(), robotoNew);
 
@@ -743,7 +724,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 					final TextView examScore = new TextView(getActivity());
 					examScore.setPadding(0,0,20,0);
-					examScore.setTextSize(getResources().getDimension(R.dimen.text_size_medium));
+					examScore.setTextSize(getResources().getDimension(R.dimen.text_size_grade_overview_score));
 					examScore.setTypeface(robotoNew);
 					examScore.setGravity(Gravity.RIGHT);
 
@@ -822,6 +803,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					layoutParams.addRule(RelativeLayout.ALIGN_TOP, minus.getId());
 					layoutParams.addRule(RelativeLayout.ALIGN_BOTTOM, minus.getId());
 					layoutParams.setMargins(0, 0, 0, 0);
+					layoutParams.width = getResources().getInteger(R.integer.width_exam_score);
 					goal.setLayoutParams(layoutParams);
 					goal.setId(123491);
 
