@@ -95,6 +95,7 @@ public class GenericDataGrabber {
 		 * Uses internet every time. 
 		 * @throws JSONException
 		 */
+		
 		public int[][] loadGradeSummary () throws JSONException {
 			try {
 				String classId = "" + classList.getJSONObject(0).getInt("enrollmentId");
@@ -125,6 +126,60 @@ public class GenericDataGrabber {
 
 				for (int classIndex = 0; classIndex < gradeSummary.length; classIndex++) {
 					int jsonIndex = classMatch[classIndex];
+					for (int termIndex = 0; termIndex < 4; termIndex++) {
+						int average = gradeSummary[classIndex][termIndex + 1];
+						if (average != -1)
+							classList.getJSONObject(jsonIndex).getJSONArray("terms").getJSONObject(termIndex)
+							.put("average", average);
+					}
+					int avg = gradeSummary[classIndex][5];
+					classList.getJSONObject(jsonIndex).put("firstSemesterAverage", avg);
+				}
+
+				// Last updated time of summary --> goes in this awkward place
+				classList.getJSONObject(0).put("summaryLastUpdated", new Instant().getMillis());
+
+				return gradeSummary;
+			} catch (IOException e) {
+				e.printStackTrace();
+				return null;
+			} catch (JSONException e) {
+				e.printStackTrace();
+				return null;
+			}
+		}
+		
+		/*
+		public int[][] loadGradeSummary () throws JSONException {
+			try {
+				String classId = "" + classList.getJSONObject(0).getInt("enrollmentId");
+				String termId = "" + classList.getJSONObject(0).getJSONArray("terms").getJSONObject(0).getInt("termId");
+
+				String url = "https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/GradeSummary.aspx?" + 
+						"&EnrollmentId=" + 	classId + 
+						"&TermId=" + termId + 
+						"&ReportType=0&StudentId=" + studentId;
+
+
+
+				Object[] summary = Request.sendGet(url,	cookies);
+				String response = (String) summary[0];
+				int responseCode = (Integer) summary[1];
+				cookies = (ArrayList<String>) summary[2];
+
+				if (responseCode != 200)
+					System.out.println("Response code: " + responseCode);
+
+				/*
+				 * puts averages in classList, under each term.
+				 *
+				Element doc = Jsoup.parse(response);
+				int[][] gradeSummary = Parser.gradeSummary(doc, classList);
+
+				matchClasses(gradeSummary);
+
+				for (int classIndex = 0; classIndex < gradeSummary.length; classIndex++) {
+					int jsonIndex = classMatch[classIndex];
 					for (int termIndex = 0; termIndex < gradeSummary[classIndex].length - 1; termIndex++) {
 						int average = gradeSummary[classIndex][termIndex + 1];
 						if (average != -1)
@@ -146,6 +201,7 @@ public class GenericDataGrabber {
 			}
 		}
 
+		*/
 
 		public int[] getClassIds() {
 			if (classIds != null)

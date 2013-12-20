@@ -125,12 +125,13 @@ public class DataGrabber extends Application {
 
 				for (int classIndex = 0; classIndex < gradeSummary.length; classIndex++) {
 					int jsonIndex = classMatch[classIndex];
-					for (int termIndex = 0; termIndex < gradeSummary[classIndex].length - 1; termIndex++) {
+					for (int termIndex = 0; termIndex < 4; termIndex++) {
 						int average = gradeSummary[classIndex][termIndex + 1];
 						if (average != -1)
 							classList.getJSONObject(jsonIndex).getJSONArray("terms").getJSONObject(termIndex)
 							.put("average", average);
 					}
+					classList.getJSONObject(jsonIndex).put("firstSemesterAverage", gradeSummary[classIndex][5]);
 				}
 
 				// Last updated time of summary --> goes in this awkward place

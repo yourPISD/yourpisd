@@ -43,8 +43,8 @@ public class LoginDebugger {
 
 				try {
 					// Only sleep extra if student account.
-					System.out.println("sleeping 7s");
-					Thread.sleep(7000);
+					System.out.println("sleeping 3.5s");
+					Thread.sleep(3500);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -70,18 +70,20 @@ public class LoginDebugger {
 		for (GenericDataGrabber.Student st : dg.getStudents()) {
 			st.loadGradeSummary();
 			for (int i = 0; i < st.getClassMatch().length; i++) {
-				System.out.print(st.getClassList().optJSONObject(st.getClassMatch()[i]).getString("title") );
+				System.out.printf("%20s", st.getClassList().optJSONObject(st.getClassMatch()[i]).getString("title") );
 				for (int j = 0; j < 4; j++) {
 					System.out.print("\t" + st.getClassList().optJSONObject(st.getClassMatch()[i])
 							.optJSONArray("terms").optJSONObject(j).optInt("average", -1));
 				}
-				System.out.println();
+				System.out.println("\t" + st.getClassList().optJSONObject(st.getClassMatch()[i])
+						.optInt("firstSemesterAverage", -1));
 			}
 		}
 		
 		
 		CURRENT_TERM_INDEX = TermFinder.getCurrentTermIndex();
 		System.out.println(CURRENT_TERM_INDEX);
+		
 		
 		
 	}

@@ -620,11 +620,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 							sum+=avg;
 							count++;
 						}
-						//might be too excessive to do this for every six weeks
-						//						if(avg>=90)
-						//							termGrade.setTextColor(getResources().getColor(R.color.green));
-						//						else
-						//							termGrade.setTextColor(getResources().getColor(R.color.red));
 						termGrade.setGravity(Gravity.CENTER);
 						summary.addView(termGrade);
 
@@ -634,7 +629,13 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					// Display the average.
 					if(count > 0) {
 						double average = Math.round(sum/count);
-						String averageText = (int)average+"";
+						
+//						String averageText = (int)average+"";
+						String averageText = "" + classList.optJSONObject(jsonIndex).optInt("firstSemesterAverage", -1);
+						
+						if (averageText.equals("-1"))
+							break;
+						
 						TextView termGrade = new TextView(getActivity());
 
 						int width = (int)((SCREEN_WIDTH - 30)/5);

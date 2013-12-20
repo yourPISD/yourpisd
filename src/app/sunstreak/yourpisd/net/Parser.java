@@ -291,7 +291,7 @@ public class Parser {
 
 		Element reportTable = doc.getElementsByClass("reportTable").get(0).getElementsByTag("tbody").get(0);
 		Elements rows = reportTable.getElementsByTag("tr");
-		int rowIndex = 0; int classIndex = 0;
+		int rowIndex = 0;
 		
 		while (rowIndex < rows.size() ) {
 			
@@ -309,7 +309,7 @@ public class Parser {
 			
 			classAverages.add(getClassId(row));
 			
-			for (int j = 0; j < 8; j++) {
+			for (int j = 0; j < 10; j++) {
 				int col = 0;
 				try {
 					col = termToColumn(j);
@@ -320,21 +320,11 @@ public class Parser {
 				Element column = columns.get(col);
 				String text = column.text();
 				classAverages.add(text.equals("") ? -1 : Integer.parseInt(column.text()));
-				
-				
-//				if ( ! column.text().equals(""))
-//					try {
-//						classList.getJSONObject(classIndex).getJSONArray("terms").getJSONObject(j).put("average", Integer.parseInt(column.text()));
-//					} catch (JSONException e) {
-//						e.printStackTrace();
-//						// Hopefully this will only execute if there is a class that does not last for all year.
-//						// In which case we have encountered ArrayIndexOutOfBounds
-//					}
 			}
 			Integer[] thisRow = new Integer[classAverages.size()];
 			classAverages.toArray(thisRow);
 			gradeSummary.add( thisRow );
-			rowIndex++; classIndex++;
+			rowIndex++;
 		}
 		
 		/*
@@ -385,6 +375,7 @@ public class Parser {
 	 * for use with GradeSummary
 	 */
 	public static int termToColumn (int column) {
+		/*
 		switch (column) {
 		case 0:
 		case 1:
@@ -399,6 +390,8 @@ public class Parser {
 		default:
 			return -1;
 		}
+		*/
+		return column;
 	}
 	
 	/**
