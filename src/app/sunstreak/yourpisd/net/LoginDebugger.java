@@ -2,18 +2,30 @@ package app.sunstreak.yourpisd.net;
 
 import java.util.Scanner;
 
+import app.sunstreak.yourpisd.TermFinder;
+
 public class LoginDebugger {
 
 	static String mEmail;
 	static String mPassword;
 	
+	static int CURRENT_TERM_INDEX;
+	
 	public static void main(String[] args) throws Exception {
 
-		Scanner sc = new Scanner(System.in);
-		System.out.print("Please enter username:\t");
-		mEmail = sc.next();
-		System.out.print("Please enter password:\t");
-		mPassword = sc.next();
+		if (args.length == 2) {
+			mEmail = args[0];
+			mPassword = args[1];
+			System.out.println("|" + mEmail + "|" + mPassword + "|");
+		} else {
+			Scanner sc = new Scanner(System.in);
+			System.out.print("Please enter username:\t");
+			mEmail = sc.next();
+			System.out.print("Please enter password:\t");
+			mPassword = sc.next();
+			sc.close();
+		}
+		
 		
 		GenericDataGrabber dg = new GenericDataGrabber();
 		dg.setData(mEmail, mPassword);
@@ -66,6 +78,10 @@ public class LoginDebugger {
 				System.out.println();
 			}
 		}
+		
+		
+		CURRENT_TERM_INDEX = TermFinder.getCurrentTermIndex();
+		System.out.println(CURRENT_TERM_INDEX);
 		
 		
 	}
