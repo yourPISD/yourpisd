@@ -44,19 +44,13 @@ import app.sunstreak.yourpisd.net.Domain;
 public class LoginActivity extends Activity {
 
 	/**
-	 * The default email to populate the email field with.
-	 */
-	public static final String EXTRA_EMAIL = "com.example.android.authenticatordemo.extra.EMAIL";
-
-	/**
 	 * Keep track of the login task to ensure we can cancel it if requested.
 	 */
 	private UserLoginTask mAuthTask = null;
 
 	// Values for email and password at the time of the login attempt.
-	//	private Domain mDomain;
-	private String mEmail;
-	private String mPassword;
+	private String mEmail = "";
+	private String mPassword = "";
 	private String encryptedPass;
 	private boolean mRememberPassword;
 	private boolean mAutoLogin;
@@ -79,29 +73,16 @@ public class LoginActivity extends Activity {
 		mLoginFormView = findViewById(R.id.login_form);
 		mLoginStatusView = findViewById(R.id.login_status);
 		mLoginStatusMessageView = (TextView) findViewById(R.id.login_status_message);
-		
-
+	
 		mAutoLogin = sharedPrefs.getBoolean("auto_login", false);
 		System.out.println(mAutoLogin);
-
 
 		try {
 			boolean refresh = getIntent().getExtras().getBoolean("Refresh");
 
-				
 			if (refresh) {
 				mEmail = ((DataGrabber) getApplication()).getUsername();
 				mPassword = ((DataGrabber) getApplication()).getPassword();
-				/*
-			}
-			else if (mAutoLogin) {
-				mEmail = sharedPrefs.getString("email", mEmail);
-				mPassword = new String(Base64.decode(sharedPrefs.getString("e_password", "")
-						, Base64.DEFAULT ));
-			}
-
-			if (refresh || mAutoLogin) {
-				*/
 				showProgress(true);
 				mAuthTask = new UserLoginTask();
 				mAuthTask.execute((Void) null);
@@ -153,9 +134,6 @@ public class LoginActivity extends Activity {
 			alertDialog.show();
 		}
 
-
-
-
 		// Set up the remember_password CheckBox
 		mRememberPasswordCheckBox = (CheckBox) findViewById(R.id.remember_password);
 		mRememberPasswordCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -165,10 +143,8 @@ public class LoginActivity extends Activity {
 
 		});
 
-
 		mRememberPassword = sharedPrefs.getBoolean("remember_password", false);
 		mRememberPasswordCheckBox.setChecked(mRememberPassword);
-
 
 		// Set up the auto_login CheckBox
 		mAutoLoginCheckBox = (CheckBox) findViewById(R.id.auto_login);
@@ -184,7 +160,6 @@ public class LoginActivity extends Activity {
 		});
 
 		// Set up the login form.
-		mEmail = getIntent().getStringExtra(EXTRA_EMAIL);
 		mEmailView = (EditText) findViewById(R.id.email);
 
 		mPasswordView = (EditText) findViewById(R.id.password);
@@ -209,9 +184,6 @@ public class LoginActivity extends Activity {
 		// If the password was not saved, give focus to the password.
 		if(mPasswordView.getText().equals(""))
 			mPasswordView.requestFocus();
-
-
-
 
 		mLoginFormView = findViewById(R.id.login_form);
 		mLoginStatusView = findViewById(R.id.login_status);
@@ -251,7 +223,6 @@ public class LoginActivity extends Activity {
 	}
 
 
-	
 	/**
 	 * Attempts to sign in or register the account specified by the login form.
 	 * If there are form errors (invalid email, missing fields, etc.), the
@@ -410,7 +381,6 @@ public class LoginActivity extends Activity {
 					dg.clearData();
 
 					dg.setData (mEmail, mPassword);
-					//						dg.setData (mDomain, mEmail, mPassword);
 
 					//mDomain is now a local variable... which I want to get rid of eventually
 					Domain mDomain = dg.getDomain();
@@ -432,47 +402,15 @@ public class LoginActivity extends Activity {
 					// Update the loading screen: Signing into Gradebook...
 					publishProgress(1);
 
-					// Try logging into Gradebook 5 times.
-					{
-						String[] ptc = dg.getPassthroughCredentials();
-						int loginAttempt = 0;
-						int counter = 0;
-						while (counter < 7 && loginAttempt != 1) {
-
-							try {
-								// Only sleep extra if student account.
-								if (mDomain == Domain.STUDENT) {
-									System.out.println("sleeping 3.5s");
-									Thread.sleep(3500);
-								}
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							}
-
-							loginAttempt = dg.loginGradebook(ptc[0], ptc[1], mEmail, mPassword);
-
-							// Internet connection lost
-							if (loginAttempt == -10)
-								return -3;
-
-							counter++;
-						}
-
-						// If even 7 tries was not enough and still getting NotSet.
-						if (loginAttempt == -1)
-							return -2;
-					}
-
+					int gradebookLoginSuccess = dg.tryLoginGradebook();
+					if (gradebookLoginSuccess != 1)
+						return gradebookLoginSuccess;
 
 					// Update the loading screen: Downloading class grades...
 					publishProgress(2);
 
-
-
-					for (DataGrabber.Student st : dg.getStudents()) {
+					for (DataGrabber.Student st : dg.getStudents())
 						st.loadGradeSummary();
-//						st.matchClasses();
-					}
 
 				} else {
 					System.err.println("No internet connection");
@@ -488,22 +426,22 @@ public class LoginActivity extends Activity {
 			startActivity(startMain);
 			finish();
 			//			overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-			try
-			{
+			
+			// What's the purpose of the sleep below?
+			// Commented out 30 December 2013 by Sidharth
+			/*
+			try {
 				Thread.sleep(50);
-			}
-			catch(InterruptedException e)
-			{
+			} catch (InterruptedException e) {
 
 			}
+			*/
 
 			return 1;
 		}
 
 		@Override
 		protected void onPostExecute(final Integer success) {
-
-
 
 			mAuthTask = null;
 			showProgress(false);
@@ -512,19 +450,13 @@ public class LoginActivity extends Activity {
 			case 1:
 				// Un-lock the screen orientation
 				setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
-				//				finish();
-				//				Intent startMain = new Intent(LoginActivity.this, MainActivity.class);
-				//				startActivity(startMain);
-				//				overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
 				break;
 			case -1:
 				// Bad password
 				mPasswordView.setError(getString(R.string.error_incorrect_password));
 				mPasswordView.requestFocus();
 				break;
-			case -2:
-			{
-				// Server error
+			case -2: { // Server error
 				AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
 				builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
@@ -539,8 +471,7 @@ public class LoginActivity extends Activity {
 				alertDialog.show();
 				break;
 			}
-			case -3:
-			{// No internet connection
+			case -3: { // No internet connection
 				AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
 				builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
@@ -569,18 +500,10 @@ public class LoginActivity extends Activity {
 		protected void onProgressUpdate(Integer... progress) {
 			int message;
 			switch (progress[0]) {
-			case 0:
-				message = R.string.login_progress_mypisd;
-				break;
-			case 1:
-				message = R.string.login_progress_gradebook;
-				break;
-			case 2:
-				message = R.string.login_progress_downloading_data;
-				break;
-			default:
-				// Do nothing.
-				return;
+			case 0:	message = R.string.login_progress_mypisd;			break;
+			case 1: message = R.string.login_progress_gradebook;		break;
+			case 2:	message = R.string.login_progress_downloading_data;	break;
+			default: /* Should not occur */	return;
 			}
 
 			((TextView)mLoginStatusMessageView).setText(message);

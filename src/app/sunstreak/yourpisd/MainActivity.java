@@ -50,7 +50,7 @@ import app.sunstreak.yourpisd.net.DataGrabber;
 import app.sunstreak.yourpisd.net.DateHandler;
 
 
-public class MainActivity extends FragmentActivity implements ActionBar.TabListener{ 
+public class MainActivity extends FragmentActivity implements ActionBar.TabListener { 
 	public static final int CURRENT_TERM_INDEX = TermFinder.getCurrentTermIndex();
 	static int classCount;
 	static RelativeLayout[] averages;
@@ -88,50 +88,60 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		SCREEN_HEIGHT = displaymetrics.heightPixels;
 		SCREEN_WIDTH = displaymetrics.widthPixels;
 		dg = (DataGrabber) getApplication();
-		
+
 		// Create the adapter that will return a fragment for each of the three
 		// primary sections of the app.
-		mSectionsPagerAdapter = new SectionsPagerAdapter(
-				getSupportFragmentManager());
+		mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
 		// Set up the ViewPager with the sections adapter.
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 
-								//fixed tab code
-								final ActionBar actionBar = getActionBar();
+		setUpTabs();
+		setUpNavigationDrawer();
 
-								actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-						        actionBar.addTab(actionBar.newTab().setText(getResources().getString(R.string.main_section_0_title))
-						                .setTabListener(this));
-						        actionBar.addTab(actionBar.newTab().setText(TermFinder.Term.values()[CURRENT_TERM_INDEX].name)
-					                    .setTabListener(this));
-						        actionBar.addTab(actionBar.newTab().setText(getResources().getString(R.string.main_section_2_title))
-					                    .setTabListener(this));
-						        actionBar.addTab(actionBar.newTab().setText(getResources().getString(R.string.main_section_3_title))
-					                    .setTabListener(this));
-						        mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-						        	 
-						            @Override
-						            public void onPageSelected(int position) {
-						                // on changing the page
-						                // make respected tab selected
-						                actionBar.setSelectedNavigationItem(position);
-						            }
-						         
-						            @Override
-						            public void onPageScrolled(int arg0, float arg1, int arg2) {
-						            }
-						         
-						            @Override
-						            public void onPageScrollStateChanged(int arg0) {
-						            }
-						        });
-						        
-		//actual code to launch, uncomment when releasing
 		AppRater.app_launched(this);
-		//testing purposes
-		//		AppRater.showRateDialog(this, null);
-		
+
+		mViewPager.setAdapter(mSectionsPagerAdapter);
+
+		// For parents with multiple students, show the profile cards first.
+		// If we are coming back from ClassSwipeActivity, go to requested section (should be section #1).
+		if (dg.MULTIPLE_STUDENTS) {
+			if (getIntent().hasExtra("mainActivitySection") )
+				mViewPager.setCurrentItem(getIntent().getExtras().getInt("mainActivitySection"));
+			else
+				mViewPager.setCurrentItem(0);
+		}
+		// Otherwise, show the current six weeks grades list.
+		else
+			mViewPager.setCurrentItem(1);
+
+	}
+
+	private void setUpTabs () {
+		final ActionBar actionBar = getActionBar();
+
+		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+		actionBar.addTab(actionBar.newTab().setText(getResources().getString(R.string.main_section_0_title))
+				.setTabListener(this));
+		actionBar.addTab(actionBar.newTab().setText(TermFinder.Term.values()[CURRENT_TERM_INDEX].name)
+				.setTabListener(this));
+		actionBar.addTab(actionBar.newTab().setText(getResources().getString(R.string.main_section_2_title))
+				.setTabListener(this));
+		actionBar.addTab(actionBar.newTab().setText(getResources().getString(R.string.main_section_3_title))
+				.setTabListener(this));
+		mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+			@Override
+			public void onPageSelected(int position) {
+				// on changing the page
+				// make respected tab selected
+				actionBar.setSelectedNavigationItem(position);
+			}
+			@Override	public void onPageScrolled(int arg0, float arg1, int arg2) {  }
+			@Override	public void onPageScrollStateChanged(int arg0) {  }
+		});
+	}
+
+	private void setUpNavigationDrawer () {
 		//navigation drawer
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		mDrawerList = (ListView) findViewById(R.id.left_drawer);
@@ -148,60 +158,46 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		}
 		mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 		mDrawerToggle = new ActionBarDrawerToggle(
-                this,                  /* host Activity */
-                mDrawerLayout,         /* DrawerLayout object */
-                R.drawable.ic_drawer,  /* nav drawer icon to replace 'Up' caret */
-                R.string.drawer_open,  /* "open drawer" description */
-                R.string.drawer_close  /* "close drawer" description */
-                );
+				this,                  /* host Activity */
+				mDrawerLayout,         /* DrawerLayout object */
+				R.drawable.ic_drawer,  /* nav drawer icon to replace 'Up' caret */
+				R.string.drawer_open,  /* "open drawer" description */
+				R.string.drawer_close  /* "close drawer" description */
+				);
 		mDrawerLayout.setDrawerListener(mDrawerToggle);
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
-        
-        mViewPager.setAdapter(mSectionsPagerAdapter);
-        
-		// For parents with multiple students, show the profile cards first.
-		// If we are coming back from ClassSwipeActivity, go to requested section (should be section #1).
-		if (dg.MULTIPLE_STUDENTS) {
-			if (getIntent().hasExtra("mainActivitySection") )
-				mViewPager.setCurrentItem(getIntent().getExtras().getInt("mainActivitySection"));
-			else
-				mViewPager.setCurrentItem(0);
-		}
-		// Otherwise, show the current six weeks grades list.
-		else
-			mViewPager.setCurrentItem(1);
-
+		getActionBar().setHomeButtonEnabled(true);
 	}
+
 	//fixed tab listener implemented
 	@Override
 	public void onTabReselected(Tab tab, FragmentTransaction ft) {
 		// TODO Auto-generated method stub
-		
+
 	}
 	@Override
 	public void onTabSelected(Tab tab, FragmentTransaction ft) {
 		mViewPager.setCurrentItem(tab.getPosition());
-		
+
 	}
 	@Override
 	public void onTabUnselected(Tab tab, FragmentTransaction ft) {
 		// TODO Auto-generated method stub
-		
+
 	}
 	@Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        // Sync the toggle state after onRestoreInstanceState has occurred.
-        mDrawerToggle.syncState();
-    }
+	protected void onPostCreate(Bundle savedInstanceState) {
+		super.onPostCreate(savedInstanceState);
+		// Sync the toggle state after onRestoreInstanceState has occurred.
+		mDrawerToggle.syncState();
+	}
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        mDrawerToggle.onConfigurationChanged(newConfig);
-    }
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		mDrawerToggle.onConfigurationChanged(newConfig);
+	}
 	@Override
 	public void onPause () {
 		SharedPreferences.Editor editor = getSharedPreferences(dg.getCurrentStudent().studentId + "", Context.MODE_PRIVATE).edit();
@@ -210,7 +206,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			System.out.println(i + " " + goals[i]);
 		}
 		editor.commit();
-		
+
 		super.onPause();
 	}
 
@@ -240,11 +236,11 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Pass the event to ActionBarDrawerToggle, if it returns
-        // true, then it has handled the app icon touch event
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
-          return true;
-        }
-        // Handle your other action bar items...
+		// true, then it has handled the app icon touch event
+		if (mDrawerToggle.onOptionsItemSelected(item)) {
+			return true;
+		}
+		// Handle your other action bar items...
 		// Handle item selection
 		switch (item.getItemId()) {
 		case R.id.log_out:
@@ -297,7 +293,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 		@Override
 		public int getCount() {
-			return 4;
+			return 3;
+			// Semester goals removed until May 2014.
+			//return 4;
 		}
 
 		@Override
@@ -307,22 +305,14 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 		@Override
 		public CharSequence getPageTitle(int position) {
-			Locale l = Locale.getDefault();
 			switch (position) {
-			case 0:
-				return getResources().getString(R.string.main_section_0_title);
-			case 1:
-				return TermFinder.Term.values()[CURRENT_TERM_INDEX].name;
-			case 2:
-				return getResources().getString(R.string.main_section_2_title);
-			case 3:
-				return getResources().getString(R.string.main_section_3_title);
-			default:
-				return null;
+			case 0:	return getResources().getString(R.string.main_section_0_title);
+			case 1:	return TermFinder.Term.values()[CURRENT_TERM_INDEX].name;
+			case 2:	return getResources().getString(R.string.main_section_2_title);
+			case 3:	return getResources().getString(R.string.main_section_3_title);
+			default: return "";
 			}
 		}
-
-
 
 	}
 
@@ -347,8 +337,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
-			if (dg.getStudents().size() == 0)
-			{
+
+			// [Hopefully] to prevent force closes.
+			if (dg.getStudents().size() == 0) {
 				dg.clearData();
 				SharedPreferences.Editor editor = getActivity().getSharedPreferences("LoginActivity", Context.MODE_PRIVATE).edit();
 				editor.putBoolean("auto_login", false);
@@ -359,25 +350,22 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				intent.putExtra("show", true);
 				startActivity(intent);
 			}
-			
+
 			Bundle args = getArguments();
 			position = args.getInt(ARG_OBJECT);
 			final Typeface robotoNew = Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf");
 			int tabLayout = 0;
 			switch (position) {
 			case 0:
-				tabLayout = R.layout.tab_new;
-				break;
+				tabLayout = R.layout.tab_new; 		break;
 			case 1:
-				tabLayout = R.layout.tab_summary;
-				break;
 			case 2:
 			case 3:
-				tabLayout = R.layout.tab_summary;
-				break;
+				tabLayout = R.layout.tab_summary;	break;
 			}
 
-
+			// Semester Goals : Shall remain dormant until May 2014.
+			/*
 			// Load saved goals.
 			goals = new int[dg.getCurrentStudent().getClassMatch().length];
 			Arrays.fill(goals, -1);
@@ -385,7 +373,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			for (String key : sharedPrefs.getAll().keySet()) {
 				goals[Integer.parseInt(key)] = sharedPrefs.getInt(key, -1);
 			}
-			
+			 */
+
 			rootView = inflater.inflate(tabLayout, container, false);
 
 
@@ -420,6 +409,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					profilePic.setLayoutParams(lpPic);
 					TextView name = new TextView(getActivity());
 					name.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
+					// TODO use screen-specific text size.
 					name.setTextSize(22);
 					name.setText(dg.getStudents().get(i).name);
 					name.setId(id.name);
@@ -435,6 +425,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					if (!Double.isNaN(gpaValue)) {
 						TextView gpa = new TextView(getActivity());
 						gpa.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
+						// TODO use screen-specific text size.
 						gpa.setTextSize(22);
 						gpa.setText(String.format("GPA: %.5f",gpaValue));
 						gpa.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
@@ -446,27 +437,21 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 						lpGPA.addRule(RelativeLayout.BELOW, id.name);
 						lpGPA.addRule(RelativeLayout.RIGHT_OF, id.profile_picture);
 
-
 						profileCards[i].addView(gpa, lpGPA);
 					}
 
 
 					profileCards[i].addView(profilePic);
-					profileCards[i].addView(name, lpName);
-					//					profileCards[i].setGravity(Gravity.CENTER_VERTICAL);
+					profileCards[i].addView(name, lpName);;
 					profileCards[i].setOnClickListener(new StudentChooserListener(i));
-
 					profileCards[i].setBackgroundResource(R.drawable.card_custom);
 
 					bigLayout.addView(profileCards[i]);
 
-					if(pictureNotLoaded)
-					{
+					if (pictureNotLoaded) {
 						StudentPictureTask spTask = new StudentPictureTask();
 						spTask.execute(i);
-					}
-					else
-					{
+					} else {
 						Drawable picture = new BitmapDrawable(getResources(), pics[i]);
 						profilePic.setImageDrawable(picture);
 					}
@@ -477,8 +462,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					colorStudents();
 			}
 
-			if (position == 1)
-			{
+			if (position == 1) {
 
 				LinearLayout bigLayout = (LinearLayout) rootView.findViewById(R.id.container);
 
@@ -580,16 +564,11 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				for (int classIndex = 0; classIndex < classCount; classIndex++) {
 
 					int jsonIndex = classMatch[classIndex];
-
 					View classSummary = inflater.inflate(R.layout.main_grade_summary_linear_layout, bigLayout, false);
-
 					TextView className = (TextView) classSummary.findViewById(R.id.class_name);
-
 					className.setText(dg.getStudents().get(dg.studentIndex).getClassName(jsonIndex));
 
-
 					LinearLayout summary = (LinearLayout) classSummary.findViewById(R.id.layout_six_weeks_summary);
-					//					summary.setPadding(20, 5, 15, 10);
 					summary.setPadding(15,0,15,14);
 					double sum = 0;
 					int count = 0;
@@ -627,31 +606,26 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					}
 
 					// Display the average.
-					if(count > 0) {
-						double average = Math.round(sum/count);
-						
-//						String averageText = (int)average+"";
-						String averageText = "" + classList.optJSONObject(jsonIndex).optInt("firstSemesterAverage", -1);
-						
-						if (averageText.equals("-1"))
-							break;
-						
-						TextView termGrade = new TextView(getActivity());
+					int average = classList.optJSONObject(jsonIndex).optInt("firstSemesterAverage", -1);
+
+					if (average != -1) {
+						String averageText = Integer.toString(average);
+
+						TextView averageGrade = new TextView(getActivity());
 
 						int width = (int)((SCREEN_WIDTH - 30)/5);
 						LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(width, LayoutParams.WRAP_CONTENT);
 						llp.setMargins(0, 0, 15, 0);
-						termGrade.setLayoutParams(llp);
+						averageGrade.setLayoutParams(llp);
 
-						termGrade.setTextSize(getResources().getDimension(R.dimen.text_size_grade_overview_score));
-						termGrade.setClickable(true);
-						termGrade.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
-						termGrade.setGravity(Gravity.CENTER);
-						termGrade.setText(averageText);
-						//color coded grades yay first comment lol
-						termGrade.setTextColor(gradeColor((int) average));
+						averageGrade.setTextSize(getResources().getDimension(R.dimen.text_size_grade_overview_score));
+						averageGrade.setClickable(false);
+						averageGrade.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
+						averageGrade.setGravity(Gravity.CENTER);
+						averageGrade.setText(averageText);
+						averageGrade.setTextColor(gradeColor(average));
 
-						summary.addView(termGrade);
+						summary.addView(averageGrade);
 					}
 
 					bigLayout.addView(classSummary);
@@ -664,6 +638,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				bigLayout.addView(summaryLastUpdated);
 
 			}
+
+			// Semester Goals : shall remain dormant until May 2014.
+			/*
 			if (position == 3) {
 
 				LinearLayout layout = (LinearLayout) rootView.findViewById(R.id.container);
@@ -687,7 +664,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				help.setPadding(0, 20, 20, 10);
 				help.setLayoutParams(labelParams);
 				helpLabel.addView(help);
-				
+
 				TextView target = new TextView(getActivity());
 				target.setText("Goal");
 				target.setTextSize(getResources().getDimension(R.dimen.text_size_grade_overview_header));
@@ -738,9 +715,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 							goal.decrement();
 						goals[classIndex] = goal.getIndex();
 					}
-					
+
 					examScore.setText("" + dg.getCurrentStudent().examScoreRequired(classIndex, TierView.RANGES[goal.getIndex()]));
-					
+
 					if (Integer.parseInt(examScore.getText().toString()) > 100)
 						examScore.setTextColor(getResources().getColor(R.color.red));
 
@@ -757,7 +734,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 								goal.increment();
 							else if (delta==-1)
 								goal.decrement();
-							
+
 							goals[classIndex] = goal.getIndex();
 
 							examScore.setText(
@@ -828,7 +805,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					layoutParams.addRule(RelativeLayout.ALIGN_BOTTOM, goal.getId());
 					layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 					examScore.setLayoutParams(layoutParams);
-					
+
 					group.addView(className);
 					group.addView(examScore);
 					group.addView(minus);
@@ -839,11 +816,12 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 							RelativeLayout.LayoutParams.WRAP_CONTENT);
 					layoutParams.setMargins(5,5,5,5);
 					group.setLayoutParams(layoutParams);
-					
+
 					layout.addView(group);
-					
+
 				}
 			}
+			 */
 			return rootView;
 		}
 
@@ -956,8 +934,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		return size.y;
 	}
 
-
-
 	class StudentChooserListener implements OnMenuItemClickListener {
 
 		int studentIndex;
@@ -979,7 +955,5 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		public static final int profile_picture = 688;
 		public static final int name = 1329482;
 	}
-
-	
 
 }

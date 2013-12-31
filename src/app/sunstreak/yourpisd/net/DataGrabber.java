@@ -204,16 +204,16 @@ public class DataGrabber extends Application {
 			}
 			return response;
 		}
-		
+
 		public String[] getAssignmentDetails(int classIndex, int termIndex, int assignmentId) throws MalformedURLException, IOException, JSONException {
 			Object[] details = Request.sendGet(
 					"https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/AssignmentDetail.aspx?"
-					+ "assignmentId=" + assignmentId
-					+ "&H=" + domain.hValue
-					+ "&GradebookId=" + studentId
-					+ "&TermId=" + classList.getJSONObject(classMatch[classIndex]).getJSONArray("terms").getJSONObject(termIndex).getInt("termId")
-					+ "&StudentId=" + studentId + "&",
-					cookies);
+							+ "assignmentId=" + assignmentId
+							+ "&H=" + domain.hValue
+							+ "&GradebookId=" + studentId
+							+ "&TermId=" + classList.getJSONObject(classMatch[classIndex]).getJSONArray("terms").getJSONObject(termIndex).getInt("termId")
+							+ "&StudentId=" + studentId + "&",
+							cookies);
 			return Parser.parseAssignment((String)details[0]);
 		}
 
@@ -281,7 +281,7 @@ public class DataGrabber extends Application {
 
 				JSONArray termGrades = Parser.detailedReport(html);
 				Object[] termCategory = Parser.termCategoryGrades(html);
-				
+
 				JSONArray termCategoryGrades = (JSONArray) termCategory[0];
 				if ((Integer)termCategory[1] != -1)
 					classGrade.getJSONArray("terms").getJSONObject(termIndex).put("average", termCategory[1].toString());
@@ -300,7 +300,7 @@ public class DataGrabber extends Application {
 
 				if (classGrades.indexOfKey(classIndex) < 0)
 					classGrades.put(classIndex, classGrade);
-				
+
 				return classGrade.getJSONArray("terms").getJSONObject(termIndex);
 
 
@@ -322,7 +322,7 @@ public class DataGrabber extends Application {
 					return "jsonException";
 				}
 		}
-		
+
 		public String getShortClassName (int classIndex) {
 			String name = getClassName(classIndex);
 			if (name.indexOf('(') != -1)
@@ -691,6 +691,36 @@ public class DataGrabber extends Application {
 			return 0;
 		}
 
+	}
+
+	public int tryLoginGradebook () throws IOException {
+		int loginAttempt = 0;
+		int counter = 0;
+		for (;counter < 7 && loginAttempt != 1; counter++) {
+
+			try {
+				// Only sleep extra if student account.
+				if (domain == Domain.STUDENT) {
+					System.out.println("sleeping 3.5s");
+					Thread.sleep(3500);
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+
+			loginAttempt = loginGradebook(
+					passthroughCredentials[0], passthroughCredentials[1], username, password);
+
+			// Internet connection lost
+			if (loginAttempt == -10)
+				return -3;
+		}
+
+		// If even 7 tries was not enough and still getting NotSet.
+		if (loginAttempt == -1)
+			return -2;
+
+		return 1;
 	}
 
 	/**
