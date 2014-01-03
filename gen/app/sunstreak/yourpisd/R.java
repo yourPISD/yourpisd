@@ -114,45 +114,49 @@ public final class R {
         public static final int tab_unselected_pressed_bluetheme=0x7f02003f;
     }
     public static final class id {
-        public static final int action_settings=0x7f0c0024;
+        public static final int action_settings=0x7f0c0028;
+        public static final int actualGPA=0x7f0c001b;
         public static final int auto_login=0x7f0c000c;
+        public static final int calculate=0x7f0c001c;
         public static final int category_name=0x7f0c0013;
         public static final int category_score=0x7f0c0014;
-        public static final int class_name=0x7f0c001a;
-        public static final int container=0x7f0c0020;
+        public static final int class_name=0x7f0c001e;
+        public static final int container=0x7f0c0024;
         public static final int copyright=0x7f0c0003;
         public static final int credit_developers=0x7f0c0001;
         public static final int credit_icon=0x7f0c0002;
-        public static final int credits=0x7f0c0026;
+        public static final int credits=0x7f0c002a;
+        public static final int cumulativeGPA=0x7f0c0019;
         public static final int description=0x7f0c0015;
         public static final int drawer_layout=0x7f0c000e;
         public static final int email=0x7f0c0008;
         public static final int grade=0x7f0c0016;
         public static final int info=0x7f0c0010;
-        public static final int layout_six_weeks_summary=0x7f0c001b;
-        public static final int layout_year_summary=0x7f0c0021;
+        public static final int layout_six_weeks_summary=0x7f0c001f;
+        public static final int layout_year_summary=0x7f0c0025;
         public static final int left_drawer=0x7f0c000f;
-        public static final int log_out=0x7f0c0025;
+        public static final int log_out=0x7f0c0029;
         public static final int login=0x7f0c000a;
         public static final int login_form=0x7f0c0007;
         public static final int login_status=0x7f0c0005;
         public static final int login_status_message=0x7f0c0006;
         public static final int logo=0x7f0c0004;
-        public static final int name=0x7f0c0019;
-        public static final int next_six_weeks=0x7f0c0023;
-        public static final int overall=0x7f0c001d;
+        public static final int name=0x7f0c001d;
+        public static final int next_six_weeks=0x7f0c0027;
+        public static final int numCredits=0x7f0c001a;
+        public static final int overall=0x7f0c0021;
         public static final int pager=0x7f0c0000;
         public static final int password=0x7f0c0009;
-        public static final int previous_six_weeks=0x7f0c0022;
+        public static final int previous_six_weeks=0x7f0c0026;
         public static final int remember_password=0x7f0c000b;
-        public static final int scroll=0x7f0c001f;
-        public static final int scrollView1=0x7f0c001c;
+        public static final int scroll=0x7f0c0023;
+        public static final int scrollView1=0x7f0c0020;
         public static final int section_label=0x7f0c0018;
         public static final int sign_in_button=0x7f0c000d;
         public static final int six_weeks_average=0x7f0c0012;
         public static final int teacher_name=0x7f0c0011;
         public static final int text=0x7f0c0017;
-        public static final int welcome=0x7f0c001e;
+        public static final int welcome=0x7f0c0022;
     }
     public static final class integer {
         public static final int width_exam_score=0x7f080000;
@@ -168,13 +172,14 @@ public final class R {
         public static final int drawer_list=0x7f030007;
         public static final int fragment_class_swipe_dummy=0x7f030008;
         public static final int fragment_main_dummy=0x7f030009;
-        public static final int main_grade_summary=0x7f03000a;
-        public static final int main_grade_summary_linear_layout=0x7f03000b;
-        public static final int main_grade_summary_score=0x7f03000c;
-        public static final int main_student_name_if_multiple_students=0x7f03000d;
-        public static final int tab_new=0x7f03000e;
-        public static final int tab_summary=0x7f03000f;
-        public static final int tab_year_summary=0x7f030010;
+        public static final int main_gpa_calc=0x7f03000a;
+        public static final int main_grade_summary=0x7f03000b;
+        public static final int main_grade_summary_linear_layout=0x7f03000c;
+        public static final int main_grade_summary_score=0x7f03000d;
+        public static final int main_student_name_if_multiple_students=0x7f03000e;
+        public static final int tab_new=0x7f03000f;
+        public static final int tab_summary=0x7f030010;
+        public static final int tab_year_summary=0x7f030011;
     }
     public static final class menu {
         public static final int class_swipe_actions=0x7f0b0000;

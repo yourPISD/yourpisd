@@ -380,7 +380,12 @@ public class DataGrabber extends Application {
 		public int[] getClassMatch () {
 			return classMatch;
 		}
-
+		
+		public double getCumulativeGPA(double oldCumulativeGPA, double numCredits)
+		{
+			double newNumCredits = numCredits+ 0.5* classMatch.length;
+			return (getGPA()*0.5*classMatch.length+oldCumulativeGPA*numCredits)/newNumCredits;
+		}
 		public double getGPA () {
 			if (classMatch == null)
 				return -2;

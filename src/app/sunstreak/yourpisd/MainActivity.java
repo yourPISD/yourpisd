@@ -1,7 +1,7 @@
 package app.sunstreak.yourpisd;
 
+import java.text.DecimalFormat;
 import java.util.Arrays;
-import java.util.Locale;
 
 import org.json.JSONArray;
 
@@ -11,6 +11,7 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Point;
@@ -38,8 +39,11 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
@@ -421,7 +425,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 							RelativeLayout.LayoutParams.WRAP_CONTENT);
 					lpName.addRule(RelativeLayout.RIGHT_OF, profilePic.getId());
 
-					double gpaValue = dg.getStudents().get(i).getGPA();
+					final double gpaValue = dg.getStudents().get(i).getGPA();
+					
 					if (!Double.isNaN(gpaValue)) {
 						TextView gpa = new TextView(getActivity());
 						gpa.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
@@ -455,11 +460,60 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 						Drawable picture = new BitmapDrawable(getResources(), pics[i]);
 						profilePic.setImageDrawable(picture);
 					}
-
+					RelativeLayout gpaCalc = (RelativeLayout)inflater.inflate(R.layout.main_gpa_calc, bigLayout, false);
+					final TextView actualGPA = (TextView)gpaCalc.findViewById(R.id.actualGPA);
+					actualGPA.setTypeface(robotoNew);
+					Button calculate = (Button)gpaCalc.findViewById(R.id.calculate);
+					calculate.setTypeface(robotoNew);
+					final EditText oldCumulativeGPA = (EditText)gpaCalc.findViewById(R.id.cumulativeGPA);
+					final EditText numCredits = (EditText)gpaCalc.findViewById(R.id.numCredits);
+					SharedPreferences sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
+					String spGPA = sharedPrefs.getString("oldCumulativeGPA", "no");
+					if(!spGPA.equals("no"))
+					{
+						oldCumulativeGPA.setText(spGPA);
+						String spCredits = sharedPrefs.getString("numCredits", "no");
+						if(!spCredits.equals("no"))
+						{
+							numCredits.setText(spCredits);
+							actualGPA.setText(""+dg.getStudents().get(i).getCumulativeGPA(
+									Double.parseDouble(spGPA),
+									Double.parseDouble(spCredits)));
+						}
+					}
+					final int newI = i;
+					calculate.setOnClickListener(new OnClickListener(){
+						public void onClick(View bigLayout)
+						{
+							double oldGPA = Double.parseDouble(oldCumulativeGPA.getText().toString());
+							double cred = Double.parseDouble(numCredits.getText().toString());
+							if((oldGPA+"").equals("") || 
+									(cred+"").equals(""))
+								actualGPA.setText("Please Fill Out the Above");
+							else
+							{
+								SharedPreferences sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
+								Editor editor = sharedPrefs.edit();
+								editor.putString("oldCumulativeGPA", ""+oldGPA);
+								editor.putString("numCredits", ""+cred);
+								editor.commit();
+								Double legitGPA = dg.getStudents().get(newI).getCumulativeGPA(
+										oldGPA,
+										cred);
+								DecimalFormat df = new DecimalFormat("#.########");
+								actualGPA.setText(df.format(legitGPA));
+							}
+							InputMethodManager imm = 
+									(InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+							imm.hideSoftInputFromWindow(numCredits.getWindowToken(), 0);
+						}
+					});
+					bigLayout.addView(gpaCalc);
 				}
 
 				if (dg.MULTIPLE_STUDENTS)
 					colorStudents();
+				
 			}
 
 			if (position == 1) {

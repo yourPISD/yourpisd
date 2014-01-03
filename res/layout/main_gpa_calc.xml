@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/card_custom" >
+
+    <EditText
+        android:id="@+id/cumulativeGPA"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:ems="9"
+        android:inputType="numberDecimal"
+        android:hint="Cumulative GPA"
+        >
+    </EditText>
+    <EditText
+        android:id="@+id/numCredits"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/cumulativeGPA"
+        android:ems="9"
+        android:inputType="numberDecimal"
+        android:hint="Number of Credits"
+        >
+    </EditText>
+
+    <TextView
+        android:id="@+id/actualGPA"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/numCredits"
+        android:text=""
+        android:textSize="35sp"
+        android:padding="5dp" 
+        />
+
+    <Button
+        android:id="@+id/calculate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/numCredits"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/cumulativeGPA"
+        android:text="Calculate" 
+        android:gravity="center"/>
+
+</RelativeLayout>
