@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -384,7 +385,9 @@ public class DataGrabber extends Application {
 		public double getCumulativeGPA(double oldCumulativeGPA, double numCredits)
 		{
 			double newNumCredits = numCredits+ 0.5* classMatch.length;
-			return (getGPA()*0.5*classMatch.length+oldCumulativeGPA*numCredits)/newNumCredits;
+			DecimalFormat df = new DecimalFormat("#.########");
+			return Double.parseDouble(df.format((getGPA()*0.5*classMatch.length
+					+oldCumulativeGPA*numCredits)/newNumCredits));
 		}
 		public double getGPA () {
 			if (classMatch == null)
