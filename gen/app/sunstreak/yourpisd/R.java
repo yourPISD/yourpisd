@@ -24,13 +24,14 @@ public final class R {
     }
     public static final class color {
         public static final int black=0x7f060003;
+        public static final int disabledCell=0x7f06000a;
         public static final int gray=0x7f060005;
         public static final int green=0x7f060006;
         public static final int holo_blue=0x7f060000;
         public static final int holo_green_dark=0x7f060002;
         public static final int holo_green_light=0x7f060001;
         public static final int light_blue=0x7f060004;
-        public static final int pressed_bluetheme=0x7f06000a;
+        public static final int pressed_bluetheme=0x7f06000b;
         public static final int red=0x7f060007;
         public static final int transparent=0x7f060008;
         public static final int yellow=0x7f060009;

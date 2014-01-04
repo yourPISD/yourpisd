@@ -6,8 +6,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-import android.text.format.DateFormat;
-
 public class TermFinder {
 
 	public enum Term {

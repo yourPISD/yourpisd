@@ -11,4 +11,5 @@
     <color name="transparent">#00000000</color>
     <color name="yellow">#FF8800</color>
 
+    <color name="disabledCell">#F0F0F0</color>
 </resources>

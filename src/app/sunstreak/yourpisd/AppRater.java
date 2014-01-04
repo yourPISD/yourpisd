@@ -48,14 +48,16 @@ public class AppRater {
         dialog.setCanceledOnTouchOutside(false);
         dialog.setTitle("Rate " + APP_TITLE);
         dialog.setMessage("Enjoying yourPISD? Please take a few seconds to rate us. Thank you for your support.");
-        dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Rate yourPISD", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
+        dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Rate yourPISD", new DialogInterface.OnClickListener() {
+            @Override
+			public void onClick(DialogInterface dialog, int id) {
             	mContext.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + APP_PNAME)));
                 dialog.dismiss();
           } }); 
 
-          dialog.setButton(AlertDialog.BUTTON_NEGATIVE, "No, thanks", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
+          dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "No, thanks", new DialogInterface.OnClickListener() {
+            @Override
+			public void onClick(DialogInterface dialog, int id) {
             	if (editor != null) {
                   editor.putBoolean("dontshowagain", true);
                   editor.commit();
@@ -63,9 +65,10 @@ public class AppRater {
               dialog.dismiss();
           }}); 
 
-          dialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Remind me later", new DialogInterface.OnClickListener() {
+          dialog.setButton(DialogInterface.BUTTON_NEUTRAL, "Remind me later", new DialogInterface.OnClickListener() {
 
-            public void onClick(DialogInterface dialog, int id) {
+            @Override
+			public void onClick(DialogInterface dialog, int id) {
             	dialog.dismiss();
           }});
 

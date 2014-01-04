@@ -25,6 +25,7 @@ public class TierView extends TextSwitcher {
 	public TierView(final Context context, final Typeface typeface) {
 		super(context);
 		setFactory(new ViewFactory() {
+			@Override
 			public View makeView() {
 				TextView tv = new TextView(context);
 				tv.setWidth(70);

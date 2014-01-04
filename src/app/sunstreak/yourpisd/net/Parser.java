@@ -22,7 +22,7 @@ public class Parser {
 	private Parser() { }
 	
 	/*
-	 * returns value of pageUniqueId from htm
+	 * returns value of pageUniqueId from html
 	 * String must contain the following block:
 	 * <input type="hidden" name="PageUniqueId" id="PageUniqueId" value="8bdc977f-ccaf-4a18-b4dd-20d1406fad6a" />
 	 */
@@ -287,7 +287,7 @@ public class Parser {
 	 */
 	public static int[][] gradeSummary (Element doc, JSONArray classList) {
 		
-		List<Integer[]> gradeSummary = new ArrayList<Integer[]>();
+		List<int[]> gradeSummary = new ArrayList<int[]>();
 
 		Element reportTable = doc.getElementsByClass("reportTable").get(0).getElementsByTag("tbody").get(0);
 		Elements rows = reportTable.getElementsByTag("tr");
@@ -295,35 +295,24 @@ public class Parser {
 		
 		while (rowIndex < rows.size() ) {
 			
-			List<Integer> classAverages = new ArrayList<Integer>();
+			int[] classAverages = new int[11];
+			Arrays.fill(classAverages, -3);
 			
 			Element row = rows.get(rowIndex);
 			Elements columns = row.getElementsByTag("td");
 			
-			// Skip classes that don't exist in the first semester.
-			// Must be modified before 2nd semester!
-			if (columns.get(0).attr("class").equals("disabledCell")) {
-				rowIndex++;
-				continue;
-			}
+			classAverages[0] = getClassId(row);
 			
-			classAverages.add(getClassId(row));
-			
-			for (int j = 0; j < 10; j++) {
-				int col = 0;
-				try {
-					col = termToColumn(j);
-				} catch (IndexOutOfBoundsException e) {
-					continue;
-				}
-				
+			for (int col = 0; col < 10; col++) {
 				Element column = columns.get(col);
 				String text = column.text();
-				classAverages.add(text.equals("") ? -1 : Integer.parseInt(column.text()));
+				
+				// -2 for disabled class
+				if (column.attr("class").equals("disabledCell"))
+					text = "-2";
+				classAverages[col+1] = text.equals("") ? -1 : Integer.parseInt(text);
 			}
-			Integer[] thisRow = new Integer[classAverages.size()];
-			classAverages.toArray(thisRow);
-			gradeSummary.add( thisRow );
+			gradeSummary.add( classAverages );
 			rowIndex++;
 		}
 		
@@ -370,30 +359,7 @@ public class Parser {
 		Element studentName = doc.getElementById("ctl00_ctl00_ContentPlaceHolder_uxMultiple");
 		return studentName.text();
 	}
-	
-	/*
-	 * for use with GradeSummary
-	 */
-	public static int termToColumn (int column) {
-		/*
-		switch (column) {
-		case 0:
-		case 1:
-		case 2:
-		case 3:
-			return column;
-		case 4:
-		case 5:
-		case 6:
-		case 7:
-			return column + 1;		// skips over first semester average column 
-		default:
-			return -1;
-		}
-		*/
-		return column;
-	}
-	
+
 	/**
 	 * 
 	 * @param html html source code of https://sso.portal.mypisd.net/cas/login?service=http%3A%2F%2Fportal.mypisd.net%2Fc%2Fportal%2Flogin

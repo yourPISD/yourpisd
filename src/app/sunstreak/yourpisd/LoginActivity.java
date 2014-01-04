@@ -1,7 +1,5 @@
 package app.sunstreak.yourpisd;
 
-
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
@@ -12,7 +10,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageInfo;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -22,7 +19,6 @@ import android.text.TextUtils;
 import android.util.Base64;
 import android.view.KeyEvent;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -33,9 +29,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import app.sunstreak.yourpisd.net.DataGrabber;
-import app.sunstreak.yourpisd.net.Domain;
-
+import app.sunstreak.yourpisd.net.YPSession;
 
 /**
  * Activity which displays a login screen to the user, offering registration as
@@ -47,7 +41,8 @@ public class LoginActivity extends Activity {
 	 * Keep track of the login task to ensure we can cancel it if requested.
 	 */
 	private UserLoginTask mAuthTask = null;
-
+	private YPSession session;
+	
 	// Values for email and password at the time of the login attempt.
 	private String mEmail = "";
 	private String mPassword = "";
@@ -77,12 +72,14 @@ public class LoginActivity extends Activity {
 		mAutoLogin = sharedPrefs.getBoolean("auto_login", false);
 		System.out.println(mAutoLogin);
 
+		session = ((YPApplication)getApplication()).session;
+		
 		try {
 			boolean refresh = getIntent().getExtras().getBoolean("Refresh");
 
 			if (refresh) {
-				mEmail = ((DataGrabber) getApplication()).getUsername();
-				mPassword = ((DataGrabber) getApplication()).getPassword();
+				mEmail = session.getUsername();
+				mPassword = session.getPassword();
 				showProgress(true);
 				mAuthTask = new UserLoginTask();
 				mAuthTask.execute((Void) null);
@@ -114,6 +111,7 @@ public class LoginActivity extends Activity {
 			builder.setMessage(getResources().getString(R.string.user_agreement));
 			// Setting Positive "Yes" Button
 			builder.setPositiveButton("Agree", new DialogInterface.OnClickListener() {
+				@Override
 				public void onClick(DialogInterface dialog,int which) {
 					sharedPrefs.edit().putBoolean("AcceptedUserAgreement", true).commit();
 					dialog.cancel();
@@ -122,6 +120,7 @@ public class LoginActivity extends Activity {
 
 			// Setting Negative "NO" Button
 			builder.setNegativeButton("Disagree", new DialogInterface.OnClickListener() {
+				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					// Write your code here to invoke NO event
 					sharedPrefs.edit().putBoolean("AcceptedUserAgreement", false).commit();
@@ -137,6 +136,7 @@ public class LoginActivity extends Activity {
 		// Set up the remember_password CheckBox
 		mRememberPasswordCheckBox = (CheckBox) findViewById(R.id.remember_password);
 		mRememberPasswordCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			@Override
 			public void onCheckedChanged(CompoundButton button, boolean isChecked) {
 				mRememberPassword = isChecked;
 			}
@@ -150,6 +150,7 @@ public class LoginActivity extends Activity {
 		mAutoLoginCheckBox = (CheckBox) findViewById(R.id.auto_login);
 		mAutoLoginCheckBox.setChecked(mAutoLogin);
 		mAutoLoginCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			@Override
 			public void onCheckedChanged(CompoundButton button, boolean isChecked) {
 				mAutoLogin = isChecked;
 				if (isChecked) {
@@ -358,7 +359,7 @@ public class LoginActivity extends Activity {
 	 */
 	public class UserLoginTask extends AsyncTask<Void, Integer, Integer> {
 
-		private DataGrabber dg = ((DataGrabber) getApplication());
+		private YPSession session;
 
 		@Override
 		protected void onPreExecute() {
@@ -377,18 +378,14 @@ public class LoginActivity extends Activity {
 				NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 				if (networkInfo != null && networkInfo.isConnected()) {
 					// Simulate network access.
-					dg = (DataGrabber) getApplication();
-					dg.clearData();
-
-					dg.setData (mEmail, mPassword);
-
-					//mDomain is now a local variable... which I want to get rid of eventually
-					Domain mDomain = dg.getDomain();
+					session = new YPSession(mEmail, mPassword);
+					
+					((YPApplication)getApplication()).session = session;
 
 					// Update the loading screen: Signing into myPISD...
 					publishProgress(0);
 
-					int loginSuccess = dg.login();
+					int loginSuccess = session.login();
 					switch (loginSuccess) {
 					case -1: // Parent login error
 						return -1;	// Bad password display
@@ -402,14 +399,14 @@ public class LoginActivity extends Activity {
 					// Update the loading screen: Signing into Gradebook...
 					publishProgress(1);
 
-					int gradebookLoginSuccess = dg.tryLoginGradebook();
+					int gradebookLoginSuccess = session.tryLoginGradebook();
 					if (gradebookLoginSuccess != 1)
 						return gradebookLoginSuccess;
 
 					// Update the loading screen: Downloading class grades...
 					publishProgress(2);
 
-					for (DataGrabber.Student st : dg.getStudents())
+					for (YPSession.Student st : session.getStudents())
 						st.loadGradeSummary();
 
 				} else {
@@ -459,6 +456,7 @@ public class LoginActivity extends Activity {
 			case -2: { // Server error
 				AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
 				builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					@Override
 					public void onClick(DialogInterface dialog, int id) {
 						// User clicked OK button
 					}
@@ -474,6 +472,7 @@ public class LoginActivity extends Activity {
 			case -3: { // No internet connection
 				AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
 				builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					@Override
 					public void onClick(DialogInterface dialog, int id) {
 						// User clicked OK button
 					}
@@ -497,6 +496,7 @@ public class LoginActivity extends Activity {
 			showProgress(false);
 		}
 
+		@Override
 		protected void onProgressUpdate(Integer... progress) {
 			int message;
 			switch (progress[0]) {
@@ -506,7 +506,7 @@ public class LoginActivity extends Activity {
 			default: /* Should not occur */	return;
 			}
 
-			((TextView)mLoginStatusMessageView).setText(message);
+			mLoginStatusMessageView.setText(message);
 		}
 
 	}

@@ -2,15 +2,17 @@ package app.sunstreak.yourpisd.net;
 
 import java.util.Scanner;
 
+import org.json.JSONArray;
+
 import app.sunstreak.yourpisd.TermFinder;
 
 public class LoginDebugger {
 
 	static String mEmail;
 	static String mPassword;
-	
+
 	static int CURRENT_TERM_INDEX;
-	
+
 	public static void main(String[] args) throws Exception {
 
 		if (args.length == 2) {
@@ -25,67 +27,56 @@ public class LoginDebugger {
 			mPassword = sc.next();
 			sc.close();
 		}
-		
-		
-		GenericDataGrabber dg = new GenericDataGrabber();
-		dg.setData(mEmail, mPassword);
 
-		int loginSuccess = dg.login();
-		System.out.println(loginSuccess);
+		YPSession session = new YPSession(mEmail, mPassword);
 
-
-		// Try logging into Gradebook 5 times.
-		{
-			String[] ptc = dg.getPassthroughCredentials();
-			int loginAttempt = 0;
-			int counter = 0;
-			while (counter < 7 && loginAttempt != 1) {
-
-				try {
-					// Only sleep extra if student account.
-					System.out.println("sleeping 3.5s");
-					Thread.sleep(3500);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-
-				loginAttempt = dg.loginGradebook(ptc[0], ptc[1], mEmail, mPassword);
-
-				// Internet connection lost
-				if (loginAttempt == -10) {
-					System.out.println("No internet connection");
-					System.exit(0);
-				}
-
-				counter++;
-			}
-
-			// If even 7 tries was not enough and still getting NotSet.
-			if (loginAttempt == -1) {
-				System.out.println("7 tries not enough. Still getting NotSet");
-				System.exit(0);
-			}
+		int loginSuccess = session.login();
+		if (loginSuccess == 1)
+			System.out.println("Successful login!");
+		else {
+			System.out.println("Login failed.");
+			System.exit(-1);
 		}
 
-		for (GenericDataGrabber.Student st : dg.getStudents()) {
+		session.tryLoginGradebook();
+
+		for (YPSession.Student st : session.getStudents()) {
 			st.loadGradeSummary();
 			for (int i = 0; i < st.getClassMatch().length; i++) {
 				System.out.printf("%20s", st.getClassList().optJSONObject(st.getClassMatch()[i]).getString("title") );
-				for (int j = 0; j < 4; j++) {
-					System.out.print("\t" + st.getClassList().optJSONObject(st.getClassMatch()[i])
-							.optJSONArray("terms").optJSONObject(j).optInt("average", -1));
+				System.out.print("   ");
+				JSONArray classGrade = st.getClassList().optJSONObject(st.getClassMatch()[i])
+						.optJSONArray("terms");
+				
+				if (classGrade.optJSONObject(0).getString("description").equals("4th Six Weeks"))
+					System.out.printf("%20s", "");
+				
+				for (int j = 0; j < classGrade.length() ; j++) {
+					int score = classGrade.optJSONObject(j).optInt("average", -1);
+					System.out.printf("%5s", displayScore(score));
 				}
-				System.out.println("\t" + st.getClassList().optJSONObject(st.getClassMatch()[i])
-						.optInt("firstSemesterAverage", -1));
+				
+				if (classGrade.length() == 4 &&
+						classGrade.optJSONObject(0).getString("description").equals("1st Six Weeks"))
+					System.out.printf("%20s", "");
+
+				System.out.printf("  S1:%5s", displayScore(st.getClassList().optJSONObject(st.getClassMatch()[i])
+						.optInt("firstSemesterAverage", -1)));
+				System.out.printf("  S2:%5s\n", displayScore(st.getClassList().optJSONObject(st.getClassMatch()[i])
+						.optInt("secondSemesterAverage", -1)));
 			}
 		}
-		
-		
+
 		CURRENT_TERM_INDEX = TermFinder.getCurrentTermIndex();
 		System.out.println(CURRENT_TERM_INDEX);
-		
-		
-		
+	}
+	
+	public static String displayScore (int score) {
+		switch (score) {
+		case -1: return "XXX";
+		case -2: return "NNN";
+		default: return Integer.toString(score);
+		}
 	}
 
 }

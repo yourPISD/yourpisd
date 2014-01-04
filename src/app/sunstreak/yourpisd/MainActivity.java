@@ -50,7 +50,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import app.sunstreak.yourpisd.net.DataGrabber;
+import app.sunstreak.yourpisd.net.YPSession;
 import app.sunstreak.yourpisd.net.DateHandler;
 
 
@@ -59,7 +59,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	static int classCount;
 	static RelativeLayout[] averages;
 	static int[] goals;
-	static DataGrabber dg;
+	static YPSession session;
 	static Bitmap proPic;
 	static int SCREEN_HEIGHT;
 	static int SCREEN_WIDTH;
@@ -91,7 +91,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
 		SCREEN_HEIGHT = displaymetrics.heightPixels;
 		SCREEN_WIDTH = displaymetrics.widthPixels;
-		dg = (DataGrabber) getApplication();
+		session = ((YPApplication)getApplication()).session;
 
 		// Create the adapter that will return a fragment for each of the three
 		// primary sections of the app.
@@ -109,7 +109,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 		// For parents with multiple students, show the profile cards first.
 		// If we are coming back from ClassSwipeActivity, go to requested section (should be section #1).
-		if (dg.MULTIPLE_STUDENTS) {
+		if (session.MULTIPLE_STUDENTS) {
 			if (getIntent().hasExtra("mainActivitySection") )
 				mViewPager.setCurrentItem(getIntent().getExtras().getInt("mainActivitySection"));
 			else
@@ -204,13 +204,14 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	}
 	@Override
 	public void onPause () {
-		SharedPreferences.Editor editor = getSharedPreferences(dg.getCurrentStudent().studentId + "", Context.MODE_PRIVATE).edit();
+		// Disabled while no goals.
+		/*
+		SharedPreferences.Editor editor = getSharedPreferences(session.getCurrentStudent().studentId + "", Context.MODE_PRIVATE).edit();
 		for (int i = 0; i < goals.length; i++) {
 			editor.putInt(Integer.toString(i), goals[i]);
-			System.out.println(i + " " + goals[i]);
 		}
 		editor.commit();
-
+		*/
 		super.onPause();
 	}
 
@@ -220,13 +221,13 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		getMenuInflater().inflate(R.menu.main_activity, menu);
 
 		// Create list of students in Menu.
-		if (dg.MULTIPLE_STUDENTS) {
-			for (int i = 0; i < dg.getStudents().size(); i++) {
-				String name = dg.getStudents().get(i).name;
+		if (session.MULTIPLE_STUDENTS) {
+			for (int i = 0; i < session.getStudents().size(); i++) {
+				String name = session.getStudents().get(i).name;
 				MenuItem item = menu.add(name);
 
 				// Set the currently enabled student un-clickable.
-				if (i == dg.studentIndex)
+				if (i == session.studentIndex)
 					item.setEnabled(false);
 
 				item.setOnMenuItemClickListener(new StudentChooserListener(i));
@@ -248,7 +249,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		// Handle item selection
 		switch (item.getItemId()) {
 		case R.id.log_out:
-			dg.clearData();
+			session = null;
 			SharedPreferences.Editor editor = getSharedPreferences("LoginActivity", Context.MODE_PRIVATE).edit();
 			editor.putBoolean("auto_login", false);
 			editor.commit();
@@ -343,8 +344,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				Bundle savedInstanceState) {
 
 			// [Hopefully] to prevent force closes.
-			if (dg.getStudents().size() == 0) {
-				dg.clearData();
+			if (session.getStudents().size() == 0) {
+				session = null;
 				SharedPreferences.Editor editor = getActivity().getSharedPreferences("LoginActivity", Context.MODE_PRIVATE).edit();
 				editor.putBoolean("auto_login", false);
 				editor.commit();
@@ -386,7 +387,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 				LinearLayout bigLayout = (LinearLayout) rootView.findViewById(R.id.overall);
 
-				if (dg.MULTIPLE_STUDENTS) {
+				if (session.MULTIPLE_STUDENTS) {
 					TextView instructions = new TextView(getActivity());
 					LinearLayout instruct = new LinearLayout(getActivity());
 
@@ -399,33 +400,33 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					bigLayout.addView(instruct, 1);
 				}
 
-				profileCards = new RelativeLayout[dg.getStudents().size()];
+				profileCards = new RelativeLayout[session.getStudents().size()];
 
-				for (int i = 0; i < dg.getStudents().size(); i++) {
+				for (int i = 0; i < session.getStudents().size(); i++) {
 					profileCards[i] = new RelativeLayout(getActivity());
 
 					ImageView profilePic = new ImageView(getActivity());
 					profilePic.setId(MainActivity.id.profile_picture);
 					LinearLayout.LayoutParams lpPic = new LinearLayout.LayoutParams(
-							LinearLayout.LayoutParams.WRAP_CONTENT,
-							LinearLayout.LayoutParams.WRAP_CONTENT);
+							android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+							android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 					lpPic.setMargins(5,5,0,0);
 					profilePic.setLayoutParams(lpPic);
 					TextView name = new TextView(getActivity());
 					name.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 					// TODO use screen-specific text size.
 					name.setTextSize(22);
-					name.setText(dg.getStudents().get(i).name);
+					name.setText(session.getStudents().get(i).name);
 					name.setId(id.name);
-					name.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+					name.setLayoutParams(new LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
 					name.setGravity(Gravity.CENTER);
 
 					RelativeLayout.LayoutParams lpName = new RelativeLayout.LayoutParams(
-							RelativeLayout.LayoutParams.MATCH_PARENT,
-							RelativeLayout.LayoutParams.WRAP_CONTENT);
+							android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+							android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 					lpName.addRule(RelativeLayout.RIGHT_OF, profilePic.getId());
 
-					final double gpaValue = dg.getStudents().get(i).getGPA();
+					final double gpaValue = session.getStudents().get(i).getGPA();
 					
 					if (!Double.isNaN(gpaValue)) {
 						TextView gpa = new TextView(getActivity());
@@ -433,12 +434,12 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 						// TODO use screen-specific text size.
 						gpa.setTextSize(22);
 						gpa.setText(String.format("GPA: %.5f",gpaValue));
-						gpa.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+						gpa.setLayoutParams(new LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
 						gpa.setGravity(Gravity.CENTER);
 
 						RelativeLayout.LayoutParams lpGPA = new RelativeLayout.LayoutParams(
-								RelativeLayout.LayoutParams.MATCH_PARENT,
-								RelativeLayout.LayoutParams.WRAP_CONTENT);
+								android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+								android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 						lpGPA.addRule(RelativeLayout.BELOW, id.name);
 						lpGPA.addRule(RelativeLayout.RIGHT_OF, id.profile_picture);
 
@@ -476,13 +477,14 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 						if(!spCredits.equals("no"))
 						{
 							numCredits.setText(spCredits);
-							actualGPA.setText(""+dg.getStudents().get(i).getCumulativeGPA(
+							actualGPA.setText(""+session.getStudents().get(i).getCumulativeGPA(
 									Double.parseDouble(spGPA),
 									Double.parseDouble(spCredits)));
 						}
 					}
 					final int newI = i;
 					calculate.setOnClickListener(new OnClickListener(){
+						@Override
 						public void onClick(View bigLayout)
 						{
 							double oldGPA = Double.parseDouble(oldCumulativeGPA.getText().toString());
@@ -497,7 +499,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 								editor.putString("oldCumulativeGPA", ""+oldGPA);
 								editor.putString("numCredits", ""+cred);
 								editor.commit();
-								Double legitGPA = dg.getStudents().get(newI).getCumulativeGPA(
+								Double legitGPA = session.getStudents().get(newI).getCumulativeGPA(
 										oldGPA,
 										cred);
 								DecimalFormat df = new DecimalFormat("#.########");
@@ -511,7 +513,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					bigLayout.addView(gpaCalc);
 				}
 
-				if (dg.MULTIPLE_STUDENTS)
+				if (session.MULTIPLE_STUDENTS)
 					colorStudents();
 				
 			}
@@ -521,13 +523,13 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				LinearLayout bigLayout = (LinearLayout) rootView.findViewById(R.id.container);
 
 				// Add current student's name
-				if (dg.MULTIPLE_STUDENTS) {
+				if (session.MULTIPLE_STUDENTS) {
 					LinearLayout studentName = (LinearLayout) inflater.inflate(R.layout.main_student_name_if_multiple_students, bigLayout, false);
-					( (TextView) studentName.findViewById(R.id.name) ).setText(dg.getStudents().get(dg.studentIndex).name);
+					( (TextView) studentName.findViewById(R.id.name) ).setText(session.getStudents().get(session.studentIndex).name);
 					bigLayout.addView(studentName);
 				}
 
-				int[] classMatch = dg.getCurrentStudent().getClassMatch();
+				int[] classMatch = session.getCurrentStudent().getClassMatch();
 
 				classCount = classMatch.length;
 				goals = new int[classCount];
@@ -535,7 +537,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 				averages = new RelativeLayout[classCount];
 
-				JSONArray classList = dg.getCurrentStudent().getClassList();
+				JSONArray classList = session.getCurrentStudent().getClassList();
 
 				for (int i = 0; i < classCount; i++) {
 
@@ -543,7 +545,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 					averages[i] = (RelativeLayout) inflater.inflate(R.layout.main_grade_summary, bigLayout, false);
 					TextView className = (TextView) averages[i].findViewById(R.id.name);
-					String name = dg.getStudents().get(dg.studentIndex).getClassName(jsonIndex);
+					String name = session.getStudents().get(session.studentIndex).getClassName(jsonIndex);
 					className.setText(name);
 
 					int avg = classList.optJSONObject(jsonIndex).optJSONArray("terms")
@@ -555,14 +557,20 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 						TextView grade = (TextView) averages[i].findViewById(R.id.grade);
 						grade.setText(average);
 					}
+					
+					// Skip classes that don't exist.
+					if (avg == -2 || ! classList.optJSONObject(jsonIndex).optJSONArray("terms")
+							.optJSONObject(CURRENT_TERM_INDEX).optString("description").equals(
+							TermFinder.Term.values()[CURRENT_TERM_INDEX].name))
+						continue;
 
-					averages[i].setOnClickListener(new ClassSwipeOpenerListener(dg.studentIndex, i, CURRENT_TERM_INDEX));
+					averages[i].setOnClickListener(new ClassSwipeOpenerListener(session.studentIndex, i, CURRENT_TERM_INDEX));
 
 					bigLayout.addView(averages[i]);
 				}
 
 				TextView summaryLastUpdated = new TextView(getActivity());
-				String lastUpdatedString = DateHandler.timeSince(dg.getCurrentStudent().getClassList().optJSONObject(0).optLong("summaryLastUpdated"));
+				String lastUpdatedString = DateHandler.timeSince(session.getCurrentStudent().getClassList().optJSONObject(0).optLong("summaryLastUpdated"));
 				summaryLastUpdated.setText(lastUpdatedString);
 				summaryLastUpdated.setPadding(10, 0, 0, 0);
 				bigLayout.addView(summaryLastUpdated);
@@ -576,9 +584,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				LinearLayout bigLayout = (LinearLayout) rootView.findViewById(R.id.container);
 
 				// Add current student's name
-				if (dg.MULTIPLE_STUDENTS) {
+				if (session.MULTIPLE_STUDENTS) {
 					LinearLayout studentName = (LinearLayout) inflater.inflate(R.layout.main_student_name_if_multiple_students, bigLayout, false);
-					( (TextView) studentName.findViewById(R.id.name) ).setText(dg.getStudents().get(dg.studentIndex).name);
+					( (TextView) studentName.findViewById(R.id.name) ).setText(session.getStudents().get(session.studentIndex).name);
 					bigLayout.addView(studentName);
 				}
 				LinearLayout weekNames = new LinearLayout(getActivity());
@@ -603,7 +611,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 
 					weeks[i].setPadding(0, 0, 0, 0);
-					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams((int)((SCREEN_WIDTH-30) / 5), LayoutParams.WRAP_CONTENT);
+					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams((SCREEN_WIDTH-30) / 5, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 					llp.setMargins(0, 0, 0, 0);
 					weeks[i].setLayoutParams(llp);
 					weeks[i].setGravity(Gravity.CENTER);
@@ -611,21 +619,20 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				}
 
 				bigLayout.addView(weekNames);
-				int[] classMatch = dg.getCurrentStudent().getClassMatch();
+				int[] classMatch = session.getCurrentStudent().getClassMatch();
 
-				JSONArray classList = dg.getCurrentStudent().getClassList();
+				JSONArray classList = session.getCurrentStudent().getClassList();
 
 				for (int classIndex = 0; classIndex < classCount; classIndex++) {
 
 					int jsonIndex = classMatch[classIndex];
 					View classSummary = inflater.inflate(R.layout.main_grade_summary_linear_layout, bigLayout, false);
 					TextView className = (TextView) classSummary.findViewById(R.id.class_name);
-					className.setText(dg.getStudents().get(dg.studentIndex).getClassName(jsonIndex));
+					className.setText(session.getStudents().get(session.studentIndex).getClassName(jsonIndex));
 
 					LinearLayout summary = (LinearLayout) classSummary.findViewById(R.id.layout_six_weeks_summary);
 					summary.setPadding(15,0,15,14);
-					double sum = 0;
-					int count = 0;
+
 					for (int termIndex = 0; 
 							termIndex < classList.optJSONObject(jsonIndex).optJSONArray("terms").length(); 
 							termIndex++) {
@@ -638,24 +645,29 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 						termGrade.setClickable(true);
 						termGrade.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 
-						int width = (int)((SCREEN_WIDTH - 30)/5);
-						LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(width, LayoutParams.WRAP_CONTENT);
+						int width = (SCREEN_WIDTH - 30)/5;
+						LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(width, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 						if(termIndex == 0)
 							llp.setMargins(15, 0, 0, 0);
 						termGrade.setLayoutParams(llp);
 
 						int avg = classList.optJSONObject(jsonIndex).optJSONArray("terms").optJSONObject(termIndex).optInt("average", -1);
 
-						termGrade.setOnClickListener(new ClassSwipeOpenerListener(dg.studentIndex, classIndex, termIndex));
-						termGrade.setBackgroundResource(R.drawable.grade_summary_click);
-						if (avg != -1) {
-							termGrade.setText(avg + "");
-							sum+=avg;
-							count++;
+						
+						
+						if (avg == -2) {
+							termGrade.setBackgroundColor(getResources().getColor(R.color.disabledCell));
+							termGrade.setClickable(false);
+						} else {
+							termGrade.setOnClickListener(new ClassSwipeOpenerListener(session.studentIndex, classIndex, termIndex));
+							termGrade.setBackgroundResource(R.drawable.grade_summary_click);
+							if (avg != -1)
+								termGrade.setText(avg + "");
 						}
+						
+						
 						termGrade.setGravity(Gravity.CENTER);
 						summary.addView(termGrade);
-
 
 					}
 
@@ -667,8 +679,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 						TextView averageGrade = new TextView(getActivity());
 
-						int width = (int)((SCREEN_WIDTH - 30)/5);
-						LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(width, LayoutParams.WRAP_CONTENT);
+						int width = (SCREEN_WIDTH - 30)/5;
+						LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(width, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 						llp.setMargins(0, 0, 15, 0);
 						averageGrade.setLayoutParams(llp);
 
@@ -686,7 +698,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				}
 
 				TextView summaryLastUpdated = new TextView(getActivity());
-				String lastUpdatedString = DateHandler.timeSince(dg.getCurrentStudent().getClassList().optJSONObject(0).optLong("summaryLastUpdated"));
+				String lastUpdatedString = DateHandler.timeSince(session.getCurrentStudent().getClassList().optJSONObject(0).optLong("summaryLastUpdated"));
 				summaryLastUpdated.setText(lastUpdatedString);
 				summaryLastUpdated.setPadding(10, 0, 0, 0);
 				bigLayout.addView(summaryLastUpdated);
@@ -880,7 +892,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		}
 
 
-		static Bitmap[] pics = new Bitmap[dg.getStudents().size()];
+		static Bitmap[] pics = new Bitmap[session.getStudents().size()];
 
 		public class StudentPictureTask extends AsyncTask<Integer, Void, Bitmap> {
 
@@ -889,8 +901,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			@Override
 			protected Bitmap doInBackground(Integer... args) {	
 				taskStudentIndex = args[0];
-				pics[taskStudentIndex]= dg.getStudents().get(taskStudentIndex).getStudentPicture();
-				return dg.getStudents().get(taskStudentIndex).getStudentPicture();
+				pics[taskStudentIndex]= session.getStudents().get(taskStudentIndex).getStudentPicture();
+				return session.getStudents().get(taskStudentIndex).getStudentPicture();
 			}
 
 			@Override
@@ -914,6 +926,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				this.termIndex = termIndex;
 			}
 
+			@Override
 			public void onClick(View arg0) {
 				Intent intent = new Intent (getActivity(), ClassSwipeActivity.class);
 				intent.putExtra("studentIndex", this.studentIndex);
@@ -935,7 +948,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 			@Override
 			public void onClick(View v) {
-				dg.studentIndex = this.studentIndex;
+				session.studentIndex = this.studentIndex;
 				colorStudents();
 
 				((MainActivity)getActivity()).refresh();
@@ -947,7 +960,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		public void colorStudents() {
 			for (int i = 0; i < profileCards.length; i++) {
 				// Display the chosen student in a different color.
-				if (i == dg.studentIndex)
+				if (i == session.studentIndex)
 					profileCards[i].setBackgroundResource(R.drawable.card_click_blue);
 				else
 					profileCards[i].setBackgroundResource(R.drawable.card_click_blue);
@@ -998,7 +1011,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 		@Override
 		public boolean onMenuItemClick(MenuItem arg0) {
-			dg.studentIndex = this.studentIndex;
+			session.studentIndex = this.studentIndex;
 
 			refresh();
 			return true;
