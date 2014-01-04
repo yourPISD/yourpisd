@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -461,7 +462,24 @@ public class YPSession {
 	private List<Student> getTestStudents() {
 
 
+<<<<<<< HEAD:src/app/sunstreak/yourpisd/net/YPSession.java
 		class TestStudent extends Student{
+=======
+		public int[] getClassMatch () {
+			return classMatch;
+		}
+		
+		public double getCumulativeGPA(double oldCumulativeGPA, double numCredits)
+		{
+			double newNumCredits = numCredits+ 0.5* classMatch.length;
+			DecimalFormat df = new DecimalFormat("#.########");
+			return Double.parseDouble(df.format((getGPA()*0.5*classMatch.length
+					+oldCumulativeGPA*numCredits)/newNumCredits));
+		}
+		public double getGPA () {
+			if (classMatch == null)
+				return -2;
+>>>>>>> 4b3bb169fc61cee78e7ddb22c3d6234bad91b112:src/app/sunstreak/yourpisd/net/DataGrabber.java
 
 
 			public TestStudent(int studentId, String studentName) {

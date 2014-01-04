@@ -78,7 +78,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	 */
 	ViewPager mViewPager;
 	//sections of the navigation drawer
-	public String[] mList = {"Profile", "Current Six Weeks", "Grade Overview", "Semester Goals"};
+	public String[] mList = {"Profile", "Current Six Weeks", "Grade Overview"/*, "Semester Goals"*/};
 	public DrawerLayout mDrawerLayout;
 	public ListView mDrawerList;
 	private ActionBarDrawerToggle mDrawerToggle;
@@ -131,8 +131,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				.setTabListener(this));
 		actionBar.addTab(actionBar.newTab().setText(getResources().getString(R.string.main_section_2_title))
 				.setTabListener(this));
-		actionBar.addTab(actionBar.newTab().setText(getResources().getString(R.string.main_section_3_title))
-				.setTabListener(this));
+		/*actionBar.addTab(actionBar.newTab().setText(getResources().getString(R.string.main_section_3_title))
+				.setTabListener(this));*/
 		mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
 			@Override
 			public void onPageSelected(int position) {
@@ -502,8 +502,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 								Double legitGPA = session.getStudents().get(newI).getCumulativeGPA(
 										oldGPA,
 										cred);
-								DecimalFormat df = new DecimalFormat("#.########");
-								actualGPA.setText(df.format(legitGPA));
+								actualGPA.setText(legitGPA+"");
 							}
 							InputMethodManager imm = 
 									(InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
