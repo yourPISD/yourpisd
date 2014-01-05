@@ -22,8 +22,6 @@ import android.util.SparseArray;
 
 public class YPSession {
 
-	
-
 	Domain domain;
 	String username;
 	String password;
@@ -121,13 +119,17 @@ public class YPSession {
 
 		switch (domain) {
 		case PARENT:
-
+			
 			String[][] requestProperties1 = new String[][] {
 					{"Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"},
 					{"Accept-Encoding","gzip,deflate,sdch"},
 					{"Accept-Language","en-US,en;q=0.8,es;q=0.6"},
 					{"Connection","keep-alive"},
 					{"Content-Type","application/x-www-form-urlencoded"},
+					{"Host", "parentviewer.pisd.edu"},
+					{"Origin", "https://parentviewer.pisd.edu"},
+					{"Referer", "https://parentviewer.pisd.edu/"},
+					{"User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/30.0.1599.114 Chrome/30.0.1599.114 Safari/537.36"}
 			};
 
 			ArrayList<String[]> rp1 = new ArrayList<String[]>(java.util.Arrays.asList(requestProperties1));
@@ -139,12 +141,12 @@ public class YPSession {
 							"&__VIEWSTATE=%2FwEPDwULLTEwNjY5NzA4NTBkZMM%2FuYdqyffE27bFnREF10B%2FRqD4" +
 							"&__SCROLLPOSITIONX=0" +
 							"&__SCROLLPOSITIONY=0" +
-							"&__EVENTVALIDATION=%2FwEWBAK6wtGnBgLEhsriDQLHoumWCgLyjYGEDNS0X%2BIS%2B22%2FGghXXv5nzic%2Bj46b" +
+							"&__EVENTVALIDATION=%2FwEdAASCW34hepkNwIXSnvGxEUTlqcZt0XO7QUOibAd3ocrpayqHxD2e5zCnWBj9%2Bm7TCi0S%2BC76MEjhL0ie%2FPsBbOp%2BShjkt2W533uAqvBQcWZNXoh672M%3D" +
 							"&ctl00%24ContentPlaceHolder1%24portalLogin%24UserName=" + URLEncoder.encode(username, "UTF-8") +
 							"&ctl00%24ContentPlaceHolder1%24portalLogin%24Password=" + URLEncoder.encode(password, "UTF-8") +
 							"&ctl00%24ContentPlaceHolder1%24portalLogin%24LoginButton=Login";
 			Object[] login = Request.sendPost(
-					"https://parentviewer.pisd.edu/Login.aspx", 
+					"https://parentviewer.pisd.edu/", 
 					postParams, 
 					cookies,
 					rp1);
