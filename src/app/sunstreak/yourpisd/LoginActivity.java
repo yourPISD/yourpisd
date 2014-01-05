@@ -29,6 +29,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import app.sunstreak.yourpisd.net.Student;
 import app.sunstreak.yourpisd.net.YPSession;
 
 /**
@@ -406,7 +407,7 @@ public class LoginActivity extends Activity {
 					// Update the loading screen: Downloading class grades...
 					publishProgress(2);
 
-					for (YPSession.Student st : session.getStudents())
+					for (Student st : session.getStudents())
 						st.loadGradeSummary();
 
 				} else {

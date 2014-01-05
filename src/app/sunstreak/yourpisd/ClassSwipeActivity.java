@@ -96,17 +96,11 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 			mFragments.add(fragment);
 		}
 
-
-
-		//		System.out.println("mFragments size = " + mFragments.size() + " and classCount = " + classCount);
-
-
-		// Create the adapter that will return a fragment for each of the three
+		// Create the adapter that will return a fragment for each of the 
 		// primary sections of the app.
 
 		mSectionsPagerAdapter = new SectionsPagerAdapter(
 				getSupportFragmentManager(), mFragments);
-
 
 		// Set up the ViewPager with the sections adapter.
 		mViewPager = (ViewPager) findViewById(R.id.pager);
@@ -116,7 +110,9 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 		
 		for(int i = 0; i< classCount; i++)
 		{
-			actionBar.addTab(actionBar.newTab().setText(session.getCurrentStudent().getClassName(session.getCurrentStudent().getClassMatch()[i]))
+			actionBar.addTab(actionBar.newTab()
+					.setText(session.getCurrentStudent()
+							.getClassName(session.getCurrentStudent().getClassMatch()[i]))
                     .setTabListener(this));
 		}
 		mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {

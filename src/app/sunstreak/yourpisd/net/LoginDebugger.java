@@ -42,7 +42,7 @@ public class LoginDebugger {
 
 		session.tryLoginGradebook();
 
-		for (YPSession.Student st : session.getStudents()) {
+		for (Student st : session.getStudents()) {
 			st.loadGradeSummary();
 			for (int i = 0; i < st.getClassMatch().length; i++) {
 				System.out.printf("%20s", st.getClassList().optJSONObject(st.getClassMatch()[i]).getString("title") );
