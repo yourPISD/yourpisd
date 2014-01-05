@@ -14,7 +14,9 @@ public class LoginDebugger {
 	static int CURRENT_TERM_INDEX;
 
 	public static void main(String[] args) throws Exception {
-
+		System.out.printf("%.4f\n", 4.3);
+		System.exit(0);
+		
 		if (args.length == 2) {
 			mEmail = args[0];
 			mPassword = args[1];

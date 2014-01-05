@@ -1005,11 +1005,12 @@ public class YPSession {
 			return classMatch;
 		}
 
-		public double getCumulativeGPA(double oldCumulativeGPA, double numCredits)
+		public double getCumulativeGPA(float oldCumulativeGPA, float numCredits)
 		{
 			double newNumCredits = numCredits+ 0.5* classMatch.length;
 			return (getGPA()*0.5*classMatch.length+oldCumulativeGPA*numCredits)/newNumCredits;
 		}
+		
 		public double getGPA () {
 			if (classMatch == null)
 				return -2;

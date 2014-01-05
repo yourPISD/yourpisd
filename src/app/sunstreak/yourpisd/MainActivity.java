@@ -461,49 +461,55 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 						Drawable picture = new BitmapDrawable(getResources(), pics[i]);
 						profilePic.setImageDrawable(picture);
 					}
+					
 					RelativeLayout gpaCalc = (RelativeLayout)inflater.inflate(R.layout.main_gpa_calc, bigLayout, false);
 					final TextView actualGPA = (TextView)gpaCalc.findViewById(R.id.actualGPA);
 					actualGPA.setTypeface(robotoNew);
+					
 					Button calculate = (Button)gpaCalc.findViewById(R.id.calculate);
 					calculate.setTypeface(robotoNew);
+					
 					final EditText oldCumulativeGPA = (EditText)gpaCalc.findViewById(R.id.cumulativeGPA);
 					final EditText numCredits = (EditText)gpaCalc.findViewById(R.id.numCredits);
+					
 					SharedPreferences sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
-					String spGPA = sharedPrefs.getString("oldCumulativeGPA", "no");
-					if(!spGPA.equals("no"))
+					float spGPA = sharedPrefs.getFloat("oldCumulativeGPA", Float.NaN);
+					
+					if( ! Float.isNaN(spGPA) )
 					{
-						oldCumulativeGPA.setText(spGPA);
-						String spCredits = sharedPrefs.getString("numCredits", "no");
-						if(!spCredits.equals("no"))
+						oldCumulativeGPA.setText(Float.toString(spGPA));
+						float spCredits = sharedPrefs.getFloat("numCredits", Float.NaN);
+						if( ! Float.isNaN(spCredits) )
 						{
-							numCredits.setText(spCredits);
-							actualGPA.setText(""+session.getStudents().get(i).getCumulativeGPA(
-									Double.parseDouble(spGPA),
-									Double.parseDouble(spCredits)));
+							numCredits.setText(Float.toString(spCredits));
+							double cumGPA = session.getStudents().get(i).getCumulativeGPA(
+									spGPA, spCredits);
+							actualGPA.setText(String.format("%.4f", cumGPA));
 						}
 					}
-					final int newI = i;
+					final int studentIndex = i;
 					calculate.setOnClickListener(new OnClickListener(){
 						@Override
 						public void onClick(View bigLayout)
 						{
-							double oldGPA = Double.parseDouble(oldCumulativeGPA.getText().toString());
-							double cred = Double.parseDouble(numCredits.getText().toString());
-							if((oldGPA+"").equals("") || 
-									(cred+"").equals(""))
+							float oldGPA = Float.parseFloat(oldCumulativeGPA.getText().toString());
+							float cred = Float.parseFloat(numCredits.getText().toString());
+							
+							if ( (oldGPA+"").equals("") || (cred+"").equals("") )
 								actualGPA.setText("Please Fill Out the Above");
 							else
 							{
 								SharedPreferences sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
 								Editor editor = sharedPrefs.edit();
-								editor.putString("oldCumulativeGPA", ""+oldGPA);
-								editor.putString("numCredits", ""+cred);
+								editor.putFloat("oldCumulativeGPA", oldGPA);
+								editor.putFloat("numCredits", cred);
 								editor.commit();
-								Double legitGPA = session.getStudents().get(newI).getCumulativeGPA(
-										oldGPA,
-										cred);
-								actualGPA.setText(legitGPA+"");
+								double legitGPA = session.getStudents().get(studentIndex).getCumulativeGPA(
+										oldGPA,	cred);
+								actualGPA.setText(String.format("%.4f", legitGPA));
 							}
+							
+							// Hide the keyboard
 							InputMethodManager imm = 
 									(InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 							imm.hideSoftInputFromWindow(numCredits.getWindowToken(), 0);
