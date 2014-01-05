@@ -40,7 +40,7 @@ public class YPSession {
 	List<Student> students = new ArrayList<Student>();
 	public int studentIndex = 0;
 	public boolean MULTIPLE_STUDENTS;
-	
+
 	public YPSession (Domain domain, String username, String password) {
 		this.domain = domain;
 		this.username = username;
@@ -119,7 +119,7 @@ public class YPSession {
 
 		switch (domain) {
 		case PARENT:
-			
+
 			String[][] requestProperties1 = new String[][] {
 					{"Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"},
 					{"Accept-Encoding","gzip,deflate,sdch"},
@@ -470,7 +470,7 @@ public class YPSession {
 		public int[] getClassMatch () {
 			return classMatch;
 		}
-		
+
 		public double getCumulativeGPA(double oldCumulativeGPA, double numCredits)
 		{
 			double newNumCredits = numCredits+ 0.5* classMatch.length;
@@ -941,7 +941,7 @@ public class YPSession {
 				return "null";
 			else
 				try {
-					return classList.getJSONObject(classIndex).getString("title");
+					return Parser.toTitleCase(classList.getJSONObject(classIndex).getString("title"));
 				} catch (JSONException e) {
 					e.printStackTrace();
 					return "jsonException";
@@ -1010,7 +1010,7 @@ public class YPSession {
 			double newNumCredits = numCredits+ 0.5* classMatch.length;
 			return (getGPA()*0.5*classMatch.length+oldCumulativeGPA*numCredits)/newNumCredits;
 		}
-		
+
 		public double getGPA () {
 			if (classMatch == null)
 				return -2;

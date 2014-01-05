@@ -14,29 +14,29 @@ import org.jsoup.select.Elements;
 
 
 public class Parser {
-	
+
 	public static final String LOGIN_FAILURE_TITLE = "myPISD - Login";
 	public static final String GRADEBOOK_BAD_USERNAME = "NotSet";
 
 	// Cannot be instantiated.
 	private Parser() { }
-	
+
 	/*
 	 * returns value of pageUniqueId from html
 	 * String must contain the following block:
 	 * <input type="hidden" name="PageUniqueId" id="PageUniqueId" value="8bdc977f-ccaf-4a18-b4dd-20d1406fad6a" />
 	 */
-	
+
 	public static String pageUniqueId (String html) {
 		Elements inputElements = Jsoup.parse(html).getElementsByTag("input");
-	
+
 		for (Element e: inputElements)
 			if (e.attr("name").equals("PageUniqueId"))
 				return e.attr("value");
 
 		return null;
 	}
-	
+
 	/*
 	 * must take in html for [Domain].loginAddress
 	 */
@@ -45,7 +45,7 @@ public class Parser {
 		String title = doc.getElementsByTag("title").text();
 		return !title.equals(LOGIN_FAILURE_TITLE) ? true : false;
 	}
-	
+
 	/*
 	 * must take in html for "https://parentviewer.pisd.edu/EP/PIV_Passthrough.aspx?action=trans&uT=" + userType + "&uID=" + uID
 	 */
@@ -53,8 +53,8 @@ public class Parser {
 		System.out.println(Arrays.deepToString(gradebookCredentials));
 		return  ! (gradebookCredentials[0].equals(GRADEBOOK_BAD_USERNAME));
 	}
-	
-	
+
+
 	public static String[] getGradebookCredentials (String html) {
 		Element doc = Jsoup.parse(html);
 		Elements userIdElements = doc.getElementsByAttributeValue("name", "userId");
@@ -73,28 +73,28 @@ public class Parser {
 		String uID = doc.getElementsByAttributeValue("name","uID").attr("value");
 		return new String[] {uT, uID};
 	}
-	
+
 	public static int studentIdPinnacle (ArrayList<String> cookies) {
-//		System.out.println("Cookies size = " + cookies.size());
+		//		System.out.println("Cookies size = " + cookies.size());
 		for (String c : cookies)
 			if (c.substring(0,c.indexOf('=')).equals("PinnacleWeb.StudentId"))
 				return Integer.parseInt(c.substring(c.indexOf('=')+1));
 		throw new RuntimeException ("Student ID not found. Cookies: " + cookies.toString());
 	}
-	
+
 	public static JSONArray detailedReport (String html) throws JSONException {
 		Element doc = Jsoup.parse(html);
-//		System.out.println(html);
+		//		System.out.println(html);
 		Element assignments = doc.getElementsByAttributeValue("id", "Assignments").get(0);
 		Elements tableRows = assignments.getElementsByTag("tbody").get(0).getElementsByTag("tr");
-		
+
 		JSONArray grades = new JSONArray();
-		
+
 		for (Element tr : tableRows) {
 			JSONObject assignment = new JSONObject();
-						
+
 			Elements columns = tr.getElementsByTag("td");
-			
+
 			for (int i = 0; i < columns.size(); i++) {
 				String value = columns.get(i).text();
 				// do not store empty values!
@@ -113,7 +113,7 @@ public class Parser {
 					}
 				}
 			}
-			
+
 			String assignmentDetailLink = tr.getElementsByTag("a").get(0).attr("href");
 			Matcher matcher = Pattern.compile(".+" +
 					"assignmentId=(\\d+)" +
@@ -129,10 +129,10 @@ public class Parser {
 			assignment.put("gradebookId", gradebookId);
 			grades.put(assignment);
 		}
-//		System.out.println((grades));
+		//		System.out.println((grades));
 		return grades;
 	}
-	
+
 	/**
 	 * Reads assignment view page and returns teacher name.
 	 * 
@@ -152,7 +152,7 @@ public class Parser {
 		Element classStandardInfo = doc.getElementById("classStandardInfo");
 		// teacher is the third row in this table
 		Element teacher = classStandardInfo.getElementsByTag("table").get(0).getElementsByTag("tr").get(3).getElementsByTag("td").get(0);
-//		System.out.println(teacher);
+		//		System.out.println(teacher);
 		String email = "";
 		try {
 			email = teacher.getElementsByTag("a").get(0).attr("title");
@@ -162,21 +162,21 @@ public class Parser {
 		String teacherName = teacher.text();
 		return new String[] {teacherName, email};
 	}
-	
+
 	public static Object[] termCategoryGrades (String html) throws JSONException {
 		JSONArray termCategoryGrades = new JSONArray();
-		
+
 		Element doc = Jsoup.parse(html);
 		Element categoryTable = doc.getElementById("Category");
 		Elements rows = categoryTable.getElementsByTag("tbody").get(0).getElementsByTag("tr");
-		
 
-		
+
+
 		for (Element row : rows) {
 			JSONObject category = new JSONObject();
 			Elements columns = row.getElementsByTag("td");
 			for (int i = 0; i < columns.size(); i++) {
-				
+
 				String value = columns.get(i).text();
 				// do not store empty values!
 				if (value.equals(""))
@@ -197,7 +197,7 @@ public class Parser {
 			termCategoryGrades.put(category);
 
 		}
-		
+
 		// The average for the six weeks is 
 		int average = -1;
 		try {
@@ -209,7 +209,7 @@ public class Parser {
 
 		return new Object[] {termCategoryGrades, average};
 	}
-	
+
 	/*
 	 * We should probably replace this with an Enum
 	 */
@@ -238,15 +238,15 @@ public class Parser {
 			return null;
 		}
 	}
-	
+
 	public static String categoryTableHeader (int column) {
 		switch (column) {
 		case 0:
-			 return "Category";
+			return "Category";
 		case 1:
 			return "Weight";
 		case 2:
-        	return "Points / Max pts.";
+			return "Points / Max pts.";
 		case 3:
 			return "Percent";
 		case 4:
@@ -255,7 +255,7 @@ public class Parser {
 			return null;
 		}
 	}
-	
+
 	/** Parses average of each term from GradeSummary.aspx.
 	 * NOTICE: Does not work for second semester classes in which the second semester schedule
 	 *  is different from the first semester schedule.
@@ -272,7 +272,7 @@ public class Parser {
 		Element doc = Jsoup.parse(html);
 		return gradeSummary(doc, classList);
 	}
-	
+
 	/** Parses average of each term from GradeSummary.aspx.
 	 * NOTICE: Does not work for second semester classes in which the second semester schedule
 	 *  is different from the first semester schedule.
@@ -286,27 +286,27 @@ public class Parser {
 	 * ]
 	 */
 	public static int[][] gradeSummary (Element doc, JSONArray classList) {
-		
+
 		List<int[]> gradeSummary = new ArrayList<int[]>();
 
 		Element reportTable = doc.getElementsByClass("reportTable").get(0).getElementsByTag("tbody").get(0);
 		Elements rows = reportTable.getElementsByTag("tr");
 		int rowIndex = 0;
-		
+
 		while (rowIndex < rows.size() ) {
-			
+
 			int[] classAverages = new int[11];
 			Arrays.fill(classAverages, -3);
-			
+
 			Element row = rows.get(rowIndex);
 			Elements columns = row.getElementsByTag("td");
-			
+
 			classAverages[0] = getClassId(row);
-			
+
 			for (int col = 0; col < 10; col++) {
 				Element column = columns.get(col);
 				String text = column.text();
-				
+
 				// -2 for disabled class
 				if (column.attr("class").equals("disabledCell"))
 					text = "-2";
@@ -315,7 +315,7 @@ public class Parser {
 			gradeSummary.add( classAverages );
 			rowIndex++;
 		}
-		
+
 		/*
 		 * [
 		 * 		[classId, avg0, avg1, ...],
@@ -330,7 +330,7 @@ public class Parser {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * 
 	 * @param A Jsoup Element that contains the html for a row in GradeSummary
@@ -342,7 +342,7 @@ public class Parser {
 		// href="javascript:ClassDetails.getClassDetails(2976981);"
 		return Integer.parseInt(href.substring(40, 47));
 	}
-	
+
 	/**
 	 * @param html Source code of any Gradebook page.
 	 * @return the full name (Last, First) of the student and ID number.
@@ -350,7 +350,7 @@ public class Parser {
 	public static String studentName (String html) {
 		return studentName(Jsoup.parse(html));
 	}
-	
+
 	/**
 	 * @param doc The Jsoup element from any Gradebook page.
 	 * @return the full name (Last, First) of the student and ID number.
@@ -369,17 +369,17 @@ public class Parser {
 		Element doc = Jsoup.parse(html);
 		Elements inputTags = doc.getElementsByTag("input");
 		//Shortcut
-//		if (inputTags.get(4).attr("name").equals("lt"))
-//			return inputTags.get(4).attr("value");
-//		else {
-			for (Element tag : inputTags) {
-				if (tag.attr("name").equals("lt"))
-					return tag.attr("value");
-			}
-//		}
+		//		if (inputTags.get(4).attr("name").equals("lt"))
+		//			return inputTags.get(4).attr("value");
+		//		else {
+		for (Element tag : inputTags) {
+			if (tag.attr("name").equals("lt"))
+				return tag.attr("value");
+		}
+		//		}
 		return null;
 	}
-	
+
 
 	/**
 	 * 
@@ -388,11 +388,11 @@ public class Parser {
 	 */
 	public static List<String[]> parseStudents (String html) {
 		List<String[]> list = new ArrayList<String[]>();
-		
+
 		Element doc = Jsoup.parse(html);
 		Element studentList = doc.getElementById("ctl00_ctl00_ContentPlaceHolder_uxStudentlist");
-		
-		
+
+
 		// Only one student
 		if (studentList.text().isEmpty()) {
 			// {studentId, studentName}
@@ -411,7 +411,7 @@ public class Parser {
 			return list;
 		}
 	}
-	
+
 	public static String[] parseAssignment (String html) throws JSONException {
 		//Debug code
 		/*
@@ -421,14 +421,36 @@ public class Parser {
 		System.out.println(assignment);
 		Elements tds = assignment.getElementsByTag("td");
 		System.out.println(tds);
-		*/
+		 */
 		Elements tds = Jsoup.parse(html).getElementById("Assignment").getElementsByTag("td");
-//		JSONObject ass = new JSONObject();
-//		ass.put("assignedDate", tds.get(3).text());
-//		ass.put("dueDate", tds.get(5).text());
-//		ass.put("weight", tds.get(9).text());
+		//		JSONObject ass = new JSONObject();
+		//		ass.put("assignedDate", tds.get(3).text());
+		//		ass.put("dueDate", tds.get(5).text());
+		//		ass.put("weight", tds.get(9).text());
 		//	{assignedDate, dueDate, weight}
 		return new String[] {tds.get(3).text(), tds.get(5).text(), tds.get(9).text()};
 	}
-	
+
+
+	public static String toTitleCase (String str) {
+		StringBuilder sb = new StringBuilder(str.length());
+		boolean capitalize = false;
+		for (int charNum = 0; charNum < str.length(); charNum++) {
+
+			capitalize = (charNum == 0 ||
+					! Character.isLetter(str.charAt(charNum - 1)) ||
+					( str.substring(charNum - 1, charNum + 1).equals("AP") ||
+							str.substring(charNum - 1, charNum + 1).equals("IB") ||
+							str.substring(charNum - 1, charNum + 1).equals("IH")) &&
+							(charNum + 2 >= str.length() || ! Character.isLetter(str.charAt(charNum + 1)) )
+					);
+
+			if (capitalize)
+				sb.append(Character.toUpperCase(str.charAt(charNum)));
+			else
+				sb.append(Character.toLowerCase(str.charAt(charNum)));
+		}
+		return sb.toString();
+	}
+
 }
