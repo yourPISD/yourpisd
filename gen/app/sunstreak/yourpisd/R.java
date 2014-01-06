@@ -9,16 +9,20 @@ package app.sunstreak.yourpisd;
 
 public final class R {
     public static final class anim {
-        public static final int in_from_left=0x7f040000;
-        public static final int in_from_right=0x7f040001;
-        public static final int out_to_left=0x7f040002;
-        public static final int out_to_right=0x7f040003;
-        public static final int slide_from_down_rotate=0x7f040004;
-        public static final int slide_in_down=0x7f040005;
-        public static final int slide_in_up=0x7f040006;
-        public static final int slide_out_down=0x7f040007;
-        public static final int slide_out_left=0x7f040008;
-        public static final int slide_out_up=0x7f040009;
+        public static final int card_flip_left_in=0x7f040000;
+        public static final int card_flip_left_out=0x7f040001;
+        public static final int card_flip_right_in=0x7f040002;
+        public static final int card_flip_right_out=0x7f040003;
+        public static final int in_from_left=0x7f040004;
+        public static final int in_from_right=0x7f040005;
+        public static final int out_to_left=0x7f040006;
+        public static final int out_to_right=0x7f040007;
+        public static final int slide_from_down_rotate=0x7f040008;
+        public static final int slide_in_down=0x7f040009;
+        public static final int slide_in_up=0x7f04000a;
+        public static final int slide_out_down=0x7f04000b;
+        public static final int slide_out_left=0x7f04000c;
+        public static final int slide_out_up=0x7f04000d;
     }
     public static final class attr {
     }
@@ -160,6 +164,8 @@ public final class R {
         public static final int welcome=0x7f0c0022;
     }
     public static final class integer {
+        public static final int card_flip_time_full=0x7f080001;
+        public static final int card_flip_time_half=0x7f080002;
         public static final int width_exam_score=0x7f080000;
     }
     public static final class layout {
@@ -171,16 +177,17 @@ public final class R {
         public static final int class_swipe_category_card=0x7f030005;
         public static final int class_swipe_grade_view=0x7f030006;
         public static final int drawer_list=0x7f030007;
-        public static final int fragment_class_swipe_dummy=0x7f030008;
-        public static final int fragment_main_dummy=0x7f030009;
-        public static final int main_gpa_calc=0x7f03000a;
-        public static final int main_grade_summary=0x7f03000b;
-        public static final int main_grade_summary_linear_layout=0x7f03000c;
-        public static final int main_grade_summary_score=0x7f03000d;
-        public static final int main_student_name_if_multiple_students=0x7f03000e;
-        public static final int tab_new=0x7f03000f;
-        public static final int tab_summary=0x7f030010;
-        public static final int tab_year_summary=0x7f030011;
+        public static final int fall_semester_summary=0x7f030008;
+        public static final int fragment_class_swipe_dummy=0x7f030009;
+        public static final int fragment_main_dummy=0x7f03000a;
+        public static final int main_gpa_calc=0x7f03000b;
+        public static final int main_grade_summary=0x7f03000c;
+        public static final int main_grade_summary_linear_layout=0x7f03000d;
+        public static final int main_grade_summary_score=0x7f03000e;
+        public static final int main_student_name_if_multiple_students=0x7f03000f;
+        public static final int tab_new=0x7f030010;
+        public static final int tab_summary=0x7f030011;
+        public static final int tab_year_summary=0x7f030012;
     }
     public static final class menu {
         public static final int class_swipe_actions=0x7f0b0000;

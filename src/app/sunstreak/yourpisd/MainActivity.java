@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import org.json.JSONArray;
 
+import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.app.FragmentTransaction;
@@ -273,7 +274,13 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			return super.onOptionsItemSelected(item);
 		}
 	}
-
+	public static class FallSemesterFragment extends Fragment {
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                Bundle savedInstanceState) {
+            return inflater.inflate(R.layout.fall_semester_summary, container, false);
+        }
+    }
 	/**
 	 * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
 	 * one of the sections/tabs/pages.
@@ -604,9 +611,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					weeks[i] = new TextView(getActivity());
 					weeks[i].setTextSize(getResources().getDimension(R.dimen.text_size_grade_overview_header));
 					switch(i) {
-					case 0:		weeks[i].setText("1st"); 	break;
-					case 1:		weeks[i].setText("2nd");	break;
-					case 2:		weeks[i].setText("3rd");	break;
+					case 0:		weeks[i].setText("4th"); 	break;
+					case 1:		weeks[i].setText("5th");	break;
+					case 2:		weeks[i].setText("6th");	break;
 					case 3:		weeks[i].setText("Exam");	break;
 					case 4:		weeks[i].setText("Avg");	break;
 					}
@@ -637,12 +644,12 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					LinearLayout summary = (LinearLayout) classSummary.findViewById(R.id.layout_six_weeks_summary);
 					summary.setPadding(15,0,15,14);
 
-					for (int termIndex = 0; 
+					for (int termIndex = 5; 
 							termIndex < classList.optJSONObject(jsonIndex).optJSONArray("terms").length(); 
 							termIndex++) {
 
 						// Support for first semester only.
-						if (termIndex >= 4)
+						if (termIndex >= 9)
 							break;
 						TextView termGrade = new TextView(getActivity());
 						termGrade.setTextSize(getResources().getDimension(R.dimen.text_size_grade_overview_score));
@@ -700,12 +707,42 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 					bigLayout.addView(classSummary);
 				}
+				Button fallSemester = new Button(getActivity());
+				fallSemester.setOnClickListener(new OnClickListener(){
+					@Override
+					public void onClick(View arg0) {
+						getFragmentManager()
+			            .beginTransaction()
 
+			            // Replace the default fragment animations with animator resources representing
+			            // rotations when switching to the back of the card, as well as animator
+			            // resources representing rotations when flipping back to the front (e.g. when
+			            // the system Back button is pressed).
+			            .setCustomAnimations(
+			                    R.anim.card_flip_right_in, R.anim.card_flip_right_out,
+			                    R.anim.card_flip_left_in, R.anim.card_flip_left_out)
+
+			            // Replace any fragments currently in the container view with a fragment
+			            // representing the next page (indicated by the just-incremented currentPage
+			            // variable).
+			            .replace(R.id.container, new FallSemesterFragment())
+
+			            // Add this transaction to the back stack, allowing users to press Back
+			            // to get to the front of the card.
+			            .addToBackStack(null)
+
+			            // Commit the transaction.
+			            .commit();
+						
+					}
+				});
 				TextView summaryLastUpdated = new TextView(getActivity());
 				String lastUpdatedString = DateHandler.timeSince(session.getCurrentStudent().getClassList().optJSONObject(0).optLong("summaryLastUpdated"));
 				summaryLastUpdated.setText(lastUpdatedString);
 				summaryLastUpdated.setPadding(10, 0, 0, 0);
 				bigLayout.addView(summaryLastUpdated);
+				
+				
 
 			}
 
