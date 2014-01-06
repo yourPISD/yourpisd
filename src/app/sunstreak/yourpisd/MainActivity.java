@@ -64,8 +64,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	static int SCREEN_HEIGHT;
 	static int SCREEN_WIDTH;
 
-	static Fragment[] mFragments;
-	static SummaryFragment[] mSummaryFragments;
+	static SummaryFragment mSummaryFragment;
+	static YPMainFragment[] mFragments;
 	public static final int NUM_FRAGMENTS = 3;
 	public static final int NUM_SUMMARY_FRAGMENTS = 2;
 	public static final int SUMMARY_FRAGMENT_POSITION = 2;
@@ -112,10 +112,14 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 		AppRater.app_launched(this);
 
-		mFragments = new Fragment[NUM_FRAGMENTS];
+		mFragments = new YPMainFragment[NUM_FRAGMENTS];
+		// Opens Spring semester summary by default.
+		currentSummaryFragment = 1;
+
 		for (int position = 0; position < NUM_FRAGMENTS; position++) {
-			if (position == SUMMARY_FRAGMENT_POSITION)
-				mFragments[position] = null;
+			if (position == SUMMARY_FRAGMENT_POSITION) {
+				mFragments[position] = new PlaceholderFragment();
+			}
 			else {
 				mFragments[position] = new MainActivityFragment();
 				Bundle args = new Bundle();
@@ -123,16 +127,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				mFragments[position].setArguments(args);
 			}
 		}
-
-		mSummaryFragments = new SummaryFragment[NUM_SUMMARY_FRAGMENTS];
-		for (int position = 0; position < NUM_SUMMARY_FRAGMENTS; position++) {
-			mSummaryFragments[position] = new SummaryFragment();
-			Bundle args = new Bundle();
-			args.putInt(SummaryFragment.ARG_SEMESTER_NUM, position);
-			mSummaryFragments[position].setArguments(args);
-		}
-		// Opens Spring semester summary by default.
-		currentSummaryFragment = 1;
 
 		mViewPager.setAdapter(mSectionsPagerAdapter);
 
@@ -319,10 +313,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			// getItem is called to instantiate the fragment for the given page.
 			// Return a MainActivityFragment (defined as a static inner class
 			// below) with the page number as its lone argument.
-			if (position == SUMMARY_FRAGMENT_POSITION)
-				return mSummaryFragments[currentSummaryFragment];
-			else
-				return mFragments[position];
+			return mFragments[position];
 		}
 
 		@Override
@@ -348,7 +339,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			case 3:	return getResources().getString(R.string.main_section_3_title);
 			default: return "";
 			}
-			*/
+			 */
 		}
 
 	}
@@ -357,13 +348,39 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		public abstract String getPageTitle ();
 	}
 	
+	public static class PlaceholderFragment extends YPMainFragment {
+		public String getPageTitle () {
+			return "";
+		}
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container,
+				Bundle savedInstanceState) {
+			View rootView = inflater.inflate(R.layout.main_summary_fragment_holder, container, false);
+			
+			System.out.println("test");
+			
+			mSummaryFragment = new SummaryFragment();
+			Bundle args = new Bundle();
+			args.putInt(SummaryFragment.ARG_SEMESTER_NUM, currentSummaryFragment);
+			mSummaryFragment.setArguments(args);
+
+			getFragmentManager()
+			.beginTransaction()
+			.replace(R.id.fragment_holder, mSummaryFragment)
+			.addToBackStack(null)
+			.commit();
+			
+			return rootView;
+		}
+	}
+
 	public static class SummaryFragment extends YPMainFragment {
 
 		public static final String ARG_SEMESTER_NUM = "semester_number";
 		public static final String[][] COLUMN_HEADERS =
 			{
-				{"1st", "2nd", "3rd", "Exam", "Avg"},
-				{"4th", "5th", "6th", "Exam", "Avg"}
+			{"1st", "2nd", "3rd", "Exam", "Avg"},
+			{"4th", "5th", "6th", "Exam", "Avg"}
 			};
 		public static final String[] PAGE_TITLE = {"Fall Semester", "Spring Semester"};
 		private View rootView;
@@ -372,7 +389,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		public String getPageTitle () {
 			return PAGE_TITLE[semesterNum];
 		}
-		
+
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
@@ -380,6 +397,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			Bundle args = getArguments();
 			semesterNum = args.getInt(ARG_SEMESTER_NUM);
 			System.out.println("Creating SummaryFragment for semester number: " + semesterNum);
+			getActivity().getActionBar().getTabAt(SUMMARY_FRAGMENT_POSITION).setText(getPageTitle());
 			//final Typeface robotoNew = Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf");
 
 			rootView = inflater.inflate(R.layout.tab_summary, container, false);
@@ -421,6 +439,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 			for (int classIndex = 0; classIndex < classCount; classIndex++) {
 
+				if ( ! session.getCurrentStudent().hasClassDuringSemester(classIndex, semesterNum) )
+					continue;
+					
 				int jsonIndex = classMatch[classIndex];
 				View classSummary = inflater.inflate(R.layout.main_grade_summary_linear_layout, bigLayout, false);
 				TextView className = (TextView) classSummary.findViewById(R.id.class_name);
@@ -441,14 +462,14 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					if(termIndex == 0)
 						llp.setMargins(15, 0, 0, 0);
 					termGrade.setLayoutParams(llp);
-					
+
 					int avg;
 					JSONArray terms = classList.optJSONObject(jsonIndex).optJSONArray("terms");
 					if (terms.length() <= 4)
 						avg = classList.optJSONObject(jsonIndex).optJSONArray("terms").optJSONObject(termIndex % 4).optInt("average", -1);
 					else
 						avg = classList.optJSONObject(jsonIndex).optJSONArray("terms").optJSONObject(termIndex).optInt("average", -1);
-					
+
 
 					if (avg == -2) {
 						termGrade.setBackgroundColor(getResources().getColor(R.color.disabledCell));
@@ -492,44 +513,45 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				bigLayout.addView(classSummary);
 			}
 			Button toggleSemester = new Button(getActivity());
+			toggleSemester.setText("View " + PAGE_TITLE[Math.abs(currentSummaryFragment-1)]);
 			toggleSemester.setOnClickListener(new OnClickListener(){
 				@Override
 				public void onClick(View arg0) {
-					
+
 					currentSummaryFragment = Math.abs(currentSummaryFragment - 1);
 					System.out.println(currentSummaryFragment);
-					mSummaryFragments[currentSummaryFragment] = new SummaryFragment();
+					SummaryFragment newFragment = new SummaryFragment();
 					Bundle args = new Bundle();
 					args.putInt(SummaryFragment.ARG_SEMESTER_NUM, currentSummaryFragment);
-					mSummaryFragments[currentSummaryFragment].setArguments(args);
-					
+					newFragment.setArguments(args);
+
 					getFragmentManager()
 					.beginTransaction()
 					// Replace the default fragment animations with animator resources representing
 					// rotations when switching to the back of the card, as well as animator
 					// resources representing rotations when flipping back to the front (e.g. when
 					// the system Back button is pressed).
-					
+
 					/*.setCustomAnimations(
 							R.anim.card_flip_right_in, R.anim.card_flip_right_out,
 							R.anim.card_flip_left_in, R.anim.card_flip_left_out)
-					*/
-							// Replace any fragments currently in the container view with a fragment
-							// representing the next page (indicated by the just-incremented currentPage
-							// variable).
-							.replace(R.id.container, mSummaryFragments[currentSummaryFragment])
+					 */
+					// Replace any fragments currently in the container view with a fragment
+					// representing the next page (indicated by the just-incremented currentPage
+					// variable).
+					.replace(R.id.fragment_holder, newFragment)
 
-							// Add this transaction to the back stack, allowing users to press Back
-							// to get to the front of the card.
-							.addToBackStack(null)
+					// Add this transaction to the back stack, allowing users to press Back
+					// to get to the front of the card.
+					.addToBackStack(null)
 
-							// Commit the transaction.
-							.commit();
-
+					// Commit the transaction.
+					.commit();
+					mSummaryFragment = newFragment;
 				}
 			});
 			bigLayout.addView(toggleSemester);
-			
+
 			TextView summaryLastUpdated = new TextView(getActivity());
 			String lastUpdatedString = DateHandler.timeSince(session.getCurrentStudent().getClassList().optJSONObject(0).optLong("summaryLastUpdated"));
 			summaryLastUpdated.setText(lastUpdatedString);
@@ -538,7 +560,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 			return rootView;
 		}
-		
+
 		class ClassSwipeOpenerListener implements OnClickListener {
 
 			int studentIndex;
@@ -561,7 +583,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				startActivity(intent);
 			}
 		}
-		
+
 	}
 
 	/**
@@ -581,7 +603,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		private boolean pictureNotLoaded = true;
 
 		public MainActivityFragment() { }
-		
+
 		public String getPageTitle () {
 			switch (position) {
 			case 0:	return getResources().getString(R.string.main_section_0_title);
@@ -591,8 +613,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			default: return "";
 			}
 		}
-		
-		
+
+
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
@@ -1152,7 +1174,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		public static final int profile_picture = 688;
 		public static final int name = 1329482;
 	}
-	
+
 	public static int gradeColor (int grade) {
 		if (grade > 100)
 			return R.color.black;
@@ -1163,6 +1185,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 		return R.color.red;
 	}
-	
-	
+
+
 }

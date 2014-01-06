@@ -31,6 +31,9 @@ public class Student {
 	//		Map<Integer[], JSONObject> classGrades = new HashMap<Integer[], JSONObject>();
 	Bitmap studentPictureBitmap;
 
+	public static final int CLASS_DISABLED_DURING_TERM = -2;
+	public static final int NO_GRADES_ENTERED = -1;
+	
 	public Student (int studentId, String studentName, YPSession session) {
 		this.session = session;
 		
@@ -79,7 +82,7 @@ public class Student {
 		for (int classIndex = 0; classIndex < gradeSummary.length; classIndex++) {
 //			System.out.println(Arrays.toString(gradeSummary[classIndex]));
 			int termLocation = termIndex < 4 ? termIndex + 1 : termIndex + 2;
-			if (gradeSummary[classIndex][termLocation] != -2)
+			if (gradeSummary[classIndex][termLocation] != CLASS_DISABLED_DURING_TERM)
 				classesForTerm.add(classIndex);
 		}
 		return classesForTerm;
@@ -141,7 +144,7 @@ public class Student {
 				for (int termIndex = firstTermIndex; termIndex < lastTermIndex; termIndex++) {
 					int arrayLocation = termIndex > 3 ? termIndex + 2 : termIndex + 1;
 					int average = gradeSummary[classIndex][arrayLocation];
-					if (average != -1)
+					if (average != NO_GRADES_ENTERED)
 						classList.getJSONObject(jsonIndex).getJSONArray("terms").getJSONObject(termIndex - firstTermIndex)
 						.put("average", average);
 				}
@@ -247,10 +250,21 @@ public class Student {
 	//		return gradeSummary;
 	//		}
 
+	public boolean hasClassDuringSemester ( int classIndex, int semesterIndex ) {
+		if (gradeSummary == null)
+			throw new RuntimeException ("Grade summary is null. " +
+					"Operation hasClassDuringSemester() not allowed.");
+		// much cryptic. so obfuscate. sorry, i'll clean it up later
+		for (int i = 4 * semesterIndex + semesterIndex; i < 4 * semesterIndex + 4; i++)
+			if (gradeSummary[classIndex][i + 1] != CLASS_DISABLED_DURING_TERM)
+				return true;
+		return false;
+	}
+	
 	public boolean hasClassGrade (int classIndex, int termIndex) throws JSONException {
 		
 		int termIndexOffset = 0;
-		if (gradeSummary[classIndex][3] == -2)
+		if (gradeSummary[classIndex][3] == CLASS_DISABLED_DURING_TERM)
 			termIndexOffset = 4;
 		
 		termIndex -= termIndexOffset;
@@ -274,7 +288,7 @@ public class Student {
 		int classId = gradeSummary[classIndex][0];
 		System.out.println(Arrays.toString(getClassIds()));
 		int termIndexOffset = 0;
-		if (gradeSummary[classIndex][3] == -2)
+		if (gradeSummary[classIndex][3] == CLASS_DISABLED_DURING_TERM)
 			termIndexOffset = 4;
 		
 		termIndex -= termIndexOffset;
