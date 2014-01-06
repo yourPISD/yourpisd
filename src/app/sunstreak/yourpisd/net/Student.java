@@ -3,6 +3,8 @@ package app.sunstreak.yourpisd.net;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.joda.time.Instant;
 import org.json.JSONArray;
@@ -22,6 +24,7 @@ public class Student {
 	public final int studentId;
 	public final String name;
 	JSONArray classList;
+	int[][] gradeSummary;
 	int[] classIds;
 	int[] classMatch;
 	SparseArray<JSONObject> classGrades = new SparseArray<JSONObject>();
@@ -66,6 +69,21 @@ public class Student {
 	public JSONArray getClassList() {
 		return classList;
 	}
+	
+	public List<Integer> getClassesForTerm (int termIndex) {
+		List<Integer> classesForTerm = new ArrayList<Integer>();
+		if (gradeSummary == null)
+			throw new RuntimeException("Grade Summary has not been fetched.");
+		
+		
+		for (int classIndex = 0; classIndex < gradeSummary.length; classIndex++) {
+//			System.out.println(Arrays.toString(gradeSummary[classIndex]));
+			int termLocation = termIndex < 4 ? termIndex + 1 : termIndex + 2;
+			if (gradeSummary[classIndex][termLocation] != -2)
+				classesForTerm.add(classIndex);
+		}
+		return classesForTerm;
+	}
 
 	/**
 	 * Uses internet every time. 
@@ -81,8 +99,6 @@ public class Student {
 					"&TermId=" + termId + 
 					"&ReportType=0&StudentId=" + studentId;
 
-
-
 			Object[] summary = Request.sendGet(url,	session.cookies);
 			String response = (String) summary[0];
 			int responseCode = (Integer) summary[1];
@@ -95,7 +111,7 @@ public class Student {
 			 * puts averages in classList, under each term.
 			 */
 			Element doc = Jsoup.parse(response);
-			int[][] gradeSummary = Parser.gradeSummary(doc, classList);
+			gradeSummary = Parser.gradeSummary(doc, classList);
 
 			matchClasses(gradeSummary);
 
@@ -146,7 +162,6 @@ public class Student {
 			return null;
 		}
 	}
-
 
 	public int[] getClassIds() {
 		if (classIds != null)
@@ -232,24 +247,46 @@ public class Student {
 	//		return gradeSummary;
 	//		}
 
-	public boolean hasClassGrade (int classIndex, int termIndex) {
-		return classGrades.indexOfKey(classIndex) > 0 
-				&& 
-				classGrades.get(classIndex).optJSONArray("terms")
-				.optJSONObject(termIndex).optLong("lastUpdated", -1) != -1;
+	public boolean hasClassGrade (int classIndex, int termIndex) throws JSONException {
+		
+		int termIndexOffset = 0;
+		if (gradeSummary[classIndex][3] == -2)
+			termIndexOffset = 4;
+		
+		termIndex -= termIndexOffset;
+		
+		if (classGrades.indexOfKey(classIndex) < 0)
+			return false;
+				
+		System.err.println(classIndex);
+		JSONObject classGrade = classGrades.get(classIndex);
+		JSONArray terms = classGrade.getJSONArray("terms");
+		JSONObject term = terms.getJSONObject(termIndex); 
+		long lastUpdated = term.optLong("lastUpdated", -1);
+		
+		return lastUpdated != -1;
 	}
 
-	public JSONObject getClassGrade( int classIndex, int termIndex ) {
+	public JSONObject getClassGrade( int classIndex, int termIndex ) throws JSONException {
 
 		String html = "";
 
+		int classId = gradeSummary[classIndex][0];
+		System.out.println(Arrays.toString(getClassIds()));
+		int termIndexOffset = 0;
+		if (gradeSummary[classIndex][3] == -2)
+			termIndexOffset = 4;
+		
+		termIndex -= termIndexOffset;
 
-		if (hasClassGrade(classIndex, termIndex))
+		if (hasClassGrade(classIndex, termIndex + termIndexOffset ))
 			return classGrades.get(classIndex).optJSONArray("terms").optJSONObject(termIndex);
 
 
 		try {
-			int classId = getClassIds()[classIndex];
+	
+			System.out.println(Arrays.toString(gradeSummary[classIndex]) + " " + 
+					getClassName(getClassMatch()[classIndex]) + " " + termIndex + " " + termIndexOffset);
 			int termId = getTermIds(classId)[termIndex];
 
 			html = getDetailedReport(classId, termId, studentId);
@@ -277,7 +314,7 @@ public class Student {
 		JSONObject classGrade; 
 
 		try {
-			classGrade = new JSONObject(classList.getJSONObject( classIndex ).toString());
+			classGrade = new JSONObject(classList.getJSONObject(getClassMatch()[classIndex] ).toString());
 
 			JSONArray termGrades = Parser.detailedReport(html);
 			Object[] termCategory = Parser.termCategoryGrades(html);
@@ -295,7 +332,7 @@ public class Student {
 			classGrade.getJSONArray("terms").getJSONObject(termIndex).put("lastUpdated", in.getMillis());
 			//				classGrade.getJSONArray("terms").getJSONObject(termIndex).put("lastUpdated", "0");
 
-			System.out.println("cg= " + classGrade);
+			//System.out.println("cg= " + classGrade);
 
 
 			if (classGrades.indexOfKey(classIndex) < 0)
@@ -305,6 +342,9 @@ public class Student {
 
 
 		} catch (JSONException e) {
+			System.err.println("Error: Class index = " + classIndex + 
+					"; JSON index = " + getClassMatch()[classIndex] + 
+					"; Term index = " + termIndex + ".");
 			e.printStackTrace();
 			return null;
 		}

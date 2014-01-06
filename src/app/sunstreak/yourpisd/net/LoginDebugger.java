@@ -1,8 +1,11 @@
 package app.sunstreak.yourpisd.net;
 
+import java.io.IOException;
 import java.util.Scanner;
+import java.util.concurrent.ExecutionException;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 
 import app.sunstreak.yourpisd.TermFinder;
 
@@ -13,9 +16,8 @@ public class LoginDebugger {
 
 	static int CURRENT_TERM_INDEX;
 
-	public static void main(String[] args) throws Exception {
-		System.out.printf("%.4f\n", 4.3);
-		System.exit(0);
+	public static void main(String[] args) throws IOException, JSONException, ExecutionException, InterruptedException {
+		
 		
 		if (args.length == 2) {
 			mEmail = args[0];
@@ -44,6 +46,10 @@ public class LoginDebugger {
 
 		for (Student st : session.getStudents()) {
 			st.loadGradeSummary();
+			
+			for (int i = 0; i < 8; i++)
+				System.out.println(st.getClassesForTerm(i));
+			
 			for (int i = 0; i < st.getClassMatch().length; i++) {
 				System.out.printf("%20s", st.getClassList().optJSONObject(st.getClassMatch()[i]).getString("title") );
 				System.out.print("   ");

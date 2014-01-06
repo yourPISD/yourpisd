@@ -8,10 +8,10 @@ import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
+import android.app.ActionBar.Tab;
 import android.app.AlertDialog;
 import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
-import android.app.ActionBar.Tab;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -37,8 +37,9 @@ import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import app.sunstreak.yourpisd.net.YPSession;
 import app.sunstreak.yourpisd.net.DateHandler;
+import app.sunstreak.yourpisd.net.Student;
+import app.sunstreak.yourpisd.net.YPSession;
 
 
 @SuppressLint("ValidFragment")
@@ -68,6 +69,9 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 	static Typeface robotoNew;
 	static YPSession session;
 
+	static Student student;
+	static List<Integer> classesForTerm;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -86,9 +90,13 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 		session = ((YPApplication) getApplication() ).session;
 
 		session.studentIndex = studentIndex;
+		student = session.getCurrentStudent();
+		classesForTerm = student.getClassesForTerm(termIndex);
+
+		System.out.println(classesForTerm);
 
 		mFragments = new ArrayList<Fragment>();
-		for (int i = 0; i < classCount; i++) {
+		for (int i = 0; i < classesForTerm.size(); i++) {
 			Bundle args = new Bundle();
 			args.putInt(DescriptionFragment.ARG_SECTION_NUMBER, i);
 			Fragment fragment = new DescriptionFragment();
@@ -107,57 +115,64 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 		mViewPager.setAdapter(mSectionsPagerAdapter);
 		final ActionBar actionBar = getActionBar();
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-		
+
+
+
+		/*
 		for(int i = 0; i< classCount; i++)
 		{
 			actionBar.addTab(actionBar.newTab()
 					.setText(session.getCurrentStudent()
 							.getClassName(session.getCurrentStudent().getClassMatch()[i]))
-                    .setTabListener(this));
+							.setTabListener(this));
 		}
-		mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-        	 
-	            @Override
-	            public void onPageSelected(int position) {
-	                // on changing the page
-	                // make respected tab selected
-	                actionBar.setSelectedNavigationItem(position);
-	            }
-	         
-	            @Override
-	            public void onPageScrolled(int arg0, float arg1, int arg2) {
-	            }
-	         
-	            @Override
-	            public void onPageScrollStateChanged(int arg0) {
-	            }
-	        });
-		
-		
-		
-		
-		
-		mViewPager.setCurrentItem(receivedClassIndex);
-		mViewPager.setOffscreenPageLimit(5);
+		 */
 
+		for (int classIndex : classesForTerm)
+			actionBar.addTab(actionBar.newTab().setText(student.getClassName(student.getClassMatch()[classIndex]))
+					.setTabListener(this));
+
+		mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+
+			@Override
+			public void onPageSelected(int position) {
+				// on changing the page
+				// make respected tab selected
+				actionBar.setSelectedNavigationItem(position);
+			}
+
+			@Override
+			public void onPageScrolled(int arg0, float arg1, int arg2) {
+			}
+
+			@Override
+			public void onPageScrollStateChanged(int arg0) {
+			}
+		});
+
+		if (receivedClassIndex > 0 && receivedClassIndex < classesForTerm.size())
+			mViewPager.setCurrentItem(receivedClassIndex);
+		// otherwise, current item is defaulted to 0
+
+		mViewPager.setOffscreenPageLimit(5);
 
 	}
 	//fixed tab listener implemented
-		@Override
-		public void onTabReselected(Tab tab, FragmentTransaction ft) {
-			// TODO Auto-generated method stub
-			
-		}
-		@Override
-		public void onTabSelected(Tab tab, FragmentTransaction ft) {
-			mViewPager.setCurrentItem(tab.getPosition());
-			
-		}
-		@Override
-		public void onTabUnselected(Tab tab, FragmentTransaction ft) {
-			// TODO Auto-generated method stub
-			
-		}
+	@Override
+	public void onTabReselected(Tab tab, FragmentTransaction ft) {
+		// TODO Auto-generated method stub
+
+	}
+	@Override
+	public void onTabSelected(Tab tab, FragmentTransaction ft) {
+		mViewPager.setCurrentItem(tab.getPosition());
+
+	}
+	@Override
+	public void onTabUnselected(Tab tab, FragmentTransaction ft) {
+		// TODO Auto-generated method stub
+
+	}
 	@Override
 	protected void onPause() {
 		super.onPause();
@@ -171,10 +186,9 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.class_swipe_actions, menu);
 
-
 		if (termIndex == 0)
 			menu.findItem(R.id.previous_six_weeks).setEnabled(false);
-		else if (termIndex == 3)
+		else if (termIndex == 7)
 			menu.findItem(R.id.next_six_weeks).setEnabled(false);
 
 		// Create list of students in Menu.
@@ -273,7 +287,9 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 
 		@Override
 		public CharSequence getPageTitle(int position) {
-			return session.getCurrentStudent().getClassName(session.getCurrentStudent().getClassMatch()[position]);
+			if (position < classesForTerm.size())
+				return student.getClassName(classesForTerm.get(position));
+			return "ERROR";
 		}
 	}
 
@@ -288,7 +304,7 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 		 */
 		public static final String ARG_SECTION_NUMBER = "section_number";
 		public static final int ASSIGNMENT_NAME_ID = 2222;
-		
+
 		private ClassGradeTask mClassGradeTask;
 		private int position;
 		private int classIndex;
@@ -317,19 +333,21 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 				intent.putExtra("show", true);
 				startActivity(intent);
 			}
+
 			position = getArguments().getInt(ARG_SECTION_NUMBER);
-			classIndex = session.getCurrentStudent().getClassMatch()[position];
+			if (position < classesForTerm.size()) {
+				classIndex = classesForTerm.get(position);
+			}
+			else
+				throw new RuntimeException ("ClassSwipe tab position exceeds number of classes" +
+						"during term.\nPosition = " + position + "; Number of classes = " +
+						classesForTerm.size() + ".");
 
 			rootView = inflater.inflate(R.layout.class_description, container, false);
 			getActivity().setProgressBarIndeterminateVisibility(true);
-			if ( session.getCurrentStudent().hasClassGrade(classIndex, termIndex) ) {
-				mClassGrade = session.getCurrentStudent().getClassGrade(classIndex, termIndex);
-				setUiElements();
-			} else {
-				mClassGradeTask = new ClassGradeTask();
-				mClassGradeTask.execute(classIndex, termIndex);
-			}
 
+			mClassGradeTask = new ClassGradeTask();
+			mClassGradeTask.execute(classIndex, termIndex);
 
 			return rootView;
 		}
@@ -340,15 +358,8 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 		public class ClassGradeTask extends AsyncTask<Integer, Void, JSONObject> {
 
 			@Override
-			protected void onPreExecute () {
-				System.out.println("ClassGradeTask starting");
-			}
-
-			@Override
 			protected void onPostExecute (final JSONObject result) {
 				mClassGrade = result;
-				System.out.println("ClassGradeTask finished");
-
 				setUiElements();
 			}
 
@@ -365,9 +376,9 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 
 		public void setUiElements () {
 			getActivity().setProgressBarIndeterminateVisibility(false);
-			
+
 			RelativeLayout layout = (RelativeLayout) rootView.findViewById(R.id.info);
-			
+
 			int lastIdAdded = R.id.teacher_name;
 			TextView teacher = (TextView) layout.findViewById(R.id.teacher_name);
 			TextView sixWeeksAverage = (TextView) layout.findViewById(R.id.six_weeks_average);
@@ -395,7 +406,7 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 			try {
 				// The following line prevents force close. Idk why.
 				// Maybe the extra print time somehow fixes it...
-				System.out.println(mClassGrade);
+				//System.out.println(mClassGrade);
 
 				teacher.setText(session.getCurrentStudent().getClassList().getJSONObject(classIndex).optString("teacher"));
 
@@ -411,19 +422,19 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 					LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 					LinearLayout studentName = (LinearLayout) inflater.inflate(R.layout.main_student_name_if_multiple_students, layout, false);
 					((TextView) studentName.findViewById(R.id.name)).setText(session.getCurrentStudent().name);
-					
+
 					RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
 							LayoutParams.MATCH_PARENT,
 							LayoutParams.WRAP_CONTENT);
 					lp.addRule(RelativeLayout.BELOW, lastIdAdded);
 					lastIdAdded = R.id.name;
-					
+
 					layout.addView(studentName, lp);
 				}
-				
+
 				LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				
-				
+
+
 				for (int category = 0;
 						category < mClassGrade.getJSONArray("categoryGrades").length();
 						category++)
@@ -434,7 +445,7 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 
 					// Name of the category ("Daily Work", etc)
 					String categoryName = mClassGrade.getJSONArray("categoryGrades").getJSONObject(category).getString("Category");
-					
+
 					// for every grade in this term [any category]
 					for(int i = 0; i< mClassGrade.getJSONArray("grades").length(); i++)
 					{
@@ -451,14 +462,14 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 									.getJSONObject(i).getString("Description");
 							descriptionView.setText(description);
 							descriptionView.setId(ASSIGNMENT_NAME_ID);
-							
+
 							TextView grade = (TextView) innerLayout.findViewById(R.id.grade);
 							String gradeValue = mClassGrade.getJSONArray("grades")
 									.getJSONObject(i).optString("Grade");
 							grade.setText(gradeValue);
 
 							innerLayout.setOnClickListener(new AssignmentDetailListener(classIndex, termIndex, innerLayout.getId()));
-							
+
 							card.addView(innerLayout);
 						}
 
@@ -479,7 +490,7 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 
 					Animation animation = AnimationUtils.loadAnimation(getActivity(), R.anim.slide_from_down_rotate);
 					animation.setStartOffset(0);
-					
+
 					card.setId(lastIdAdded + 1);
 					RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
 							LayoutParams.MATCH_PARENT,
@@ -487,7 +498,7 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 					lp.addRule(RelativeLayout.BELOW, lastIdAdded);
 					layout.addView(card, lp);
 					lastIdAdded = card.getId();
-					
+
 					card.startAnimation(animation);
 
 				}
@@ -508,13 +519,13 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 			}
 
 		}
-		
+
 		class GradeDetailsTask extends AsyncTask<Integer, Integer, String> {
-			
+
 			CharSequence title;
-			
+
 			ProgressDialog dialog;
-			
+
 			@Override
 			protected String doInBackground(Integer... params) {
 				title = ((TextView)rootView.findViewById(params[2]).findViewById(ASSIGNMENT_NAME_ID)).getText();
@@ -561,7 +572,7 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 		}
 	}
 
-	
+
 
 	class StudentSelectListener implements MenuItem.OnMenuItemClickListener {
 
@@ -587,5 +598,5 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 		}
 
 	}
-	
+
 }

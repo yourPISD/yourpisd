@@ -603,7 +603,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				{
 					weeks[i] = new TextView(getActivity());
 					weeks[i].setTextSize(getResources().getDimension(R.dimen.text_size_grade_overview_header));
-					System.out.println(weeks[i].getTextSize());
 					switch(i) {
 					case 0:		weeks[i].setText("1st"); 	break;
 					case 1:		weeks[i].setText("2nd");	break;
