@@ -20,7 +20,7 @@ import android.util.SparseArray;
 public class Student {
 
 	private YPSession session;
-	
+
 	public final int studentId;
 	public final String name;
 	JSONArray classList;
@@ -33,10 +33,11 @@ public class Student {
 
 	public static final int CLASS_DISABLED_DURING_TERM = -2;
 	public static final int NO_GRADES_ENTERED = -1;
-	
+	public static final String[] SEMESTER_AVERAGE_KEY = {"firstSemesterAverage", "secondSemesterAverage"};
+
 	public Student (int studentId, String studentName, YPSession session) {
 		this.session = session;
-		
+
 		this.studentId = studentId;
 		String tempName = studentName;
 		name = tempName.substring(tempName.indexOf(",") + 2, tempName.indexOf("("))
@@ -72,15 +73,15 @@ public class Student {
 	public JSONArray getClassList() {
 		return classList;
 	}
-	
+
 	public List<Integer> getClassesForTerm (int termIndex) {
 		List<Integer> classesForTerm = new ArrayList<Integer>();
 		if (gradeSummary == null)
 			throw new RuntimeException("Grade Summary has not been fetched.");
-		
-		
+
+
 		for (int classIndex = 0; classIndex < gradeSummary.length; classIndex++) {
-//			System.out.println(Arrays.toString(gradeSummary[classIndex]));
+			//			System.out.println(Arrays.toString(gradeSummary[classIndex]));
 			int termLocation = termIndex < 4 ? termIndex + 1 : termIndex + 2;
 			if (gradeSummary[classIndex][termLocation] != CLASS_DISABLED_DURING_TERM)
 				classesForTerm.add(classIndex);
@@ -141,7 +142,7 @@ public class Student {
 					}
 				}
 
-				for (int termIndex = firstTermIndex; termIndex < lastTermIndex; termIndex++) {
+				for (int termIndex = firstTermIndex; termIndex <= lastTermIndex; termIndex++) {
 					int arrayLocation = termIndex > 3 ? termIndex + 2 : termIndex + 1;
 					int average = gradeSummary[classIndex][arrayLocation];
 					if (average != NO_GRADES_ENTERED)
@@ -260,24 +261,23 @@ public class Student {
 				return true;
 		return false;
 	}
-	
+
 	public boolean hasClassGrade (int classIndex, int termIndex) throws JSONException {
-		
+
 		int termIndexOffset = 0;
 		if (gradeSummary[classIndex][3] == CLASS_DISABLED_DURING_TERM)
 			termIndexOffset = 4;
-		
+
 		termIndex -= termIndexOffset;
-		
+
 		if (classGrades.indexOfKey(classIndex) < 0)
 			return false;
-				
-		System.err.println(classIndex);
+
 		JSONObject classGrade = classGrades.get(classIndex);
 		JSONArray terms = classGrade.getJSONArray("terms");
 		JSONObject term = terms.getJSONObject(termIndex); 
 		long lastUpdated = term.optLong("lastUpdated", -1);
-		
+
 		return lastUpdated != -1;
 	}
 
@@ -286,11 +286,10 @@ public class Student {
 		String html = "";
 
 		int classId = gradeSummary[classIndex][0];
-		System.out.println(Arrays.toString(getClassIds()));
 		int termIndexOffset = 0;
 		if (gradeSummary[classIndex][3] == CLASS_DISABLED_DURING_TERM)
 			termIndexOffset = 4;
-		
+
 		termIndex -= termIndexOffset;
 
 		if (hasClassGrade(classIndex, termIndex + termIndexOffset ))
@@ -298,9 +297,7 @@ public class Student {
 
 
 		try {
-	
-			System.out.println(Arrays.toString(gradeSummary[classIndex]) + " " + 
-					getClassName(getClassMatch()[classIndex]) + " " + termIndex + " " + termIndexOffset);
+
 			int termId = getTermIds(classId)[termIndex];
 
 			html = getDetailedReport(classId, termId, studentId);
@@ -335,7 +332,7 @@ public class Student {
 
 			JSONArray termCategoryGrades = (JSONArray) termCategory[0];
 			if ((Integer)termCategory[1] != -1)
-				classGrade.getJSONArray("terms").getJSONObject(termIndex).put("average", termCategory[1].toString());
+				classGrade.getJSONArray("terms").getJSONObject(termIndex).put("average", termCategory[1]);
 
 			classGrade.getJSONArray("terms").getJSONObject(termIndex).put("grades", termGrades);
 			classGrade.getJSONArray("terms").getJSONObject(termIndex).put("categoryGrades", termCategoryGrades);
@@ -441,6 +438,11 @@ public class Student {
 	}
 
 	public double getGPA () {
+		return getGPA(1);
+	}
+
+	public double getGPA ( int semesterIndex ) {
+
 		if (classMatch == null)
 			return -2;
 
@@ -451,30 +453,26 @@ public class Student {
 
 			int jsonIndex = classMatch[classIndex];
 
-			double sum = 0;
-			double count = 0;
-			for (int termIndex = 0; termIndex < 4; termIndex++) {
-				if (classList.optJSONObject(jsonIndex).optJSONArray("terms").optJSONObject(termIndex).optInt("average", -1) != -1) {
-					sum += classList.optJSONObject(jsonIndex).optJSONArray("terms").optJSONObject(termIndex).optInt("average");
-					count++;
-				}
+			int grade = classList.optJSONObject(jsonIndex).optInt(SEMESTER_AVERAGE_KEY[semesterIndex]);
+
+			if (grade == NO_GRADES_ENTERED || grade == CLASS_DISABLED_DURING_TERM)
+				continue;
+			// Failed class
+			if (grade < 70) {
+				// Do not increment pointSum because the student received a GPA of 0.
+				pointCount++;
 			}
-			if (count > 0) {
-				int grade = (int) Math.round (sum / count);
-				// Failed class
-				if (grade < 70) {
-					// Do not increment pointSum because the student received a GPA of 0.
-					pointCount++;
-				}
-				else {
-					pointCount++;
-					double classGPA = maxGPA(classIndex) - gpaDifference(grade);
-					pointSum += classGPA;
-				}
+			else {
+				double classGPA = maxGPA(classIndex) - gpaDifference(grade);
+				pointSum += classGPA;
+				pointCount++;
 			}
 		}
-
-		return pointSum / pointCount;
+		try {
+			return pointSum / pointCount;
+		} catch (ArithmeticException e) {
+			return Double.NaN;
+		}
 	}
 
 	public double maxGPA (int classIndex) {
@@ -482,6 +480,8 @@ public class Student {
 	}
 
 	public double maxGPA (String className) {
+		className = className.toUpperCase();
+
 		if (className.contains("PHYS IB SL") || className.contains("MATH STDY IB"))
 			return 4.5;
 
@@ -497,6 +497,9 @@ public class Student {
 	}
 
 	public double gpaDifference (int grade) {
+		if (grade == NO_GRADES_ENTERED)
+			return Double.NaN;
+
 		if (grade<= 100 & grade>= 97)
 			return 0;
 		if (grade >= 93)

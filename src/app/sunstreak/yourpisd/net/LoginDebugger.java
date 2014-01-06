@@ -75,8 +75,6 @@ public class LoginDebugger {
 			}
 		}
 
-		CURRENT_TERM_INDEX = TermFinder.getCurrentTermIndex();
-		System.out.println(CURRENT_TERM_INDEX);
 	}
 	
 	public static String displayScore (int score) {

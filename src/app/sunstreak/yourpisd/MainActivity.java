@@ -50,6 +50,7 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import app.sunstreak.yourpisd.net.DateHandler;
+import app.sunstreak.yourpisd.net.Student;
 import app.sunstreak.yourpisd.net.YPSession;
 
 
@@ -395,7 +396,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 			Bundle args = getArguments();
 			semesterNum = args.getInt(ARG_SEMESTER_NUM);
-			System.out.println("Creating SummaryFragment for semester number: " + semesterNum);
 			getActivity().getActionBar().getTabAt(SUMMARY_FRAGMENT_POSITION).setText(getPageTitle());
 			//final Typeface robotoNew = Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf");
 
@@ -470,7 +470,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 						avg = classList.optJSONObject(jsonIndex).optJSONArray("terms").optJSONObject(termIndex).optInt("average", -1);
 
 
-					if (avg == -2) {
+					if (avg == Student.CLASS_DISABLED_DURING_TERM) {
 						termGrade.setBackgroundColor(getResources().getColor(R.color.disabledCell));
 						termGrade.setClickable(false);
 					} else {
@@ -487,7 +487,11 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				}
 
 				// Display the average.
-				int average = classList.optJSONObject(jsonIndex).optInt("firstSemesterAverage", -1);
+				int average;
+				if (semesterNum == 0)
+					average = classList.optJSONObject(jsonIndex).optInt("firstSemesterAverage", -1);
+				else
+					average = classList.optJSONObject(jsonIndex).optInt("secondSemesterAverage", -1);
 
 				if (average != -1) {
 					String averageText = Integer.toString(average);
@@ -518,7 +522,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				public void onClick(View arg0) {
 
 					currentSummaryFragment = Math.abs(currentSummaryFragment - 1);
-					System.out.println(currentSummaryFragment);
 					SummaryFragment newFragment = new SummaryFragment();
 					Bundle args = new Bundle();
 					args.putInt(SummaryFragment.ARG_SEMESTER_NUM, currentSummaryFragment);
