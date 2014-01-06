@@ -3,10 +3,11 @@ package app.sunstreak.yourpisd;
 import java.util.Arrays;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
@@ -20,11 +21,9 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -102,7 +101,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 		// Create the adapter that will return a fragment for each of the three
 		// primary sections of the app.
-		mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+		mSectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager());
 
 		// Set up the ViewPager with the sections adapter.
 		mViewPager = (ViewPager) findViewById(R.id.pager);
@@ -532,10 +531,10 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					// resources representing rotations when flipping back to the front (e.g. when
 					// the system Back button is pressed).
 
-					/*.setCustomAnimations(
+					.setCustomAnimations(
 							R.anim.card_flip_right_in, R.anim.card_flip_right_out,
 							R.anim.card_flip_left_in, R.anim.card_flip_left_out)
-					 */
+					 
 					// Replace any fragments currently in the container view with a fragment
 					// representing the next page (indicated by the just-incremented currentPage
 					// variable).
