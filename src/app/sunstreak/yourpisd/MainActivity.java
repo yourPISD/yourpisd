@@ -1,11 +1,10 @@
 package app.sunstreak.yourpisd;
 
-import java.text.DecimalFormat;
 import java.util.Arrays;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
-import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.app.FragmentTransaction;
@@ -51,8 +50,8 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import app.sunstreak.yourpisd.net.YPSession;
 import app.sunstreak.yourpisd.net.DateHandler;
+import app.sunstreak.yourpisd.net.YPSession;
 
 
 public class MainActivity extends FragmentActivity implements ActionBar.TabListener { 
@@ -64,6 +63,13 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	static Bitmap proPic;
 	static int SCREEN_HEIGHT;
 	static int SCREEN_WIDTH;
+
+	static Fragment[] mFragments;
+	static SummaryFragment[] mSummaryFragments;
+	public static final int NUM_FRAGMENTS = 3;
+	public static final int NUM_SUMMARY_FRAGMENTS = 2;
+	public static final int SUMMARY_FRAGMENT_POSITION = 2;
+	static int currentSummaryFragment;
 
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -105,6 +111,28 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		setUpNavigationDrawer();
 
 		AppRater.app_launched(this);
+
+		mFragments = new Fragment[NUM_FRAGMENTS];
+		for (int position = 0; position < NUM_FRAGMENTS; position++) {
+			if (position == SUMMARY_FRAGMENT_POSITION)
+				mFragments[position] = null;
+			else {
+				mFragments[position] = new MainActivityFragment();
+				Bundle args = new Bundle();
+				args.putInt(MainActivityFragment.ARG_OBJECT, position);
+				mFragments[position].setArguments(args);
+			}
+		}
+
+		mSummaryFragments = new SummaryFragment[NUM_SUMMARY_FRAGMENTS];
+		for (int position = 0; position < NUM_SUMMARY_FRAGMENTS; position++) {
+			mSummaryFragments[position] = new SummaryFragment();
+			Bundle args = new Bundle();
+			args.putInt(SummaryFragment.ARG_SEMESTER_NUM, position);
+			mSummaryFragments[position].setArguments(args);
+		}
+		// Opens Spring semester summary by default.
+		currentSummaryFragment = 1;
 
 		mViewPager.setAdapter(mSectionsPagerAdapter);
 
@@ -212,7 +240,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			editor.putInt(Integer.toString(i), goals[i]);
 		}
 		editor.commit();
-		*/
+		 */
 		super.onPause();
 	}
 
@@ -274,13 +302,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			return super.onOptionsItemSelected(item);
 		}
 	}
-	public static class FallSemesterFragment extends Fragment {
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            return inflater.inflate(R.layout.fall_semester_summary, container, false);
-        }
-    }
+
+
 	/**
 	 * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
 	 * one of the sections/tabs/pages.
@@ -294,18 +317,17 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		@Override
 		public Fragment getItem(int position) {
 			// getItem is called to instantiate the fragment for the given page.
-			// Return a DummySectionFragment (defined as a static inner class
+			// Return a MainActivityFragment (defined as a static inner class
 			// below) with the page number as its lone argument.
-			Fragment fragment = new MainActivityFragment();
-			Bundle args = new Bundle();
-			args.putInt(MainActivityFragment.ARG_OBJECT, position);
-			fragment.setArguments(args);
-			return fragment;
+			if (position == SUMMARY_FRAGMENT_POSITION)
+				return mSummaryFragments[currentSummaryFragment];
+			else
+				return mFragments[position];
 		}
 
 		@Override
 		public int getCount() {
-			return 3;
+			return NUM_FRAGMENTS;
 			// Semester goals removed until May 2014.
 			//return 4;
 		}
@@ -317,6 +339,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 		@Override
 		public CharSequence getPageTitle(int position) {
+			return ((YPMainFragment)getItem(position)).getPageTitle();
+			/*
 			switch (position) {
 			case 0:	return getResources().getString(R.string.main_section_0_title);
 			case 1:	return TermFinder.Term.values()[CURRENT_TERM_INDEX].name;
@@ -324,15 +348,227 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			case 3:	return getResources().getString(R.string.main_section_3_title);
 			default: return "";
 			}
+			*/
 		}
 
+	}
+
+	public static abstract class YPMainFragment extends Fragment {
+		public abstract String getPageTitle ();
+	}
+	
+	public static class SummaryFragment extends YPMainFragment {
+
+		public static final String ARG_SEMESTER_NUM = "semester_number";
+		public static final String[][] COLUMN_HEADERS =
+			{
+				{"1st", "2nd", "3rd", "Exam", "Avg"},
+				{"4th", "5th", "6th", "Exam", "Avg"}
+			};
+		public static final String[] PAGE_TITLE = {"Fall Semester", "Spring Semester"};
+		private View rootView;
+		private int semesterNum;
+
+		public String getPageTitle () {
+			return PAGE_TITLE[semesterNum];
+		}
+		
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container,
+				Bundle savedInstanceState) {
+
+			Bundle args = getArguments();
+			semesterNum = args.getInt(ARG_SEMESTER_NUM);
+			System.out.println("Creating SummaryFragment for semester number: " + semesterNum);
+			//final Typeface robotoNew = Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf");
+
+			rootView = inflater.inflate(R.layout.tab_summary, container, false);
+
+			LinearLayout bigLayout = (LinearLayout) rootView.findViewById(R.id.container);
+
+			// Add current student's name
+			if (session.MULTIPLE_STUDENTS) {
+				LinearLayout studentName = (LinearLayout) inflater.inflate(R.layout.main_student_name_if_multiple_students, bigLayout, false);
+				( (TextView) studentName.findViewById(R.id.name) ).setText(session.getStudents().get(session.studentIndex).name);
+				bigLayout.addView(studentName);
+			}
+			LinearLayout weekNames = new LinearLayout(getActivity());
+			weekNames.setBackgroundResource(R.drawable.card_custom);
+			TextView[] weeks = new TextView[5];
+			weekNames.setPadding(15,20,0,20);
+			weekNames.setGravity(Gravity.CENTER);
+			for(int i = 0; i< weeks.length; i++)
+			{
+				weeks[i] = new TextView(getActivity());
+				weeks[i].setTextSize(getResources().getDimension(R.dimen.text_size_grade_overview_header));
+				weeks[i].setText(COLUMN_HEADERS[semesterNum][i]);
+
+				weeks[i].setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
+
+
+				weeks[i].setPadding(0, 0, 0, 0);
+				LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams((SCREEN_WIDTH-30) / 5, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+				llp.setMargins(0, 0, 0, 0);
+				weeks[i].setLayoutParams(llp);
+				weeks[i].setGravity(Gravity.CENTER);
+				weekNames.addView(weeks[i]);
+			}
+
+			bigLayout.addView(weekNames);
+			int[] classMatch = session.getCurrentStudent().getClassMatch();
+
+			JSONArray classList = session.getCurrentStudent().getClassList();
+
+			for (int classIndex = 0; classIndex < classCount; classIndex++) {
+
+				int jsonIndex = classMatch[classIndex];
+				View classSummary = inflater.inflate(R.layout.main_grade_summary_linear_layout, bigLayout, false);
+				TextView className = (TextView) classSummary.findViewById(R.id.class_name);
+				className.setText(session.getStudents().get(session.studentIndex).getClassName(jsonIndex));
+
+				LinearLayout summary = (LinearLayout) classSummary.findViewById(R.id.layout_six_weeks_summary);
+				summary.setPadding(15,0,15,14);
+
+				for (int termIndex = 4 * semesterNum; termIndex < 4 + 4 * semesterNum; termIndex++) {
+
+					TextView termGrade = new TextView(getActivity());
+					termGrade.setTextSize(getResources().getDimension(R.dimen.text_size_grade_overview_score));
+					termGrade.setClickable(true);
+					termGrade.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
+
+					int width = (SCREEN_WIDTH - 30)/5;
+					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(width, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+					if(termIndex == 0)
+						llp.setMargins(15, 0, 0, 0);
+					termGrade.setLayoutParams(llp);
+					
+					int avg;
+					JSONArray terms = classList.optJSONObject(jsonIndex).optJSONArray("terms");
+					if (terms.length() <= 4)
+						avg = classList.optJSONObject(jsonIndex).optJSONArray("terms").optJSONObject(termIndex % 4).optInt("average", -1);
+					else
+						avg = classList.optJSONObject(jsonIndex).optJSONArray("terms").optJSONObject(termIndex).optInt("average", -1);
+					
+
+					if (avg == -2) {
+						termGrade.setBackgroundColor(getResources().getColor(R.color.disabledCell));
+						termGrade.setClickable(false);
+					} else {
+						termGrade.setOnClickListener(new ClassSwipeOpenerListener(session.studentIndex, classIndex, termIndex));
+						termGrade.setBackgroundResource(R.drawable.grade_summary_click);
+						if (avg != -1)
+							termGrade.setText(avg + "");
+					}
+
+
+					termGrade.setGravity(Gravity.CENTER);
+					summary.addView(termGrade);
+
+				}
+
+				// Display the average.
+				int average = classList.optJSONObject(jsonIndex).optInt("firstSemesterAverage", -1);
+
+				if (average != -1) {
+					String averageText = Integer.toString(average);
+
+					TextView averageGrade = new TextView(getActivity());
+
+					int width = (SCREEN_WIDTH - 30)/5;
+					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(width, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+					llp.setMargins(0, 0, 15, 0);
+					averageGrade.setLayoutParams(llp);
+
+					averageGrade.setTextSize(getResources().getDimension(R.dimen.text_size_grade_overview_score));
+					averageGrade.setClickable(false);
+					averageGrade.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
+					averageGrade.setGravity(Gravity.CENTER);
+					averageGrade.setText(averageText);
+					averageGrade.setTextColor(getResources().getColor(gradeColor(average)));
+
+					summary.addView(averageGrade);
+				}
+
+				bigLayout.addView(classSummary);
+			}
+			Button toggleSemester = new Button(getActivity());
+			toggleSemester.setOnClickListener(new OnClickListener(){
+				@Override
+				public void onClick(View arg0) {
+					
+					currentSummaryFragment = Math.abs(currentSummaryFragment - 1);
+					System.out.println(currentSummaryFragment);
+					mSummaryFragments[currentSummaryFragment] = new SummaryFragment();
+					Bundle args = new Bundle();
+					args.putInt(SummaryFragment.ARG_SEMESTER_NUM, currentSummaryFragment);
+					mSummaryFragments[currentSummaryFragment].setArguments(args);
+					
+					getFragmentManager()
+					.beginTransaction()
+					// Replace the default fragment animations with animator resources representing
+					// rotations when switching to the back of the card, as well as animator
+					// resources representing rotations when flipping back to the front (e.g. when
+					// the system Back button is pressed).
+					
+					/*.setCustomAnimations(
+							R.anim.card_flip_right_in, R.anim.card_flip_right_out,
+							R.anim.card_flip_left_in, R.anim.card_flip_left_out)
+					*/
+							// Replace any fragments currently in the container view with a fragment
+							// representing the next page (indicated by the just-incremented currentPage
+							// variable).
+							.replace(R.id.container, mSummaryFragments[currentSummaryFragment])
+
+							// Add this transaction to the back stack, allowing users to press Back
+							// to get to the front of the card.
+							.addToBackStack(null)
+
+							// Commit the transaction.
+							.commit();
+
+				}
+			});
+			bigLayout.addView(toggleSemester);
+			
+			TextView summaryLastUpdated = new TextView(getActivity());
+			String lastUpdatedString = DateHandler.timeSince(session.getCurrentStudent().getClassList().optJSONObject(0).optLong("summaryLastUpdated"));
+			summaryLastUpdated.setText(lastUpdatedString);
+			summaryLastUpdated.setPadding(10, 0, 0, 0);
+			bigLayout.addView(summaryLastUpdated);
+
+			return rootView;
+		}
+		
+		class ClassSwipeOpenerListener implements OnClickListener {
+
+			int studentIndex;
+			int classIndex;
+			int termIndex;
+
+			ClassSwipeOpenerListener (int studentIndex, int classIndex, int termIndex) {
+				this.studentIndex = studentIndex;
+				this.classIndex = classIndex;
+				this.termIndex = termIndex;
+			}
+
+			@Override
+			public void onClick(View arg0) {
+				Intent intent = new Intent (getActivity(), ClassSwipeActivity.class);
+				intent.putExtra("studentIndex", this.studentIndex);
+				intent.putExtra("classCount", classCount);
+				intent.putExtra("classIndex", this.classIndex);
+				intent.putExtra("termIndex", this.termIndex);
+				startActivity(intent);
+			}
+		}
+		
 	}
 
 	/**
 	 * A dummy fragment representing a section of the app, but that simply
 	 * displays dummy text.
 	 */
-	public static class MainActivityFragment extends Fragment  {
+	public static class MainActivityFragment extends YPMainFragment  {
 		/**
 		 * The fragment argument representing the section number for this
 		 * fragment.
@@ -343,9 +579,20 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		private int position;
 		RelativeLayout[] profileCards;
 		private boolean pictureNotLoaded = true;
-		public MainActivityFragment() {
-		}
 
+		public MainActivityFragment() { }
+		
+		public String getPageTitle () {
+			switch (position) {
+			case 0:	return getResources().getString(R.string.main_section_0_title);
+			case 1:	return TermFinder.Term.values()[CURRENT_TERM_INDEX].name;
+			//case 2:	return getResources().getString(R.string.main_section_2_title);
+			case 3:	return getResources().getString(R.string.main_section_3_title);
+			default: return "";
+			}
+		}
+		
+		
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
@@ -434,7 +681,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					lpName.addRule(RelativeLayout.RIGHT_OF, profilePic.getId());
 
 					final double gpaValue = session.getStudents().get(i).getGPA();
-					
+
 					if (!Double.isNaN(gpaValue)) {
 						TextView gpa = new TextView(getActivity());
 						gpa.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
@@ -468,20 +715,20 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 						Drawable picture = new BitmapDrawable(getResources(), pics[i]);
 						profilePic.setImageDrawable(picture);
 					}
-					
+
 					RelativeLayout gpaCalc = (RelativeLayout)inflater.inflate(R.layout.main_gpa_calc, bigLayout, false);
 					final TextView actualGPA = (TextView)gpaCalc.findViewById(R.id.actualGPA);
 					actualGPA.setTypeface(robotoNew);
-					
+
 					Button calculate = (Button)gpaCalc.findViewById(R.id.calculate);
 					calculate.setTypeface(robotoNew);
-					
+
 					final EditText oldCumulativeGPA = (EditText)gpaCalc.findViewById(R.id.cumulativeGPA);
 					final EditText numCredits = (EditText)gpaCalc.findViewById(R.id.numCredits);
-					
+
 					SharedPreferences sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
 					float spGPA = sharedPrefs.getFloat("oldCumulativeGPA", Float.NaN);
-					
+
 					if( ! Float.isNaN(spGPA) )
 					{
 						oldCumulativeGPA.setText(Float.toString(spGPA));
@@ -501,7 +748,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 						{
 							float oldGPA = Float.parseFloat(oldCumulativeGPA.getText().toString());
 							float cred = Float.parseFloat(numCredits.getText().toString());
-							
+
 							if ( (oldGPA+"").equals("") || (cred+"").equals("") )
 								actualGPA.setText("Please Fill Out the Above");
 							else
@@ -515,7 +762,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 										oldGPA,	cred);
 								actualGPA.setText(String.format("%.4f", legitGPA));
 							}
-							
+
 							// Hide the keyboard
 							InputMethodManager imm = 
 									(InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -527,7 +774,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 				if (session.MULTIPLE_STUDENTS)
 					colorStudents();
-				
+
 			}
 
 			if (position == 1) {
@@ -569,11 +816,11 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 						TextView grade = (TextView) averages[i].findViewById(R.id.grade);
 						grade.setText(average);
 					}
-					
+
 					// Skip classes that don't exist.
 					if (avg == -2 || ! classList.optJSONObject(jsonIndex).optJSONArray("terms")
 							.optJSONObject(CURRENT_TERM_INDEX).optString("description").equals(
-							TermFinder.Term.values()[CURRENT_TERM_INDEX].name))
+									TermFinder.Term.values()[CURRENT_TERM_INDEX].name))
 						continue;
 
 					averages[i].setOnClickListener(new ClassSwipeOpenerListener(session.studentIndex, i, CURRENT_TERM_INDEX));
@@ -592,158 +839,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 
 			if (position == 2) {
-
-				LinearLayout bigLayout = (LinearLayout) rootView.findViewById(R.id.container);
-
-				// Add current student's name
-				if (session.MULTIPLE_STUDENTS) {
-					LinearLayout studentName = (LinearLayout) inflater.inflate(R.layout.main_student_name_if_multiple_students, bigLayout, false);
-					( (TextView) studentName.findViewById(R.id.name) ).setText(session.getStudents().get(session.studentIndex).name);
-					bigLayout.addView(studentName);
-				}
-				LinearLayout weekNames = new LinearLayout(getActivity());
-				weekNames.setBackgroundResource(R.drawable.card_custom);
-				TextView[] weeks = new TextView[5];
-				weekNames.setPadding(15,20,0,20);
-				weekNames.setGravity(Gravity.CENTER);
-				for(int i = 0; i< weeks.length; i++)
-				{
-					weeks[i] = new TextView(getActivity());
-					weeks[i].setTextSize(getResources().getDimension(R.dimen.text_size_grade_overview_header));
-					switch(i) {
-					case 0:		weeks[i].setText("4th"); 	break;
-					case 1:		weeks[i].setText("5th");	break;
-					case 2:		weeks[i].setText("6th");	break;
-					case 3:		weeks[i].setText("Exam");	break;
-					case 4:		weeks[i].setText("Avg");	break;
-					}
-
-					weeks[i].setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
-
-
-					weeks[i].setPadding(0, 0, 0, 0);
-					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams((SCREEN_WIDTH-30) / 5, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-					llp.setMargins(0, 0, 0, 0);
-					weeks[i].setLayoutParams(llp);
-					weeks[i].setGravity(Gravity.CENTER);
-					weekNames.addView(weeks[i]);
-				}
-
-				bigLayout.addView(weekNames);
-				int[] classMatch = session.getCurrentStudent().getClassMatch();
-
-				JSONArray classList = session.getCurrentStudent().getClassList();
-
-				for (int classIndex = 0; classIndex < classCount; classIndex++) {
-
-					int jsonIndex = classMatch[classIndex];
-					View classSummary = inflater.inflate(R.layout.main_grade_summary_linear_layout, bigLayout, false);
-					TextView className = (TextView) classSummary.findViewById(R.id.class_name);
-					className.setText(session.getStudents().get(session.studentIndex).getClassName(jsonIndex));
-
-					LinearLayout summary = (LinearLayout) classSummary.findViewById(R.id.layout_six_weeks_summary);
-					summary.setPadding(15,0,15,14);
-
-					for (int termIndex = 5; 
-							termIndex < classList.optJSONObject(jsonIndex).optJSONArray("terms").length(); 
-							termIndex++) {
-
-						// Support for first semester only.
-						if (termIndex >= 9)
-							break;
-						TextView termGrade = new TextView(getActivity());
-						termGrade.setTextSize(getResources().getDimension(R.dimen.text_size_grade_overview_score));
-						termGrade.setClickable(true);
-						termGrade.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
-
-						int width = (SCREEN_WIDTH - 30)/5;
-						LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(width, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-						if(termIndex == 0)
-							llp.setMargins(15, 0, 0, 0);
-						termGrade.setLayoutParams(llp);
-
-						int avg = classList.optJSONObject(jsonIndex).optJSONArray("terms").optJSONObject(termIndex).optInt("average", -1);
-
-						
-						
-						if (avg == -2) {
-							termGrade.setBackgroundColor(getResources().getColor(R.color.disabledCell));
-							termGrade.setClickable(false);
-						} else {
-							termGrade.setOnClickListener(new ClassSwipeOpenerListener(session.studentIndex, classIndex, termIndex));
-							termGrade.setBackgroundResource(R.drawable.grade_summary_click);
-							if (avg != -1)
-								termGrade.setText(avg + "");
-						}
-						
-						
-						termGrade.setGravity(Gravity.CENTER);
-						summary.addView(termGrade);
-
-					}
-
-					// Display the average.
-					int average = classList.optJSONObject(jsonIndex).optInt("firstSemesterAverage", -1);
-
-					if (average != -1) {
-						String averageText = Integer.toString(average);
-
-						TextView averageGrade = new TextView(getActivity());
-
-						int width = (SCREEN_WIDTH - 30)/5;
-						LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(width, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-						llp.setMargins(0, 0, 15, 0);
-						averageGrade.setLayoutParams(llp);
-
-						averageGrade.setTextSize(getResources().getDimension(R.dimen.text_size_grade_overview_score));
-						averageGrade.setClickable(false);
-						averageGrade.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
-						averageGrade.setGravity(Gravity.CENTER);
-						averageGrade.setText(averageText);
-						averageGrade.setTextColor(gradeColor(average));
-
-						summary.addView(averageGrade);
-					}
-
-					bigLayout.addView(classSummary);
-				}
-				Button fallSemester = new Button(getActivity());
-				fallSemester.setOnClickListener(new OnClickListener(){
-					@Override
-					public void onClick(View arg0) {
-						getFragmentManager()
-			            .beginTransaction()
-
-			            // Replace the default fragment animations with animator resources representing
-			            // rotations when switching to the back of the card, as well as animator
-			            // resources representing rotations when flipping back to the front (e.g. when
-			            // the system Back button is pressed).
-			            .setCustomAnimations(
-			                    R.anim.card_flip_right_in, R.anim.card_flip_right_out,
-			                    R.anim.card_flip_left_in, R.anim.card_flip_left_out)
-
-			            // Replace any fragments currently in the container view with a fragment
-			            // representing the next page (indicated by the just-incremented currentPage
-			            // variable).
-			            .replace(R.id.container, new FallSemesterFragment())
-
-			            // Add this transaction to the back stack, allowing users to press Back
-			            // to get to the front of the card.
-			            .addToBackStack(null)
-
-			            // Commit the transaction.
-			            .commit();
-						
-					}
-				});
-				TextView summaryLastUpdated = new TextView(getActivity());
-				String lastUpdatedString = DateHandler.timeSince(session.getCurrentStudent().getClassList().optJSONObject(0).optLong("summaryLastUpdated"));
-				summaryLastUpdated.setText(lastUpdatedString);
-				summaryLastUpdated.setPadding(10, 0, 0, 0);
-				bigLayout.addView(summaryLastUpdated);
-				
-				
-
+				throw new RuntimeException("This position should instantiated as SummaryFragment," +
+						" not MainActivityFragment.");
 			}
 
 			// Semester Goals : shall remain dormant until May 2014.
@@ -955,28 +1052,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			}
 		}
 
-		class ClassSwipeOpenerListener implements OnClickListener {
 
-			int studentIndex;
-			int classIndex;
-			int termIndex;
-
-			ClassSwipeOpenerListener (int studentIndex, int classIndex, int termIndex) {
-				this.studentIndex = studentIndex;
-				this.classIndex = classIndex;
-				this.termIndex = termIndex;
-			}
-
-			@Override
-			public void onClick(View arg0) {
-				Intent intent = new Intent (getActivity(), ClassSwipeActivity.class);
-				intent.putExtra("studentIndex", this.studentIndex);
-				intent.putExtra("classCount", classCount);
-				intent.putExtra("classIndex", this.classIndex);
-				intent.putExtra("termIndex", this.termIndex);
-				startActivity(intent);
-			}
-		}
 
 
 
@@ -1008,17 +1084,30 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			}
 		}
 
-		public int gradeColor (int grade) {
-			if (grade > 100)
-				return getResources().getColor(R.color.black);
-			if (grade >= 90)
-				return getResources().getColor(R.color.green);
-			if (grade >= 80)
-				return getResources().getColor(R.color.yellow);
 
-			return getResources().getColor(R.color.red);
+
+		class ClassSwipeOpenerListener implements OnClickListener {
+
+			int studentIndex;
+			int classIndex;
+			int termIndex;
+
+			ClassSwipeOpenerListener (int studentIndex, int classIndex, int termIndex) {
+				this.studentIndex = studentIndex;
+				this.classIndex = classIndex;
+				this.termIndex = termIndex;
+			}
+
+			@Override
+			public void onClick(View arg0) {
+				Intent intent = new Intent (getActivity(), ClassSwipeActivity.class);
+				intent.putExtra("studentIndex", this.studentIndex);
+				intent.putExtra("classCount", classCount);
+				intent.putExtra("classIndex", this.classIndex);
+				intent.putExtra("termIndex", this.termIndex);
+				startActivity(intent);
+			}
 		}
-
 	}
 
 	public void refresh() {
@@ -1063,5 +1152,17 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		public static final int profile_picture = 688;
 		public static final int name = 1329482;
 	}
+	
+	public static int gradeColor (int grade) {
+		if (grade > 100)
+			return R.color.black;
+		if (grade >= 90)
+			return R.color.green;
+		if (grade >= 80)
+			return R.color.yellow;
 
+		return R.color.red;
+	}
+	
+	
 }
