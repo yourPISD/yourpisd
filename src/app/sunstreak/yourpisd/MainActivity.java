@@ -765,12 +765,12 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					final EditText numCredits = (EditText)gpaCalc.findViewById(R.id.numCredits);
 					numCredits.setTypeface(robotoNew);
 					SharedPreferences sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
-					float spGPA = sharedPrefs.getFloat("oldCumulativeGPA", Float.NaN);
+					float spGPA = sharedPrefs.getFloat("oldCumulativeGPA" + session.getStudents().get(i).studentId, Float.NaN);
 
 					if( ! Float.isNaN(spGPA) )
 					{
 						oldCumulativeGPA.setText(Float.toString(spGPA));
-						float spCredits = sharedPrefs.getFloat("numCredits", Float.NaN);
+						float spCredits = sharedPrefs.getFloat("numCredits" + session.getStudents().get(i).studentId, Float.NaN);
 						if( ! Float.isNaN(spCredits) )
 						{
 							numCredits.setText(Float.toString(spCredits));
@@ -781,6 +781,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					}
 					final int studentIndex = i;
 					calculate.setOnClickListener(new OnClickListener(){
+						
+						private int mStudentIndex = studentIndex;
+						
 						@Override
 						public void onClick(View bigLayout)
 						{
@@ -804,8 +807,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 							{
 								SharedPreferences sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
 								Editor editor = sharedPrefs.edit();
-								editor.putFloat("oldCumulativeGPA", oldGPA);
-								editor.putFloat("numCredits", cred);
+								editor.putFloat("oldCumulativeGPA" + session.getStudents().get(mStudentIndex).studentId, oldGPA);
+								editor.putFloat("numCredits" + session.getStudents().get(mStudentIndex).studentId, cred);
 								editor.commit();
 								double legitGPA = session.getStudents().get(studentIndex).getCumulativeGPA(
 										oldGPA,	cred);
@@ -872,40 +875,38 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 				JSONArray classList = session.getCurrentStudent().getClassList();
 
-				for (int i = 0; i < classCount; i++) {
+				for (int classIndex = 0; classIndex < classCount; classIndex++) {
 
-					int jsonIndex = classMatch[i];
+					// Skip classes that don't exist in Semester 1 [Spring Semester]
+					if ( ! session.getCurrentStudent().hasClassDuringSemester(classIndex, 1) )
+						continue;
 					
-					
-					averages[i] = (RelativeLayout) inflater.inflate(R.layout.main_grade_summary, bigLayout, false);
-					TextView className = (TextView) averages[i].findViewById(R.id.name);
+					int jsonIndex = classMatch[classIndex];
+
+					averages[classIndex] = (RelativeLayout) inflater.inflate(R.layout.main_grade_summary, bigLayout, false);
+					TextView className = (TextView) averages[classIndex].findViewById(R.id.name);
 					String name = session.getStudents().get(session.studentIndex).getClassName(jsonIndex);
 					className.setText(name);
-					
+
+					// For 2nd-semester-only classes whose 4th six weeks is located as position 0
 					int avg;
-					if (classList.optJSONArray("terms").length() <= 4)
+					if (classList.optJSONObject(jsonIndex).optJSONArray("terms").length() <= 4)
 						avg = classList.optJSONObject(jsonIndex).optJSONArray("terms")
-							.optJSONObject(CURRENT_TERM_INDEX % 4).optInt("average", -1);
+						.optJSONObject(CURRENT_TERM_INDEX % 4).optInt("average", -1);
 					else
 						avg = classList.optJSONObject(jsonIndex).optJSONArray("terms")
-							.optJSONObject(CURRENT_TERM_INDEX).optInt("average", -1);
+						.optJSONObject(CURRENT_TERM_INDEX).optInt("average", -1);
 
-					// No need to increase overdraw if there is nothing to display
-					if (avg != -1) {
+					// Only set the grade text if the average is not empty
+					if (avg != Student.NO_GRADES_ENTERED) {
 						String average = avg + "";
-						TextView grade = (TextView) averages[i].findViewById(R.id.grade);
+						TextView grade = (TextView) averages[classIndex].findViewById(R.id.grade);
 						grade.setText(average);
 					}
 
-					// Skip classes that don't exist.
-					if (avg == -2 || ! classList.optJSONObject(jsonIndex).optJSONArray("terms")
-							.optJSONObject(CURRENT_TERM_INDEX).optString("description").equals(
-									TermFinder.Term.values()[CURRENT_TERM_INDEX].name))
-						continue;
+					averages[classIndex].setOnClickListener(new ClassSwipeOpenerListener(session.studentIndex, classIndex, CURRENT_TERM_INDEX));
 
-					averages[i].setOnClickListener(new ClassSwipeOpenerListener(session.studentIndex, i, CURRENT_TERM_INDEX));
-
-					bigLayout.addView(averages[i]);
+					bigLayout.addView(averages[classIndex]);
 				}
 
 				TextView summaryLastUpdated = new TextView(getActivity());
@@ -1109,8 +1110,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			return rootView;
 		}
 
-		
-		
+
+
 		static Bitmap[] pics = new Bitmap[session.getStudents().size()];
 
 		public class StudentPictureTask extends AsyncTask<Integer, Void, Bitmap> {

@@ -427,7 +427,9 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 							LayoutParams.MATCH_PARENT,
 							LayoutParams.WRAP_CONTENT);
 					lp.addRule(RelativeLayout.BELOW, lastIdAdded);
-					lastIdAdded = R.id.name;
+					studentName.setId(ClassSwipeActivity.id.student_name);
+					lastIdAdded = studentName.getId();
+					System.out.println("Student name box ID: " + lastIdAdded + ".");
 
 					layout.addView(studentName, lp);
 				}
@@ -498,6 +500,7 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 					lp.addRule(RelativeLayout.BELOW, lastIdAdded);
 					layout.addView(card, lp);
 					lastIdAdded = card.getId();
+					System.out.println("Category: " + category + "; ID: " + lastIdAdded + ".");
 
 					card.startAnimation(animation);
 
@@ -597,6 +600,10 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 
 		}
 
+	}
+	
+	private class id {
+		static final int student_name = 234246;
 	}
 
 }
