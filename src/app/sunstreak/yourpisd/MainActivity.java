@@ -875,13 +875,19 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				for (int i = 0; i < classCount; i++) {
 
 					int jsonIndex = classMatch[i];
-
+					
+					
 					averages[i] = (RelativeLayout) inflater.inflate(R.layout.main_grade_summary, bigLayout, false);
 					TextView className = (TextView) averages[i].findViewById(R.id.name);
 					String name = session.getStudents().get(session.studentIndex).getClassName(jsonIndex);
 					className.setText(name);
-
-					int avg = classList.optJSONObject(jsonIndex).optJSONArray("terms")
+					
+					int avg;
+					if (classList.optJSONArray("terms").length() <= 4)
+						avg = classList.optJSONObject(jsonIndex).optJSONArray("terms")
+							.optJSONObject(CURRENT_TERM_INDEX % 4).optInt("average", -1);
+					else
+						avg = classList.optJSONObject(jsonIndex).optJSONArray("terms")
 							.optJSONObject(CURRENT_TERM_INDEX).optInt("average", -1);
 
 					// No need to increase overdraw if there is nothing to display
