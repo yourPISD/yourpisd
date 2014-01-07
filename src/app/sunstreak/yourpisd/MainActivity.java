@@ -798,7 +798,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 							}
 
 
-							if ( (oldGPA+"").equals("") || (cred+"").equals("") )
+							if ( (oldGPA+"").equals("0.0") || (cred+"").equals("0.0") )
 								actualGPA.setText("Please Fill Out the Above");
 							else
 							{
