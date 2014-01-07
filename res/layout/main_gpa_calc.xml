@@ -2,49 +2,48 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/card_custom" 
-    android:padding="10dp">
+    android:background="@drawable/card_custom"
+    android:padding="10dp" >
 
     <EditText
         android:id="@+id/cumulativeGPA"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:ems="9"
-        android:inputType="numberDecimal"
+        android:ems="7"
         android:hint="Cumulative GPA"
-        >
+        android:inputType="numberDecimal" >
     </EditText>
+
     <EditText
         android:id="@+id/numCredits"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@id/cumulativeGPA"
-        android:ems="9"
-        android:inputType="numberDecimal"
+        android:ems="7"
         android:hint="Number of Credits"
-        >
+        android:inputType="numberDecimal" >
     </EditText>
 
     <TextView
         android:id="@+id/actualGPA"
-        android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/numCredits"
+        android:gravity="center"
+        android:padding="5dp"
         android:text=""
-        android:textSize="35sp"
-        android:padding="5dp" 
-        />
+        android:textSize="35sp" />
+
     <ImageButton
-    android:id="@+id/help"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="@drawable/ic_help" 
-    android:layout_alignParentRight = "true"
-    android:layout_below = "@id/actualGPA"/>
+        android:id="@+id/help"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/actualGPA"
+        android:layout_alignParentRight="true"
+        android:background="@drawable/ic_help" />
 
     <Button
         android:id="@+id/calculate"
@@ -54,7 +53,9 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/cumulativeGPA"
-        android:text="Calculate" 
-        android:gravity="center"/>
+        android:ellipsize="none"
+        android:gravity="center"
+        android:singleLine="true"
+        android:text="Calculate" />
 
 </RelativeLayout>

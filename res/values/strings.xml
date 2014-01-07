@@ -3,13 +3,10 @@
 
     <string name="app_name">yourPISD</string>
     <string name="action_settings">Settings</string>
-    
     <string name="quit">Quit</string>
-    
     <string name="main_section_0_title">Profile</string>
     <string name="main_section_2_title">Grade Overview</string>
     <string name="main_section_3_title">Semester Goals</string>
-    
     <string name="teacher_name"></string>
     <string name="daily">Daily Grades:</string>
     <string name="major">Major Evaluations:</string>
@@ -19,17 +16,14 @@
     <string name="log_out">Log out</string>
     <string name="title_activity_credit">CreditActivity</string>
     <string name="hello_world">Hello world!</string>
-
-	
     <string name="refresh">Refresh</string>
-    
     <string name="welcome">Welcome to yourPISD!</string>
     <string name="welcome_multiple_students">Switch between students by clicking 
         below, or using the menu.</string>
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
-    <string name="gpa_help">Cumulative GPA(box 1)-Your GPA that is listed at the bottom right
-        of your official transcript. \nNumber of Credits(box 2)-The total number of credits
-        shown in the box towards the left of your transcript.</string>
+    <string name="gpa_help"><u>Cumulative GPA (box 1)</u>: Your GPA before this semester.
+        \n<u>Number of Credits (box 2)</u>: Total number of credits earned 
+        before this semester.</string>
 
 </resources>

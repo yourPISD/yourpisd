@@ -6,6 +6,7 @@ import org.json.JSONArray;
 
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -350,7 +351,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	public static abstract class YPMainFragment extends Fragment {
 		public abstract String getPageTitle ();
 	}
-	
+
 	public static class PlaceholderFragment extends YPMainFragment {
 		public String getPageTitle () {
 			return "";
@@ -359,9 +360,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
 			View rootView = inflater.inflate(R.layout.main_summary_fragment_holder, container, false);
-			
-			System.out.println("test");
-			
+
 			mSummaryFragment = new SummaryFragment();
 			Bundle args = new Bundle();
 			args.putInt(SummaryFragment.ARG_SEMESTER_NUM, currentSummaryFragment);
@@ -372,7 +371,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			.replace(R.id.fragment_holder, mSummaryFragment)
 			.addToBackStack(null)
 			.commit();
-			
+
 			return rootView;
 		}
 	}
@@ -386,6 +385,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			{"4th", "5th", "6th", "Exam", "Avg"}
 			};
 		public static final String[] PAGE_TITLE = {"Fall Semester", "Spring Semester"};
+		public static final String[] PAGE_TITLE_SHORT = {"Fall", "Spring"};
 		private View rootView;
 		private int semesterNum;
 
@@ -443,7 +443,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 				if ( ! session.getCurrentStudent().hasClassDuringSemester(classIndex, semesterNum) )
 					continue;
-					
+
 				int jsonIndex = classMatch[classIndex];
 				View classSummary = inflater.inflate(R.layout.main_grade_summary_linear_layout, bigLayout, false);
 				TextView className = (TextView) classSummary.findViewById(R.id.class_name);
@@ -540,18 +540,18 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					.setCustomAnimations(
 							R.anim.card_flip_right_in, R.anim.card_flip_right_out,
 							R.anim.card_flip_left_in, R.anim.card_flip_left_out)
-					 
-					// Replace any fragments currently in the container view with a fragment
-					// representing the next page (indicated by the just-incremented currentPage
-					// variable).
-					.replace(R.id.fragment_holder, newFragment)
 
-					// Add this transaction to the back stack, allowing users to press Back
-					// to get to the front of the card.
-					.addToBackStack(null)
+							// Replace any fragments currently in the container view with a fragment
+							// representing the next page (indicated by the just-incremented currentPage
+							// variable).
+							.replace(R.id.fragment_holder, newFragment)
 
-					// Commit the transaction.
-					.commit();
+							// Add this transaction to the back stack, allowing users to press Back
+							// to get to the front of the card.
+							.addToBackStack(null)
+
+							// Commit the transaction.
+							.commit();
 					mSummaryFragment = newFragment;
 				}
 			});
@@ -707,29 +707,39 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 							android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 					lpName.addRule(RelativeLayout.RIGHT_OF, profilePic.getId());
 
-					final double gpaValue = session.getStudents().get(i).getGPA();
+					int lastId = id.name;
 
-					if (!Double.isNaN(gpaValue)) {
-						TextView gpa = new TextView(getActivity());
-						gpa.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
-						// TODO use screen-specific text size.
-						gpa.setTextSize(22);
-						gpa.setText(String.format("GPA: %.5f",gpaValue));
-						gpa.setLayoutParams(new LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
-						gpa.setGravity(Gravity.CENTER);
+					for (int semesterNum = 0; semesterNum < 2; semesterNum++) {
+						final double gpaValue = session.getStudents().get(i).getGPA(semesterNum);
 
-						RelativeLayout.LayoutParams lpGPA = new RelativeLayout.LayoutParams(
-								android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-								android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-						lpGPA.addRule(RelativeLayout.BELOW, id.name);
-						lpGPA.addRule(RelativeLayout.RIGHT_OF, id.profile_picture);
+						if (!Double.isNaN(gpaValue)) {
+							TextView gpa = new TextView(getActivity());
+							gpa.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
+							// TODO use screen-specific text size.
+							gpa.setTextSize(22);
+							gpa.setText(String.format("%s GPA: %.4f",
+									SummaryFragment.PAGE_TITLE_SHORT[semesterNum],
+									gpaValue)
+									);
+							gpa.setLayoutParams(new LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
+							gpa.setGravity(Gravity.CENTER);
 
-						profileCards[i].addView(gpa, lpGPA);
+							RelativeLayout.LayoutParams lpGPA = new RelativeLayout.LayoutParams(
+									android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+									android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+							lpGPA.addRule(RelativeLayout.BELOW, lastId);
+							lpGPA.addRule(RelativeLayout.RIGHT_OF, id.profile_picture);
+
+							profileCards[i].addView(gpa, lpGPA);
+
+							lastId = gpa.getId();
+						}
 					}
 
 
+
 					profileCards[i].addView(profilePic);
-					profileCards[i].addView(name, lpName);;
+					profileCards[i].addView(name, lpName);
 					profileCards[i].setOnClickListener(new StudentChooserListener(i));
 					profileCards[i].setBackgroundResource(R.drawable.card_custom);
 
@@ -776,17 +786,17 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 						{
 							float oldGPA;
 							float cred;
-							try
-							{
+							try {
 								oldGPA = Float.parseFloat(oldCumulativeGPA.getText().toString());
-								cred = Float.parseFloat(numCredits.getText().toString());
-							}
-							catch(NumberFormatException e)
-							{
+							} catch(NumberFormatException e) {
 								oldGPA = 0;
+							}
+							try {
+								cred = Float.parseFloat(numCredits.getText().toString());
+							} catch (NumberFormatException e) {
 								cred = 0;
 							}
-							
+
 
 							if ( (oldGPA+"").equals("") || (cred+"").equals("") )
 								actualGPA.setText("Please Fill Out the Above");
@@ -810,6 +820,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					});
 					ImageButton help = (ImageButton)gpaCalc.findViewById(R.id.help);
 					help.setOnClickListener(new OnClickListener(){
+						@Override
 						public void onClick(View v)
 						{
 							AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -1092,7 +1103,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			return rootView;
 		}
 
-
+		
+		
 		static Bitmap[] pics = new Bitmap[session.getStudents().size()];
 
 		public class StudentPictureTask extends AsyncTask<Integer, Void, Bitmap> {
