@@ -28,5 +28,8 @@
         below, or using the menu.</string>
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
+    <string name="gpa_help">Cumulative GPA(box 1)-Your GPA that is listed at the bottom right
+        of your official transcript. \nNumber of Credits(box 2)-The total number of credits
+        shown in the box towards the left of your transcript.</string>
 
 </resources>

@@ -6,10 +6,12 @@ import org.json.JSONArray;
 
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -43,6 +45,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
@@ -748,8 +751,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					calculate.setTypeface(robotoNew);
 
 					final EditText oldCumulativeGPA = (EditText)gpaCalc.findViewById(R.id.cumulativeGPA);
+					oldCumulativeGPA.setTypeface(robotoNew);
 					final EditText numCredits = (EditText)gpaCalc.findViewById(R.id.numCredits);
-
+					numCredits.setTypeface(robotoNew);
 					SharedPreferences sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
 					float spGPA = sharedPrefs.getFloat("oldCumulativeGPA", Float.NaN);
 
@@ -770,8 +774,19 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 						@Override
 						public void onClick(View bigLayout)
 						{
-							float oldGPA = Float.parseFloat(oldCumulativeGPA.getText().toString());
-							float cred = Float.parseFloat(numCredits.getText().toString());
+							float oldGPA;
+							float cred;
+							try
+							{
+								oldGPA = Float.parseFloat(oldCumulativeGPA.getText().toString());
+								cred = Float.parseFloat(numCredits.getText().toString());
+							}
+							catch(NumberFormatException e)
+							{
+								oldGPA = 0;
+								cred = 0;
+							}
+							
 
 							if ( (oldGPA+"").equals("") || (cred+"").equals("") )
 								actualGPA.setText("Please Fill Out the Above");
@@ -791,6 +806,30 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 							InputMethodManager imm = 
 									(InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 							imm.hideSoftInputFromWindow(numCredits.getWindowToken(), 0);
+						}
+					});
+					ImageButton help = (ImageButton)gpaCalc.findViewById(R.id.help);
+					help.setOnClickListener(new OnClickListener(){
+						public void onClick(View v)
+						{
+							AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+							builder.setTitle("Help");
+
+							try {
+								builder.setMessage(R.string.gpa_help);
+							} catch(Exception e) {
+								return;
+							}
+
+							builder.setCancelable(false)
+							.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog, int id) {
+									dialog.dismiss();
+								}
+							});
+							AlertDialog diag = builder.create();
+							diag.show();
 						}
 					});
 					bigLayout.addView(gpaCalc);

@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/card_custom" 
-    android:padding="5dp">
+    android:padding="10dp">
 
     <EditText
         android:id="@+id/cumulativeGPA"
@@ -38,6 +38,13 @@
         android:textSize="35sp"
         android:padding="5dp" 
         />
+    <ImageButton
+    android:id="@+id/help"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/ic_help" 
+    android:layout_alignParentRight = "true"
+    android:layout_below = "@id/actualGPA"/>
 
     <Button
         android:id="@+id/calculate"
