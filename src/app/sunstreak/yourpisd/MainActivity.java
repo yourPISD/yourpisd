@@ -519,6 +519,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				bigLayout.addView(classSummary);
 			}
 			Button toggleSemester = new Button(getActivity());
+			Typeface robotoNew = Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf");
+			toggleSemester.setTypeface(robotoNew);
+			toggleSemester.setBackgroundResource(R.drawable.card_click_blue);
 			toggleSemester.setText("View " + PAGE_TITLE[Math.abs(currentSummaryFragment-1)]);
 			toggleSemester.setOnClickListener(new OnClickListener(){
 				@Override
