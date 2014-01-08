@@ -433,12 +433,26 @@ public class Student {
 
 	public double getCumulativeGPA(float oldCumulativeGPA, float numCredits)
 	{
-		double newNumCredits = numCredits+ 0.5* classMatch.length;
-		return (getGPA()*0.5*classMatch.length+oldCumulativeGPA*numCredits)/newNumCredits;
+		// TODO method is hardcoded for use with fall semester
+		double oldSum = (double) oldCumulativeGPA * (double) numCredits;
+		double newNumCredits = numCredits + getNumCredits(0);
+		return (getGPA(0) * getNumCredits(0) + oldSum)/newNumCredits;
 	}
 
-	public double getGPA () {
-		return getGPA(1);
+	public int getNumCredits( int semesterIndex ) {
+		if (classMatch == null)
+			return -2;
+
+		int pointCount = 0;
+		
+		for (int classIndex = 0; classIndex < classMatch.length; classIndex++) {
+			int jsonIndex = classMatch[classIndex];
+			int grade = classList.optJSONObject(jsonIndex).optInt(SEMESTER_AVERAGE_KEY[semesterIndex]);
+
+			if (!(grade == NO_GRADES_ENTERED || grade == CLASS_DISABLED_DURING_TERM))
+				pointCount++;
+		}
+		return pointCount;
 	}
 
 	public double getGPA ( int semesterIndex ) {
