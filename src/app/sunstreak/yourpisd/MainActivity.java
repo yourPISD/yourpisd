@@ -687,53 +687,55 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				profileCards = new RelativeLayout[session.getStudents().size()];
 
 				for (int i = 0; i < session.getStudents().size(); i++) {
-					profileCards[i] = new RelativeLayout(getActivity());
-
-					ImageView profilePic = new ImageView(getActivity());
-					profilePic.setId(MainActivity.id.profile_picture);
-					LinearLayout.LayoutParams lpPic = new LinearLayout.LayoutParams(
-							android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
-							android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-					lpPic.setMargins(5,5,0,0);
-					profilePic.setLayoutParams(lpPic);
-					TextView name = new TextView(getActivity());
+//					profileCards[i] = new RelativeLayout(getActivity());
+//
+//					ImageView profilePic = new ImageView(getActivity());
+//					profilePic.setId(MainActivity.id.profile_picture);
+//					LinearLayout.LayoutParams lpPic = new LinearLayout.LayoutParams(
+//							android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+//							android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+//					lpPic.setMargins(5,5,0,0);
+//					profilePic.setLayoutParams(lpPic);
+//					TextView name = new TextView(getActivity());
+//					name.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
+//					// TODO use screen-specific text size.
+//					name.setTextSize(22);
+//					name.setText(session.getStudents().get(i).name);
+//					name.setId(id.name);
+//					name.setLayoutParams(new LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
+//					name.setGravity(Gravity.CENTER);
+//
+//					RelativeLayout.LayoutParams lpName = new RelativeLayout.LayoutParams(
+//							android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+//							android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+//					lpName.addRule(RelativeLayout.RIGHT_OF, profilePic.getId());
+//
+					
+					profileCards[i] = (RelativeLayout) inflater.inflate(R.layout.profile_card, bigLayout, false);
+					ImageView profilePic = (ImageView)profileCards[i].findViewById(R.id.profilePic);
+					TextView name = (TextView)profileCards[i].findViewById(R.id.name);
 					name.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
-					// TODO use screen-specific text size.
-					name.setTextSize(22);
 					name.setText(session.getStudents().get(i).name);
-					name.setId(id.name);
-					name.setLayoutParams(new LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
-					name.setGravity(Gravity.CENTER);
-
-					RelativeLayout.LayoutParams lpName = new RelativeLayout.LayoutParams(
-							android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-							android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-					lpName.addRule(RelativeLayout.RIGHT_OF, profilePic.getId());
-
-					int lastId = id.name;
-
+					int lastId = R.id.name;
+					
 					for (int semesterNum = 0; semesterNum < 2; semesterNum++) {
 						final double gpaValue = session.getStudents().get(i).getGPA(semesterNum);
 
 						if (!Double.isNaN(gpaValue)) {
-							TextView gpa = new TextView(getActivity());
+							TextView gpa;
+							if(semesterNum == 0)
+							{
+								gpa = (TextView)profileCards[i].findViewById(R.id.gpaFall);
+								
+							}
+							else
+								gpa = (TextView)profileCards[i].findViewById(R.id.gpaSpring);
 							gpa.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
-							// TODO use screen-specific text size.
-							gpa.setTextSize(22);
 							gpa.setText(String.format("%s GPA: %.4f",
 									SummaryFragment.PAGE_TITLE_SHORT[semesterNum],
 									gpaValue)
 									);
-							gpa.setLayoutParams(new LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
-							gpa.setGravity(Gravity.CENTER);
 
-							RelativeLayout.LayoutParams lpGPA = new RelativeLayout.LayoutParams(
-									android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-									android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-							lpGPA.addRule(RelativeLayout.BELOW, lastId);
-							lpGPA.addRule(RelativeLayout.RIGHT_OF, id.profile_picture);
-
-							profileCards[i].addView(gpa, lpGPA);
 
 							lastId = gpa.getId();
 						}
@@ -741,10 +743,10 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 
 
-					profileCards[i].addView(profilePic);
-					profileCards[i].addView(name, lpName);
-					profileCards[i].setOnClickListener(new StudentChooserListener(i));
-					profileCards[i].setBackgroundResource(R.drawable.card_custom);
+//					profileCards[i].addView(profilePic);
+//					profileCards[i].addView(name, lpName);
+//					profileCards[i].setOnClickListener(new StudentChooserListener(i));
+//					profileCards[i].setBackgroundResource(R.drawable.card_custom);
 
 					bigLayout.addView(profileCards[i]);
 
@@ -1130,7 +1132,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 			@Override
 			protected void onPostExecute (final Bitmap result) {
-				ImageView profilePic = (ImageView) profileCards[taskStudentIndex].findViewById(MainActivity.id.profile_picture);
+				ImageView profilePic = (ImageView) profileCards[taskStudentIndex].findViewById(R.id.profilePic);
 				profilePic.setImageBitmap(result);
 
 				pictureNotLoaded = false;
