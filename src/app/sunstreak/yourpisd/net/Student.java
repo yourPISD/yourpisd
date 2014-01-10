@@ -493,7 +493,7 @@ public class Student {
 		return maxGPA(getClassName(classMatch[classIndex]));
 	}
 
-	public double maxGPA (String className) {
+	public static double maxGPA (String className) {
 		className = className.toUpperCase();
 
 		if (className.contains("PHYS IB SL") || className.contains("MATH STDY IB"))
@@ -501,7 +501,7 @@ public class Student {
 
 		String[] split = className.split("[\\s()\\d\\/]+");
 
-		for (int i = split.length - 1; i >= 0; i--) {
+		for (int i = 0; i < split.length; i++) {
 			if (split[i].equals("AP") || split[i].equals("IB"))
 				return 5;
 			if (split[i].equals("H") || split[i].equals("IH"))
@@ -510,7 +510,7 @@ public class Student {
 		return 4;
 	}
 
-	public double gpaDifference (int grade) {
+	public static double gpaDifference (int grade) {
 		if (grade == NO_GRADES_ENTERED)
 			return Double.NaN;
 
