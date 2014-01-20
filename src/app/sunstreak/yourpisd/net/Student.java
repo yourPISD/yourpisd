@@ -432,18 +432,17 @@ public class Student {
 
 	}
 
-
-
 	public int[] getClassMatch () {
 		return classMatch;
 	}
 
 	public double getCumulativeGPA(float oldCumulativeGPA, float numCredits)
 	{
-		// TODO method is hardcoded for use with fall semester
+		// Averages given GPA with spring semester grades.
+		int SPRING_SEMESTER = 1;
 		double oldSum = (double) oldCumulativeGPA * (double) numCredits;
-		double newNumCredits = numCredits + getNumCredits(0);
-		return (getGPA(0) * getNumCredits(0) + oldSum)/newNumCredits;
+		double newNumCredits = numCredits + getNumCredits(SPRING_SEMESTER);
+		return (getGPA(SPRING_SEMESTER) * getNumCredits(SPRING_SEMESTER) + oldSum)/newNumCredits;
 	}
 
 	public int getNumCredits( int semesterIndex ) {
