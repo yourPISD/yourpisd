@@ -415,13 +415,20 @@ public class Student {
 		classMatch = new int[classCount];
 		int classesMatched = 0;
 
-		while (classesMatched < classCount)
-			for (int i = classesMatched; i < classIds.length; i++)
+		System.out.println(Arrays.toString(classIds));
+		for (int i = 0; i < gradeSummary.length; i++)
+			System.out.print(gradeSummary[i][0] + " ");
+		System.out.println();
+		
+		while (classesMatched < classCount) {
+			for (int i = 0; i < classIds.length; i++)
 				if (classIds[i] == gradeSummary[classesMatched][0]) {
 					classMatch[classesMatched] = i;
 					classesMatched++;
 					break;
 				}
+			System.out.println(Arrays.toString(classMatch));
+		}
 
 	}
 
