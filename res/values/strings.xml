@@ -22,8 +22,9 @@
         below, or using the menu.</string>
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
-    <string name="gpa_help"><u>Cumulative GPA (box 1)</u>: Your GPA before this semester.
-        \n<u>Number of Credits (box 2)</u>: Total number of credits earned 
-        before this semester.</string>
+    <string name="gpa_help">Cumulative GPA (box 1): Your GPA before this semester.
+        Can be found on your most recent transcript at the bottom right hand corner.
+        \nNumber of Credits (box 2): Total number of credits earned 
+        before this semester. Can be found in the box towards the bottom left of the transcript</string>
 
 </resources>
