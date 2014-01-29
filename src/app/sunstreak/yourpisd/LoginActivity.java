@@ -421,8 +421,9 @@ public class LoginActivity extends Activity {
 
 			Intent startMain = new Intent(LoginActivity.this, MainActivity.class);
 			
-			startActivity(startMain);
 			finish();
+			startActivity(startMain);
+			
 			//			overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
 			
 			// What's the purpose of the sleep below?
