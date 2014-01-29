@@ -585,7 +585,7 @@ public class Student {
 		}
 	}
 	
-	public boolean loadAttendanceSummary () throws IOException {
+	public boolean loadAttendanceSummary () throws IOException, JSONException {
 		String url = "https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/" +
 				"AttendanceSummary.aspx?EnrollmentId=" + classIds[0] + 
 				"&TermId=" + getTermIds(classIds[0]) +

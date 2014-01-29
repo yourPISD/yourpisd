@@ -16,7 +16,6 @@
   along with yourPISD.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<color name="holo_blue">#33B5E5</color>
 	<color name="holo_green_light">#99CC00</color>

@@ -16,7 +16,6 @@
   along with yourPISD.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
     <string name="credit_developers">App developed by Han Li and Sidharth Kapur from Plano West Senior High School, Plano, TX.</string>
