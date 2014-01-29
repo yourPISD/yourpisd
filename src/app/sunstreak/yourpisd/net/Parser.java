@@ -15,20 +15,30 @@ import org.jsoup.select.Elements;
 
 public class Parser {
 
+
+
 	public static final String LOGIN_FAILURE_TITLE = "myPISD - Login";
 	public static final String GRADEBOOK_BAD_USERNAME = "NotSet";
 
 	// Cannot be instantiated.
 	private Parser() { }
 
-	/*
+	/**
 	 * returns value of pageUniqueId from html
 	 * String must contain the following block:
 	 * <input type="hidden" name="PageUniqueId" id="PageUniqueId" value="8bdc977f-ccaf-4a18-b4dd-20d1406fad6a" />
 	 */
-
 	public static String pageUniqueId (String html) {
-		Elements inputElements = Jsoup.parse(html).getElementsByTag("input");
+		return pageUniqueId(Jsoup.parse(html));
+	}
+	
+	/**
+	 * returns value of pageUniqueId from html
+	 * String must contain the following block:
+	 * <input type="hidden" name="PageUniqueId" id="PageUniqueId" value="8bdc977f-ccaf-4a18-b4dd-20d1406fad6a" />
+	 */
+	public static String pageUniqueId (Element doc) {
+		Elements inputElements = doc.getElementsByTag("input");
 
 		for (Element e: inputElements)
 			if (e.attr("name").equals("PageUniqueId"))
@@ -453,4 +463,79 @@ public class Parser {
 		return sb.toString();
 	}
 
+	public static AttendanceSummary parseAttendanceSummaryWithoutData (String html) {
+		Element doc = Jsoup.parse(html);
+		return parseAttendanceSummaryValidation(doc);
+	}
+	
+	private static AttendanceSummary parseAttendanceSummaryValidation (Element doc) {
+		AttendanceSummary sum = new AttendanceSummary();
+		
+		sum.viewState = doc.getElementById("__VIEWSTATE").attr("value");
+		Element event = doc.getElementById("__EVENTVALIDATION");
+		if (event != null)
+			sum.eventValidation = event.attr("value");
+		
+		return sum;
+	}
+	
+	public static AttendanceSummary parseAttendanceSummary (String html) {
+		Element doc = Jsoup.parse(html);
+		
+		AttendanceSummary sum = parseAttendanceSummaryValidation(doc);
+		
+		Element table = doc.getElementById("AttendanceSummaryd");
+		System.out.println(table);
+		
+		Element classNames = table.getElementsByTag("thead").get(0).getElementsByTag("tr").get(1);
+		Element tableBody = table.child(1);
+		int numClasses = classNames.children().size() - 1;
+		System.out.println(numClasses);
+		sum.attendanceSummary = new int[numClasses][AttendanceSummary.NUM_COLS];
+		sum.classNames = new String[numClasses];
+		
+		for (int i = 1; i <= numClasses; i++) {
+			sum.classNames[i-1] = classNames.child(i).text();
+			System.out.println(i + " " + sum.classNames[i-1]);
+		}
+		
+		for (int colIndex = 0; colIndex < AttendanceSummary.NUM_COLS; colIndex++) {
+			Element row = tableBody.child(colIndex);
+			for (int classIndex = 1; classIndex <= numClasses; classIndex++) {
+				int num;
+				try {
+					num = Integer.parseInt(row.child(classIndex).text());
+				} catch (NumberFormatException e) {
+					num = 0;
+				}
+				sum.attendanceSummary[classIndex][colIndex - 1] = num;
+			}
+		}
+		
+		sum.pageUniqueId = pageUniqueId(doc);
+		
+		return sum;
+	}
+	
+	public static class AttendanceSummary {
+		public static final String[] COLS = {"Unexcused Absence", "Excused Absence",
+			"School Absence", "Unexcused Tardy", "Excused Tardy"};
+		public static final int NUM_COLS = COLS.length;
+		/**
+		 * 1 Jan 2014
+		 */
+		public static String START_OF_SPRING_SEMESTER = "Wed+1%2F1%2F2014";
+		/**
+		 * 11 June 2014
+		 */
+		public static String END_OF_SPRING_SEMESTER = "Wed+6%2F11%2F2014";
+		
+		
+		String viewState;
+		String eventValidation;
+		int[][] attendanceSummary;
+		String[] classNames;
+		String pageUniqueId;
+	}
+	
 }

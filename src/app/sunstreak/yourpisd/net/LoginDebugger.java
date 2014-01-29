@@ -73,6 +73,22 @@ public class LoginDebugger {
 				System.out.printf("  S2:%5s\n", displayScore(st.getClassList().optJSONObject(st.getClassMatch()[i])
 						.optInt("secondSemesterAverage", -1)));
 			}
+			
+			st.loadAttendanceSummary();
+			String[] classNames = st.getAttendanceSummaryClassNames();
+			int[][] attendanceSummary = st.getAttendanceSummary();
+			for (int j = 0; j < Parser.AttendanceSummary.COLS.length; j++) {
+				System.out.printf("%20s", "");
+				System.out.printf("%5s", Parser.AttendanceSummary.COLS[j]);
+				System.out.println();
+			}
+			for (int i = 0; i < classNames.length; i++) {
+				System.out.printf("%20s", classNames[i]);
+				for (int j = 0; j < attendanceSummary[i].length; j++) {
+					System.out.printf("%5d", attendanceSummary[i][j]);
+				}
+				System.out.println();
+			}
 		}
 
 	}

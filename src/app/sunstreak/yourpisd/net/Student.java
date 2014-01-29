@@ -2,6 +2,7 @@ package app.sunstreak.yourpisd.net;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,6 +26,11 @@ public class Student {
 	public final String name;
 	JSONArray classList;
 	int[][] gradeSummary;
+	
+	int[][] attendanceSummary;
+	String[] attendanceSummaryClassNames;
+	
+	String attendanceViewState;
 	int[] classIds;
 	int[] classMatch;
 	SparseArray<JSONObject> classGrades = new SparseArray<JSONObject>();
@@ -560,6 +566,50 @@ public class Student {
 			// Not enough grades for calculation
 			return -1;
 		}
+	}
+	
+	public boolean loadAttendanceSummary () throws IOException {
+		String url = "https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/" +
+				"AttendanceSummary.aspx?EnrollmentId=" + classIds[0] + 
+				"&TermId=" + getTermIds(classIds[0]) +
+				"&ReportType=0&StudentId=" + studentId;
+		
+		Object[] summaryWithBadData = Request.sendGet(url, session.cookies);
+		String html = (String) summaryWithBadData[0];
+		int responseCode = (Integer) summaryWithBadData[1];
+		session.cookies = (ArrayList<String>) summaryWithBadData[2];
+		Parser.AttendanceSummary sumWithBadData = Parser.parseAttendanceSummaryWithoutData(html);
+		
+		String postParams = "__VIEWSTATE=" + sumWithBadData.viewState +
+				"&__EVENTVALIDATION=" + sumWithBadData.eventValidation + 
+				"&ctl00%24ctl00%24ContentPlaceHolder%24uxStudentId=" + studentId +
+				"&ctl00%24ctl00%24ContentPlaceHolder%24ContentPane%24dateCtrl=" + Parser.AttendanceSummary.START_OF_SPRING_SEMESTER + 
+				"&ctl00%24ctl00%24ContentPlaceHolder%24ContentPane%24uxEndDate=" + Parser.AttendanceSummary.END_OF_SPRING_SEMESTER + 
+				"&PageUniqueId=" + URLEncoder.encode(session.pageUniqueId, "UTF-8");
+		Object[] attendanceSummaryReq = Request.sendPost(url, postParams, session.cookies);
+		
+		html = (String) attendanceSummaryReq[0];
+		responseCode = (Integer) attendanceSummaryReq[1];
+		session.cookies = (ArrayList<String>) attendanceSummaryReq[2];
+		
+		if (responseCode != 200)
+			throw new IOException("Response code of " + responseCode + " when trying to " +
+					"read attendance summary.");
+		
+		Parser.AttendanceSummary sum = Parser.parseAttendanceSummary(html);
+		
+		attendanceSummary = sum.attendanceSummary;
+		attendanceSummaryClassNames = sum.classNames;
+		session.pageUniqueId = sum.pageUniqueId;
+		return true;
+	}
+	
+	public int[][] getAttendanceSummary () {
+		return attendanceSummary;
+	}
+	
+	public String[] getAttendanceSummaryClassNames () {
+		return attendanceSummaryClassNames;
 	}
 
 }
