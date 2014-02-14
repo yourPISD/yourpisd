@@ -283,9 +283,11 @@ public class YPSession {
 		}
 
 		// If even 7 tries was not enough and still getting NotSet.
-		if (loginAttempt == -1)
+		if (loginAttempt == -1) {
+			if (domain==Domain.STUDENT)
+				logout();
 			return -2;
-
+		}
 		return 1;
 	}
 
@@ -650,6 +652,13 @@ public class YPSession {
 	}
 	 */
 
-
+	public boolean logout () throws MalformedURLException, IOException {
+		Object[] logout = Request.sendGet("http://portal.mypisd.net/c/portal/logout", cookies);
+		//String response = (String) logout[0];
+		int responseCode = (Integer) logout[1];
+		cookies = (ArrayList<String>) logout[2];
+		
+		return responseCode==302 || responseCode==200;
+	}
 	
 }

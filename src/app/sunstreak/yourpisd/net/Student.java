@@ -86,9 +86,10 @@ public class Student {
 		session.cookies = (ArrayList<String>) init[2];
 
 		try {
-			classList = (new JSONObject(response)).getJSONArray("classes");
+			classList = (new JSONArray(response)).getJSONObject(0).getJSONArray("classes");
 		} catch (JSONException e) {
 			e.printStackTrace();
+			System.out.println(response);
 		}
 
 	}
