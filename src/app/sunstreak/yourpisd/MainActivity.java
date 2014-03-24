@@ -72,7 +72,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import app.sunstreak.yourpisd.net.DateHandler;
 import app.sunstreak.yourpisd.net.Student;
-import app.sunstreak.yourpisd.net.YPSession;
+import app.sunstreak.yourpisd.net.Session;
 
 
 public class MainActivity extends FragmentActivity implements ActionBar.TabListener { 
@@ -80,7 +80,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	static int classCount;
 	static RelativeLayout[] averages;
 	static int[] goals;
-	static YPSession session;
+	static Session session;
 	static Bitmap proPic;
 	static int SCREEN_HEIGHT;
 	static int SCREEN_WIDTH;

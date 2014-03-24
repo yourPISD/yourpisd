@@ -47,7 +47,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import app.sunstreak.yourpisd.net.Student;
-import app.sunstreak.yourpisd.net.YPSession;
+import app.sunstreak.yourpisd.net.Session;
 
 /**
  * Activity which displays a login screen to the user, offering registration as
@@ -59,7 +59,7 @@ public class LoginActivity extends Activity {
 	 * Keep track of the login task to ensure we can cancel it if requested.
 	 */
 	private UserLoginTask mAuthTask = null;
-	private YPSession session;
+	private Session session;
 	
 	// Values for email and password at the time of the login attempt.
 	private String mEmail = "";
@@ -377,7 +377,7 @@ public class LoginActivity extends Activity {
 	 */
 	public class UserLoginTask extends AsyncTask<Void, Integer, Integer> {
 
-		private YPSession session;
+		private Session session;
 
 		@Override
 		protected void onPreExecute() {
@@ -396,7 +396,7 @@ public class LoginActivity extends Activity {
 				NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 				if (networkInfo != null && networkInfo.isConnected()) {
 					// Simulate network access.
-					session = new YPSession(mEmail, mPassword);
+					session = Session.createSession(mEmail, mPassword);
 					
 					((YPApplication)getApplication()).session = session;
 

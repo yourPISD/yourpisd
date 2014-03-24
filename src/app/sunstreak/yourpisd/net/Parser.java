@@ -19,6 +19,8 @@ package app.sunstreak.yourpisd.net;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,6 +30,8 @@ import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import android.util.SparseArray;
 
 
 public class Parser {
@@ -480,61 +484,24 @@ public class Parser {
 		return sb.toString();
 	}
 
-	public static AttendanceSummary parseAttendanceSummaryWithoutData (String html) {
-		Element doc = Jsoup.parse(html);
-		return parseAttendanceSummaryValidation(doc);
+	public static AttendanceData parseAttendanceSummaryWithoutData (String html) {
+		return new AttendanceData(html);
 	}
 	
-	private static AttendanceSummary parseAttendanceSummaryValidation (Element doc) {
-		AttendanceSummary sum = new AttendanceSummary();
-		
-		sum.viewState = doc.getElementById("__VIEWSTATE").attr("value");
-		Element event = doc.getElementById("__EVENTVALIDATION");
-		if (event != null)
-			sum.eventValidation = event.attr("value");
-		
-		return sum;
+	/*
+	private static AttendanceData parseAttendanceSummaryValidation (Element doc) {
+		return new AttendanceData();
+	}
+	*/
+	
+	public static AttendanceData parseAttendanceSummary (String html) {
+		AttendanceData ad = new AttendanceData(html);
+		//ad.parseSummary();
+		ad.parseDetailedView();
+		return ad;
 	}
 	
-	public static AttendanceSummary parseAttendanceSummary (String html) {
-		Element doc = Jsoup.parse(html);
-		
-		AttendanceSummary sum = parseAttendanceSummaryValidation(doc);
-		
-		Element table = doc.getElementById("AttendanceSummaryd");
-		System.out.println(table);
-		
-		Element classNames = table.getElementsByTag("thead").get(0).getElementsByTag("tr").get(1);
-		Element tableBody = table.child(1);
-		int numClasses = classNames.children().size() - 1;
-		System.out.println(numClasses);
-		sum.attendanceSummary = new int[numClasses][AttendanceSummary.NUM_COLS];
-		sum.classNames = new String[numClasses];
-		
-		for (int i = 1; i <= numClasses; i++) {
-			sum.classNames[i-1] = classNames.child(i).text();
-			System.out.println(i + " " + sum.classNames[i-1]);
-		}
-		
-		for (int colIndex = 0; colIndex < AttendanceSummary.NUM_COLS; colIndex++) {
-			Element row = tableBody.child(colIndex);
-			for (int classIndex = 1; classIndex <= numClasses; classIndex++) {
-				int num;
-				try {
-					num = Integer.parseInt(row.child(classIndex).text());
-				} catch (NumberFormatException e) {
-					num = 0;
-				}
-				sum.attendanceSummary[classIndex][colIndex - 1] = num;
-			}
-		}
-		
-		sum.pageUniqueId = pageUniqueId(doc);
-		
-		return sum;
-	}
-	
-	public static class AttendanceSummary {
+	public static class AttendanceData {
 		public static final String[] COLS = {"Unexcused Absence", "Excused Absence",
 			"School Absence", "Unexcused Tardy", "Excused Tardy"};
 		public static final int NUM_COLS = COLS.length;
@@ -547,12 +514,180 @@ public class Parser {
 		 */
 		public static String END_OF_SPRING_SEMESTER = "Wed+6%2F11%2F2014";
 		
+		public static class AttendanceEvent {
+			public static final String[] ATTENDANCE_CODE_DOES_NOT_COUNT_TOWARDS_EXEMPTIONS = new String[]
+					{"ABC",	"ACI", "ACL", "ACR", "ADN",
+					"AEC", "AEE", "AFT", "AIS", "AOC",
+					"ARH", "ASO", "ATS", "NS"};
+			
+			String date;
+			boolean isAbsence; // True if absence, false if tardy
+			boolean countsTowardExemptions;
+			int period;
+			
+			public AttendanceEvent (String date, String code, int period) {
+				this.date = date;
+				this.period = period;
+				
+				code = code.substring(code.indexOf("-")+1);
+				isAbsence = !code.equals("T");
+				
+				countsTowardExemptions = true;
+				for (String codeThatDoesNotCount : ATTENDANCE_CODE_DOES_NOT_COUNT_TOWARDS_EXEMPTIONS) {
+					if (code.equals(codeThatDoesNotCount)) {
+						countsTowardExemptions = false;
+						break;
+					}
+				}
+			}
+			
+			public String toString() {
+				return String.format("%s: Period %d: %s %s", date, period, isAbsence?"A":"T", countsTowardExemptions?":(":":)");
+			}
+		}
 		
+		SparseArray<String> classNames;
+		TreeMap<String,List<AttendanceEvent>> eventsByDate;
+		SparseArray<List<AttendanceEvent>> eventsByPeriod;
 		String viewState;
 		String eventValidation;
-		int[][] attendanceSummary;
-		String[] classNames;
+		//int[][] attendanceSummary;
+		//String[] classNames;
 		String pageUniqueId;
+		Element doc;
+		
+		AttendanceData () {	}
+		
+		AttendanceData (String html) {
+			eventsByDate = new TreeMap<String, List<AttendanceEvent>>();
+			eventsByPeriod = new SparseArray<List<AttendanceEvent>>();
+			classNames = new SparseArray<String>();
+			
+			doc = Jsoup.parse(html);
+			
+			if (doc.getElementsByTag("title").get(0).text().trim().equals("Error")) {
+				throw new RuntimeException ("Gradebook error");
+			}
+			
+			parseValidation();
+			
+			pageUniqueId = pageUniqueId(doc);
+		}
+		
+		/*
+		private void parseSummary() {
+			Element table = doc.getElementById("AttendanceSummaryd");
+			
+			Element classNamesElement = table.getElementsByTag("thead").get(0).getElementsByTag("tr").get(1);
+			Element tableBody = table.child(1);
+			int numClasses = classNamesElement.children().size() - 1;
+			//System.out.println(numClasses);
+			attendanceSummary = new int[numClasses][AttendanceData.NUM_COLS];
+			classNames = new String[numClasses];
+			
+			for (int i = 1; i <= numClasses; i++) {
+				classNames[i-1] = classNamesElement.child(i).text();
+			}
+			
+			for (int colIndex = 0; colIndex < AttendanceData.NUM_COLS; colIndex++) {
+				Element row = tableBody.child(colIndex);
+				for (int classIndex = 1; classIndex <= numClasses; classIndex++) {
+					
+					int num;
+					try {
+						num = Integer.parseInt(row.child(classIndex).text());
+					} catch(NumberFormatException e) {
+						num = 0;
+					}
+					
+					attendanceSummary[classIndex - 1][colIndex] = num;
+				}
+			}
+		}
+		*/
+		
+		private void parseDetailedView() {
+			Element table = doc.getElementById("AttendanceDetaild");
+			List<Integer> classes = new ArrayList<Integer>();
+			{
+				Elements classesElements = table.child(0).child(1).children();
+				Pattern p = Pattern.compile("(.+)" + Pattern.quote("(") + "(\\d+)" + Pattern.quote(")"));
+				for (int i = 1; i < classesElements.size(); i++) {
+					String className = classesElements.get(i).text();
+					Matcher m = p.matcher(className);
+					if (m.find()) {
+						int period = Integer.parseInt(m.group(2));
+						classes.add(period);
+						classNames.append(period, m.group(1));
+					} else {
+						throw new RuntimeException(String.format("Class %s does not have a period", className));
+					}
+				}
+			}
+			{
+				Elements attendanceDays = table.child(1).children();
+				for (Element attendanceDay : attendanceDays) {
+					String day = attendanceDay.children().get(0).text();
+					Elements periods = attendanceDay.children();
+					for (int i = 1; i < periods.size(); i++) {
+						Element period  = periods.get(i);
+						if (period.hasText()) {
+							AttendanceEvent event = new AttendanceEvent(day, period.text(), classes.get(i-1));
+							List<AttendanceEvent> eventsOnPeriod;
+							if (eventsByPeriod.indexOfKey(event.period) >= 0)
+								eventsOnPeriod = eventsByPeriod.get(event.period);
+							else {
+								eventsOnPeriod = new ArrayList<AttendanceEvent>();
+								eventsByPeriod.append(event.period, eventsOnPeriod);
+							}
+							//System.out.println(event);
+							eventsOnPeriod.add(event);
+							
+							List<AttendanceEvent> eventsOnDay;
+							if (eventsByDate.containsKey(day)) {
+								eventsOnDay = eventsByDate.get(day);
+							} else {
+								eventsOnDay = new ArrayList<AttendanceEvent>();
+								eventsByDate.put(day, eventsOnDay);
+							}
+							eventsOnDay.add(event);
+						}
+					}
+				}
+			}
+		}
+		
+		public void printDetailedView () {
+			System.out.println("Events by Period:");
+			for (int i = 0; i < eventsByPeriod.size(); i++) {
+				int period = eventsByPeriod.keyAt(i);
+				System.out.printf("Period %d:\n", period);
+				for (AttendanceEvent e : eventsByPeriod.get(period)) {
+					System.out.println(e);
+				}
+			}
+			
+			System.out.println("\nEvents by Date:");
+			
+			for (Map.Entry<String,List<AttendanceEvent>> entry : eventsByDate.entrySet()) {
+				String date = entry.getKey();
+				System.out.printf("%s:\n", date);
+				for (AttendanceEvent e : entry.getValue()) {
+					System.out.println(e);
+				}
+			}
+		}
+		
+		public void parseValidation () {
+			viewState = doc.getElementById("__VIEWSTATE").attr("value");
+			Element event = doc.getElementById("__EVENTVALIDATION");
+			if (event != null)
+				eventValidation = event.attr("value");
+		}
+		
+		public String toString() {
+			return String.format("View State: %s\nEvent validation: %s", viewState, eventValidation);
+		}
 	}
 	
 }

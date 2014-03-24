@@ -23,6 +23,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import org.joda.time.Instant;
 import org.json.JSONArray;
@@ -37,17 +38,19 @@ import android.util.SparseArray;
 
 public class Student {
 
-	private YPSession session;
+	private Session session;
 
 	public final int studentId;
 	public final String name;
 	JSONArray classList;
 	int[][] gradeSummary;
 	
-	int[][] attendanceSummary;
-	String[] attendanceSummaryClassNames;
+	//int[][] attendanceSummary;
+	//String[] attendanceSummaryClassNames;
 	
-	String attendanceViewState;
+	//String attendanceViewState;
+	Parser.AttendanceData attendanceData;
+	
 	int[] classIds;
 	int[] classMatch;
 	SparseArray<JSONObject> classGrades = new SparseArray<JSONObject>();
@@ -58,7 +61,7 @@ public class Student {
 	public static final int NO_GRADES_ENTERED = -1;
 	public static final String[] SEMESTER_AVERAGE_KEY = {"firstSemesterAverage", "secondSemesterAverage"};
 
-	public Student (int studentId, String studentName, YPSession session) {
+	public Student (int studentId, String studentName, Session session) {
 		this.session = session;
 
 		this.studentId = studentId;
@@ -83,7 +86,7 @@ public class Student {
 
 		String response = (String) init[0];
 		int responseCode = (Integer) init[1];
-		session.cookies = (ArrayList<String>) init[2];
+		session.cookies = (Set<String>) init[2];
 
 		try {
 			classList = (new JSONArray(response)).getJSONObject(0).getJSONArray("classes");
@@ -130,7 +133,7 @@ public class Student {
 			Object[] summary = Request.sendGet(url,	session.cookies);
 			String response = (String) summary[0];
 			int responseCode = (Integer) summary[1];
-			session.cookies = (ArrayList<String>) summary[2];
+			session.cookies = (Set<String>) summary[2];
 
 			if (responseCode != 200)
 				System.out.println("Response code: " + responseCode);
@@ -240,7 +243,7 @@ public class Student {
 		Object[] report = Request.sendGet(url,	session.cookies);
 		String response = (String) report[0];
 		int responseCode = (Integer) report[1];
-		session.cookies = (ArrayList<String>) report[2];
+		session.cookies = (Set<String>) report[2];
 
 		if (responseCode != 200) {
 			System.out.println("Response code: " + responseCode);
@@ -595,39 +598,33 @@ public class Student {
 		Object[] summaryWithBadData = Request.sendGet(url, session.cookies);
 		String html = (String) summaryWithBadData[0];
 		int responseCode = (Integer) summaryWithBadData[1];
-		session.cookies = (ArrayList<String>) summaryWithBadData[2];
-		Parser.AttendanceSummary sumWithBadData = Parser.parseAttendanceSummaryWithoutData(html);
+		session.cookies = (Set<String>) summaryWithBadData[2];
+		Parser.AttendanceData sumWithBadData = Parser.parseAttendanceSummaryWithoutData(html);
+		//System.out.println(sumWithBadData);
 		
 		String postParams = "__VIEWSTATE=" + sumWithBadData.viewState +
 				"&__EVENTVALIDATION=" + sumWithBadData.eventValidation + 
 				"&ctl00%24ctl00%24ContentPlaceHolder%24uxStudentId=" + studentId +
-				"&ctl00%24ctl00%24ContentPlaceHolder%24ContentPane%24dateCtrl=" + Parser.AttendanceSummary.START_OF_SPRING_SEMESTER + 
-				"&ctl00%24ctl00%24ContentPlaceHolder%24ContentPane%24uxEndDate=" + Parser.AttendanceSummary.END_OF_SPRING_SEMESTER + 
+				"&ctl00%24ctl00%24ContentPlaceHolder%24ContentPane%24dateCtrl=" + Parser.AttendanceData.START_OF_SPRING_SEMESTER + 
+				"&ctl00%24ctl00%24ContentPlaceHolder%24ContentPane%24uxEndDate=" + Parser.AttendanceData.END_OF_SPRING_SEMESTER + 
 				"&PageUniqueId=" + URLEncoder.encode(session.pageUniqueId, "UTF-8");
 		Object[] attendanceSummaryReq = Request.sendPost(url, postParams, session.cookies);
 		
+		//System.out.println(postParams);
 		html = (String) attendanceSummaryReq[0];
 		responseCode = (Integer) attendanceSummaryReq[1];
-		session.cookies = (ArrayList<String>) attendanceSummaryReq[2];
+		session.cookies = (Set<String>) attendanceSummaryReq[2];
 		
 		if (responseCode != 200)
-			throw new IOException("Response code of " + responseCode + " when trying to " +
-					"read attendance summary.");
+			throw new IOException("Response code of " + responseCode + " when loading attendance summary.");
 		
-		Parser.AttendanceSummary sum = Parser.parseAttendanceSummary(html);
+		attendanceData = Parser.parseAttendanceSummary(html);
+		attendanceData.printDetailedView();
 		
-		attendanceSummary = sum.attendanceSummary;
-		attendanceSummaryClassNames = sum.classNames;
-		session.pageUniqueId = sum.pageUniqueId;
+		//attendanceSummary = sum.attendanceSummary;
+		//attendanceSummaryClassNames = sum.classNames;
+		session.pageUniqueId = attendanceData.pageUniqueId;
 		return true;
-	}
-	
-	public int[][] getAttendanceSummary () {
-		return attendanceSummary;
-	}
-	
-	public String[] getAttendanceSummaryClassNames () {
-		return attendanceSummaryClassNames;
 	}
 
 }

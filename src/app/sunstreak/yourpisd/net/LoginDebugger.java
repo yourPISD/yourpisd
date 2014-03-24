@@ -18,6 +18,7 @@
 package app.sunstreak.yourpisd.net;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 
@@ -28,14 +29,37 @@ import app.sunstreak.yourpisd.TermFinder;
 
 public class LoginDebugger {
 
+	static Session session;
+	
 	static String mEmail;
 	static String mPassword;
 
 	static int CURRENT_TERM_INDEX;
 
+	public static class Colors {
+		public static final String ANSI_RESET = "\u001B[0m";
+		public static final String ANSI_BLACK = "\u001B[30m";
+		public static final String ANSI_RED = "\u001B[31m";
+		public static final String ANSI_GREEN = "\u001B[32m";
+		public static final String ANSI_YELLOW = "\u001B[33m";
+		public static final String ANSI_BLUE = "\u001B[34m";
+		public static final String ANSI_PURPLE = "\u001B[35m";
+		public static final String ANSI_CYAN = "\u001B[36m";
+		public static final String ANSI_WHITE = "\u001B[37m";
+	}
+	
 	public static void main(String[] args) throws IOException, JSONException, ExecutionException, InterruptedException {
 		
+		try {
+			debug(args);
+		} catch (Exception e) {
+			e.printStackTrace();
+			session.logout();
+		}
 		
+	}
+	
+	static void debug (String[] args) throws MalformedURLException, IOException, InterruptedException, ExecutionException, JSONException {
 		if (args.length == 2) {
 			mEmail = args[0];
 			mPassword = args[1];
@@ -49,7 +73,7 @@ public class LoginDebugger {
 			sc.close();
 		}
 
-		YPSession session = new YPSession(mEmail, mPassword);
+		session = Session.createSession(mEmail, mPassword);
 
 		int loginSuccess = session.login();
 		if (loginSuccess == 1)
@@ -91,12 +115,22 @@ public class LoginDebugger {
 						.optInt("secondSemesterAverage", -1)));
 			}
 			
-			st.loadAttendanceSummary();
+			boolean attendanceLoaded = false;
+			while (!attendanceLoaded) {
+				try {
+					st.loadAttendanceSummary();
+					attendanceLoaded = true;
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			
+			/*
 			String[] classNames = st.getAttendanceSummaryClassNames();
 			int[][] attendanceSummary = st.getAttendanceSummary();
-			for (int j = 0; j < Parser.AttendanceSummary.COLS.length; j++) {
+			for (int j = 0; j < Parser.AttendanceData.COLS.length; j++) {
 				System.out.printf("%20s", "");
-				System.out.printf("%5s", Parser.AttendanceSummary.COLS[j]);
+				System.out.printf("%5s", Parser.AttendanceData.COLS[j]);
 				System.out.println();
 			}
 			for (int i = 0; i < classNames.length; i++) {
@@ -106,8 +140,8 @@ public class LoginDebugger {
 				}
 				System.out.println();
 			}
+			*/
 		}
-
 	}
 	
 	public static String displayScore (int score) {

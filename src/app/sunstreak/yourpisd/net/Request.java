@@ -32,6 +32,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -49,23 +52,23 @@ public class Request {
 	}
 
 	public static Object[] sendGet(String url) throws MalformedURLException, IOException {
-		return sendGet (url, new ArrayList<String>());
+		return sendGet (url, new HashSet<String>());
 	}
 	
 
 	public static Object[] sendGet(String url, boolean isSecure) throws MalformedURLException, IOException {
-		return sendGet (url, new ArrayList<String>(), null, isSecure);
+		return sendGet (url, new HashSet<String>(), null, isSecure);
 	}
 	
 
-	public static Object[] sendGet(String url, ArrayList<String> cookies) throws MalformedURLException, IOException {
+	public static Object[] sendGet(String url, Set<String> cookies) throws MalformedURLException, IOException {
 			return sendGet (url, cookies, null, isSecure(url));
 	}
 	
 	/**
-	 * returns Object[] {String response, int responseCode, ArrayList<String> cookies}
+	 * returns Object[] {String response, int responseCode, Set<String> cookies}
 	 */
-	public static Object[] sendGet(String url, ArrayList<String> cookies, ArrayList<String[]> requestProperties, boolean isSecure) throws MalformedURLException, IOException {
+	public static Object[] sendGet(String url, Set<String> cookies, ArrayList<String[]> requestProperties, boolean isSecure) throws MalformedURLException, IOException {
 		
 		CookieManager cm = new CookieManager();
 		CookieHandler.setDefault(cm);
@@ -113,12 +116,7 @@ public class Request {
 				
 				// Concatenates the cookies into one cookie string, seperated by semicolons.
 				if (cookies != null && cookies.size()>0) {
-					String cookieRequest = "";
-					for (int i = 0; i < cookies.size(); i++) {
-						cookieRequest += cookies.get(i);
-						if (i < cookies.size() - 1)
-							cookieRequest += "; ";
-					}
+					String cookieRequest = concatCookies(cookies);
 					conn.setRequestProperty("Cookie", cookieRequest);
 				}
 				
@@ -178,20 +176,20 @@ public class Request {
 	
 
 	
-	public static Object[] sendPost(String url, String postParams, ArrayList<String> cookies) throws MalformedURLException, IOException {
+	public static Object[] sendPost(String url, String postParams, Set<String> cookies) throws MalformedURLException, IOException {
 		
 		return sendPost (url, cookies, null, isSecure(url), postParams);
 		
 	}
 	
-	public static Object[] sendPost(String url, String postParams, ArrayList<String> cookies, ArrayList<String[]> requestProperties) throws MalformedURLException, IOException {
+	public static Object[] sendPost(String url, String postParams, Set<String> cookies, ArrayList<String[]> requestProperties) throws MalformedURLException, IOException {
 		if (isSecure(url))
 			return sendPost (url, cookies, requestProperties, true, postParams);
 		else
 			return sendPost (url, cookies, requestProperties, false, postParams);
 	}
 	
-	public static Object[] sendPost(String url, ArrayList<String> cookies, ArrayList<String[]> requestProperties, boolean isSecure, String postParams) throws MalformedURLException, IOException {
+	public static Object[] sendPost(String url, Set<String> cookies, ArrayList<String[]> requestProperties, boolean isSecure, String postParams) throws MalformedURLException, IOException {
 //		System.out.println(url);
 //		System.out.println(postParams);
 		
@@ -240,12 +238,7 @@ public class Request {
 				
 				// Concatenates the cookies into one cookie string, seperated by semicolons.
 				if (cookies != null && cookies.size()>0) {
-					String cookieRequest = "";
-					for (int i = 0; i < cookies.size(); i++) {
-						cookieRequest += cookies.get(i);
-						if (i < cookies.size() - 1)
-							cookieRequest += "; ";
-					}
+					String cookieRequest = concatCookies(cookies);
 					conn.setRequestProperty("Cookie", cookieRequest);
 				}
 				
@@ -342,7 +335,7 @@ public class Request {
 	 * @throws IOException 
 	 * @throws Exception
 	 */
-	public static Object[] getBitmap (String url, ArrayList<String> cookies, ArrayList<String[]> requestProperties, boolean isSecure) {
+	public static Object[] getBitmap (String url, Set<String> cookies, ArrayList<String[]> requestProperties, boolean isSecure) {
 		try {
 			CookieManager cm = new CookieManager();
 			CookieHandler.setDefault(cm);
@@ -368,12 +361,7 @@ public class Request {
 			
 			// Concatenates the cookies into one cookie string, seperated by semicolons.
 			if (cookies != null && cookies.size()>0) {
-				String cookieRequest = "";
-				for (int i = 0; i < cookies.size(); i++) {
-					cookieRequest += cookies.get(i);
-					if (i < cookies.size() - 1)
-						cookieRequest += "; ";
-				}
+				String cookieRequest = concatCookies(cookies);
 				conn.setRequestProperty("Cookie", cookieRequest);
 			}
 			
@@ -416,5 +404,14 @@ public class Request {
 		}
 	}
 	
+	private static String concatCookies (Set<String> cookies) {
+		StringBuilder sb = new StringBuilder();
+		for (Iterator<String> it = cookies.iterator(); it.hasNext();) {
+			sb.append(it.next());
+			if (it.hasNext())
+				sb.append("; ");
+		}
+		return sb.toString();
+	}
 	
 }

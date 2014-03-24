@@ -56,7 +56,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import app.sunstreak.yourpisd.net.DateHandler;
 import app.sunstreak.yourpisd.net.Student;
-import app.sunstreak.yourpisd.net.YPSession;
+import app.sunstreak.yourpisd.net.Session;
 
 
 @SuppressLint("ValidFragment")
@@ -84,7 +84,7 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 	static int termIndex;
 	static boolean doneMakingClasses;
 	static Typeface robotoNew;
-	static YPSession session;
+	static Session session;
 
 	static Student student;
 	static List<Integer> classesForTerm;
