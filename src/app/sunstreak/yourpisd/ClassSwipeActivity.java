@@ -33,7 +33,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -56,7 +55,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import app.sunstreak.yourpisd.net.Student;
 import app.sunstreak.yourpisd.net.Session;
-import app.sunstreak.yourpisd.util.DateHandler;
+import app.sunstreak.yourpisd.util.DateHelper;
 
 
 @SuppressLint("ValidFragment")
@@ -83,7 +82,6 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 	static int classesMade = 0;
 	static int termIndex;
 	static boolean doneMakingClasses;
-	static Typeface robotoNew;
 	static Session session;
 
 	static Student student;
@@ -94,7 +92,6 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.activity_class_swipe);
-		robotoNew = Typeface.createFromAsset(this.getAssets(),"Roboto-Light.ttf");
 
 
 		receivedClassIndex = getIntent().getExtras().getInt("classIndex");
@@ -552,7 +549,7 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 				title = ((TextView)rootView.findViewById(params[2]).findViewById(ASSIGNMENT_NAME_ID)).getText();
 				try {
 					String[] array = session.getCurrentStudent().getAssignmentDetails(params[0], params[1], params[2]);
-					return "Due date: "+ array[0] + DateHandler.daysRelative(array[1]) +"\nWeight: " + array[2];
+					return "Due date: "+ array[0] + DateHelper.daysRelative(array[1]) +"\nWeight: " + array[2];
 				} catch (Exception e) {
 					cancel(true);
 					return null;

@@ -14,7 +14,7 @@
   
   You should have received a copy of the GNU General Public License
   along with yourPISD.  If not, see <http://www.gnu.org/licenses/>.
-  -->
+-->
 
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
@@ -22,13 +22,12 @@
     android:background="@color/gray"
     android:fillViewport="true" >
 
-
     <RelativeLayout
         android:id="@+id/info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
 
-        <TextView
+        <app.sunstreak.yourpisd.view.MyTextView
             android:id="@+id/teacher_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -43,7 +42,7 @@
             android:textSize="28sp"
             android:visibility="gone" />
 
-        <TextView
+        <app.sunstreak.yourpisd.view.MyTextView
             android:id="@+id/six_weeks_average"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -56,8 +55,6 @@
             android:padding="15dp"
             android:textSize="28sp"
             android:visibility="gone" />
-        
-
     </RelativeLayout>
 
     <!-- </LinearLayout> -->

@@ -17,17 +17,18 @@
 
 package app.sunstreak.yourpisd.util;
 
-import org.joda.time.LocalDate;
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
 import org.joda.time.Interval;
+import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
 import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
-public class DateHandler {
+public class DateHelper {
 	
 	public static DateTimeFormatter dtf;
 	public static PeriodFormatter pf;
@@ -113,6 +114,14 @@ public class DateHandler {
 	
 	public static String toHumanDate (String webDate) {
 		return webFormat.parseDateTime(webDate).toString(humanFormat);
+	}
+	
+	public static boolean isAprilFools() {
+		return true;
+		/*
+		MonthDay now = MonthDay.now();
+		return now.getDayOfMonth() == 1 && now.getMonthOfYear() == 4;
+		*/
 	}
 
 }

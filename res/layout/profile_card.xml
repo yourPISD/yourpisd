@@ -14,50 +14,46 @@
   
   You should have received a copy of the GNU General Public License
   along with yourPISD.  If not, see <http://www.gnu.org/licenses/>.
-  -->
+-->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@drawable/card_custom"
-    >
+    android:background="@drawable/card_custom" >
 
     <ImageView
         android:id="@+id/profilePic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true" 
-        android:layout_margin="5dp"/>
+        android:layout_alignParentTop="true"
+        android:layout_margin="5dp" />
 
-    <TextView
+    <app.sunstreak.yourpisd.view.MyTextView
         android:id="@+id/name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:gravity="center"
         android:layout_toRightOf="@+id/profilePic"
-        android:text="TextView"
-        android:textSize="22sp" 
-        />
-	<TextView
+        android:gravity="center"
+        android:textSize="22sp" />
+
+    <app.sunstreak.yourpisd.view.MyTextView
         android:id="@+id/gpaFall"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
+        android:layout_below="@id/name"
         android:layout_toRightOf="@+id/profilePic"
-        android:layout_below = "@id/name"
-        android:text="TextView"
-        android:textSize="22sp" 
-        />
-        <TextView
+        android:gravity="center"
+        android:textSize="22sp" />
+
+    <app.sunstreak.yourpisd.view.MyTextView
         android:id="@+id/gpaSpring"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
+        android:layout_below="@id/gpaFall"
         android:layout_toRightOf="@+id/profilePic"
-        android:layout_below = "@id/gpaFall"
-        android:text="TextView"
-        android:textSize="22sp"
-        /> 
+        android:gravity="center"
+        android:textSize="22sp" />
+
 </RelativeLayout>

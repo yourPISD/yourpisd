@@ -14,7 +14,7 @@
   
   You should have received a copy of the GNU General Public License
   along with yourPISD.  If not, see <http://www.gnu.org/licenses/>.
-  -->
+-->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -29,7 +29,7 @@
     android:paddingBottom="5dp"
     android:paddingTop="5dp" >
 
-    <TextView
+    <app.sunstreak.yourpisd.view.MyTextView
         android:id="@+id/name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -44,7 +44,7 @@
         android:textSize="@dimen/six_weeks_summary_class_name_text_size"
         android:textStyle="normal" />
 
-    <TextView
+    <app.sunstreak.yourpisd.view.MyTextView
         android:id="@+id/grade"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

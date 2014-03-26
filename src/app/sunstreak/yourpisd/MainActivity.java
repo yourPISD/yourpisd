@@ -80,10 +80,14 @@ import app.sunstreak.yourpisd.net.Parser.AttendanceData;
 import app.sunstreak.yourpisd.net.Parser.AttendanceData.AttendanceEvent;
 import app.sunstreak.yourpisd.net.Session;
 import app.sunstreak.yourpisd.net.Student;
-import app.sunstreak.yourpisd.util.DateHandler;
+import app.sunstreak.yourpisd.util.DateHelper;
+import app.sunstreak.yourpisd.view.MyTextView;
 
 
-public class MainActivity extends FragmentActivity implements ActionBar.TabListener { 
+public class MainActivity extends FragmentActivity implements ActionBar.TabListener {
+
+	public static boolean isTroll;
+
 	public static final int CURRENT_TERM_INDEX = TermFinder.getCurrentTermIndex();
 	static int classCount;
 	static RelativeLayout[] averages;
@@ -175,6 +179,14 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		else
 			mViewPager.setCurrentItem(1);
 
+		MyTextView.typeface = Typeface.createFromAsset(getAssets(),"Roboto-Light.ttf");
+		if (DateHelper.isAprilFools()) {
+			setUpTroll();
+		}
+	}
+
+	private void setUpTroll () {
+		MyTextView.typeface = Typeface.createFromAsset(getAssets(),"Comic-Sans.ttf");
 	}
 
 	private void setUpTabs () {
@@ -429,7 +441,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			Bundle args = getArguments();
 			semesterNum = args.getInt(ARG_SEMESTER_NUM);
 			getActivity().getActionBar().getTabAt(SUMMARY_FRAGMENT_POSITION).setText(getPageTitle());
-			//final Typeface robotoNew = Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf");
 
 			rootView = inflater.inflate(R.layout.tab_summary, container, false);
 
@@ -443,16 +454,15 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			}
 			LinearLayout weekNames = new LinearLayout(getActivity());
 			weekNames.setBackgroundResource(R.drawable.card_custom);
-			TextView[] weeks = new TextView[5];
+			TextView[] weeks = new MyTextView[5];
 			weekNames.setPadding(15,20,0,20);
 			weekNames.setGravity(Gravity.CENTER);
 			for(int i = 0; i< weeks.length; i++)
 			{
-				weeks[i] = new TextView(getActivity());
+				weeks[i] = new MyTextView(getActivity());
 				weeks[i].setTextSize(getResources().getDimension(R.dimen.text_size_grade_overview_header));
 				weeks[i].setText(COLUMN_HEADERS[semesterNum][i]);
 
-				weeks[i].setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 
 				weeks[i].setPadding(0, 0, 0, 0);
 				LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams((SCREEN_WIDTH-30) / 5, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -469,7 +479,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 			//TODO Will break for people who change courses in middle of semester.
 			int realClassIndex = 0;
-			
+
 			for (int classIndex = 0; classIndex < classCount; classIndex++) {
 
 				if ( ! session.getCurrentStudent().hasClassDuringSemester(classIndex, semesterNum) )
@@ -485,10 +495,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 				for (int termIndex = 4 * semesterNum; termIndex < 4 + 4 * semesterNum; termIndex++) {
 
-					TextView termGrade = new TextView(getActivity());
+					TextView termGrade = new MyTextView(getActivity());
 					termGrade.setTextSize(getResources().getDimension(R.dimen.text_size_grade_overview_score));
 					termGrade.setClickable(true);
-					termGrade.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 
 					int width = (SCREEN_WIDTH - 30)/5;
 					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(width, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -518,7 +527,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					termGrade.setGravity(Gravity.CENTER);
 					summary.addView(termGrade);
 
-					
+
 				}
 
 				// Display the average.
@@ -531,7 +540,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				if (average != -1) {
 					String averageText = Integer.toString(average);
 
-					TextView averageGrade = new TextView(getActivity());
+					TextView averageGrade = new MyTextView(getActivity());
 
 					int width = (SCREEN_WIDTH - 30)/5;
 					LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(width, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -540,7 +549,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 					averageGrade.setTextSize(getResources().getDimension(R.dimen.text_size_grade_overview_score));
 					averageGrade.setClickable(false);
-					averageGrade.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 					averageGrade.setGravity(Gravity.CENTER);
 					averageGrade.setText(averageText);
 					averageGrade.setTextColor(getResources().getColor(gradeColor(average)));
@@ -550,11 +558,10 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 				bigLayout.addView(classSummary);
 				realClassIndex++;
-				
+
 			}
 			Button toggleSemester = new Button(getActivity());
-			Typeface robotoNew = Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf");
-			toggleSemester.setTypeface(robotoNew);
+
 			toggleSemester.setBackgroundResource(R.drawable.card_click_blue);
 			toggleSemester.setText("View " + PAGE_TITLE[Math.abs(currentSummaryFragment-1)]);
 			toggleSemester.setOnClickListener(new OnClickListener(){
@@ -595,8 +602,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			});
 			bigLayout.addView(toggleSemester);
 
-			TextView summaryLastUpdated = new TextView(getActivity());
-			String lastUpdatedString = DateHandler.timeSince(session.getCurrentStudent().getClassList().optJSONObject(0).optLong("summaryLastUpdated"));
+			TextView summaryLastUpdated = new MyTextView(getActivity());
+			String lastUpdatedString = DateHelper.timeSince(session.getCurrentStudent().getClassList().optJSONObject(0).optLong("summaryLastUpdated"));
 			summaryLastUpdated.setText(lastUpdatedString);
 			summaryLastUpdated.setPadding(10, 0, 0, 0);
 			bigLayout.addView(summaryLastUpdated);
@@ -637,56 +644,56 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		private LinearLayout viewByDateLayout;
 		private AttendanceData data;
 		private AttendanceTask task;
-		
+
 		private static final int VIEW_BY_PERIOD = -1324;
 		private static final int VIEW_BY_DATE = -134245;
-		
+
 		@Override
 		public String getPageTitle() {
 			return "Attendance";
 		}
-		
+
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, 
 				Bundle savedInstanceState) {
 			View rootView = inflater.inflate(R.layout.attendance, container, false);
-			
+
 			placeHolder = (FrameLayout)rootView.findViewById(R.id.attendance_placeholder);
-			
+
 			task = new AttendanceTask();
 			task.execute();
 			return rootView;
 		}
-		
+
 		public void showAttendanceByPeriod () {
 			// View has already been created.
 			if (viewByPeriodLayout != null) {
 				setLayoutInPlaceholder(viewByPeriodLayout);
 				return;
 			}
-			
+
 			if (task == null) {
 				task = new AttendanceTask();
 			}
 			if (task.getStatus() == AsyncTask.Status.PENDING) {
 				task.execute(VIEW_BY_PERIOD);
 			}
-			
+
 			viewByPeriodLayout = new LinearLayout(getActivity());
 			viewByPeriodLayout.setOrientation(LinearLayout.VERTICAL);
-			
+
 			SparseArray<List<AttendanceEvent>> arr = data.getEventsByPeriod(); 
-			
+
 			for (int i = 0; i < arr.size(); i++) {
-				TextView periodView = new TextView(getActivity());
+				TextView periodView = new MyTextView(getActivity());
 				periodView.setBackgroundResource(R.drawable.card);
-				
-				
-				
+
+
+
 				int tardies = 0;
 				int goodAbs = 0;
 				int badAbs = 0;
-				
+
 				for (AttendanceEvent e : arr.valueAt(i)) {
 					if (e.isAbsence()) {
 						if (e.countsAgainstExemptions())
@@ -697,57 +704,57 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 						tardies++;
 					}
 				}
-				
+
 				periodView.setText(
 						Html.fromHtml(
 								String.format(
 										"%d " +
-										"<font color=\"orange\">%d</font> " +
-										"<font color=\"red\">%d</font> " +
-										"<font color=\"green\">%d</font>", i, tardies, badAbs, goodAbs
-										
+												"<font color=\"orange\">%d</font> " +
+												"<font color=\"red\">%d</font> " +
+												"<font color=\"green\">%d</font>", i, tardies, badAbs, goodAbs
+
+										)
 								)
-						)
-				);
+						);
 				viewByPeriodLayout.addView(periodView);
 			}
-			
+
 			// Put the view in the placeholder
 			setLayoutInPlaceholder(viewByPeriodLayout);
 		}
-		
+
 		private void setLayoutInPlaceholder(View view) {
 			if (placeHolder.getChildCount() != 1 || placeHolder.getChildAt(0) != view) {
 				placeHolder.removeAllViews();
 				placeHolder.addView(view);
 			}
 		}
-		
+
 		public void showAttendanceByDate () {
 			// View has already been created
 			if (viewByDateLayout != null) {
 				setLayoutInPlaceholder(viewByDateLayout);
 				return;
 			}
-			
+
 			if (task == null) {
 				task = new AttendanceTask();
 			}
 			if (task.getStatus() == AsyncTask.Status.PENDING) {
 				task.execute(VIEW_BY_DATE);
 			}
-			
+
 			viewByDateLayout = new LinearLayout(getActivity());
 			viewByDateLayout.setOrientation(LinearLayout.VERTICAL);
-			
+
 			for (Entry<String, List<AttendanceEvent>> entry : data.getEventsByDate().entrySet()) {
 				String date = entry.getKey();
-				TextView dateView = new TextView(getActivity());
-				dateView.setText(DateHandler.toHumanDate(date));
+				TextView dateView = new MyTextView(getActivity());
+				dateView.setText(DateHelper.toHumanDate(date));
 				dateView.setBackgroundResource(R.drawable.card);
 				viewByDateLayout.addView(dateView);
-				
-				TextView eventView = new TextView(getActivity());
+
+				TextView eventView = new MyTextView(getActivity());
 				StringBuilder sb = new StringBuilder();
 				for (AttendanceEvent e : entry.getValue()) {
 					if (!e.isAbsence())
@@ -763,18 +770,18 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				eventView.setText(Html.fromHtml(sb.toString()));
 				eventView.setBackgroundResource(R.drawable.card);
 				viewByDateLayout.addView(eventView);
-				
-				
+
+
 			}
-			
+
 			// Put the view in the placeholder
 			setLayoutInPlaceholder(viewByDateLayout);
 		}
-		
+
 		class AttendanceTask extends AsyncTask<Integer, Integer, AttendanceData> {
 
 			int viewType;
-			
+
 			@Override
 			protected AttendanceData doInBackground(Integer... args) {
 				if (args.length > 0)
@@ -789,21 +796,21 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					return null;
 				}
 			}
-			
+
 			@Override
 			protected void onPostExecute(AttendanceData result) {
 				data = result;
-				
+
 				if (viewType == VIEW_BY_DATE)
 					showAttendanceByDate();
 				else // default
 					showAttendanceByPeriod();
-				
+
 			}
-			
+
 		}
 	}
-	
+
 	/**
 	 * A dummy fragment representing a section of the app, but that simply
 	 * displays dummy text.
@@ -850,7 +857,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 			Bundle args = getArguments();
 			position = args.getInt(ARG_OBJECT);
-			final Typeface robotoNew = Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf");
 			int tabLayout = 0;
 			switch (position) {
 			case 0:
@@ -879,12 +885,10 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				LinearLayout bigLayout = (LinearLayout) rootView.findViewById(R.id.overall);
 
 				if (session.MULTIPLE_STUDENTS) {
-					TextView instructions = new TextView(getActivity());
+					TextView instructions = new MyTextView(getActivity());
 					LinearLayout instruct = new LinearLayout(getActivity());
 
 					instructions.setPadding(15, 15, 15, 15);
-					instructions.setTypeface(Typeface.createFromAsset(getActivity().getAssets()
-							,"Roboto-Light.ttf"));
 					instructions.setText(R.string.welcome_multiple_students);
 					instruct.setBackgroundResource(R.drawable.card_custom);
 					instruct.addView(instructions);
@@ -894,37 +898,36 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				profileCards = new RelativeLayout[session.getStudents().size()];
 
 				for (int i = 0; i < session.getStudents().size(); i++) {
-//					profileCards[i] = new RelativeLayout(getActivity());
-//
-//					ImageView profilePic = new ImageView(getActivity());
-//					profilePic.setId(MainActivity.id.profile_picture);
-//					LinearLayout.LayoutParams lpPic = new LinearLayout.LayoutParams(
-//							android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
-//							android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-//					lpPic.setMargins(5,5,0,0);
-//					profilePic.setLayoutParams(lpPic);
-//					TextView name = new TextView(getActivity());
-//					name.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
-//					// TODO use screen-specific text size.
-//					name.setTextSize(22);
-//					name.setText(session.getStudents().get(i).name);
-//					name.setId(id.name);
-//					name.setLayoutParams(new LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
-//					name.setGravity(Gravity.CENTER);
-//
-//					RelativeLayout.LayoutParams lpName = new RelativeLayout.LayoutParams(
-//							android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-//							android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-//					lpName.addRule(RelativeLayout.RIGHT_OF, profilePic.getId());
-//
-					
+					//					profileCards[i] = new RelativeLayout(getActivity());
+					//
+					//					ImageView profilePic = new ImageView(getActivity());
+					//					profilePic.setId(MainActivity.id.profile_picture);
+					//					LinearLayout.LayoutParams lpPic = new LinearLayout.LayoutParams(
+					//							android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+					//							android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+					//					lpPic.setMargins(5,5,0,0);
+					//					profilePic.setLayoutParams(lpPic);
+					//					TextView name = new MyTextView(getActivity());
+					//					name.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
+					//					// TODO use screen-specific text size.
+					//					name.setTextSize(22);
+					//					name.setText(session.getStudents().get(i).name);
+					//					name.setId(id.name);
+					//					name.setLayoutParams(new LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
+					//					name.setGravity(Gravity.CENTER);
+					//
+					//					RelativeLayout.LayoutParams lpName = new RelativeLayout.LayoutParams(
+					//							android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+					//							android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+					//					lpName.addRule(RelativeLayout.RIGHT_OF, profilePic.getId());
+					//
+
 					profileCards[i] = (RelativeLayout) inflater.inflate(R.layout.profile_card, bigLayout, false);
 					ImageView profilePic = (ImageView)profileCards[i].findViewById(R.id.profilePic);
 					TextView name = (TextView)profileCards[i].findViewById(R.id.name);
-					name.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 					name.setText(session.getStudents().get(i).name);
 					int lastId = R.id.name;
-					
+
 					for (int semesterNum = 0; semesterNum < 2; semesterNum++) {
 						final double gpaValue = session.getStudents().get(i).getGPA(semesterNum);
 
@@ -933,11 +936,10 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 							if(semesterNum == 0)
 							{
 								gpa = (TextView)profileCards[i].findViewById(R.id.gpaFall);
-								
+
 							}
 							else
 								gpa = (TextView)profileCards[i].findViewById(R.id.gpaSpring);
-							gpa.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 							gpa.setText(String.format("%s GPA: %.4f",
 									SummaryFragment.PAGE_TITLE_SHORT[semesterNum],
 									gpaValue)
@@ -950,10 +952,10 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 
 
-//					profileCards[i].addView(profilePic);
-//					profileCards[i].addView(name, lpName);
-//					profileCards[i].setOnClickListener(new StudentChooserListener(i));
-//					profileCards[i].setBackgroundResource(R.drawable.card_custom);
+					//					profileCards[i].addView(profilePic);
+					//					profileCards[i].addView(name, lpName);
+					//					profileCards[i].setOnClickListener(new StudentChooserListener(i));
+					//					profileCards[i].setBackgroundResource(R.drawable.card_custom);
 
 					bigLayout.addView(profileCards[i]);
 
@@ -967,15 +969,15 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 					RelativeLayout gpaCalc = (RelativeLayout)inflater.inflate(R.layout.main_gpa_calc, bigLayout, false);
 					final TextView actualGPA = (TextView)gpaCalc.findViewById(R.id.actualGPA);
-					actualGPA.setTypeface(robotoNew);
+					
 
 					Button calculate = (Button)gpaCalc.findViewById(R.id.calculate);
-					calculate.setTypeface(robotoNew);
+					
 
 					final EditText oldCumulativeGPA = (EditText)gpaCalc.findViewById(R.id.cumulativeGPA);
-					oldCumulativeGPA.setTypeface(robotoNew);
+					
 					final EditText numCredits = (EditText)gpaCalc.findViewById(R.id.numCredits);
-					numCredits.setTypeface(robotoNew);
+					
 					SharedPreferences sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
 					float spGPA = sharedPrefs.getFloat("oldCumulativeGPA" + session.getStudents().get(i).studentId, Float.NaN);
 
@@ -993,9 +995,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					}
 					final int studentIndex = i;
 					calculate.setOnClickListener(new OnClickListener(){
-						
+
 						private int mStudentIndex = studentIndex;
-						
+
 						@Override
 						public void onClick(View bigLayout)
 						{
@@ -1088,13 +1090,13 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				JSONArray classList = session.getCurrentStudent().getClassList();
 
 				int realClassIndex = 0;
-				
+
 				for (int classIndex = 0; classIndex < classCount; classIndex++) {
 
 					// Skip classes that don't exist in Semester 1 [Spring Semester]
 					if ( ! session.getCurrentStudent().hasClassDuringSemester(classIndex, 1) )
 						continue;
-					
+
 					int jsonIndex = classMatch[classIndex];
 
 					averages[classIndex] = (RelativeLayout) inflater.inflate(R.layout.main_grade_summary, bigLayout, false);
@@ -1123,8 +1125,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					bigLayout.addView(averages[classIndex]);
 				}
 
-				TextView summaryLastUpdated = new TextView(getActivity());
-				String lastUpdatedString = DateHandler.timeSince(session.getCurrentStudent().getClassList().optJSONObject(0).optLong("summaryLastUpdated"));
+				TextView summaryLastUpdated = new MyTextView(getActivity());
+				String lastUpdatedString = DateHelper.timeSince(session.getCurrentStudent().getClassList().optJSONObject(0).optLong("summaryLastUpdated"));
 				summaryLastUpdated.setText(lastUpdatedString);
 				summaryLastUpdated.setPadding(10, 0, 0, 0);
 				bigLayout.addView(summaryLastUpdated);
@@ -1137,7 +1139,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				throw new RuntimeException("This position should instantiated as SummaryFragment," +
 						" not MainActivityFragment.");
 			}
-			
+
 			if (position == 3) {
 				throw new RuntimeException("This position should be instantiated as AttendanceFragment," +
 						"not MainActivityFragment.");
@@ -1151,7 +1153,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 				RelativeLayout helpLabel = new RelativeLayout(getActivity());
 				helpLabel.setBackgroundResource(R.drawable.card_custom);
-				TextView help = new TextView(getActivity());
+				TextView help = new MyTextView(getActivity());
 				help.setText("Exam Grade Needed");
 				help.setTextSize(getResources().getDimension(R.dimen.text_size_grade_overview_header));
 				help.setTypeface(robotoNew);
@@ -1169,7 +1171,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				help.setLayoutParams(labelParams);
 				helpLabel.addView(help);
 
-				TextView target = new TextView(getActivity());
+				TextView target = new MyTextView(getActivity());
 				target.setText("Goal");
 				target.setTextSize(getResources().getDimension(R.dimen.text_size_grade_overview_header));
 				target.setTypeface(robotoNew);
@@ -1191,7 +1193,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					RelativeLayout group = new RelativeLayout(getActivity());
 					group.setBackgroundResource(R.drawable.card_custom);
 
-					TextView className = new TextView(getActivity());
+					TextView className = new MyTextView(getActivity());
 					className.setText(dg.getCurrentStudent().getShortClassName(jsonIndex));
 					className.setTypeface(robotoNew);
 					className.setTextSize(getResources().getDimension(R.dimen.text_size_grade_overview_header)-5);
@@ -1204,7 +1206,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					minus.setBackgroundResource(R.drawable.navigation_previous_item);
 					plus.setBackgroundResource(R.drawable.navigation_next_item);
 
-					final TextView examScore = new TextView(getActivity());
+					final TextView examScore = new MyTextView(getActivity());
 					examScore.setPadding(0,0,20,0);
 					examScore.setTextSize(getResources().getDimension(R.dimen.text_size_grade_overview_score));
 					examScore.setTypeface(robotoNew);
@@ -1466,22 +1468,23 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	}
 
 	public void onRadioButtonClicked (View view) {
-	    // Is the button now checked?
-	    boolean checked = ((RadioButton) view).isChecked();
-	    
-	    // Check which radio button was clicked
-	    switch(view.getId()) {
-	        case R.id.attendance_by_period:
-	            if (checked) {
-	            	((AttendanceFragment)mFragments[ATTENDANCE_FRAGMENT_POSITION]).showAttendanceByPeriod();
-	            }
-	            break;
-	        case R.id.attendance_by_date:
-	            if (checked) {
-	            	((AttendanceFragment)mFragments[ATTENDANCE_FRAGMENT_POSITION]).showAttendanceByDate();
-	            }
-	            break;
-	    }
+		// Is the button now checked?
+		boolean checked = ((RadioButton) view).isChecked();
+
+		// Check which radio button was clicked
+		switch(view.getId()) {
+		case R.id.attendance_by_period:
+			if (checked) {
+				((AttendanceFragment)mFragments[ATTENDANCE_FRAGMENT_POSITION]).showAttendanceByPeriod();
+			}
+			break;
+		case R.id.attendance_by_date:
+			if (checked) {
+				((AttendanceFragment)mFragments[ATTENDANCE_FRAGMENT_POSITION]).showAttendanceByDate();
+			}
+			break;
+		}
 	}
+
 
 }
