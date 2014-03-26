@@ -522,7 +522,7 @@ public class Parser {
 			
 			String date;
 			boolean isAbsence; // True if absence, false if tardy
-			boolean countsTowardExemptions;
+			boolean countsAgainstExemptions;
 			int period;
 			
 			public AttendanceEvent (String date, String code, int period) {
@@ -532,17 +532,26 @@ public class Parser {
 				code = code.substring(code.indexOf("-")+1);
 				isAbsence = !code.equals("T");
 				
-				countsTowardExemptions = true;
+				countsAgainstExemptions = true;
 				for (String codeThatDoesNotCount : ATTENDANCE_CODE_DOES_NOT_COUNT_TOWARDS_EXEMPTIONS) {
 					if (code.equals(codeThatDoesNotCount)) {
-						countsTowardExemptions = false;
+						countsAgainstExemptions = false;
 						break;
 					}
 				}
 			}
 			
+			public boolean isAbsence() { return isAbsence; 	}
+			
+			public boolean countsAgainstExemptions() { return countsAgainstExemptions; }
+			
+			
+			public int getPeriod() {
+				return period;
+			}
+			
 			public String toString() {
-				return String.format("%s: Period %d: %s %s", date, period, isAbsence?"A":"T", countsTowardExemptions?":(":":)");
+				return String.format("%s: Period %d: %s %s", date, period, isAbsence?"A":"T", countsAgainstExemptions?":(":":)");
 			}
 		}
 		
@@ -572,6 +581,18 @@ public class Parser {
 			parseValidation();
 			
 			pageUniqueId = pageUniqueId(doc);
+		}
+		
+		public TreeMap<String, List<AttendanceEvent>> getEventsByDate() {
+			if (eventsByDate == null)
+				throw new IllegalStateException();
+			return eventsByDate;
+		}
+		
+		public SparseArray<List<AttendanceEvent>> getEventsByPeriod() {
+			if (eventsByPeriod == null)
+				throw new IllegalStateException();
+			return eventsByPeriod;
 		}
 		
 		/*

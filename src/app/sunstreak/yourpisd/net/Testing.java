@@ -17,6 +17,8 @@
 
 package app.sunstreak.yourpisd.net;
 
+import java.time.format.DateTimeFormatter;
+
 public class Testing {
 
 	static String[] classes = {"BIO AP",
@@ -36,9 +38,15 @@ public class Testing {
 	};
 	
 	public static void main(String[] args) {
+		/*
 		for (String s : classes)
 			System.out.println(s + "\t\t" + Student.maxGPA(s));
-
+		*/
+		
+		/*
+		 * DateTimeFormatter dfm = new DateTimeFormatter("e MMM yyyy");
+		 */
+		//System.out.println(DateTimeFormatter.fromPattern(dfm).)
 	}
 
 }

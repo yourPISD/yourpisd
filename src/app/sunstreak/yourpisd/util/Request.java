@@ -15,7 +15,7 @@
  *  along with yourPISD.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package app.sunstreak.yourpisd.net;
+package app.sunstreak.yourpisd.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;

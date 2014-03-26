@@ -23,7 +23,7 @@
     <string name="quit">Quit</string>
     <string name="main_section_0_title">Profile</string>
     <string name="main_section_2_title">Grade Overview</string>
-    <string name="main_section_3_title">Semester Goals</string>
+    <string name="main_section_3_title">Attendance</string>
     <string name="teacher_name"></string>
     <string name="daily">Daily Grades:</string>
     <string name="major">Major Evaluations:</string>

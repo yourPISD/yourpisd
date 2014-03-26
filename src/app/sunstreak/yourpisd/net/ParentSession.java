@@ -6,6 +6,8 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Set;
 
+import app.sunstreak.yourpisd.util.Request;
+
 public class ParentSession extends Session {
 	public ParentSession (String username, String password) {
 		this.username = username;

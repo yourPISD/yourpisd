@@ -54,9 +54,9 @@ import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import app.sunstreak.yourpisd.net.DateHandler;
 import app.sunstreak.yourpisd.net.Student;
 import app.sunstreak.yourpisd.net.Session;
+import app.sunstreak.yourpisd.util.DateHandler;
 
 
 @SuppressLint("ValidFragment")
@@ -167,6 +167,7 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 			}
 		});
 
+		System.out.println("received class index = " + receivedClassIndex);
 		if (receivedClassIndex > 0 && receivedClassIndex < classesForTerm.size())
 			mViewPager.setCurrentItem(receivedClassIndex);
 		// otherwise, current item is defaulted to 0

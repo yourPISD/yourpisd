@@ -17,13 +17,16 @@
 
 package app.sunstreak.yourpisd;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map.Entry;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -47,7 +50,9 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.text.Html;
 import android.util.DisplayMetrics;
+import android.util.SparseArray;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -63,16 +68,19 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
+import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import app.sunstreak.yourpisd.net.DateHandler;
-import app.sunstreak.yourpisd.net.Student;
+import app.sunstreak.yourpisd.net.Parser.AttendanceData;
+import app.sunstreak.yourpisd.net.Parser.AttendanceData.AttendanceEvent;
 import app.sunstreak.yourpisd.net.Session;
+import app.sunstreak.yourpisd.net.Student;
+import app.sunstreak.yourpisd.util.DateHandler;
 
 
 public class MainActivity extends FragmentActivity implements ActionBar.TabListener { 
@@ -87,9 +95,10 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 	static SummaryFragment mSummaryFragment;
 	static YPMainFragment[] mFragments;
-	public static final int NUM_FRAGMENTS = 3;
+	public static final int NUM_FRAGMENTS = 3+1;
 	public static final int NUM_SUMMARY_FRAGMENTS = 2;
 	public static final int SUMMARY_FRAGMENT_POSITION = 2;
+	public static final int ATTENDANCE_FRAGMENT_POSITION = 3;
 	static int currentSummaryFragment;
 
 	/**
@@ -141,6 +150,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			if (position == SUMMARY_FRAGMENT_POSITION) {
 				mFragments[position] = new PlaceholderFragment();
 			}
+			else if (position == ATTENDANCE_FRAGMENT_POSITION) {
+				mFragments[position] = new AttendanceFragment();
+			}
 			else {
 				mFragments[position] = new MainActivityFragment();
 				Bundle args = new Bundle();
@@ -175,8 +187,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				.setTabListener(this));
 		actionBar.addTab(actionBar.newTab().setText(getResources().getString(R.string.main_section_2_title))
 				.setTabListener(this));
-		/*actionBar.addTab(actionBar.newTab().setText(getResources().getString(R.string.main_section_3_title))
-				.setTabListener(this));*/
+		actionBar.addTab(actionBar.newTab().setText(getResources().getString(R.string.main_section_3_title))
+				.setTabListener(this));
 		mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
 			@Override
 			public void onPageSelected(int position) {
@@ -442,7 +454,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 				weeks[i].setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
 
-
 				weeks[i].setPadding(0, 0, 0, 0);
 				LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams((SCREEN_WIDTH-30) / 5, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 				llp.setMargins(0, 0, 0, 0);
@@ -456,6 +467,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 			JSONArray classList = session.getCurrentStudent().getClassList();
 
+			//TODO Will break for people who change courses in middle of semester.
+			int realClassIndex = 0;
+			
 			for (int classIndex = 0; classIndex < classCount; classIndex++) {
 
 				if ( ! session.getCurrentStudent().hasClassDuringSemester(classIndex, semesterNum) )
@@ -494,7 +508,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 						termGrade.setBackgroundColor(getResources().getColor(R.color.disabledCell));
 						termGrade.setClickable(false);
 					} else {
-						termGrade.setOnClickListener(new ClassSwipeOpenerListener(session.studentIndex, classIndex, termIndex));
+						termGrade.setOnClickListener(new ClassSwipeOpenerListener(session.studentIndex, realClassIndex, termIndex));
 						termGrade.setBackgroundResource(R.drawable.grade_summary_click);
 						if (avg != -1)
 							termGrade.setText(avg + "");
@@ -504,6 +518,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					termGrade.setGravity(Gravity.CENTER);
 					summary.addView(termGrade);
 
+					
 				}
 
 				// Display the average.
@@ -534,6 +549,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				}
 
 				bigLayout.addView(classSummary);
+				realClassIndex++;
+				
 			}
 			Button toggleSemester = new Button(getActivity());
 			Typeface robotoNew = Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf");
@@ -544,6 +561,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				@Override
 				public void onClick(View arg0) {
 
+					// Toggle between spring/fall semester
 					currentSummaryFragment = Math.abs(currentSummaryFragment - 1);
 					SummaryFragment newFragment = new SummaryFragment();
 					Bundle args = new Bundle();
@@ -611,6 +629,181 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 	}
 
+	public static class AttendanceFragment extends YPMainFragment {
+
+		//private LinearLayout rootView;
+		private FrameLayout placeHolder;
+		private LinearLayout viewByPeriodLayout;
+		private LinearLayout viewByDateLayout;
+		private AttendanceData data;
+		private AttendanceTask task;
+		
+		private static final int VIEW_BY_PERIOD = -1324;
+		private static final int VIEW_BY_DATE = -134245;
+		
+		@Override
+		public String getPageTitle() {
+			return "Attendance";
+		}
+		
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container, 
+				Bundle savedInstanceState) {
+			View rootView = inflater.inflate(R.layout.attendance, container, false);
+			
+			placeHolder = (FrameLayout)rootView.findViewById(R.id.attendance_placeholder);
+			
+			task = new AttendanceTask();
+			task.execute();
+			return rootView;
+		}
+		
+		public void showAttendanceByPeriod () {
+			// View has already been created.
+			if (viewByPeriodLayout != null) {
+				setLayoutInPlaceholder(viewByPeriodLayout);
+				return;
+			}
+			
+			if (task == null) {
+				task = new AttendanceTask();
+			}
+			if (task.getStatus() == AsyncTask.Status.PENDING) {
+				task.execute(VIEW_BY_PERIOD);
+			}
+			
+			viewByPeriodLayout = new LinearLayout(getActivity());
+			viewByPeriodLayout.setOrientation(LinearLayout.VERTICAL);
+			
+			SparseArray<List<AttendanceEvent>> arr = data.getEventsByPeriod(); 
+			
+			for (int i = 0; i < arr.size(); i++) {
+				TextView periodView = new TextView(getActivity());
+				periodView.setBackgroundResource(R.drawable.card);
+				
+				
+				
+				int tardies = 0;
+				int goodAbs = 0;
+				int badAbs = 0;
+				
+				for (AttendanceEvent e : arr.valueAt(i)) {
+					if (e.isAbsence()) {
+						if (e.countsAgainstExemptions())
+							badAbs++;
+						else
+							goodAbs++;
+					} else {
+						tardies++;
+					}
+				}
+				
+				periodView.setText(
+						Html.fromHtml(
+								String.format(
+										"%d " +
+										"<font color=\"orange\">%d</font> " +
+										"<font color=\"red\">%d</font> " +
+										"<font color=\"green\">%d</font>", i, tardies, badAbs, goodAbs
+										
+								)
+						)
+				);
+				viewByPeriodLayout.addView(periodView);
+			}
+			
+			// Put the view in the placeholder
+			setLayoutInPlaceholder(viewByPeriodLayout);
+		}
+		
+		private void setLayoutInPlaceholder(View view) {
+			if (placeHolder.getChildCount() != 1 || placeHolder.getChildAt(0) != view) {
+				placeHolder.removeAllViews();
+				placeHolder.addView(view);
+			}
+		}
+		
+		public void showAttendanceByDate () {
+			// View has already been created
+			if (viewByDateLayout != null) {
+				setLayoutInPlaceholder(viewByDateLayout);
+				return;
+			}
+			
+			if (task == null) {
+				task = new AttendanceTask();
+			}
+			if (task.getStatus() == AsyncTask.Status.PENDING) {
+				task.execute(VIEW_BY_DATE);
+			}
+			
+			viewByDateLayout = new LinearLayout(getActivity());
+			viewByDateLayout.setOrientation(LinearLayout.VERTICAL);
+			
+			for (Entry<String, List<AttendanceEvent>> entry : data.getEventsByDate().entrySet()) {
+				String date = entry.getKey();
+				TextView dateView = new TextView(getActivity());
+				dateView.setText(DateHandler.toHumanDate(date));
+				dateView.setBackgroundResource(R.drawable.card);
+				viewByDateLayout.addView(dateView);
+				
+				TextView eventView = new TextView(getActivity());
+				StringBuilder sb = new StringBuilder();
+				for (AttendanceEvent e : entry.getValue()) {
+					if (!e.isAbsence())
+						sb.append("<font color=\"yellow\">"); // tardy
+					else if (e.countsAgainstExemptions())
+						sb.append("<font color=\"red\">");	// bad absence
+					else
+						sb.append("<font color=\"green\">");	// good absence
+					sb.append(e.getPeriod());
+					sb.append("</font>");
+					sb.append(" ");
+				}
+				eventView.setText(Html.fromHtml(sb.toString()));
+				eventView.setBackgroundResource(R.drawable.card);
+				viewByDateLayout.addView(eventView);
+				
+				
+			}
+			
+			// Put the view in the placeholder
+			setLayoutInPlaceholder(viewByDateLayout);
+		}
+		
+		class AttendanceTask extends AsyncTask<Integer, Integer, AttendanceData> {
+
+			int viewType;
+			
+			@Override
+			protected AttendanceData doInBackground(Integer... args) {
+				if (args.length > 0)
+					viewType = args[0];
+				try {
+					return session.getCurrentStudent().loadAttendanceSummary();
+				} catch (IOException e) {
+					e.printStackTrace();
+					return null;
+				} catch (JSONException e) {
+					e.printStackTrace();
+					return null;
+				}
+			}
+			
+			@Override
+			protected void onPostExecute(AttendanceData result) {
+				data = result;
+				
+				if (viewType == VIEW_BY_DATE)
+					showAttendanceByDate();
+				else // default
+					showAttendanceByPeriod();
+				
+			}
+			
+		}
+	}
+	
 	/**
 	 * A dummy fragment representing a section of the app, but that simply
 	 * displays dummy text.
@@ -627,14 +820,12 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		RelativeLayout[] profileCards;
 		private boolean pictureNotLoaded = true;
 
-		public MainActivityFragment() { }
-
 		public String getPageTitle () {
 			switch (position) {
 			case 0:	return getResources().getString(R.string.main_section_0_title);
 			case 1:	return TermFinder.Term.values()[CURRENT_TERM_INDEX].name;
 			//case 2:	return getResources().getString(R.string.main_section_2_title);
-			case 3:	return getResources().getString(R.string.main_section_3_title);
+			//case 3:	return getResources().getString(R.string.main_section_3_title);
 			default: return "";
 			}
 		}
@@ -682,7 +873,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			 */
 
 			rootView = inflater.inflate(tabLayout, container, false);
-
 
 			if (position == 0) {
 
@@ -897,6 +1087,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 				JSONArray classList = session.getCurrentStudent().getClassList();
 
+				int realClassIndex = 0;
+				
 				for (int classIndex = 0; classIndex < classCount; classIndex++) {
 
 					// Skip classes that don't exist in Semester 1 [Spring Semester]
@@ -926,7 +1118,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 						grade.setText(average);
 					}
 
-					averages[classIndex].setOnClickListener(new ClassSwipeOpenerListener(session.studentIndex, classIndex, CURRENT_TERM_INDEX));
+					averages[classIndex].setOnClickListener(new ClassSwipeOpenerListener(session.studentIndex, realClassIndex++, CURRENT_TERM_INDEX));
 
 					bigLayout.addView(averages[classIndex]);
 				}
@@ -944,6 +1136,11 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			if (position == 2) {
 				throw new RuntimeException("This position should instantiated as SummaryFragment," +
 						" not MainActivityFragment.");
+			}
+			
+			if (position == 3) {
+				throw new RuntimeException("This position should be instantiated as AttendanceFragment," +
+						"not MainActivityFragment.");
 			}
 
 			// Semester Goals : shall remain dormant until May 2014.
@@ -1268,5 +1465,23 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		return R.color.red;
 	}
 
+	public void onRadioButtonClicked (View view) {
+	    // Is the button now checked?
+	    boolean checked = ((RadioButton) view).isChecked();
+	    
+	    // Check which radio button was clicked
+	    switch(view.getId()) {
+	        case R.id.attendance_by_period:
+	            if (checked) {
+	            	((AttendanceFragment)mFragments[ATTENDANCE_FRAGMENT_POSITION]).showAttendanceByPeriod();
+	            }
+	            break;
+	        case R.id.attendance_by_date:
+	            if (checked) {
+	            	((AttendanceFragment)mFragments[ATTENDANCE_FRAGMENT_POSITION]).showAttendanceByDate();
+	            }
+	            break;
+	    }
+	}
 
 }

@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import android.graphics.Bitmap;
+import app.sunstreak.yourpisd.util.Request;
 
 public abstract class Session {
 

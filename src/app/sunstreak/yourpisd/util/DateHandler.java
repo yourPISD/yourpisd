@@ -15,7 +15,7 @@
  *  along with yourPISD.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package app.sunstreak.yourpisd.net;
+package app.sunstreak.yourpisd.util;
 
 import org.joda.time.LocalDate;
 import org.joda.time.DateTime;
@@ -31,10 +31,16 @@ public class DateHandler {
 	
 	public static DateTimeFormatter dtf;
 	public static PeriodFormatter pf;
+	public static DateTimeFormatter humanFormat; 
+	public static DateTimeFormatter webFormat;
+	public static DateTimeFormatter webFormatWithSpaces;
 	public static DateTime startOfSchoolYear;
 
 	static {
 		dtf = DateTimeFormat.forPattern("MMM dd");
+		humanFormat = DateTimeFormat.forPattern("E MMM d");
+		webFormat = DateTimeFormat.forPattern("yyyy-M-dd");
+		webFormatWithSpaces = DateTimeFormat.forPattern("MMM dd yyyy");
 		pf = new PeriodFormatterBuilder()
 		.printZeroNever()
 		.appendMonths()
@@ -47,7 +53,7 @@ public class DateHandler {
 		.appendDays()
 		.appendSuffix(" day", " days")
 		.toFormatter();
-		startOfSchoolYear = DateTimeFormat.forPattern("MMM dd yyyy").parseDateTime("Aug 26 2013");
+		startOfSchoolYear = webFormatWithSpaces.parseDateTime("Aug 26 2013");
 	}
 
 	public static String timeSince (long millis) {
@@ -103,6 +109,10 @@ public class DateHandler {
 		else
 			sb.append(" from now)");
 		return sb.toString();
+	}
+	
+	public static String toHumanDate (String webDate) {
+		return webFormat.parseDateTime(webDate).toString(humanFormat);
 	}
 
 }

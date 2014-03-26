@@ -7,6 +7,8 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Set;
 
+import app.sunstreak.yourpisd.util.Request;
+
 public class StudentSession extends Session {
 	public StudentSession (String username, String password) {
 		this.username = username;
