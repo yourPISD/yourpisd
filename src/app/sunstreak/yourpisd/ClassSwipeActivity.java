@@ -19,6 +19,8 @@ package app.sunstreak.yourpisd;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -57,6 +59,7 @@ import android.widget.TextView;
 import app.sunstreak.yourpisd.net.Session;
 import app.sunstreak.yourpisd.net.Student;
 import app.sunstreak.yourpisd.util.DateHelper;
+import app.sunstreak.yourpisd.util.RandomStuff;
 
 
 @SuppressLint("ValidFragment")
@@ -87,6 +90,8 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 
 	static Student student;
 	static List<Integer> classesForTerm;
+
+	static QuotesTask quotesTask;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -171,6 +176,9 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 		// otherwise, current item is defaulted to 0
 
 		mViewPager.setOffscreenPageLimit(5);
+
+		if (DateHelper.isAprilFools())
+			quotesTask = new QuotesTask();
 
 	}
 	//fixed tab listener implemented
@@ -618,15 +626,58 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 		}
 
 	}
-	
+
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		System.out.println("scren touched");
 		return true;
 	}
-	
+
 	private class id {
 		static final int student_name = 234246;
+	}
+
+	private class QuotesTask {
+
+		Timer timer;
+		TimerTask task;
+
+		public QuotesTask() {
+			timer = new Timer();
+			task = new TimerTask() {
+
+				@Override
+				public void run() {
+					runOnUiThread (new Runnable() {
+
+						@Override
+						public void run() {
+							showQuote();
+							
+						}
+						
+						void showQuote() {
+							AlertDialog.Builder builder = new AlertDialog.Builder(ClassSwipeActivity.this);
+							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									// Do nothing.
+								}
+							});
+							builder.setTitle("Quote!");
+							builder.setMessage(RandomStuff.getRandomQuote());
+
+							builder.create().show();
+						}
+					});
+					
+
+				}
+			};
+			timer.scheduleAtFixedRate(task, 10000, 10000);
+		}
+
 	}
 
 }
