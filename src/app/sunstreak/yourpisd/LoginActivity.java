@@ -17,6 +17,9 @@
 
 package app.sunstreak.yourpisd;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
@@ -27,6 +30,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -40,14 +44,19 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import app.sunstreak.yourpisd.net.Student;
 import app.sunstreak.yourpisd.net.Session;
+import app.sunstreak.yourpisd.net.Student;
+import app.sunstreak.yourpisd.util.DateHelper;
 
 /**
  * Activity which displays a login screen to the user, offering registration as
@@ -60,7 +69,7 @@ public class LoginActivity extends Activity {
 	 */
 	private UserLoginTask mAuthTask = null;
 	private Session session;
-	
+
 	// Values for email and password at the time of the login attempt.
 	private String mEmail = "";
 	private String mPassword = "";
@@ -72,7 +81,7 @@ public class LoginActivity extends Activity {
 	private EditText mEmailView;
 	private EditText mPasswordView;
 	private View mLoginFormView;
-	private View mLoginStatusView;
+	private LinearLayout mLoginStatusView;
 	private TextView mLoginStatusMessageView;
 	private CheckBox mRememberPasswordCheckBox;
 	private CheckBox mAutoLoginCheckBox;
@@ -84,14 +93,14 @@ public class LoginActivity extends Activity {
 		final SharedPreferences sharedPrefs = getPreferences(Context.MODE_PRIVATE);
 
 		mLoginFormView = findViewById(R.id.login_form);
-		mLoginStatusView = findViewById(R.id.login_status);
+		mLoginStatusView = (LinearLayout)findViewById(R.id.login_status);
 		mLoginStatusMessageView = (TextView) findViewById(R.id.login_status_message);
-	
+
 		mAutoLogin = sharedPrefs.getBoolean("auto_login", false);
 		System.out.println(mAutoLogin);
 
 		session = ((YPApplication)getApplication()).session;
-		
+
 		try {
 			boolean refresh = getIntent().getExtras().getBoolean("Refresh");
 
@@ -205,7 +214,7 @@ public class LoginActivity extends Activity {
 			mPasswordView.requestFocus();
 
 		mLoginFormView = findViewById(R.id.login_form);
-		mLoginStatusView = findViewById(R.id.login_status);
+		mLoginStatusView = (LinearLayout)findViewById(R.id.login_status);
 		mLoginStatusMessageView = (TextView) findViewById(R.id.login_status_message);
 
 		findViewById(R.id.sign_in_button).setOnClickListener(
@@ -237,7 +246,7 @@ public class LoginActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 		getMenuInflater().inflate(R.menu.login, menu);
-	
+
 		return true;
 	}
 
@@ -312,6 +321,8 @@ public class LoginActivity extends Activity {
 		// for very easy animations. If available, use these APIs to fade-in
 		// the progress spinner.
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+
+
 			int shortAnimTime = getResources().getInteger(
 					android.R.integer.config_shortAnimTime);
 
@@ -338,6 +349,25 @@ public class LoginActivity extends Activity {
 							: View.GONE);
 				}
 			});
+			
+			if (DateHelper.isAprilFools()) {
+				mLoginStatusView.removeAllViews();
+				
+		        
+		        try {
+		        	ImageView img = new ImageView(this);
+		        	InputStream is = getAssets().open("nyan.png");
+		        	img.setImageBitmap(BitmapFactory.decodeStream(is));
+		        	is.close();
+		        	mLoginStatusView.addView(img);
+		        } catch (Exception e) {
+		        	e.printStackTrace();
+		        	return;
+		        }
+				
+			}
+
+
 			//			mLoginStatusView.animate().setDuration(shortAnimTime)
 			//					.alpha(show ? 1 : 0)
 			//					.setListener(new AnimatorListenerAdapter() {
@@ -360,12 +390,12 @@ public class LoginActivity extends Activity {
 			//					});
 
 
-		} else if(getIntent().getExtras().getBoolean("Refresh")){
+		}/* else if(getIntent().getExtras().getBoolean("Refresh")){
 			// The ViewPropertyAnimator APIs are not available, so simply show
 			// and hide the relevant UI components.
 			mLoginStatusView.setVisibility(show ? View.VISIBLE : View.GONE);
 			mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-		}
+		}*/
 
 	}
 
@@ -383,7 +413,7 @@ public class LoginActivity extends Activity {
 		protected void onPreExecute() {
 			invalidateOptionsMenu();
 		}
-		
+
 		@Override
 		protected Integer doInBackground(Void... params) {
 
@@ -397,7 +427,7 @@ public class LoginActivity extends Activity {
 				if (networkInfo != null && networkInfo.isConnected()) {
 					// Simulate network access.
 					session = Session.createSession(mEmail, mPassword);
-					
+
 					((YPApplication)getApplication()).session = session;
 
 					// Update the loading screen: Signing into myPISD...
@@ -437,12 +467,12 @@ public class LoginActivity extends Activity {
 
 
 			Intent startMain = new Intent(LoginActivity.this, MainActivity.class);
-			
+
 			finish();
 			startActivity(startMain);
-			
+
 			//			overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-			
+
 			// What's the purpose of the sleep below?
 			// Commented out 30 December 2013 by Sidharth
 			/*
@@ -451,7 +481,7 @@ public class LoginActivity extends Activity {
 			} catch (InterruptedException e) {
 
 			}
-			*/
+			 */
 
 			return 1;
 		}

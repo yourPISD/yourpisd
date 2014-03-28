@@ -43,6 +43,7 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -53,8 +54,8 @@ import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import app.sunstreak.yourpisd.net.Student;
 import app.sunstreak.yourpisd.net.Session;
+import app.sunstreak.yourpisd.net.Student;
 import app.sunstreak.yourpisd.util.DateHelper;
 
 
@@ -551,8 +552,9 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 					String[] array = session.getCurrentStudent().getAssignmentDetails(params[0], params[1], params[2]);
 					return "Due date: "+ array[0] + DateHelper.daysRelative(array[1]) +"\nWeight: " + array[2];
 				} catch (Exception e) {
-					cancel(true);
-					return null;
+					e.printStackTrace();
+					//cancel(true);
+					return "Gradebook encountered an error.";
 				}
 			}
 
@@ -615,6 +617,12 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 
 		}
 
+	}
+	
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		System.out.println("scren touched");
+		return true;
 	}
 	
 	private class id {

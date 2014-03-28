@@ -254,6 +254,16 @@ public class Student {
 	}
 
 	public String[] getAssignmentDetails(int classIndex, int termIndex, int assignmentId) throws MalformedURLException, IOException, JSONException {
+		
+		//System.out.println(classList.getJSONObject(classMatch[classIndex]));
+		
+		// TODO This is hardcoded and messy!
+		// Takes care of second semester classes that for some reason
+		// don't have a term index of 4-8, perhaps because they didn't
+		// exist in the fall semester.
+		if (classList.getJSONObject(classMatch[classIndex]).getJSONArray("terms").length() <= termIndex)
+			termIndex -= 4;
+		
 		Object[] details = Request.sendGet(
 				"https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/AssignmentDetail.aspx?"
 						+ "assignmentId=" + assignmentId
