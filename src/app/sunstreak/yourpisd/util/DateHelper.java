@@ -117,7 +117,7 @@ public class DateHelper {
 	}
 	
 	public static boolean isAprilFools() {
-		return true;
+		return false;
 		/*
 		MonthDay now = MonthDay.now();
 		return now.getDayOfMonth() == 1 && now.getMonthOfYear() == 4;

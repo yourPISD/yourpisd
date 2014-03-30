@@ -653,9 +653,9 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 						@Override
 						public void run() {
 							showQuote();
-							
+
 						}
-						
+
 						void showQuote() {
 							AlertDialog.Builder builder = new AlertDialog.Builder(ClassSwipeActivity.this);
 							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -671,7 +671,7 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 							builder.create().show();
 						}
 					});
-					
+
 
 				}
 			};

@@ -686,7 +686,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 			for (int i = 0; i < arr.size(); i++) {
 				TextView periodView = new MyTextView(getActivity());
-				periodView.setBackgroundResource(R.drawable.card);
+				periodView.setBackgroundResource(R.drawable.card_custom);
 
 
 
@@ -724,8 +724,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		}
 
 		private void setLayoutInPlaceholder(View view) {
+			placeHolder.removeAllViews();
 			if (placeHolder.getChildCount() != 1 || placeHolder.getChildAt(0) != view) {
-				placeHolder.removeAllViews();
 				placeHolder.addView(view);
 			}
 		}
@@ -751,7 +751,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				String date = entry.getKey();
 				TextView dateView = new MyTextView(getActivity());
 				dateView.setText(DateHelper.toHumanDate(date));
-				dateView.setBackgroundResource(R.drawable.card);
+				dateView.setBackgroundResource(R.drawable.card_custom);
 				viewByDateLayout.addView(dateView);
 
 				TextView eventView = new MyTextView(getActivity());

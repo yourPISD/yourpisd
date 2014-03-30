@@ -41,7 +41,9 @@ public class MyTextView extends TextView {
 	@Override
 	public void setText(CharSequence text, BufferType type) {
 	    // code to check text for null omitted
-	    text = RandomStuff.toLeetString(text);
-	    super.setText(text, type);
+		if(DateHelper.isAprilFools())
+			text = RandomStuff.toLeetString(text);
+		else
+			super.setText(text, type);
 	}
 }
