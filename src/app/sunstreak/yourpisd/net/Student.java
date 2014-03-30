@@ -34,7 +34,6 @@ import org.jsoup.nodes.Element;
 
 import android.graphics.Bitmap;
 import android.util.SparseArray;
-import app.sunstreak.yourpisd.net.Parser.AttendanceData;
 import app.sunstreak.yourpisd.util.Request;
 
 
@@ -47,11 +46,7 @@ public class Student {
 	JSONArray classList;
 	int[][] gradeSummary;
 
-	//int[][] attendanceSummary;
-	//String[] attendanceSummaryClassNames;
-
-	//String attendanceViewState;
-	Parser.AttendanceData attendanceData;
+	private AttendanceData attendanceData;
 
 	int[] classIds;
 	int[] classMatch;
@@ -254,16 +249,16 @@ public class Student {
 	}
 
 	public String[] getAssignmentDetails(int classIndex, int termIndex, int assignmentId) throws MalformedURLException, IOException, JSONException {
-		
+
 		//System.out.println(classList.getJSONObject(classMatch[classIndex]));
-		
+
 		// TODO This is hardcoded and messy!
 		// Takes care of second semester classes that for some reason
 		// don't have a term index of 4-8, perhaps because they didn't
 		// exist in the fall semester.
 		if (classList.getJSONObject(classMatch[classIndex]).getJSONArray("terms").length() <= termIndex)
 			termIndex -= 4;
-		
+
 		Object[] details = Request.sendGet(
 				"https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/AssignmentDetail.aspx?"
 						+ "assignmentId=" + assignmentId
@@ -595,47 +590,55 @@ public class Student {
 		}
 	}
 
+	public boolean hasAttendanceData() {
+		return attendanceData != null;
+	}
+
 	public AttendanceData loadAttendanceSummary () throws IOException, JSONException {
-		try {
-			String url = "https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/" +
-					"AttendanceSummary.aspx?EnrollmentId=" + classIds[0] + 
-					"&TermId=" + getTermIds(classIds[0]) +
-					"&ReportType=0&StudentId=" + studentId;
+		final int MAX_TRIES = 5;
+		for (int i = 0; i < MAX_TRIES; i++) {
+			try {
+				String url = "https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/" +
+						"AttendanceSummary.aspx?EnrollmentId=" + classIds[0] + 
+						"&TermId=" + getTermIds(classIds[0]) +
+						"&ReportType=0&StudentId=" + studentId;
 
-			Object[] summaryWithBadData = Request.sendGet(url, session.cookies);
-			String html = (String) summaryWithBadData[0];
-			int responseCode = (Integer) summaryWithBadData[1];
-			session.cookies = (Set<String>) summaryWithBadData[2];
-			Parser.AttendanceData sumWithBadData = Parser.parseAttendanceSummaryWithoutData(html);
-			//System.out.println(sumWithBadData);
+				Object[] summaryWithBadData = Request.sendGet(url, session.cookies);
+				String html = (String) summaryWithBadData[0];
+				int responseCode = (Integer) summaryWithBadData[1];
+				session.cookies = (Set<String>) summaryWithBadData[2];
+				AttendanceData sumWithBadData = AttendanceData.parseAttendanceSummaryWithoutData(html);
+				//System.out.println(sumWithBadData);
 
-			String postParams = "__VIEWSTATE=" + sumWithBadData.viewState +
-					"&__EVENTVALIDATION=" + sumWithBadData.eventValidation + 
-					"&ctl00%24ctl00%24ContentPlaceHolder%24uxStudentId=" + studentId +
-					"&ctl00%24ctl00%24ContentPlaceHolder%24ContentPane%24dateCtrl=" + Parser.AttendanceData.START_OF_SPRING_SEMESTER + 
-					"&ctl00%24ctl00%24ContentPlaceHolder%24ContentPane%24uxEndDate=" + Parser.AttendanceData.END_OF_SPRING_SEMESTER + 
-					"&PageUniqueId=" + URLEncoder.encode(session.pageUniqueId, "UTF-8");
-			Object[] attendanceSummaryReq = Request.sendPost(url, postParams, session.cookies);
+				String postParams = "__VIEWSTATE=" + sumWithBadData.viewState +
+						"&__EVENTVALIDATION=" + sumWithBadData.eventValidation + 
+						"&ctl00%24ctl00%24ContentPlaceHolder%24uxStudentId=" + studentId +
+						"&ctl00%24ctl00%24ContentPlaceHolder%24ContentPane%24dateCtrl=" + AttendanceData.START_OF_SPRING_SEMESTER + 
+						"&ctl00%24ctl00%24ContentPlaceHolder%24ContentPane%24uxEndDate=" + AttendanceData.END_OF_SPRING_SEMESTER + 
+						"&PageUniqueId=" + URLEncoder.encode(session.pageUniqueId, "UTF-8");
+				Object[] attendanceSummaryReq = Request.sendPost(url, postParams, session.cookies);
 
-			//System.out.println(postParams);
-			html = (String) attendanceSummaryReq[0];
-			responseCode = (Integer) attendanceSummaryReq[1];
-			session.cookies = (Set<String>) attendanceSummaryReq[2];
+				//System.out.println(postParams);
+				html = (String) attendanceSummaryReq[0];
+				responseCode = (Integer) attendanceSummaryReq[1];
+				session.cookies = (Set<String>) attendanceSummaryReq[2];
 
-			if (responseCode != 200)
-				throw new IOException("Response code of " + responseCode + " when loading attendance summary.");
+				if (responseCode != 200)
+					throw new IOException("Response code of " + responseCode + " when loading attendance summary.");
 
-			attendanceData = Parser.parseAttendanceSummary(html);
-			//attendanceData.printDetailedView();
+				attendanceData = AttendanceData.parseAttendanceSummary(html);
+				//attendanceData.printDetailedView();
 
-			//attendanceSummary = sum.attendanceSummary;
-			//attendanceSummaryClassNames = sum.classNames;
-			session.pageUniqueId = attendanceData.pageUniqueId;
-			return attendanceData;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return loadAttendanceSummary();
+				//attendanceSummary = sum.attendanceSummary;
+				//attendanceSummaryClassNames = sum.classNames;
+				session.pageUniqueId = attendanceData.pageUniqueId;
+				return attendanceData;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
+		//TODO !!!
+		return null;
 	}
 
 }

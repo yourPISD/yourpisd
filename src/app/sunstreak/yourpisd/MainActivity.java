@@ -75,9 +75,12 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RelativeLayout;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
-import app.sunstreak.yourpisd.net.Parser.AttendanceData;
-import app.sunstreak.yourpisd.net.Parser.AttendanceData.AttendanceEvent;
+import app.sunstreak.yourpisd.net.AttendanceData;
+import app.sunstreak.yourpisd.net.AttendanceData.AttendanceEvent;
+import app.sunstreak.yourpisd.net.AttendanceData.AttendancePeriod;
 import app.sunstreak.yourpisd.net.Session;
 import app.sunstreak.yourpisd.net.Student;
 import app.sunstreak.yourpisd.util.DateHelper;
@@ -104,6 +107,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	public static final int SUMMARY_FRAGMENT_POSITION = 2;
 	public static final int ATTENDANCE_FRAGMENT_POSITION = 3;
 	static int currentSummaryFragment;
+	
+	private static AttendanceTask attendanceTask;
+	private static boolean isAttendanceLoaded;
 
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -178,6 +184,10 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		// Otherwise, show the current six weeks grades list.
 		else
 			mViewPager.setCurrentItem(1);
+		
+		isAttendanceLoaded = false;
+		attendanceTask = new AttendanceTask();
+		attendanceTask.execute();
 
 		MyTextView.typeface = Typeface.createFromAsset(getAssets(),"Roboto-Light.ttf");
 		if (DateHelper.isAprilFools()) {
@@ -318,6 +328,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		switch (item.getItemId()) {
 		case R.id.log_out:
 			session = null;
+			attendanceTask.cancel(true);
+			attendanceTask = null;
 			SharedPreferences.Editor editor = getSharedPreferences("LoginActivity", Context.MODE_PRIVATE).edit();
 			editor.putBoolean("auto_login", false);
 			editor.commit();
@@ -643,7 +655,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		private LinearLayout viewByPeriodLayout;
 		private LinearLayout viewByDateLayout;
 		private AttendanceData data;
-		private AttendanceTask task;
 
 		private static final int VIEW_BY_PERIOD = -1324;
 		private static final int VIEW_BY_DATE = -134245;
@@ -660,63 +671,52 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 			placeHolder = (FrameLayout)rootView.findViewById(R.id.attendance_placeholder);
 
-			task = new AttendanceTask();
-			task.execute();
 			return rootView;
+		}
+		
+		public void setAttendanceData (AttendanceData data) {
+			this.data = data;
+			showAttendanceByPeriod();
 		}
 
 		public void showAttendanceByPeriod () {
 			// View has already been created.
+			if (data == null) {
+				// wait for data to be received, then it will be set.
+				return;
+			}
+			
 			if (viewByPeriodLayout != null) {
 				setLayoutInPlaceholder(viewByPeriodLayout);
 				return;
 			}
 
-			if (task == null) {
-				task = new AttendanceTask();
-			}
-			if (task.getStatus() == AsyncTask.Status.PENDING) {
-				task.execute(VIEW_BY_PERIOD);
-			}
+			LayoutInflater inflater = (LayoutInflater)getActivity().getSystemService
+				      (Context.LAYOUT_INFLATER_SERVICE);
+			
+			viewByPeriodLayout = new TableLayout(getActivity());
 
-			viewByPeriodLayout = new LinearLayout(getActivity());
-			viewByPeriodLayout.setOrientation(LinearLayout.VERTICAL);
-
-			SparseArray<List<AttendanceEvent>> arr = data.getEventsByPeriod(); 
+			SparseArray<AttendancePeriod> arr = data.getEventsByPeriod(); 
 
 			for (int i = 0; i < arr.size(); i++) {
-				TextView periodView = new MyTextView(getActivity());
-				periodView.setBackgroundResource(R.drawable.card_custom);
+				
+				TableRow row = (TableRow) inflater.inflate(
+						R.layout.activity_main_attendance_period_row, viewByPeriodLayout);
+				
+				TextView className = (TextView) row.findViewById(R.id.class_name);
+				TextView tardiesView = (TextView) row.findViewById(R.id.num_tardies);
+				TextView absencesView = (TextView) row.findViewById(R.id.num_absences);
+				TextView schoolAbsencesView = (TextView) row.findViewById(R.id.num_school_absences);
+				
+				AttendancePeriod pd = arr.valueAt(i);
+				int[] attendanceTotals = pd.getAttendanceTotals();
 
-
-
-				int tardies = 0;
-				int goodAbs = 0;
-				int badAbs = 0;
-
-				for (AttendanceEvent e : arr.valueAt(i)) {
-					if (e.isAbsence()) {
-						if (e.countsAgainstExemptions())
-							badAbs++;
-						else
-							goodAbs++;
-					} else {
-						tardies++;
-					}
-				}
-
-				periodView.setText(
-						Html.fromHtml(
-								String.format(
-										"%d " +
-												"<font color=\"orange\">%d</font> " +
-												"<font color=\"red\">%d</font> " +
-												"<font color=\"green\">%d</font>", i, tardies, badAbs, goodAbs
-
-										)
-								)
-						);
-				viewByPeriodLayout.addView(periodView);
+				className.setText(pd.getClassName());
+				tardiesView.setText("" + attendanceTotals[AttendancePeriod.TARDIES_INDEX]);
+				absencesView.setText("" + attendanceTotals[AttendancePeriod.ABSENCES_INDEX]);
+				schoolAbsencesView.setText("" + attendanceTotals[AttendancePeriod.SCHOOL_ABSENCES_INDEX]);
+				
+				viewByPeriodLayout.addView(row);
 			}
 
 			// Put the view in the placeholder
@@ -724,24 +724,25 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		}
 
 		private void setLayoutInPlaceholder(View view) {
-			placeHolder.removeAllViews();
+			// if exactly one view is in placeholder AND the view is the existing view,
+			// does nothing.
+			// Else, removes all views and switches views out.
 			if (placeHolder.getChildCount() != 1 || placeHolder.getChildAt(0) != view) {
+				placeHolder.removeAllViews();
 				placeHolder.addView(view);
 			}
 		}
 
 		public void showAttendanceByDate () {
+			if (data == null) {
+				// wait for data to be received, then it will be set.
+				return;
+			}
+			
 			// View has already been created
 			if (viewByDateLayout != null) {
 				setLayoutInPlaceholder(viewByDateLayout);
 				return;
-			}
-
-			if (task == null) {
-				task = new AttendanceTask();
-			}
-			if (task.getStatus() == AsyncTask.Status.PENDING) {
-				task.execute(VIEW_BY_DATE);
 			}
 
 			viewByDateLayout = new LinearLayout(getActivity());
@@ -752,6 +753,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				TextView dateView = new MyTextView(getActivity());
 				dateView.setText(DateHelper.toHumanDate(date));
 				dateView.setBackgroundResource(R.drawable.card_custom);
+				dateView.setTextSize(30);
 				viewByDateLayout.addView(dateView);
 
 				TextView eventView = new MyTextView(getActivity());
@@ -768,9 +770,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 					sb.append(" ");
 				}
 				eventView.setText(Html.fromHtml(sb.toString()));
-				eventView.setBackgroundResource(R.drawable.card);
+				eventView.setBackgroundResource(R.drawable.card_custom);
+				eventView.setTextSize(23);
 				viewByDateLayout.addView(eventView);
-
 
 			}
 
@@ -778,37 +780,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			setLayoutInPlaceholder(viewByDateLayout);
 		}
 
-		class AttendanceTask extends AsyncTask<Integer, Integer, AttendanceData> {
-
-			int viewType;
-
-			@Override
-			protected AttendanceData doInBackground(Integer... args) {
-				if (args.length > 0)
-					viewType = args[0];
-				try {
-					return session.getCurrentStudent().loadAttendanceSummary();
-				} catch (IOException e) {
-					e.printStackTrace();
-					return null;
-				} catch (JSONException e) {
-					e.printStackTrace();
-					return null;
-				}
-			}
-
-			@Override
-			protected void onPostExecute(AttendanceData result) {
-				data = result;
-
-				if (viewType == VIEW_BY_DATE)
-					showAttendanceByDate();
-				else // default
-					showAttendanceByPeriod();
-
-			}
-
-		}
+		
 	}
 
 	/**
@@ -1484,6 +1456,33 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			}
 			break;
 		}
+	}
+	
+	class AttendanceTask extends AsyncTask<Integer, Integer, AttendanceData> {
+
+		int viewType;
+
+		@Override
+		protected AttendanceData doInBackground(Integer... args) {
+			if (args.length > 0)
+				viewType = args[0];
+			try {
+				return session.getCurrentStudent().loadAttendanceSummary();
+			} catch (IOException e) {
+				e.printStackTrace();
+				return null;
+			} catch (JSONException e) {
+				e.printStackTrace();
+				return null;
+			}
+		}
+
+		@Override
+		protected void onPostExecute(final AttendanceData result) {
+			if (result != null)
+				((AttendanceFragment)mFragments[ATTENDANCE_FRAGMENT_POSITION]).setAttendanceData(result);
+		}
+
 	}
 
 

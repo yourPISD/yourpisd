@@ -43,7 +43,9 @@ public class MyTextView extends TextView {
 	    // code to check text for null omitted
 		if(DateHelper.isAprilFools())
 			text = RandomStuff.toLeetString(text);
-		else
-			super.setText(text, type);
+		
+		// Even if the text is modified, we still need to call super.setText()
+		// to actually put the text in the TextView.
+		super.setText(text, type);
 	}
 }
