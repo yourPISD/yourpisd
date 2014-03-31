@@ -607,18 +607,17 @@ public class Student {
 				String html = (String) summaryWithBadData[0];
 				int responseCode = (Integer) summaryWithBadData[1];
 				session.cookies = (Set<String>) summaryWithBadData[2];
-				AttendanceData sumWithBadData = AttendanceData.parseAttendanceSummaryWithoutData(html);
-				//System.out.println(sumWithBadData);
+				
+				AttendanceData sumWithBadData = new AttendanceData(session, html);
 
-				String postParams = "__VIEWSTATE=" + sumWithBadData.viewState +
-						"&__EVENTVALIDATION=" + sumWithBadData.eventValidation + 
+				String postParams = "__VIEWSTATE=" + session.viewState +
+						"&__EVENTVALIDATION=" + session.eventValidation + 
 						"&ctl00%24ctl00%24ContentPlaceHolder%24uxStudentId=" + studentId +
 						"&ctl00%24ctl00%24ContentPlaceHolder%24ContentPane%24dateCtrl=" + AttendanceData.START_OF_SPRING_SEMESTER + 
 						"&ctl00%24ctl00%24ContentPlaceHolder%24ContentPane%24uxEndDate=" + AttendanceData.END_OF_SPRING_SEMESTER + 
 						"&PageUniqueId=" + URLEncoder.encode(session.pageUniqueId, "UTF-8");
 				Object[] attendanceSummaryReq = Request.sendPost(url, postParams, session.cookies);
 
-				//System.out.println(postParams);
 				html = (String) attendanceSummaryReq[0];
 				responseCode = (Integer) attendanceSummaryReq[1];
 				session.cookies = (Set<String>) attendanceSummaryReq[2];
@@ -626,12 +625,9 @@ public class Student {
 				if (responseCode != 200)
 					throw new IOException("Response code of " + responseCode + " when loading attendance summary.");
 
-				attendanceData = AttendanceData.parseAttendanceSummary(html);
-				//attendanceData.printDetailedView();
-
-				//attendanceSummary = sum.attendanceSummary;
-				//attendanceSummaryClassNames = sum.classNames;
-				session.pageUniqueId = attendanceData.pageUniqueId;
+				attendanceData = new AttendanceData(session, html);
+				attendanceData.parseDetailedView();
+				
 				return attendanceData;
 			} catch (Exception e) {
 				e.printStackTrace();

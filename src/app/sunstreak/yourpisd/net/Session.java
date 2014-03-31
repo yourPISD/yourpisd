@@ -35,7 +35,12 @@ public abstract class Session {
 	String password;
 	String[] passthroughCredentials;
 	String[] gradebookCredentials;
+	
+	
 	String pageUniqueId;
+	String viewState;
+	String eventValidation;
+	
 	// 1= success. 0 = not tried; <0 = failure.
 	int editureLogin = 0;
 	int gradebookLogin = 0;

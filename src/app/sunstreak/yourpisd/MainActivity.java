@@ -675,8 +675,12 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		}
 		
 		public void setAttendanceData (AttendanceData data) {
-			this.data = data;
-			showAttendanceByPeriod();
+			if (data == null) {
+				System.err.println("Attendance Data is null.");
+			} else {
+				this.data = data;
+				showAttendanceByPeriod();
+			}
 		}
 
 		public void showAttendanceByPeriod () {
@@ -1479,8 +1483,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 		@Override
 		protected void onPostExecute(final AttendanceData result) {
-			if (result != null)
-				((AttendanceFragment)mFragments[ATTENDANCE_FRAGMENT_POSITION]).setAttendanceData(result);
+			((AttendanceFragment)mFragments[ATTENDANCE_FRAGMENT_POSITION]).setAttendanceData(result);
 		}
 
 	}
