@@ -667,8 +667,15 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 							});
 							builder.setTitle("Quote!");
 							builder.setMessage(RandomStuff.getRandomQuote());
-
-							builder.create().show();
+							try
+							{
+								AlertDialog diag = builder.create();
+								diag.setCanceledOnTouchOutside(false);
+							}
+							catch(Exception e)
+							{
+								System.out.println("LOL");
+							}
 						}
 					});
 

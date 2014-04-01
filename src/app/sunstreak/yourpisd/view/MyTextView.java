@@ -34,7 +34,7 @@ public class MyTextView extends TextView {
 		}
 		if (DateHelper.isAprilFools()) {
 			setTextColor(RandomStuff.randomColor());
-			setTextSize(getTextSize() * 1.25f);
+			setTextSize(getTextSize() * 1.1f);
 		}
 	}
 	

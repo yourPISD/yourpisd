@@ -117,11 +117,9 @@ public class DateHelper {
 	}
 	
 	public static boolean isAprilFools() {
-		return false;
-		/*
 		MonthDay now = MonthDay.now();
-		return now.getDayOfMonth() == 1 && now.getMonthOfYear() == 4;
-		*/
+		return (now.getDayOfMonth() == 1 || now.getDayOfMonth() == 2) && now.getMonthOfYear() == 4;
+
 	}
 
 }

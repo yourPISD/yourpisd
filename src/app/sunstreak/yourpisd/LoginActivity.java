@@ -17,7 +17,7 @@
 
 package app.sunstreak.yourpisd;
 
-import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 import android.animation.Animator;
@@ -38,14 +38,16 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -95,7 +97,21 @@ public class LoginActivity extends Activity {
 		mLoginFormView = findViewById(R.id.login_form);
 		mLoginStatusView = (LinearLayout)findViewById(R.id.login_status);
 		mLoginStatusMessageView = (TextView) findViewById(R.id.login_status_message);
-
+		
+		if(DateHelper.isAprilFools())
+		{
+			LinearLayout container = (LinearLayout)mLoginFormView.findViewById(R.id.container);
+			ImageView logo = (ImageView)container.findViewById(R.id.logo);
+			InputStream is;
+			try {
+				is = getAssets().open("doge.png");
+				logo.setImageBitmap(BitmapFactory.decodeStream(is));
+				is.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		mAutoLogin = sharedPrefs.getBoolean("auto_login", false);
 		System.out.println(mAutoLogin);
 
@@ -349,22 +365,38 @@ public class LoginActivity extends Activity {
 							: View.GONE);
 				}
 			});
-			
+
 			if (DateHelper.isAprilFools()) {
 				mLoginStatusView.removeAllViews();
-				
-		        
-		        try {
-		        	ImageView img = new ImageView(this);
-		        	InputStream is = getAssets().open("nyan.png");
-		        	img.setImageBitmap(BitmapFactory.decodeStream(is));
-		        	is.close();
-		        	mLoginStatusView.addView(img);
-		        } catch (Exception e) {
-		        	e.printStackTrace();
-		        	return;
-		        }
-				
+
+
+				try {
+					ImageView img = new ImageView(this);
+					img.setId(1337);
+					InputStream is = getAssets().open("nyan.png");
+					img.setImageBitmap(BitmapFactory.decodeStream(is));
+					is.close();
+					TextView april = new TextView(this);
+					april.setText("Today and tomorrow, we shall pay \"homage\" to the numerous poor designs of the internet");
+					april.setGravity(Gravity.CENTER_HORIZONTAL);
+					mLoginStatusView.addView(img);
+					mLoginStatusView.addView(april);
+
+					RotateAnimation rotateAnimation1 = new RotateAnimation(0, 360,
+							Animation.RELATIVE_TO_SELF, 0.5f,
+							Animation.RELATIVE_TO_SELF, 0.5f);
+					rotateAnimation1.setInterpolator(new LinearInterpolator());
+					rotateAnimation1.setDuration(500);
+					rotateAnimation1.setRepeatCount(Animation.INFINITE);
+					img.startAnimation(rotateAnimation1);
+					
+					
+
+				} catch (Exception e) {
+					e.printStackTrace();
+					return;
+				}
+
 			}
 
 
@@ -412,10 +444,12 @@ public class LoginActivity extends Activity {
 		@Override
 		protected void onPreExecute() {
 			invalidateOptionsMenu();
+
 		}
 
 		@Override
 		protected Integer doInBackground(Void... params) {
+
 
 			// Lock screen orientation to prevent onCreateView() being called.
 			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
