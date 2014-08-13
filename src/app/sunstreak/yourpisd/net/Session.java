@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import android.graphics.Bitmap;
+import app.sunstreak.yourpisd.util.HTTPResponse;
 import app.sunstreak.yourpisd.util.Request;
 
 public abstract class Session {
@@ -35,12 +36,11 @@ public abstract class Session {
 	String password;
 	String[] passthroughCredentials;
 	String[] gradebookCredentials;
-	
-	
+
 	String pageUniqueId;
 	String viewState;
 	String eventValidation;
-	
+
 	// 1= success. 0 = not tried; <0 = failure.
 	int editureLogin = 0;
 	int gradebookLogin = 0;
@@ -54,7 +54,7 @@ public abstract class Session {
 	public int studentIndex = 0;
 	public boolean MULTIPLE_STUDENTS;
 
-	public static Session createSession (String username, String password) {
+	public static Session createSession(String username, String password) {
 		if (username.equals("test"))
 			return new TestSession();
 		else if (username.contains("@mypisd.net") || !username.contains("@"))
@@ -62,33 +62,23 @@ public abstract class Session {
 		else
 			return new ParentSession(username, password);
 	}
-	
+
 	/*
-	public Session (Domain domain, String username, String password) {
-		this.domain = domain;
-		this.username = username;
-		this.password = password;
-	}
-
-	public Session (String username, String password) {
-		this.username = username;
-		this.password = password;
-
-		// Find out whether student or parent using the username.
-		if (username.equals("test")) {
-			this.domain = Domain.TEST;
-			students = new ArrayList<Student>();
-			//students = getTestStudents();
-			passthroughCredentials = new String[] {"", ""};
-			gradebookCredentials = new String[] {"", ""};
-			MULTIPLE_STUDENTS = true;
-		}
-		else if (username.contains("@mypisd.net") || !username.contains("@"))
-			this.domain = Domain.STUDENT;
-		else
-			this.domain = Domain.PARENT;
-	}
-	*/
+	 * public Session (Domain domain, String username, String password) {
+	 * this.domain = domain; this.username = username; this.password = password;
+	 * }
+	 * 
+	 * public Session (String username, String password) { this.username =
+	 * username; this.password = password;
+	 * 
+	 * // Find out whether student or parent using the username. if
+	 * (username.equals("test")) { this.domain = Domain.TEST; students = new
+	 * ArrayList<Student>(); //students = getTestStudents();
+	 * passthroughCredentials = new String[] {"", ""}; gradebookCredentials =
+	 * new String[] {"", ""}; MULTIPLE_STUDENTS = true; } else if
+	 * (username.contains("@mypisd.net") || !username.contains("@")) this.domain
+	 * = Domain.STUDENT; else this.domain = Domain.PARENT; }
+	 */
 
 	public Domain getDomain() {
 		return domain;
@@ -103,43 +93,37 @@ public abstract class Session {
 	}
 
 	/*
-	public void clearData () {
-		domain = null;
-		username = null;
-		password = null;
-		passthroughCredentials = null;
-		gradebookCredentials = null;
-		pageUniqueId = null;
-		editureLogin = 0;
-		gradebookLogin = 0;
-		cookies = new ArrayList<String>();
-
-		studentName = "";
-		studentPictureBitmap = null;
-
-		students = new ArrayList<Student>();
-		studentIndex = 0;
-
-	}
+	 * public void clearData () { domain = null; username = null; password =
+	 * null; passthroughCredentials = null; gradebookCredentials = null;
+	 * pageUniqueId = null; editureLogin = 0; gradebookLogin = 0; cookies = new
+	 * ArrayList<String>();
+	 * 
+	 * studentName = ""; studentPictureBitmap = null;
+	 * 
+	 * students = new ArrayList<Student>(); studentIndex = 0;
+	 * 
+	 * }
 	 */
 
 	/**
 	 * Logs in to Editure/New Age portal. Retrieves passthroughCredentials.
 	 * Precondition: username and password are defined.
+	 * 
 	 * @throws MalformedURLException
 	 * @throws IllegalUrlException
 	 * @throws IOException
 	 * @throws PISDException
 	 * @throws InterruptedException
 	 * @throws ExecutionException
-	 * @return 1 if success, -1 if parent failure, -2 if student failure, 0 if domain value is not 0 or 1
+	 * @return 1 if success, -1 if parent failure, -2 if student failure, 0 if
+	 *         domain value is not 0 or 1
 	 */
-	public abstract int login()
-			throws MalformedURLException, IOException, InterruptedException, ExecutionException;
+	public abstract int login() throws MalformedURLException, IOException,
+			InterruptedException, ExecutionException;
 
-	public int tryLoginGradebook () throws IOException {
+	public int tryLoginGradebook() throws IOException {
 		int loginAttempt = 0;
-		
+
 		for (int counter = 0; counter < 7 && loginAttempt != 1; counter++) {
 
 			try {
@@ -152,8 +136,8 @@ public abstract class Session {
 				e.printStackTrace();
 			}
 
-			loginAttempt = loginGradebook(
-					passthroughCredentials[0], passthroughCredentials[1], username, password);
+			loginAttempt = loginGradebook(passthroughCredentials[0],
+					passthroughCredentials[1], username, password);
 
 			// Internet connection lost
 			if (loginAttempt == -10)
@@ -162,7 +146,7 @@ public abstract class Session {
 
 		// If even 7 tries was not enough and still getting NotSet.
 		if (loginAttempt == -1) {
-			if (domain==Domain.STUDENT)
+			if (domain == Domain.STUDENT)
 				logout();
 			return -2;
 		}
@@ -170,8 +154,11 @@ public abstract class Session {
 	}
 
 	/**
-	 * Logs into Gradebook using PIV_Passthrough.aspx and receives classList (from InternetViewerService.ashx/Init).
-	 * @param userType P (parent) or S (student)
+	 * Logs into Gradebook using PIV_Passthrough.aspx and receives classList
+	 * (from InternetViewerService.ashx/Init).
+	 * 
+	 * @param userType
+	 *            P (parent) or S (student)
 	 * @param uID
 	 * @param email
 	 * @param password
@@ -181,32 +168,32 @@ public abstract class Session {
 	 * @throws IOException
 	 * @throws PISDException
 	 */
-	public int loginGradebook(String userType, String uID, String email, String password)
-			throws MalformedURLException, IOException {
+	public int loginGradebook(String userType, String uID, String email,
+			String password) throws MalformedURLException, IOException {
 
 		/*
-		ConnectivityManager connMgr = (ConnectivityManager) 
-				application.getSystemService(Context.CONNECTIVITY_SERVICE);
-		NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-		if (networkInfo == null || !networkInfo.isConnected())
-			return -10;
+		 * ConnectivityManager connMgr = (ConnectivityManager)
+		 * application.getSystemService(Context.CONNECTIVITY_SERVICE);
+		 * NetworkInfo networkInfo = connMgr.getActiveNetworkInfo(); if
+		 * (networkInfo == null || !networkInfo.isConnected()) return -10;
 		 */
 
-		// commented request paramater is allowed for parent account, not allowed for student account. never required.
-		String url = "https://parentviewer.pisd.edu/EP/PIV_Passthrough.aspx?action=trans&uT=" + userType + "&uID=" + uID /*+ "&submit=Login+to+Parent+Viewer"*/;
+		// commented request paramater is allowed for parent account, not
+		// allowed for student account. never required.
+		String url = "https://parentviewer.pisd.edu/EP/PIV_Passthrough.aspx?action=trans&uT="
+				+ userType + "&uID=" + uID /*
+											 * +
+											 * "&submit=Login+to+Parent+Viewer"
+											 */;
 		String postParams = "password=" + password + "&username=" + email;
 
-		Object[] passthrough = Request.sendPost(
-				url, 
-				postParams, 
-				cookies);
+		HTTPResponse passthrough = Request.sendPost(url, postParams, cookies);
 
-		String response = (String) passthrough[0];
-		int responseCode = (Integer) passthrough[1];
-		cookies = (Set<String>) passthrough[2];
+		String response = passthrough.getData();
+		int responseCode = passthrough.getResponseCode();
 
-		String[] gradebookCredentials = Parser.getGradebookCredentials(response);
-
+		String[] gradebookCredentials = Parser
+				.getGradebookCredentials(response);
 
 		/*
 		 * escapes if access not granted.
@@ -214,37 +201,34 @@ public abstract class Session {
 		if (Parser.accessGrantedGradebook(gradebookCredentials)) {
 			System.out.println("Gradebook access granted!");
 			gradebookLogin = 1;
-		}
-		else {
+		} else {
 			System.out.println("Bad username/password 2!");
 			gradebookLogin--;
 			return -1;
 		}
 
-		postParams = "userId=" + gradebookCredentials[0] + "&password=" + gradebookCredentials[1];
+		postParams = "userId=" + gradebookCredentials[0] + "&password="
+				+ gradebookCredentials[1];
 
-		Object[] link = Request.sendPost("https://gradebook.pisd.edu/Pinnacle/Gradebook/link.aspx?target=InternetViewer",
-				postParams,
-				cookies);
+		HTTPResponse link = Request
+				.sendPost(
+						"https://gradebook.pisd.edu/Pinnacle/Gradebook/link.aspx?target=InternetViewer",
+						postParams, cookies);
 
-		response = (String) link[0];
-		responseCode = (Integer) link[1];
-		cookies = (Set<String>) link[2];
-
+		response = link.getData();
+		responseCode = link.getResponseCode();
 
 		// for teh cookiez
-		Object[] defaultAspx = Request.sendPost("https://gradebook.pisd.edu/Pinnacle/Gradebook/Default.aspx",
-				postParams,
-				cookies);
+		HTTPResponse defaultAspx = Request.sendPost(
+				"https://gradebook.pisd.edu/Pinnacle/Gradebook/Default.aspx",
+				postParams, cookies);
 
-		response = (String) defaultAspx[0];
-		responseCode = (Integer) defaultAspx[1];
-		cookies = (Set<String>) defaultAspx[2];
+		response = defaultAspx.getData();
+		responseCode = defaultAspx.getResponseCode();
 
-		for (String[] args : Parser.parseStudents(response) ) {
-			students.add(new Student(Integer.parseInt(args[0]) , args[1], this));
+		for (String[] args : Parser.parseStudents(response)) {
+			students.add(new Student(Integer.parseInt(args[0]), args[1], this));
 		}
-
 
 		MULTIPLE_STUDENTS = students.size() > 1;
 
@@ -253,9 +237,8 @@ public abstract class Session {
 		}
 
 		/*
-		 * retrieves the pageUniqueID from html of link.aspx.
-		 * retrieves the student id from a cookie, PinnacleWeb.StudentId=###
-		 * 
+		 * retrieves the pageUniqueID from html of link.aspx. retrieves the
+		 * student id from a cookie, PinnacleWeb.StudentId=###
 		 */
 		pageUniqueId = Parser.pageUniqueId(response);
 		// throws PISDException
@@ -265,7 +248,6 @@ public abstract class Session {
 			return -1;
 		}
 
-
 		for (Student st : students) {
 			st.loadClassList();
 		}
@@ -273,34 +255,23 @@ public abstract class Session {
 		return 1;
 	}
 
-
 	/**
-	 * Temporary code. In use because login1.mypisd.net has an expired certificate. with new portal website, should not be necessary.
+	 * Temporary code. In use because login1.mypisd.net has an expired
+	 * certificate. with new portal website, should not be necessary.
 	 */
 	/*
-	public static void acceptAllCertificates() {
-		TrustManager[] trustAllCerts = new TrustManager[]{
-				new X509TrustManager() { 
-					public java.security.cert.X509Certificate[] getAcceptedIssuers() { 
-						return null; 
-					} 
-					public void checkClientTrusted( 
-							java.security.cert.X509Certificate[] certs, String authType) { 
-					} 
-					public void checkServerTrusted( 
-							java.security.cert.X509Certificate[] certs, String authType) { 
-					} 
-				} 
-		}; 
-
-		// Install the all-trusting trust manager 
-		try { 
-			SSLContext sc = SSLContext.getInstance("SSL");
-			sc.init(null, trustAllCerts, new java.security.SecureRandom()); 
-			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory()); 
-		} catch (Exception e) {
-		} 
-	}
+	 * public static void acceptAllCertificates() { TrustManager[] trustAllCerts
+	 * = new TrustManager[]{ new X509TrustManager() { public
+	 * java.security.cert.X509Certificate[] getAcceptedIssuers() { return null;
+	 * } public void checkClientTrusted( java.security.cert.X509Certificate[]
+	 * certs, String authType) { } public void checkServerTrusted(
+	 * java.security.cert.X509Certificate[] certs, String authType) { } } };
+	 * 
+	 * // Install the all-trusting trust manager try { SSLContext sc =
+	 * SSLContext.getInstance("SSL"); sc.init(null, trustAllCerts, new
+	 * java.security.SecureRandom());
+	 * HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory()); }
+	 * catch (Exception e) { } }
 	 */
 
 	public int getEditureLogin() {
@@ -330,5 +301,5 @@ public abstract class Session {
 	public boolean logout() {
 		return false;
 	}
-	
+
 }

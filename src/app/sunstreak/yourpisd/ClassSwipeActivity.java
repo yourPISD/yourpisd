@@ -91,8 +91,6 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 	static Student student;
 	static List<Integer> classesForTerm;
 
-	static QuotesTask quotesTask;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -177,9 +175,6 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 
 		mViewPager.setOffscreenPageLimit(5);
 
-		if (DateHelper.isAprilFools())
-			quotesTask = new QuotesTask();
-
 	}
 	//fixed tab listener implemented
 	@Override
@@ -263,7 +258,7 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 			intent.putExtra("classCount", classCount);
 			intent.putExtra("classIndex", mViewPager.getCurrentItem());
 			// Don't go into the negatives!
-			intent.putExtra("termIndex", termIndex - 1 >= 0 ? termIndex - 1 : 0);
+			intent.putExtra("termIndex", Math.max(termIndex-1, 0));
 			startActivity(intent);
 
 			//			overridePendingTransition(R.anim.slide_in_down, R.anim.slide_out_up);
@@ -276,7 +271,7 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 			intent.putExtra("classCount", classCount);
 			intent.putExtra("classIndex", mViewPager.getCurrentItem());
 			// Don't go too positive!
-			intent.putExtra("termIndex", termIndex + 1 <= 7 ? termIndex + 1 : 7);
+			intent.putExtra("termIndex", Math.min(termIndex+1, 7));
 			startActivity(intent);
 			//			overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_down);
 			return true;
@@ -300,8 +295,7 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 
 		@Override
 		public Fragment getItem(int position) {
-			Fragment fragment = fragmentList.get(position);        
-			return fragment;
+			return fragmentList.get(position);
 		}
 
 		@Override
@@ -345,8 +339,7 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState)  {
-			if (session.getStudents().size() == 0)
-			{
+			if (session.getStudents().size() == 0) {
 				session = null;
 				SharedPreferences.Editor editor = getActivity().getSharedPreferences("LoginActivity", Context.MODE_PRIVATE).edit();
 				editor.putBoolean("auto_login", false);
@@ -369,7 +362,7 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 
 			rootView = inflater.inflate(R.layout.class_description, container, false);
 			getActivity().setProgressBarIndeterminateVisibility(true);
-
+			
 			mClassGradeTask = new ClassGradeTask();
 			mClassGradeTask.execute(classIndex, termIndex);
 
@@ -479,19 +472,18 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 						if (mClassGrade.getJSONArray("grades").getJSONObject(i).getString("Category")
 								.equals(categoryName))
 						{
+							JSONObject grades = mClassGrade.getJSONArray("grades").getJSONObject(i);
+							
 							LinearLayout innerLayout = (LinearLayout) inflater.inflate(R.layout.class_swipe_grade_view, card, false);
-							innerLayout.setId(mClassGrade.getJSONArray("grades").getJSONObject(i)
-									.getInt("assignmentId"));
+							innerLayout.setId(grades.getInt("assignmentId"));
 
 							TextView descriptionView = (TextView) innerLayout.findViewById(R.id.description);
-							String description = "" + mClassGrade.getJSONArray("grades")
-									.getJSONObject(i).getString("Description");
+							String description = grades.getString("Description");
 							descriptionView.setText(description);
 							descriptionView.setId(ASSIGNMENT_NAME_ID);
 
 							TextView grade = (TextView) innerLayout.findViewById(R.id.grade);
-							String gradeValue = mClassGrade.getJSONArray("grades")
-									.getJSONObject(i).optString("Grade");
+							String gradeValue = grades.optString("Grade");
 							grade.setText(gradeValue);
 
 							innerLayout.setOnClickListener(new AssignmentDetailListener(classIndex, termIndex, innerLayout.getId()));
@@ -627,64 +619,8 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 
 	}
 
-	@Override
-	public boolean onTouchEvent(MotionEvent event) {
-		System.out.println("scren touched");
-		return true;
-	}
-
 	private class id {
 		static final int student_name = 234246;
-	}
-
-	private class QuotesTask {
-
-		Timer timer;
-		TimerTask task;
-
-		public QuotesTask() {
-			timer = new Timer();
-			task = new TimerTask() {
-
-				@Override
-				public void run() {
-					runOnUiThread (new Runnable() {
-
-						@Override
-						public void run() {
-							showQuote();
-
-						}
-
-						void showQuote() {
-							AlertDialog.Builder builder = new AlertDialog.Builder(ClassSwipeActivity.this);
-							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-
-								@Override
-								public void onClick(DialogInterface dialog, int which) {
-									// Do nothing.
-								}
-							});
-							builder.setTitle("Quote!");
-							builder.setMessage(RandomStuff.getRandomQuote());
-							try
-							{
-								AlertDialog diag = builder.create();
-								diag.setCanceledOnTouchOutside(false);
-							}
-							catch(Exception e)
-							{
-								System.out.println("LOL");
-							}
-						}
-					});
-
-
-				}
-			};
-			timer.scheduleAtFixedRate(task, 10000, 10000);
-		}
-
 	}
 
 }

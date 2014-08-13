@@ -25,6 +25,7 @@ import java.util.Locale;
 
 public class TermFinder {
 
+	// TODO Hardcoded for 2013-2014 school year
 	public enum Term {
 		TERM_0 ("1st Six Weeks", "8/19/2013","10/2/2013"),
 		TERM_1 ("2nd Six Weeks", "10/2/2013", "11/8/2013"),
@@ -35,14 +36,11 @@ public class TermFinder {
 		TERM_6 ("6th Six Weeks", "4/18/2014", "6/6/2014"),
 		TERM_7 ("2nd Semester Exam", "6/6/2014", "6/6/2014");
 		
-
-        
 		public final String name;
 		public Date startDate;
 		public Date endDate;
 
 		private Term (String name, String startDate, String endDate) {
-
 			this.name = name;
 			try {
 				this.startDate = dfm.parse(startDate);
@@ -55,7 +53,6 @@ public class TermFinder {
 	
 	public static final SimpleDateFormat dfm = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
 
-	
 	public static int getCurrentTermIndex() {
 		
 		Date d = Calendar.getInstance().getTime();

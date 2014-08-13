@@ -15,7 +15,7 @@
  *  along with yourPISD.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package app.sunstreak.yourpisd;
+package app.sunstreak.yourpisd.view;
 
 import android.content.Context;
 import android.graphics.Typeface;
@@ -25,6 +25,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
+import app.sunstreak.yourpisd.R;
+import app.sunstreak.yourpisd.R.anim;
 
 public class TierView extends TextSwitcher {
 

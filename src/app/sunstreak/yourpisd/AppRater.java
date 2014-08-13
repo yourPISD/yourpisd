@@ -25,7 +25,11 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 
 public class AppRater {
-    private final static String APP_TITLE = "yourPISD";
+    private static final String RATE_YOUR_PISD = "Rate yourPISD";
+	private static final String REMIND_ME_LATER = "Remind me later";
+	private static final String NO_THANKS = "No, thanks";
+	private static final String RATE_MESSAGE = "Enjoying yourPISD? Please take a few seconds to rate us. Thank you for your support.";
+	private final static String APP_TITLE = "yourPISD";
     private final static String APP_PNAME = "app.sunstreak.yourpisd";
     
     private final static int DAYS_UNTIL_PROMPT = 3;
@@ -64,15 +68,15 @@ public class AppRater {
         dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
         dialog.setTitle("Rate " + APP_TITLE);
-        dialog.setMessage("Enjoying yourPISD? Please take a few seconds to rate us. Thank you for your support.");
-        dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Rate yourPISD", new DialogInterface.OnClickListener() {
+        dialog.setMessage(RATE_MESSAGE);
+        dialog.setButton(DialogInterface.BUTTON_POSITIVE, RATE_YOUR_PISD, new DialogInterface.OnClickListener() {
             @Override
 			public void onClick(DialogInterface dialog, int id) {
             	mContext.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + APP_PNAME)));
                 dialog.dismiss();
           } }); 
 
-          dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "No, thanks", new DialogInterface.OnClickListener() {
+          dialog.setButton(DialogInterface.BUTTON_NEGATIVE, NO_THANKS, new DialogInterface.OnClickListener() {
             @Override
 			public void onClick(DialogInterface dialog, int id) {
             	if (editor != null) {
@@ -82,7 +86,7 @@ public class AppRater {
               dialog.dismiss();
           }}); 
 
-          dialog.setButton(DialogInterface.BUTTON_NEUTRAL, "Remind me later", new DialogInterface.OnClickListener() {
+          dialog.setButton(DialogInterface.BUTTON_NEUTRAL, REMIND_ME_LATER, new DialogInterface.OnClickListener() {
 
             @Override
 			public void onClick(DialogInterface dialog, int id) {
