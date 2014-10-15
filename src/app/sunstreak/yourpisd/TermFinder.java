@@ -27,14 +27,14 @@ public class TermFinder {
 
 	// TODO Hardcoded for 2013-2014 school year
 	public enum Term {
-		TERM_0 ("1st Six Weeks", "8/19/2013","10/2/2013"),
-		TERM_1 ("2nd Six Weeks", "10/2/2013", "11/8/2013"),
-		TERM_2 ("3rd Six Weeks", "11/8/2013", "12/20/2013"),
-		TERM_3 ("1st Semester Exam", "12/20/2013", "1/7/2014"),
-		TERM_4 ("4th Six Weeks", "1/7/2014", "2/22/2014"),
-		TERM_5 ("5th Six Weeks", "2/22/2014", "4/18/2014"),
-		TERM_6 ("6th Six Weeks", "4/18/2014", "6/6/2014"),
-		TERM_7 ("2nd Semester Exam", "6/6/2014", "6/6/2014");
+		TERM_0 ("1st Six Weeks", "8/25/2014","9/30/2014"),
+		TERM_1 ("2nd Six Weeks", "9/30/2014", "11/5/2014"),
+		TERM_2 ("3rd Six Weeks", "11/5/2014", "12/19/2014"),
+		TERM_3 ("1st Semester Exam", "12/19/2014", "1/6/2015"),
+		TERM_4 ("4th Six Weeks", "1/6/2015", "2/20/2015"),
+		TERM_5 ("5th Six Weeks", "2/20/2015", "4/17/2015"),
+		TERM_6 ("6th Six Weeks", "4/17/2015", "6/5/2015"),
+		TERM_7 ("2nd Semester Exam", "6/5/2015", "6/6/2015");
 		
 		public final String name;
 		public Date startDate;
