@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  This file is part of yourPISD.
+   
+  yourPISD is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+   
+  yourPISD is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License
+  along with yourPISD.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+  <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="app.sunstreak.yourpisd">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application
+        android:name=".YPApplication"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_cool_icon"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="app.sunstreak.yourpisd.MainActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="app.sunstreak.yourpisd.ClassSwipeActivity"
+            android:label="@string/title_activity_class_swipe"
+            android:parentActivityName="app.sunstreak.yourpisd.MainActivity" >
+
+            <!--&lt;!&ndash; Parent activity meta-data to support 4.0 and lower &ndash;&gt;-->
+            <!--<meta-data-->
+                <!--android:name="android.support.PARENT_ACTIVITY"-->
+                <!--android:value="com.example.myfirstapp.MainActivity"-->
+                 <!--/>-->
+        </activity>
+        <activity
+            android:name="app.sunstreak.yourpisd.LoginActivity"
+            android:label="@string/app_name"
+            android:windowSoftInputMode="adjustResize|stateAlwaysHidden" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="app.sunstreak.yourpisd.CreditActivity"
+            android:label="About" >
+        </activity>
+    </application>
+
+</manifest>

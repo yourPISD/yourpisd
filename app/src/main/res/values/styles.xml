@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  This file is part of yourPISD.
+   
+  yourPISD is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+   
+  yourPISD is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License
+  along with yourPISD.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<resources>
+
+    <style name="AppTheme" parent="AppTheme.Base" />
+
+    <style name="AppTheme.Base" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/blue_500</item>
+        <item name="colorPrimaryDark">@color/blue_700</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="colorAccent">@color/lime_green_A400</item>
+        <item name="android:buttonStyle">@style/MaterialButton</item>
+        <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
+    </style>
+
+    <style name="MaterialButton" parent="android:Widget.Button">
+        <item name="android:background">@drawable/custom_btn</item>
+    </style>
+    <style name="DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
+        <item name="spinBars">true</item>
+        <item name="color">@android:color/white</item>
+    </style>
+    <!--
+        Base application theme, dependent on API level. This theme is replaced
+        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
+
+    -->
+    <style name="OldAppBaseTheme" parent="@android:style/Theme.Holo.Light">
+        <!--
+            Theme customizations available in newer API levels can go in
+            res/values-vXX/styles.xml, while customizations related to
+            backward-compatibility can go here.
+        -->
+    </style>
+
+    <!-- Application theme. -->
+    <style name="OldAppTheme" parent="AppBaseTheme">
+
+        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+
+        <item name="android:actionBarItemBackground">@drawable/selectable_background_bluetheme
+        </item>
+        <item name="android:popupMenuStyle">@style/PopupMenu.Bluetheme</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.Bluetheme</item>
+        <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.Bluetheme</item>
+        <item name="android:actionDropDownStyle">@style/DropDownNav.Bluetheme</item>
+        <item name="android:actionBarStyle">@style/ActionBar.Solid.Bluetheme</item>
+        <item name="android:actionModeBackground">@drawable/cab_background_top_bluetheme</item>
+        <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_bluetheme
+        </item>
+        <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Bluetheme
+        </item>
+    </style>
+
+    <style name="ActionBar.Solid.Bluetheme" parent="@android:style/Widget.Holo.Light.ActionBar.Solid">
+        <item name="android:background">@drawable/ab_solid_bluetheme</item>
+        <item name="android:backgroundStacked">@drawable/ab_stacked_solid_bluetheme</item>
+        <item name="android:backgroundSplit">@drawable/ab_bottom_solid_bluetheme</item>
+        <item name="android:progressBarStyle">@style/ProgressBar.Bluetheme</item>
+        <item name="android:titleTextStyle">@style/myTheme.ActionBar.Text</item>
+    </style>
+
+    <style name="myTheme.ActionBar.Text" parent="@android:style/TextAppearance">
+        <item name="android:textColor">#FFFFFF</item>
+    </style>
+
+    <style name="ActionBar.Transparent.Bluetheme" parent="@android:style/Widget.Holo.Light.ActionBar">
+        <item name="android:background">@drawable/ab_transparent_bluetheme</item>
+        <item name="android:progressBarStyle">@style/ProgressBar.Bluetheme</item>
+    </style>
+
+    <style name="PopupMenu.Bluetheme" parent="@android:style/Widget.Holo.Light.ListPopupWindow">
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_bluetheme</item>
+    </style>
+
+    <style name="DropDownListView.Bluetheme" parent="@android:style/Widget.Holo.Light.ListView.DropDown">
+        <item name="android:listSelector">@drawable/selectable_background_bluetheme</item>
+    </style>
+
+    <style name="ActionBarTabStyle.Bluetheme" parent="@android:style/Widget.Holo.Light.ActionBar.TabView">
+        <item name="android:background">@drawable/tab_indicator_ab_bluetheme</item>
+    </style>
+
+    <style name="DropDownNav.Bluetheme" parent="@android:style/Widget.Holo.Light.Spinner">
+        <item name="android:background">@drawable/spinner_background_ab_bluetheme</item>
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_bluetheme</item>
+        <item name="android:dropDownSelector">@drawable/selectable_background_bluetheme</item>
+    </style>
+
+    <style name="ProgressBar.Bluetheme" parent="@android:style/Widget.Holo.Light.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/progress_horizontal_bluetheme</item>
+    </style>
+
+    <style name="ActionButton.CloseMode.Bluetheme" parent="@android:style/Widget.Holo.Light.ActionButton.CloseMode">
+        <item name="android:background">@drawable/btn_cab_done_bluetheme</item>
+    </style>
+
+    <!-- this style is only referenced in a Light.DarkActionBar based theme -->
+    <style name="Theme.Bluetheme.Widget" parent="@android:style/Theme.Holo">
+        <item name="android:popupMenuStyle">@style/PopupMenu.Bluetheme</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.Bluetheme</item>
+    </style>
+
+    <style name="LoginFormContainer">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">16dp</item>
+    </style>
+
+</resources>

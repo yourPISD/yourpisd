@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  This file is part of yourPISD.
+   
+  yourPISD is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+   
+  yourPISD is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License
+  along with yourPISD.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<resources>
+
+    <string name="title_activity_login">Log in</string>
+    <string name="user_agreement_title">User Agreement</string>
+    <string name="user_agreement_old">    This app is provided as-is and we will not be responsible for any damage to your phone.\nBy clicking agree, you (the user), will conform to the following requirements made by the us (the developers). By entering your username and password in the fields, the user is giving us permission in parsing their information for displaying in the app. The app is secure; however, the user assumes full responsibility regarding his information usage and potential damages(extremely unlikely).
+	</string>
+	<string name="user_agreement">Clicking "Agree" constitutes your agreement to the following conditions:\n
+\n
+<b>This app will:</b>\n
+&#8226;send and receive data through Wi-Fi and your service provider.\n
+&#8226;communicate on your behalf with the server at mypisd.net on an SSL-encrypted connection.\n
+&#8226;locally store your username and password on your mobile device (if you choose to \"Remember my password\").\n
+\n
+<b>This app will not:</b>\n
+&#8226;store personal information, including but not limited to your name, student ID, or academic records, locally or on any remote server (except as mentioned above).\n
+\n
+<b>You (the user) will not:</b>\n
+&#8226;use this app to access a myPISD account that is not yours.\n
+\n
+<b>We (the developers) will not be responible for responsible for:</b>\n
+&#8226;damage incurred on your mobile device.\n
+&#8226;presentation of inaccurate information, including but not limited to name, student ID, or academic records.</string>
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_login">Login ID</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in_register"><b>Sign in</b></string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="action_forgot_password">Recover lost password</string>
+    <string name="login_progress_mypisd">Signing in to myPISD&#8230;</string>
+    <string name="login_progress_gradebook">Signing in to Gradebook&#8230;</string>
+    <string name="login_progress_downloading_data">Downloading class data&#8230;</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="remember_password">Remember my password</string>
+    <string name="auto_login">Auto-login when app is opened</string>
+
+</resources>
