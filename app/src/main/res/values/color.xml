@@ -18,9 +18,12 @@
 
 <resources>
     <color name="white">#FFFFFF</color>
+    <color name="blue_100">#C5CAE9</color>
     <color name="blue_500">#2196F3</color>
     <color name="blue_700">#1976D2</color>
     <color name="lime_green_A400">#C6FF00</color>
+    <color name="lime_green_A700">#AEEA00</color>
+    <color name="green_500">#4CAF50</color>
 	<color name="holo_blue">#33B5E5</color>
     <color name="holo_blue_light">#00ddff</color>
     <color name="holo_blue_dark">#0099CC</color>

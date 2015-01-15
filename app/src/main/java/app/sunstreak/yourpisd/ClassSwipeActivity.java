@@ -40,6 +40,8 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -54,6 +56,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import app.sunstreak.yourpisd.googleutil.SlidingTabLayout;
 import app.sunstreak.yourpisd.net.Session;
 import app.sunstreak.yourpisd.net.Student;
 import app.sunstreak.yourpisd.util.DateHelper;
@@ -61,7 +64,7 @@ import app.sunstreak.yourpisd.util.DateHelper;
 
 
 @SuppressLint("ValidFragment")
-public class ClassSwipeActivity extends FragmentActivity implements ActionBar.TabListener{
+public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.TabListener{
 	static List<Fragment> mFragments;
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -88,14 +91,18 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 
 	static Student student;
 	static List<Integer> classesForTerm;
+    public SlidingTabLayout slidingTabLayout;
+    public Toolbar toolbar;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+//		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.activity_class_swipe);
-
-
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+        }
 		receivedClassIndex = getIntent().getExtras().getInt("classIndex");
 		classCount = getIntent().getExtras().getInt("classCount");
 		termIndex = getIntent().getExtras().getInt("termIndex");
@@ -129,8 +136,9 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 		// Set up the ViewPager with the sections adapter.
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 		mViewPager.setAdapter(mSectionsPagerAdapter);
-		final ActionBar actionBar = getActionBar();
-		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        setUpMaterialTabs();
+//		final ActionBar actionBar = getActionBar();
+//		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
 
 
@@ -144,36 +152,44 @@ public class ClassSwipeActivity extends FragmentActivity implements ActionBar.Ta
 		}
 		 */
 
-		for (int classIndex : classesForTerm)
-			actionBar.addTab(actionBar.newTab().setText(student.getClassName(student.getClassMatch()[classIndex]))
-					.setTabListener(this));
+//		for (int classIndex : classesForTerm)
+//			actionBar.addTab(actionBar.newTab().setText(student.getClassName(student.getClassMatch()[classIndex]))
+//					.setTabListener(this));
 
-		mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-
-			@Override
-			public void onPageSelected(int position) {
-				// on changing the page
-				// make respected tab selected
-				actionBar.setSelectedNavigationItem(position);
-			}
-
-			@Override
-			public void onPageScrolled(int arg0, float arg1, int arg2) {
-			}
-
-			@Override
-			public void onPageScrollStateChanged(int arg0) {
-			}
-		});
-
+//		mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+//
+//			@Override
+//			public void onPageSelected(int position) {
+//				// on changing the page
+//				// make respected tab selected
+//				actionBar.setSelectedNavigationItem(position);
+//			}
+//
+//			@Override
+//			public void onPageScrolled(int arg0, float arg1, int arg2) {
+//			}
+//
+//			@Override
+//			public void onPageScrollStateChanged(int arg0) {
+//			}
+//		});
+//
 		System.out.println("received class index = " + receivedClassIndex);
 		if (receivedClassIndex > 0 && receivedClassIndex < classesForTerm.size())
 			mViewPager.setCurrentItem(receivedClassIndex);
 		// otherwise, current item is defaulted to 0
 
-		mViewPager.setOffscreenPageLimit(5);
+//		mViewPager.setOffscreenPageLimit(5);
 
 	}
+    private void setUpMaterialTabs() {
+        slidingTabLayout = (SlidingTabLayout) findViewById(R.id.sliding_tabs);
+        slidingTabLayout.setDistributeEvenly(true);
+//        slidingTabLayout.setScrollBarSize(5);
+        slidingTabLayout.setBackgroundColor(getResources().getColor((R.color.blue_500)));
+        slidingTabLayout.setSelectedIndicatorColors(getResources().getColor(R.color.green_500));
+        slidingTabLayout.setViewPager(mViewPager);
+    }
 	//fixed tab listener implemented
 	@Override
 	public void onTabReselected(Tab tab, FragmentTransaction ft) {
