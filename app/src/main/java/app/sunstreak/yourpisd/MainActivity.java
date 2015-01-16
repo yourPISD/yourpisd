@@ -192,8 +192,6 @@ public class MainActivity extends ActionBarActivity implements
             mViewPager.setCurrentItem(1);
 
         isAttendanceLoaded = false;
-        // attendanceTask = new AttendanceTask();
-        // attendanceTask.execute();
 
         MyTextView.typeface = Typeface.createFromAsset(getAssets(),
                 "Roboto-Light.ttf");
@@ -212,7 +210,7 @@ public class MainActivity extends ActionBarActivity implements
         slidingTabLayout.setDistributeEvenly(true);
 //        slidingTabLayout.setScrollBarSize(5);
         slidingTabLayout.setBackgroundColor(getResources().getColor((R.color.blue_500)));
-        slidingTabLayout.setSelectedIndicatorColors(getResources().getColor(R.color.green_500));
+        slidingTabLayout.setSelectedIndicatorColors(getResources().getColor(R.color.green_A700));
         slidingTabLayout.setViewPager(mViewPager);
     }
 
@@ -239,23 +237,23 @@ public class MainActivity extends ActionBarActivity implements
                         .setTabListener(this));
         // actionBar.addTab(actionBar.newTab().setText(getResources().getString(R.string.main_section_3_title))
         // .setTabListener(this));
-        mViewPager
-                .setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-                    @Override
-                    public void onPageSelected(int position) {
-                        // on changing the page
-                        // make respected tab selected
-                        actionBar.setSelectedNavigationItem(position);
-                    }
-
-                    @Override
-                    public void onPageScrolled(int arg0, float arg1, int arg2) {
-                    }
-
-                    @Override
-                    public void onPageScrollStateChanged(int arg0) {
-                    }
-                });
+//        mViewPager
+//                .setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+//                    @Override
+//                    public void onPageSelected(int position) {
+//                        // on changing the page
+//                        // make respected tab selected
+//                        actionBar.setSelectedNavigationItem(position);
+//                    }
+//
+//                    @Override
+//                    public void onPageScrolled(int arg0, float arg1, int arg2) {
+//                    }
+//
+//                    @Override
+//                    public void onPageScrollStateChanged(int arg0) {
+//                    }
+//                });
     }
 
     private void setUpNavigationDrawer() {
@@ -521,7 +519,7 @@ public class MainActivity extends ActionBarActivity implements
             LinearLayout weekNames = new LinearLayout(getActivity());
             weekNames.setBackgroundResource(R.drawable.card_custom);
             TextView[] weeks = new MyTextView[5];
-            weekNames.setPadding(15, 20, 0, 20);
+//            weekNames.setPadding(15, 20, 0, 20);
             weekNames.setGravity(Gravity.CENTER);
 
             for (int i = 0; i < weeks.length; i++) {
@@ -530,12 +528,11 @@ public class MainActivity extends ActionBarActivity implements
                         R.dimen.text_size_grade_overview_header));
                 weeks[i].setText(COLUMN_HEADERS[semesterNum][i]);
 
-                weeks[i].setPadding(0, 0, 0, 0);
-                LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
-                        (SCREEN_WIDTH - 30) / 5,
-                        ViewGroup.LayoutParams.WRAP_CONTENT);
-                llp.setMargins(0, 0, 0, 0);
-                weeks[i].setLayoutParams(llp);
+//                LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
+//                        (SCREEN_WIDTH - 30) / 5,
+//                        ViewGroup.LayoutParams.WRAP_CONTENT);
+//                weeks[i].setLayoutParams(llp);
+                weeks[i].setTextSize(16);
                 weeks[i].setGravity(Gravity.CENTER);
                 weekNames.addView(weeks[i]);
             }
@@ -566,7 +563,7 @@ public class MainActivity extends ActionBarActivity implements
 
                 LinearLayout summary = (LinearLayout) classSummary
                         .findViewById(R.id.layout_six_weeks_summary);
-                summary.setPadding(15, 0, 15, 14);
+//                summary.setPadding(15, 0, 15, 14);
 
                 for (int termIndex = 4 * semesterNum; termIndex < 4 + 4 * semesterNum; termIndex++) {
 
@@ -575,13 +572,13 @@ public class MainActivity extends ActionBarActivity implements
                             R.dimen.text_size_grade_overview_score));
                     termGrade.setClickable(true);
 
-                    int width = (SCREEN_WIDTH - 30) / 5;
-                    LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
-                            width,
-                            ViewGroup.LayoutParams.WRAP_CONTENT);
-                    if (termIndex == 0)
-                        llp.setMargins(15, 0, 0, 0);
-                    termGrade.setLayoutParams(llp);
+//                    int width = (SCREEN_WIDTH - 30) / 5;
+//                    LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
+//                            width,
+//                            ViewGroup.LayoutParams.WRAP_CONTENT);
+//                    if (termIndex == 0)
+//                        llp.setMargins(15, 0, 0, 0);
+//                    termGrade.setLayoutParams(llp);
 
                     int avg;
                     JSONArray terms = classList.optJSONObject(jsonIndex)
@@ -602,8 +599,9 @@ public class MainActivity extends ActionBarActivity implements
                                 .setOnClickListener(new ClassSwipeOpenerListener(
                                         session.studentIndex, realClassIndex,
                                         termIndex));
-                        termGrade
-                                .setBackgroundResource(R.drawable.grade_summary_click);
+//                        termGrade
+//                                .setBackgroundResource(R.drawable.grade_summary_click);
+
                         if (avg != -1)
                             termGrade.setText(avg + "");
                     }
@@ -627,12 +625,12 @@ public class MainActivity extends ActionBarActivity implements
 
                     TextView averageGrade = new MyTextView(getActivity());
 
-                    int width = (SCREEN_WIDTH - 30) / 5;
-                    LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
-                            width,
-                            ViewGroup.LayoutParams.WRAP_CONTENT);
-                    llp.setMargins(0, 0, 15, 0);
-                    averageGrade.setLayoutParams(llp);
+//                    int width = (SCREEN_WIDTH - 30) / 5;
+//                    LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
+//                            width,
+//                            ViewGroup.LayoutParams.WRAP_CONTENT);
+//                    llp.setMargins(0, 0, 15, 0);
+//                    averageGrade.setLayoutParams(llp);
 
                     averageGrade.setTextSize(getResources().getDimension(
                             R.dimen.text_size_grade_overview_score));
@@ -651,7 +649,7 @@ public class MainActivity extends ActionBarActivity implements
             }
             Button toggleSemester = new Button(getActivity());
 
-            toggleSemester.setBackgroundResource(R.drawable.card_click_blue);
+//            toggleSemester.setBackgroundResource(R.drawable.card_click_blue);
             toggleSemester.setText("View "
                     + PAGE_TITLE[Math.abs(currentSummaryFragment - 1)]);
             toggleSemester.setOnClickListener(new OnClickListener() {

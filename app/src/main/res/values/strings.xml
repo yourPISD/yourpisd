@@ -22,7 +22,7 @@
     <string name="action_settings">Settings</string>
     <string name="quit">Quit</string>
     <string name="main_section_0_title">Profile</string>
-    <string name="main_section_2_title">Grade Overview</string>
+    <string name="main_section_2_title">Semester</string>
     <string name="main_section_3_title">Attendance</string>
     <string name="teacher_name"></string>
     <string name="daily">Daily Grades:</string>

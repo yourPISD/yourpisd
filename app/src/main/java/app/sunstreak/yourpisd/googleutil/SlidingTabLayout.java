@@ -32,6 +32,8 @@ import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 import app.sunstreak.yourpisd.R;
 
 /**
@@ -79,7 +81,8 @@ public class SlidingTabLayout extends HorizontalScrollView {
     private ViewPager.OnPageChangeListener mViewPagerPageChangeListener;
 
     private final SlidingTabStrip mTabStrip;
-
+    private ArrayList<String> titleArray = new ArrayList<String>();
+    private boolean useCustom = false;
     public SlidingTabLayout(Context context) {
         this(context, null);
     }
@@ -213,8 +216,12 @@ public class SlidingTabLayout extends HorizontalScrollView {
                 lp.width = 0;
                 lp.weight = 1;
             }
-
-            tabTitleView.setText(adapter.getPageTitle(i));
+            if(!useCustom)
+                tabTitleView.setText(adapter.getPageTitle(i));
+            else
+            {
+                tabTitleView.setText(titleArray.get(i));
+            }
             tabTitleView.setTextColor(getResources().getColor(R.color.white));
             //added by @Han for yourpisd
             tabView.setOnClickListener(tabClickListener);
@@ -322,5 +329,12 @@ public class SlidingTabLayout extends HorizontalScrollView {
             }
         }
     }
-
+    public void customTitle(ArrayList<String> title)
+    {
+        for(int i = 0; i< title.size(); i++)
+        {
+            titleArray.add(title.get(i));
+        }
+        useCustom= true;
+    }
 }

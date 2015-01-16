@@ -53,6 +53,7 @@ import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -92,7 +93,7 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
 	static Student student;
 	static List<Integer> classesForTerm;
     public SlidingTabLayout slidingTabLayout;
-    public Toolbar toolbar;
+    static Toolbar toolbar;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -103,6 +104,10 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
         if (toolbar != null) {
             setSupportActionBar(toolbar);
         }
+        ProgressBar spinner = new ProgressBar(this);
+        spinner.setIndeterminate(true);
+        spinner.setId(R.id.action_bar_spinner);
+        toolbar.addView(spinner);
 		receivedClassIndex = getIntent().getExtras().getInt("classIndex");
 		classCount = getIntent().getExtras().getInt("classCount");
 		termIndex = getIntent().getExtras().getInt("termIndex");
@@ -136,7 +141,7 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
 		// Set up the ViewPager with the sections adapter.
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 		mViewPager.setAdapter(mSectionsPagerAdapter);
-        setUpMaterialTabs();
+
 //		final ActionBar actionBar = getActionBar();
 //		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
@@ -155,7 +160,13 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
 //		for (int classIndex : classesForTerm)
 //			actionBar.addTab(actionBar.newTab().setText(student.getClassName(student.getClassMatch()[classIndex]))
 //					.setTabListener(this));
+        ArrayList<String> temp = new ArrayList<>();
+        for(int classIndex: classesForTerm)
+        {
+            temp.add(student.getClassName(student.getClassMatch()[classIndex]));
+        }
 
+        setUpMaterialTabs(temp);
 //		mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
 //
 //			@Override
@@ -182,12 +193,13 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
 //		mViewPager.setOffscreenPageLimit(5);
 
 	}
-    private void setUpMaterialTabs() {
+    private void setUpMaterialTabs(ArrayList<String> temp) {
         slidingTabLayout = (SlidingTabLayout) findViewById(R.id.sliding_tabs);
         slidingTabLayout.setDistributeEvenly(true);
 //        slidingTabLayout.setScrollBarSize(5);
         slidingTabLayout.setBackgroundColor(getResources().getColor((R.color.blue_500)));
-        slidingTabLayout.setSelectedIndicatorColors(getResources().getColor(R.color.green_500));
+        slidingTabLayout.setSelectedIndicatorColors(getResources().getColor(R.color.green_A700));
+        slidingTabLayout.customTitle(temp);
         slidingTabLayout.setViewPager(mViewPager);
     }
 	//fixed tab listener implemented
@@ -375,7 +387,8 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
 						classesForTerm.size() + ".");
 
 			rootView = inflater.inflate(R.layout.class_description, container, false);
-			getActivity().setProgressBarIndeterminateVisibility(true);
+//			getActivity().setProgressBarIndeterminateVisibility(true);
+            ((ProgressBar)toolbar.findViewById(R.id.action_bar_spinner)).setVisibility(View.VISIBLE);
 			
 			mClassGradeTask = new ClassGradeTask();
 			mClassGradeTask.execute(classIndex, termIndex);
@@ -407,8 +420,9 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
 
 		@SuppressWarnings("ResourceType")
         public void setUiElements () {
-			getActivity().setProgressBarIndeterminateVisibility(false);
-
+//			getActivity().setProgressBarIndeterminateVisibility(false);
+            ((ProgressBar)toolbar.findViewById(R.id.action_bar_spinner)).setVisibility(View.INVISIBLE);
+            toolbar.getTag(R.id.action_bar_spinner);
 			RelativeLayout layout = (RelativeLayout) rootView.findViewById(R.id.info);
 
 			int lastIdAdded = R.id.teacher_name;

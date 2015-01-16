@@ -24,7 +24,7 @@
         <item name="colorPrimaryDark">@color/blue_700</item>
         <item name="android:windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
-        <item name="colorAccent">@color/green_500</item>
+        <item name="colorAccent">@color/green_A700</item>
         <item name="android:buttonStyle">@style/MaterialButton</item>
         <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
     </style>

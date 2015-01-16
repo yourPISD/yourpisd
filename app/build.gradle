@@ -9,8 +9,8 @@ android {
         applicationId "app.sunstreak.yourpisd"
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 15
-        versionName "2.3"
+        versionCode 16
+        versionName "3.0"
     }
     buildTypes {
         release {
