@@ -39,6 +39,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Base64;
@@ -58,8 +59,10 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.SnackbarManager;
@@ -190,14 +193,13 @@ public class LoginActivity extends ActionBarActivity {
 		}
 
 		// Set up the remember_password CheckBox
-		mRememberPasswordCheckBox = (CheckBox) findViewById(R.id.remember_password);
-		mRememberPasswordCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			@Override
-			public void onCheckedChanged(CompoundButton button, boolean isChecked) {
-				mRememberPassword = isChecked;
-			}
-
-		});
+        mRememberPasswordCheckBox = (CheckBox) findViewById(R.id.remember_password);
+        mRememberPasswordCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                mRememberPassword = isChecked;
+            }
+        });
 
 		mRememberPassword = sharedPrefs.getBoolean("remember_password", false);
 		mRememberPasswordCheckBox.setChecked(mRememberPassword);
@@ -365,8 +367,6 @@ public class LoginActivity extends ActionBarActivity {
 				public void onAnimationEnd(Animator animation) {
 					mLoginFormView.setVisibility(show ? View.GONE
 							: View.VISIBLE);
-					mLoginFormView.animate().setDuration(0)
-					.translationY(0);
 				}
 			});
 			mLoginStatusView.setVisibility(View.VISIBLE);

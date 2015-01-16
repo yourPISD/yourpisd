@@ -209,7 +209,7 @@ public class MainActivity extends ActionBarActivity implements
         slidingTabLayout.setDistributeEvenly(true);
 //        slidingTabLayout.setScrollBarSize(5);
         slidingTabLayout.setBackgroundColor(getResources().getColor((R.color.blue_500)));
-        slidingTabLayout.setSelectedIndicatorColors(getResources().getColor(R.color.green_A700));
+        slidingTabLayout.setSelectedIndicatorColors(getResources().getColor(R.color.white));
         slidingTabLayout.setViewPager(mViewPager);
     }
 
@@ -576,6 +576,7 @@ public class MainActivity extends ActionBarActivity implements
                             ViewGroup.LayoutParams.WRAP_CONTENT,
                             ViewGroup.LayoutParams.WRAP_CONTENT,
                             1f);
+                    termGrade.setTextSize(29);
 //                    if (termIndex == 0)
 //                        llp.setMargins(15, 0, 0, 0);
                     termGrade.setLayoutParams(llp);
@@ -678,8 +679,8 @@ public class MainActivity extends ActionBarActivity implements
 //                                    R.anim.card_flip_right_out,
 //                                    R.anim.card_flip_left_in,
 //                                    R.anim.card_flip_left_out)
-                            .setCustomAnimations(R.anim.slide_in_down,
-                                    R.anim.slide_out_up)
+                            .setCustomAnimations(R.anim.slide_in_up,
+                                    R.anim.slide_out_down)
 
                                     // Replace any fragments currently in the container
                                     // view with a fragment
@@ -691,7 +692,7 @@ public class MainActivity extends ActionBarActivity implements
                                     // Add this transaction to the back stack, allowing
                                     // users to press Back
                                     // to get to the front of the card.
-                            .addToBackStack(null)
+//                            .addToBackStack(null)
 
                                     // Commit the transaction.
                             .commit();

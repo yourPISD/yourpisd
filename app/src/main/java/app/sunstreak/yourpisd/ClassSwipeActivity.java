@@ -33,6 +33,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -107,6 +109,7 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
         ProgressBar spinner = new ProgressBar(this);
         spinner.setIndeterminate(true);
         spinner.setId(R.id.action_bar_spinner);
+        spinner.getIndeterminateDrawable().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN);
         toolbar.addView(spinner);
 		receivedClassIndex = getIntent().getExtras().getInt("classIndex");
 		classCount = getIntent().getExtras().getInt("classCount");
@@ -198,7 +201,7 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
         slidingTabLayout.setDistributeEvenly(true);
 //        slidingTabLayout.setScrollBarSize(5);
         slidingTabLayout.setBackgroundColor(getResources().getColor((R.color.blue_500)));
-        slidingTabLayout.setSelectedIndicatorColors(getResources().getColor(R.color.green_A700));
+        slidingTabLayout.setSelectedIndicatorColors(getResources().getColor(R.color.white));
         slidingTabLayout.customTitle(temp);
         slidingTabLayout.setViewPager(mViewPager);
     }
