@@ -39,12 +39,11 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
@@ -528,11 +527,11 @@ public class MainActivity extends ActionBarActivity implements
                         R.dimen.text_size_grade_overview_header));
                 weeks[i].setText(COLUMN_HEADERS[semesterNum][i]);
 
-//                LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
-//                        (SCREEN_WIDTH - 30) / 5,
-//                        ViewGroup.LayoutParams.WRAP_CONTENT);
-//                weeks[i].setLayoutParams(llp);
-                weeks[i].setTextSize(16);
+                LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+                weeks[i].setLayoutParams(llp);
+                weeks[i].setTextSize(18);
                 weeks[i].setGravity(Gravity.CENTER);
                 weekNames.addView(weeks[i]);
             }
@@ -573,12 +572,13 @@ public class MainActivity extends ActionBarActivity implements
                     termGrade.setClickable(true);
 
 //                    int width = (SCREEN_WIDTH - 30) / 5;
-//                    LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
-//                            width,
-//                            ViewGroup.LayoutParams.WRAP_CONTENT);
+                    LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            1f);
 //                    if (termIndex == 0)
 //                        llp.setMargins(15, 0, 0, 0);
-//                    termGrade.setLayoutParams(llp);
+                    termGrade.setLayoutParams(llp);
 
                     int avg;
                     JSONArray terms = classList.optJSONObject(jsonIndex)
@@ -626,11 +626,11 @@ public class MainActivity extends ActionBarActivity implements
                     TextView averageGrade = new MyTextView(getActivity());
 
 //                    int width = (SCREEN_WIDTH - 30) / 5;
-//                    LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
-//                            width,
-//                            ViewGroup.LayoutParams.WRAP_CONTENT);
+                    LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
 //                    llp.setMargins(0, 0, 15, 0);
-//                    averageGrade.setLayoutParams(llp);
+                    averageGrade.setLayoutParams(llp);
 
                     averageGrade.setTextSize(getResources().getDimension(
                             R.dimen.text_size_grade_overview_score));
@@ -642,7 +642,7 @@ public class MainActivity extends ActionBarActivity implements
 
                     summary.addView(averageGrade);
                 }
-
+                summary.setPadding(5,0,5,0);
                 bigLayout.addView(classSummary);
                 realClassIndex++;
 
@@ -674,10 +674,12 @@ public class MainActivity extends ActionBarActivity implements
                             // the front (e.g. when
                             // the system Back button is pressed).
 
-                            .setCustomAnimations(R.anim.card_flip_right_in,
-                                    R.anim.card_flip_right_out,
-                                    R.anim.card_flip_left_in,
-                                    R.anim.card_flip_left_out)
+//                            .setCustomAnimations(R.anim.card_flip_right_in,
+//                                    R.anim.card_flip_right_out,
+//                                    R.anim.card_flip_left_in,
+//                                    R.anim.card_flip_left_out)
+                            .setCustomAnimations(R.anim.slide_in_down,
+                                    R.anim.slide_out_up)
 
                                     // Replace any fragments currently in the container
                                     // view with a fragment
