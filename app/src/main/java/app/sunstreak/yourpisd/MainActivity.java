@@ -633,8 +633,7 @@ public class MainActivity extends ActionBarActivity implements
 //                    llp.setMargins(0, 0, 15, 0);
                     averageGrade.setLayoutParams(llp);
 
-                    averageGrade.setTextSize(getResources().getDimension(
-                            R.dimen.text_size_grade_overview_score));
+                    averageGrade.setTextSize(29);
                     averageGrade.setClickable(false);
                     averageGrade.setGravity(Gravity.CENTER);
                     averageGrade.setText(averageText);

@@ -22,6 +22,7 @@ import java.io.InputStream;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.TimeInterpolator;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -31,6 +32,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -43,12 +45,15 @@ import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Config;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.view.inputmethod.EditorInfo;
@@ -99,17 +104,21 @@ public class LoginActivity extends ActionBarActivity {
 	private TextView mLoginStatusMessageView;
 	private CheckBox mRememberPasswordCheckBox;
 	private CheckBox mAutoLoginCheckBox;
+    private int height;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_login);
+		setContentView(R.layout.activity_login_new);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
         }
 		final SharedPreferences sharedPrefs = getPreferences(Context.MODE_PRIVATE);
-
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        height = size.y;
 		mLoginFormView = findViewById(R.id.login_form);
 		mLoginStatusView = (LinearLayout)findViewById(R.id.login_status);
 		mLoginStatusMessageView = (TextView) findViewById(R.id.login_status_message);
@@ -358,27 +367,45 @@ public class LoginActivity extends ActionBarActivity {
 					android.R.integer.config_shortAnimTime);
 
 
-			mLoginFormView.setVisibility(View.VISIBLE);
-			mLoginFormView.animate().setDuration(shortAnimTime)
-			//.translationY(-200)
-                    .alpha(show?0:1)
-			.setListener(new AnimatorListenerAdapter() {
+//			mLoginFormView.setVisibility(View.VISIBLE);
+//			mLoginFormView.animate().setDuration(shortAnimTime)
+//			//.translationY(-200)
+//                    .alpha(show?0:1)
+//			.setListener(new AnimatorListenerAdapter() {
+//				@Override
+//				public void onAnimationEnd(Animator animation) {
+//					mLoginFormView.setVisibility(show ? View.GONE
+//							: View.VISIBLE);
+//				}
+//			});
+//			mLoginStatusView.setVisibility(View.VISIBLE);
+//			mLoginStatusView.animate().setDuration(shortAnimTime)
+//			.alpha(show ? 1:0)
+//			.setListener(new AnimatorListenerAdapter() {
+//				@Override
+//				public void onAnimationEnd(Animator animation) {
+//					mLoginStatusView.setVisibility(show ? View.VISIBLE
+//							: View.GONE);
+//				}
+//			});
+//            mLoginStatusView.animate().setDuration(0).translationY(500);
+            System.out.println(height);
+            mLoginFormView.animate().setDuration(500).setInterpolator(new DecelerateInterpolator())
+                    .translationYBy(height*-1).setListener(new AnimatorListenerAdapter() {
 				@Override
 				public void onAnimationEnd(Animator animation) {
-					mLoginFormView.setVisibility(show ? View.GONE
-							: View.VISIBLE);
+					mLoginFormView.setVisibility(View.GONE);
 				}
 			});
-			mLoginStatusView.setVisibility(View.VISIBLE);
-			mLoginStatusView.animate().setDuration(shortAnimTime)
-			.alpha(show ? 1:0)
-			.setListener(new AnimatorListenerAdapter() {
-				@Override
-				public void onAnimationEnd(Animator animation) {
-					mLoginStatusView.setVisibility(show ? View.VISIBLE
-							: View.GONE);
-				}
-			});
+            mLoginStatusView.setVisibility(View.VISIBLE);
+//            mLoginStatusView.animate().setDuration(shortAnimTime)
+//			.setListener(new AnimatorListenerAdapter() {
+//				@Override
+//				public void onAnimationEnd(Animator animation) {
+//					mLoginStatusView.setVisibility(show ? View.VISIBLE
+//							: View.GONE);
+//				}
+//			});
 
 			if (DateHelper.isAprilFools()) {
 				mLoginStatusView.removeAllViews();
