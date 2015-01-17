@@ -898,7 +898,7 @@ public class MainActivity extends ActionBarActivity implements
         public static final String ARG_OBJECT = "object";
         private View rootView;
         private int position;
-        RelativeLayout[] profileCards;
+        LinearLayout[] profileCards;
         private boolean pictureNotLoaded = true;
 
         @Override
@@ -982,7 +982,7 @@ public class MainActivity extends ActionBarActivity implements
                     bigLayout.addView(instruct, 1);
                 }
 
-                profileCards = new RelativeLayout[session.getStudents().size()];
+                profileCards = new LinearLayout[session.getStudents().size()];
 
                 for (int i = 0; i < session.getStudents().size(); i++) {
                     // profileCards[i] = new RelativeLayout(getActivity());
@@ -1014,7 +1014,7 @@ public class MainActivity extends ActionBarActivity implements
                     // profilePic.getId());
                     //
 
-                    profileCards[i] = (RelativeLayout) inflater.inflate(
+                    profileCards[i] = (LinearLayout) inflater.inflate(
                             R.layout.profile_card, bigLayout, false);
                     ImageView profilePic = (ImageView) profileCards[i]
                             .findViewById(R.id.profilePic);

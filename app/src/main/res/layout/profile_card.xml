@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   This file is part of yourPISD.
    
   yourPISD is free software: you can redistribute it and/or modify
@@ -16,47 +15,51 @@
   along with yourPISD.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/card_custom" >
+    android:background="@drawable/card_custom"
+    android:orientation="horizontal"
+    android:paddingTop="5dp">
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/profilePic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_centerVertical="true"
-        android:layout_margin="5dp"
+        app:border_color="@color/gray"
         app:border_width="2dp"
-        app:border_color="@color/black"/>
+        android:layout_weight="1"/>
 
-    <app.sunstreak.yourpisd.view.MyTextView
-        android:id="@+id/name"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:id="@+id/information"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/profilePic"
-        android:gravity="center"
-        android:textSize="22sp" />
+        android:orientation="vertical"
+        android:layout_weight="1">
 
-    <app.sunstreak.yourpisd.view.MyTextView
-        android:id="@+id/gpaFall"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/name"
-        android:layout_toRightOf="@+id/profilePic"
-        android:gravity="center"
-        android:textSize="22sp" />
+        <app.sunstreak.yourpisd.view.MyTextView
+            android:id="@+id/name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="22sp" />
 
-    <app.sunstreak.yourpisd.view.MyTextView
-        android:id="@+id/gpaSpring"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/gpaFall"
-        android:layout_toRightOf="@+id/profilePic"
-        android:gravity="center"
-        android:textSize="22sp" />
+        <app.sunstreak.yourpisd.view.MyTextView
+            android:id="@+id/gpaFall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="22sp" />
 
-</RelativeLayout>
+        <app.sunstreak.yourpisd.view.MyTextView
+            android:id="@+id/gpaSpring"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="22sp" />
+
+    </LinearLayout>
+
+
+</LinearLayout>
