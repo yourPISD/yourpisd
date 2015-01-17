@@ -17,17 +17,20 @@
 -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@drawable/card_custom" >
 
-    <ImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/profilePic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_margin="5dp" />
+        android:layout_centerVertical="true"
+        android:layout_margin="5dp"
+        app:border_width="2dp"
+        app:border_color="@color/black"/>
 
     <app.sunstreak.yourpisd.view.MyTextView
         android:id="@+id/name"

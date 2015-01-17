@@ -367,43 +367,45 @@ public class LoginActivity extends ActionBarActivity {
 					android.R.integer.config_shortAnimTime);
 
 
-//			mLoginFormView.setVisibility(View.VISIBLE);
-//			mLoginFormView.animate().setDuration(shortAnimTime)
-//			//.translationY(-200)
-//                    .alpha(show?0:1)
-//			.setListener(new AnimatorListenerAdapter() {
-//				@Override
-//				public void onAnimationEnd(Animator animation) {
-//					mLoginFormView.setVisibility(show ? View.GONE
-//							: View.VISIBLE);
-//				}
-//			});
-//			mLoginStatusView.setVisibility(View.VISIBLE);
-//			mLoginStatusView.animate().setDuration(shortAnimTime)
-//			.alpha(show ? 1:0)
-//			.setListener(new AnimatorListenerAdapter() {
-//				@Override
-//				public void onAnimationEnd(Animator animation) {
-//					mLoginStatusView.setVisibility(show ? View.VISIBLE
-//							: View.GONE);
-//				}
-//			});
-//            mLoginStatusView.animate().setDuration(0).translationY(500);
-            System.out.println(height);
-            mLoginFormView.animate().setDuration(500).setInterpolator(new DecelerateInterpolator())
-                    .translationYBy(height*-1).setListener(new AnimatorListenerAdapter() {
+			mLoginFormView.setVisibility(View.VISIBLE);
+			mLoginFormView.animate().setDuration(shortAnimTime)
+			//.translationY(-200)
+                    .alpha(show?0:1)
+			.setListener(new AnimatorListenerAdapter() {
 				@Override
 				public void onAnimationEnd(Animator animation) {
-					mLoginFormView.setVisibility(View.GONE);
+					mLoginFormView.setVisibility(show ? View.GONE
+							: View.VISIBLE);
 				}
 			});
-            mLoginStatusView.setVisibility(View.VISIBLE);
-//            mLoginStatusView.animate().setDuration(shortAnimTime)
+			mLoginStatusView.setVisibility(View.VISIBLE);
+			mLoginStatusView.animate().setDuration(shortAnimTime)
+			.alpha(show ? 1:0)
+			.setListener(new AnimatorListenerAdapter() {
+				@Override
+				public void onAnimationEnd(Animator animation) {
+					mLoginStatusView.setVisibility(show ? View.VISIBLE
+							: View.GONE);
+				}
+			});
+
+//            mLoginFormView.setVisibility(View.VISIBLE);
+//            mLoginFormView.animate().setDuration(500).setInterpolator(new DecelerateInterpolator())
+//                    .translationY(height*(show? -1 : 1)).setListener(new AnimatorListenerAdapter() {
+//				@Override
+//				public void onAnimationEnd(Animator animation) {
+//                    mLoginFormView.setVisibility(show ? View.INVISIBLE
+//                            : View.VISIBLE);
+//				}
+//			});
+//            mLoginStatusView.setVisibility(View.VISIBLE);
+//            mLoginStatusView.animate().setDuration(shortAnimTime).translationY(0)
 //			.setListener(new AnimatorListenerAdapter() {
 //				@Override
 //				public void onAnimationEnd(Animator animation) {
 //					mLoginStatusView.setVisibility(show ? View.VISIBLE
-//							: View.GONE);
+//							: View.INVISIBLE);
+//                    System.out.println("show loading: " + show);
 //				}
 //			});
 

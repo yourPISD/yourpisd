@@ -25,6 +25,7 @@
         <item name="android:windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
         <item name="colorAccent">@color/white</item>
+        <item name="android:textSelectHandle">@color/blue_500</item>
         <item name="android:buttonStyle">@style/MaterialButton</item>
         <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
     </style>
