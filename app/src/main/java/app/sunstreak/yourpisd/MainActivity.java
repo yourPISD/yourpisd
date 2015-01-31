@@ -78,6 +78,10 @@ import app.sunstreak.yourpisd.util.DateHelper;
 import app.sunstreak.yourpisd.util.RandomStuff;
 import app.sunstreak.yourpisd.view.MyTextView;
 
+/**
+ * MainActivity displays the summary fragments which shows the user their average grade in each
+ * class, profile card with gpa, and overall semester averages
+ */
 public class MainActivity extends ActionBarActivity implements
         ActionBar.TabListener {
 
@@ -234,25 +238,7 @@ public class MainActivity extends ActionBarActivity implements
                                 getResources().getString(
                                         R.string.main_section_2_title))
                         .setTabListener(this));
-        // actionBar.addTab(actionBar.newTab().setText(getResources().getString(R.string.main_section_3_title))
-        // .setTabListener(this));
-//        mViewPager
-//                .setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-//                    @Override
-//                    public void onPageSelected(int position) {
-//                        // on changing the page
-//                        // make respected tab selected
-//                        actionBar.setSelectedNavigationItem(position);
-//                    }
-//
-//                    @Override
-//                    public void onPageScrolled(int arg0, float arg1, int arg2) {
-//                    }
-//
-//                    @Override
-//                    public void onPageScrollStateChanged(int arg0) {
-//                    }
-//                });
+
     }
 
     private void setUpNavigationDrawer() {
@@ -320,8 +306,8 @@ public class MainActivity extends ActionBarActivity implements
     @Override
     public void onPause() {
         // Disabled while no goals.
-		/*
-		 * SharedPreferences.Editor editor =
+        /*
+         * SharedPreferences.Editor editor =
 		 * getSharedPreferences(session.getCurrentStudent().studentId + "",
 		 * Context.MODE_PRIVATE).edit(); for (int i = 0; i < goals.length; i++)
 		 * { editor.putInt(Integer.toString(i), goals[i]); } editor.commit();
@@ -497,8 +483,6 @@ public class MainActivity extends ActionBarActivity implements
 
             Bundle args = getArguments();
             semesterNum = args.getInt(ARG_SEMESTER_NUM);
-//			getActivity().getActionBar().getTabAt(SUMMARY_FRAGMENT_POSITION)
-//					.setText(getPageTitle());
 
             rootView = inflater.inflate(R.layout.tab_summary, container, false);
 
@@ -518,7 +502,6 @@ public class MainActivity extends ActionBarActivity implements
             LinearLayout weekNames = new LinearLayout(getActivity());
             weekNames.setBackgroundResource(R.drawable.card_custom);
             TextView[] weeks = new MyTextView[5];
-//            weekNames.setPadding(15, 20, 0, 20);
             weekNames.setGravity(Gravity.CENTER);
 
             for (int i = 0; i < weeks.length; i++) {
@@ -562,7 +545,6 @@ public class MainActivity extends ActionBarActivity implements
 
                 LinearLayout summary = (LinearLayout) classSummary
                         .findViewById(R.id.layout_six_weeks_summary);
-//                summary.setPadding(15, 0, 15, 14);
 
                 for (int termIndex = 4 * semesterNum; termIndex < 4 + 4 * semesterNum; termIndex++) {
 
@@ -571,14 +553,12 @@ public class MainActivity extends ActionBarActivity implements
                             R.dimen.text_size_grade_overview_score));
                     termGrade.setClickable(true);
 
-//                    int width = (SCREEN_WIDTH - 30) / 5;
                     LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
                             ViewGroup.LayoutParams.WRAP_CONTENT,
                             ViewGroup.LayoutParams.WRAP_CONTENT,
                             1f);
                     termGrade.setTextSize(29);
-//                    if (termIndex == 0)
-//                        llp.setMargins(15, 0, 0, 0);
+
                     termGrade.setLayoutParams(llp);
 
                     int avg;
@@ -600,8 +580,6 @@ public class MainActivity extends ActionBarActivity implements
                                 .setOnClickListener(new ClassSwipeOpenerListener(
                                         session.studentIndex, realClassIndex,
                                         termIndex));
-//                        termGrade
-//                                .setBackgroundResource(R.drawable.grade_summary_click);
 
                         if (avg != -1)
                             termGrade.setText(avg + "");
@@ -625,12 +603,9 @@ public class MainActivity extends ActionBarActivity implements
                     String averageText = Integer.toString(average);
 
                     TextView averageGrade = new MyTextView(getActivity());
-
-//                    int width = (SCREEN_WIDTH - 30) / 5;
                     LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
                             ViewGroup.LayoutParams.WRAP_CONTENT,
                             ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-//                    llp.setMargins(0, 0, 15, 0);
                     averageGrade.setLayoutParams(llp);
 
                     averageGrade.setTextSize(29);
@@ -642,7 +617,7 @@ public class MainActivity extends ActionBarActivity implements
 
                     summary.addView(averageGrade);
                 }
-                summary.setPadding(5,0,5,0);
+                summary.setPadding(5, 0, 5, 0);
                 bigLayout.addView(classSummary);
                 realClassIndex++;
 
@@ -985,34 +960,7 @@ public class MainActivity extends ActionBarActivity implements
                 profileCards = new LinearLayout[session.getStudents().size()];
 
                 for (int i = 0; i < session.getStudents().size(); i++) {
-                    // profileCards[i] = new RelativeLayout(getActivity());
-                    //
-                    // ImageView profilePic = new ImageView(getActivity());
-                    // profilePic.setId(MainActivity.id.profile_picture);
-                    // LinearLayout.LayoutParams lpPic = new
-                    // LinearLayout.LayoutParams(
-                    // android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
-                    // android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-                    // lpPic.setMargins(5,5,0,0);
-                    // profilePic.setLayoutParams(lpPic);
-                    // TextView name = new MyTextView(getActivity());
-                    // name.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),"Roboto-Light.ttf"));
-                    // // TODO use screen-specific text size.
-                    // name.setTextSize(22);
-                    // name.setText(session.getStudents().get(i).name);
-                    // name.setId(id.name);
-                    // name.setLayoutParams(new
-                    // LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
-                    // android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
-                    // name.setGravity(Gravity.CENTER);
-                    //
-                    // RelativeLayout.LayoutParams lpName = new
-                    // RelativeLayout.LayoutParams(
-                    // android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                    // android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-                    // lpName.addRule(RelativeLayout.RIGHT_OF,
-                    // profilePic.getId());
-                    //
+
 
                     profileCards[i] = (LinearLayout) inflater.inflate(
                             R.layout.profile_card, bigLayout, false);
@@ -1280,190 +1228,6 @@ public class MainActivity extends ActionBarActivity implements
                         "This position should instantiated as SummaryFragment,"
                                 + " not MainActivityFragment.");
             }
-
-            // if (position == 3) {
-            // throw new
-            // RuntimeException("This position should be instantiated as AttendanceFragment,"
-            // +
-            // "not MainActivityFragment.");
-            // }
-
-            // Semester Goals : shall remain dormant until May 2014.
-			/*
-			 * if (position == 3) {
-			 * 
-			 * LinearLayout layout = (LinearLayout)
-			 * rootView.findViewById(R.id.container);
-			 * 
-			 * RelativeLayout helpLabel = new RelativeLayout(getActivity());
-			 * helpLabel.setBackgroundResource(R.drawable.card_custom); TextView
-			 * help = new MyTextView(getActivity());
-			 * help.setText("Exam Grade Needed");
-			 * help.setTextSize(getResources()
-			 * .getDimension(R.dimen.text_size_grade_overview_header));
-			 * help.setTypeface(robotoNew); help.setGravity(Gravity.RIGHT);
-			 * RelativeLayout.LayoutParams labelParams = new
-			 * RelativeLayout.LayoutParams(
-			 * RelativeLayout.LayoutParams.WRAP_CONTENT,
-			 * RelativeLayout.LayoutParams.WRAP_CONTENT);
-			 * RelativeLayout.LayoutParams labelParams1 = new
-			 * RelativeLayout.LayoutParams(
-			 * RelativeLayout.LayoutParams.WRAP_CONTENT,
-			 * RelativeLayout.LayoutParams.WRAP_CONTENT);
-			 * labelParams1.setMargins(5, 5, 5, 5);
-			 * helpLabel.setLayoutParams(labelParams1);
-			 * labelParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-			 * help.setPadding(0, 20, 20, 10);
-			 * help.setLayoutParams(labelParams); helpLabel.addView(help);
-			 * 
-			 * TextView target = new MyTextView(getActivity());
-			 * target.setText("Goal");
-			 * target.setTextSize(getResources().getDimension
-			 * (R.dimen.text_size_grade_overview_header));
-			 * target.setTypeface(robotoNew); target.setGravity(Gravity.LEFT);
-			 * RelativeLayout.LayoutParams targetParams = new
-			 * RelativeLayout.LayoutParams(
-			 * RelativeLayout.LayoutParams.WRAP_CONTENT,
-			 * RelativeLayout.LayoutParams.WRAP_CONTENT);
-			 * targetParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-			 * target.setLayoutParams(targetParams); target.setPadding(20, 20,
-			 * 0, 10); helpLabel.addView(target);
-			 * 
-			 * layout.addView(helpLabel);
-			 * 
-			 * for (int classIndex = 0; classIndex < classCount; classIndex++) {
-			 * 
-			 * int jsonIndex =
-			 * dg.getCurrentStudent().getClassMatch()[classIndex];
-			 * 
-			 * RelativeLayout group = new RelativeLayout(getActivity());
-			 * group.setBackgroundResource(R.drawable.card_custom);
-			 * 
-			 * TextView className = new MyTextView(getActivity());
-			 * className.setText
-			 * (dg.getCurrentStudent().getShortClassName(jsonIndex));
-			 * className.setTypeface(robotoNew);
-			 * className.setTextSize(getResources
-			 * ().getDimension(R.dimen.text_size_grade_overview_header)-5);
-			 * className.setPadding(20,10,0,0); final TierView goal = new
-			 * TierView(getActivity(), robotoNew);
-			 * 
-			 * View minus = new View(getActivity()); View plus = new
-			 * View(getActivity());
-			 * 
-			 * minus.setBackgroundResource(R.drawable.navigation_previous_item);
-			 * plus.setBackgroundResource(R.drawable.navigation_next_item);
-			 * 
-			 * final TextView examScore = new MyTextView(getActivity());
-			 * examScore.setPadding(0,0,20,0);
-			 * examScore.setTextSize(getResources
-			 * ().getDimension(R.dimen.text_size_grade_overview_score));
-			 * examScore.setTypeface(robotoNew);
-			 * examScore.setGravity(Gravity.RIGHT);
-			 * 
-			 * // Try to retrieve data from sharedPrefs, otherwise calculate
-			 * from scratch. if (goals[classIndex] != -1) {
-			 * goal.setText(goals[classIndex]); } else { while(goal.getIndex()
-			 * != 0 && dg.getCurrentStudent().examScoreRequired(classIndex,
-			 * TierView.RANGES[goal.getIndex()])>100) goal.decrement();
-			 * goals[classIndex] = goal.getIndex(); }
-			 * 
-			 * examScore.setText("" +
-			 * dg.getCurrentStudent().examScoreRequired(classIndex,
-			 * TierView.RANGES[goal.getIndex()]));
-			 * 
-			 * if (Integer.parseInt(examScore.getText().toString()) > 100)
-			 * examScore.setTextColor(getResources().getColor(R.color.red));
-			 * 
-			 * class PlusMinusOnClickListener implements OnClickListener { int
-			 * classIndex; int delta; PlusMinusOnClickListener(int classIndex,
-			 * int delta) { this.classIndex = classIndex; this.delta = delta; }
-			 * 
-			 * @Override public void onClick(View v) { if (delta==1)
-			 * goal.increment(); else if (delta==-1) goal.decrement();
-			 * 
-			 * goals[classIndex] = goal.getIndex();
-			 * 
-			 * examScore.setText( "" + dg.getCurrentStudent().examScoreRequired(
-			 * classIndex, TierView.RANGES[goal.getIndex()])); if
-			 * (Integer.parseInt(examScore.getText().toString()) > 100)
-			 * examScore.setTextColor(getResources().getColor(R.color.red));
-			 * else
-			 * examScore.setTextColor(getResources().getColor(R.color.black)); }
-			 * }
-			 * 
-			 * minus.setOnClickListener(new PlusMinusOnClickListener(classIndex,
-			 * -1)); plus.setOnClickListener(new
-			 * PlusMinusOnClickListener(classIndex, 1));
-			 * 
-			 * // Don't show classes that don't have grades in the 3rd six weeks
-			 * // (ex. James Hannah & senior release, etc.) if
-			 * (examScore.getText().equals("-1")) continue;
-			 * 
-			 * // Assign position to class name RelativeLayout.LayoutParams
-			 * layoutParams = new RelativeLayout.LayoutParams(
-			 * RelativeLayout.LayoutParams.WRAP_CONTENT,
-			 * RelativeLayout.LayoutParams.WRAP_CONTENT);
-			 * layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-			 * layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-			 * className.setLayoutParams(layoutParams); className.setId(234254);
-			 * 
-			 * // Put minus under class name layoutParams = new
-			 * RelativeLayout.LayoutParams(
-			 * RelativeLayout.LayoutParams.WRAP_CONTENT,
-			 * RelativeLayout.LayoutParams.WRAP_CONTENT);
-			 * layoutParams.addRule(RelativeLayout.BELOW, className.getId());
-			 * layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-			 * minus.setLayoutParams(layoutParams); minus.setId(2345235);
-			 * 
-			 * // Put goal to right of minus layoutParams = new
-			 * RelativeLayout.LayoutParams(
-			 * RelativeLayout.LayoutParams.WRAP_CONTENT,
-			 * RelativeLayout.LayoutParams.WRAP_CONTENT);
-			 * layoutParams.addRule(RelativeLayout.RIGHT_OF, minus.getId());
-			 * layoutParams.addRule(RelativeLayout.ALIGN_TOP, minus.getId());
-			 * layoutParams.addRule(RelativeLayout.ALIGN_BOTTOM, minus.getId());
-			 * layoutParams.setMargins(0, 0, 0, 0); layoutParams.width =
-			 * getResources().getInteger(R.integer.width_exam_score);
-			 * goal.setLayoutParams(layoutParams); goal.setId(123491);
-			 * 
-			 * // Put plus to right of goal layoutParams = new
-			 * RelativeLayout.LayoutParams(
-			 * RelativeLayout.LayoutParams.WRAP_CONTENT,
-			 * RelativeLayout.LayoutParams.WRAP_CONTENT);
-			 * layoutParams.addRule(RelativeLayout.RIGHT_OF, goal.getId());
-			 * layoutParams.addRule(RelativeLayout.BELOW, className.getId());
-			 * plus.setLayoutParams(layoutParams);
-			 * 
-			 * // Assign size of plus and minus minus.getLayoutParams().width =
-			 * (int)
-			 * getResources().getDimension(R.dimen.semester_goals_arrow_size);
-			 * minus.getLayoutParams().height = (int)
-			 * getResources().getDimension(R.dimen.semester_goals_arrow_size);
-			 * plus.getLayoutParams().width = (int)
-			 * getResources().getDimension(R.dimen.semester_goals_arrow_size);
-			 * plus.getLayoutParams().height = (int)
-			 * getResources().getDimension(R.dimen.semester_goals_arrow_size);
-			 * // minus.setPadding(0, 0, 0, 30); layoutParams = new
-			 * RelativeLayout.LayoutParams(
-			 * RelativeLayout.LayoutParams.WRAP_CONTENT,
-			 * RelativeLayout.LayoutParams.WRAP_CONTENT);
-			 * layoutParams.addRule(RelativeLayout.ALIGN_BOTTOM, goal.getId());
-			 * layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-			 * examScore.setLayoutParams(layoutParams);
-			 * 
-			 * group.addView(className); group.addView(examScore);
-			 * group.addView(minus); group.addView(goal); group.addView(plus);
-			 * layoutParams = new RelativeLayout.LayoutParams(
-			 * RelativeLayout.LayoutParams.WRAP_CONTENT,
-			 * RelativeLayout.LayoutParams.WRAP_CONTENT);
-			 * layoutParams.setMargins(5,5,5,5);
-			 * group.setLayoutParams(layoutParams);
-			 * 
-			 * layout.addView(group);
-			 * 
-			 * } }
-			 */
             return rootView;
         }
 
@@ -1586,50 +1350,5 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
-    // public void onRadioButtonClicked (View view) {
-    // // Is the button now checked?
-    // boolean checked = ((RadioButton) view).isChecked();
-    //
-    // // Check which radio button was clicked
-    // switch(view.getId()) {
-    // case R.id.attendance_by_period:
-    // if (checked) {
-    // ((AttendanceFragment)mFragments[ATTENDANCE_FRAGMENT_POSITION]).showAttendanceByPeriod();
-    // }
-    // break;
-    // case R.id.attendance_by_date:
-    // if (checked) {
-    // ((AttendanceFragment)mFragments[ATTENDANCE_FRAGMENT_POSITION]).showAttendanceByDate();
-    // }
-    // break;
-    // }
-    // }
-    //
-    // class AttendanceTask extends AsyncTask<Integer, Integer, AttendanceData>
-    // {
-    //
-    // int viewType;
-    //
-    // @Override
-    // protected AttendanceData doInBackground(Integer... args) {
-    // if (args.length > 0)
-    // viewType = args[0];
-    // try {
-    // return session.getCurrentStudent().loadAttendanceSummary();
-    // } catch (IOException e) {
-    // e.printStackTrace();
-    // return null;
-    // } catch (JSONException e) {
-    // e.printStackTrace();
-    // return null;
-    // }
-    // }
-    //
-    // @Override
-    // protected void onPostExecute(final AttendanceData result) {
-    // ((AttendanceFragment)mFragments[ATTENDANCE_FRAGMENT_POSITION]).setAttendanceData(result);
-    // }
-    //
-    // }
 
 }
