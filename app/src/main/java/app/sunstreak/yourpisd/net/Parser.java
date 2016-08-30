@@ -16,9 +16,13 @@
  */
 
 package app.sunstreak.yourpisd.net;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -189,6 +193,21 @@ public class Parser {
 		}
 		String teacherName = teacher.text();
 		return new String[] {teacherName, email};
+	}
+
+	public static Map<String, String> parseHiddenFields(String html) throws UnsupportedEncodingException{
+		Pattern hiddenField = Pattern.compile(
+				"<input type=\"hidden\" name=\"([A-Za-z0-9_/+=]+)\" id=\"[A-Za-z0-9_/+=]+\" value=\"([A-Za-z0-9_/+=]+)\"",
+				Pattern.CASE_INSENSITIVE);
+		Matcher matches = hiddenField.matcher(html);
+		Map<String, String> values = new HashMap<>();
+
+		while (matches.find())
+		{
+			values.put(URLEncoder.encode(matches.group(1), "UTF-8"),
+					URLEncoder.encode(matches.group(2), "UTF-8"));
+		}
+		return values;
 	}
 
 	public static Object[] termCategoryGrades (String html) throws JSONException {

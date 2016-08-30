@@ -5,91 +5,123 @@ import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import app.sunstreak.yourpisd.util.HTTPResponse;
 import app.sunstreak.yourpisd.util.Request;
 
 public class StudentSession extends Session {
-	public StudentSession(String username, String password) {
-		this.username = username;
-		this.password = password;
-		this.domain = Domain.STUDENT;
-	}
+    public StudentSession(String username, String password) {
+        this.username = username;
+        this.password = password;
+        this.domain = Domain.STUDENT;
+    }
 
-	@Override
-	public int login() throws MalformedURLException, IOException {
-		String response;
-		int responseCode;
-		String postParams;
+    public int login2() {
+        //TODO: parse hidden fields and domain id.
+        String url = "https://gradebook.pisd.edu/pinnacle/gradebook/logon.aspx";
+        String[][] requestProperties = new String[][]{
 
-		HTTPResponse portalDefaultPage = Request.sendGet(domain.loginAddress,
-				cookies);
+                {"Accept",
+                        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"},
+                {"Accept-Encoding", "gzip, deflate, br"},
+                {"Accept-Language", "en-US,en;q=0.8"},
+                {"Cache-Control", "max-age=0"},
+                {"Connection", "keep-alive"},
+                {"Content-Type", "application/x-www-form-urlencoded"},
+                {"Host", "gradebook.pisd.edu"},
+                {"Origin", "https://gradebook.pisd.edu"},
+                {"Referer", "https://gradebook.pisd.edu/pinnacle/gradebook/logon.aspx"}
+        };
+        ArrayList<String[]> rp = new ArrayList<>(
+                java.util.Arrays.asList(requestProperties));
 
-		response = portalDefaultPage.getData();
-		responseCode = portalDefaultPage.getResponseCode();
+        try {
+            HTTPResponse login = Request.sendPost(url, new HashSet<>(), rp, true, postParams);
 
-		String[][] requestProperties = new String[][] {
-				{ "Accept",
-						"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" },
-				{ "Accept-Encoding", "gzip,deflate,sdch" },
-				{ "Accept-Language", "en-US,en;q=0.8,es;q=0.6" },
-				{ "Cache-Control", "max-age=0" },
-				{ "Connection", "keep-alive" },
-				{ "Content-Type", "application/x-www-form-urlencoded" },
-				{ "Host", "sso.portal.mypisd.net" },
-				{ "Origin", "https://sso.portal.mypisd.net" },
-				{
-						"Referer",
-						"https://sso.portal.mypisd.net/cas/login?service=http%3A%2F%2Fportal.mypisd.net%2Fc%2Fportal%2Flogin" } };
 
-		ArrayList<String[]> rp = new ArrayList<String[]>(
-				java.util.Arrays.asList(requestProperties));
+        } catch (SocketTimeoutException e) {
+            e.printStackTrace();
+            return -2;
+        }
 
-		String lt = Parser.portalLt(response);
 
-		postParams = "username=" + URLEncoder.encode(username, "UTF-8")
-				+ "&password=" + URLEncoder.encode(password, "UTF-8") + "&lt="
-				+ lt + "&_eventId=submit";
-		try {
-			HTTPResponse portalLogin = Request.sendPost(domain.loginAddress,
-					cookies, rp, true, postParams);
+    }
 
-			response = portalLogin.getData();
-			responseCode = portalLogin.getResponseCode();
+    @Override
+    public int login() throws MalformedURLException, IOException {
+        String response;
+        int responseCode;
+        String postParams;
 
-			// weird AF way of checking for bad password.
-			if (Request.getRedirectLocation() == null)
-				return -1;
+        HTTPResponse portalDefaultPage = Request.sendGet(domain.loginAddress,
+                cookies);
 
-			HTTPResponse ticket = Request.sendGet(
-					Request.getRedirectLocation(), cookies);
+        response = portalDefaultPage.getData();
+        responseCode = portalDefaultPage.getResponseCode();
 
-			if (ticket == null)
-				return -2;
+        String[][] requestProperties = new String[][]{
+                {"Accept",
+                        "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"},
+                {"Accept-Encoding", "gzip,deflate,sdch"},
+                {"Accept-Language", "en-US,en;q=0.8,es;q=0.6"},
+                {"Cache-Control", "max-age=0"},
+                {"Connection", "keep-alive"},
+                {"Content-Type", "application/x-www-form-urlencoded"},
+                {"Host", "sso.portal.mypisd.net"},
+                {"Origin", "https://sso.portal.mypisd.net"},
+                {
+                        "Referer",
+                        "https://sso.portal.mypisd.net/cas/login?service=http%3A%2F%2Fportal.mypisd.net%2Fc%2Fportal%2Flogin"}};
 
-			response = ticket.getData();
-			responseCode = ticket.getResponseCode();
+        ArrayList<String[]> rp = new ArrayList<String[]>(
+                java.util.Arrays.asList(requestProperties));
 
-			passthroughCredentials = Parser.passthroughCredentials(response);
-			return 1;
-		} catch (SocketTimeoutException e) {
-			e.printStackTrace();
-			return -2;
-		}
-	}
+        String lt = Parser.portalLt(response);
 
-	@Override
-	public boolean logout() {
-		try {
-			HTTPResponse logout = Request.sendGet(
-					"http://portal.mypisd.net/c/portal/logout", cookies);
-			int responseCode = logout.getResponseCode();
+        postParams = "username=" + URLEncoder.encode(username, "UTF-8")
+                + "&password=" + URLEncoder.encode(password, "UTF-8") + "&lt="
+                + lt + "&_eventId=submit";
+        try {
+            HTTPResponse portalLogin = Request.sendPost(domain.loginAddress,
+                    cookies, rp, true, postParams);
 
-			return responseCode == 302 || responseCode == 200;
-		} catch (MalformedURLException e) {
-			return false;
-		} catch (IOException e) {
-			return false;
-		}
-	}
+            response = portalLogin.getData();
+            responseCode = portalLogin.getResponseCode();
+
+            // weird AF way of checking for bad password.
+            if (Request.getRedirectLocation() == null)
+                return -1;
+
+            HTTPResponse ticket = Request.sendGet(
+                    Request.getRedirectLocation(), cookies);
+
+            if (ticket == null)
+                return -2;
+
+            response = ticket.getData();
+            responseCode = ticket.getResponseCode();
+
+            passthroughCredentials = Parser.passthroughCredentials(response);
+            return 1;
+        } catch (SocketTimeoutException e) {
+            e.printStackTrace();
+            return -2;
+        }
+    }
+
+    @Override
+    public boolean logout() {
+        try {
+            HTTPResponse logout = Request.sendGet(
+                    "http://portal.mypisd.net/c/portal/logout", cookies);
+            int responseCode = logout.getResponseCode();
+
+            return responseCode == 302 || responseCode == 200;
+        } catch (MalformedURLException e) {
+            return false;
+        } catch (IOException e) {
+            return false;
+        }
+    }
 }
