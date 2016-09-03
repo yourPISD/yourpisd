@@ -1,110 +1,76 @@
 package app.sunstreak.yourpisd.net;
 
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.FormElement;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.net.URL;
 
 import app.sunstreak.yourpisd.util.HTTPResponse;
 import app.sunstreak.yourpisd.util.Request;
 
 public class StudentSession extends Session {
+
     public StudentSession(String username, String password) {
         this.username = username;
         this.password = password;
         this.domain = Domain.STUDENT;
     }
 
-    public int login2() {
-        //TODO: parse hidden fields and domain id.
-        String url = "https://gradebook.pisd.edu/pinnacle/gradebook/logon.aspx";
-        String[][] requestProperties = new String[][]{
-
-                {"Accept",
-                        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"},
-                {"Accept-Encoding", "gzip, deflate, br"},
-                {"Accept-Language", "en-US,en;q=0.8"},
-                {"Cache-Control", "max-age=0"},
-                {"Connection", "keep-alive"},
-                {"Content-Type", "application/x-www-form-urlencoded"},
-                {"Host", "gradebook.pisd.edu"},
-                {"Origin", "https://gradebook.pisd.edu"},
-                {"Referer", "https://gradebook.pisd.edu/pinnacle/gradebook/logon.aspx"}
-        };
-        ArrayList<String[]> rp = new ArrayList<>(
-                java.util.Arrays.asList(requestProperties));
-
-        try {
-            HTTPResponse login = Request.sendPost(url, new HashSet<>(), rp, true, postParams);
-
-
-        } catch (SocketTimeoutException e) {
-            e.printStackTrace();
-            return -2;
-        }
-
-
-    }
-
     @Override
-    public int login() throws MalformedURLException, IOException {
-        String response;
-        int responseCode;
-        String postParams;
+    public int login() throws IOException
+    {
+        final URL LOAD_URL = new URL(LOGON);
+        final String USERNAME_FIELD = "ctl00$ContentPlaceHolder$Username";
+        final String PASSWORD_FIELD = "ctl00$ContentPlaceHolder$Password";
 
-        HTTPResponse portalDefaultPage = Request.sendGet(domain.loginAddress,
-                cookies);
+        try
+        {
+            // Submitting form data.
+            Document html = Jsoup.parse(LOAD_URL, 60000);
+            FormElement form = (FormElement) html.getElementsByTag("form").get(0);
+            Connection conn = form.submit();
 
-        response = portalDefaultPage.getData();
-        responseCode = portalDefaultPage.getResponseCode();
+            // Find username and password field.
+            Connection.KeyVal usernameField = null;
+            Connection.KeyVal passwordField = null;
+            for (Connection.KeyVal field : conn.request().data())
+                if (field.key().equals(USERNAME_FIELD))
+                    usernameField = field;
+                else if (field.key().equals(PASSWORD_FIELD))
+                    passwordField = field;
 
-        String[][] requestProperties = new String[][]{
-                {"Accept",
-                        "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"},
-                {"Accept-Encoding", "gzip,deflate,sdch"},
-                {"Accept-Language", "en-US,en;q=0.8,es;q=0.6"},
-                {"Cache-Control", "max-age=0"},
-                {"Connection", "keep-alive"},
-                {"Content-Type", "application/x-www-form-urlencoded"},
-                {"Host", "sso.portal.mypisd.net"},
-                {"Origin", "https://sso.portal.mypisd.net"},
-                {
-                        "Referer",
-                        "https://sso.portal.mypisd.net/cas/login?service=http%3A%2F%2Fportal.mypisd.net%2Fc%2Fportal%2Flogin"}};
-
-        ArrayList<String[]> rp = new ArrayList<String[]>(
-                java.util.Arrays.asList(requestProperties));
-
-        String lt = Parser.portalLt(response);
-
-        postParams = "username=" + URLEncoder.encode(username, "UTF-8")
-                + "&password=" + URLEncoder.encode(password, "UTF-8") + "&lt="
-                + lt + "&_eventId=submit";
-        try {
-            HTTPResponse portalLogin = Request.sendPost(domain.loginAddress,
-                    cookies, rp, true, postParams);
-
-            response = portalLogin.getData();
-            responseCode = portalLogin.getResponseCode();
-
-            // weird AF way of checking for bad password.
-            if (Request.getRedirectLocation() == null)
-                return -1;
-
-            HTTPResponse ticket = Request.sendGet(
-                    Request.getRedirectLocation(), cookies);
-
-            if (ticket == null)
+            if (usernameField == null)
+            {
+                System.err.println("EXPECTED: Form field for username.");
                 return -2;
+            }
 
-            response = ticket.getData();
-            responseCode = ticket.getResponseCode();
+            if (passwordField == null)
+            {
+                System.err.println("EXPECTED: Form field for password.");
+                return -2;
+            }
 
-            passthroughCredentials = Parser.passthroughCredentials(response);
-            return 1;
-        } catch (SocketTimeoutException e) {
+            // Submit username and password
+            usernameField.value(username);
+            passwordField.value(password);
+            Connection.Response resp = conn.execute();
+
+            if (resp.url().equals(LOAD_URL))
+                return -1;
+            else
+            {
+                System.out.println(resp.cookies());
+                return 1;
+            }
+        }
+        catch (SocketTimeoutException e)
+        {
             e.printStackTrace();
             return -2;
         }
@@ -113,13 +79,8 @@ public class StudentSession extends Session {
     @Override
     public boolean logout() {
         try {
-            HTTPResponse logout = Request.sendGet(
-                    "http://portal.mypisd.net/c/portal/logout", cookies);
-            int responseCode = logout.getResponseCode();
-
-            return responseCode == 302 || responseCode == 200;
-        } catch (MalformedURLException e) {
-            return false;
+            return Jsoup.connect(LOGOFF).timeout(60000).cookies(cookies).execute()
+                    .statusCode() == 200;
         } catch (IOException e) {
             return false;
         }

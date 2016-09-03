@@ -70,7 +70,7 @@ public class Student {
 	}
 
 	public void loadClassList() throws IOException {
-
+		// FIXME: redo loading class list.
 		String postParams = "{\"studentId\":\"" + studentId + "\"}";
 
 		ArrayList<String[]> requestProperties = new ArrayList<String[]>();
@@ -96,7 +96,7 @@ public class Student {
 
 	}
 
-	public JSONArray getClassList() {
+	public ArrayList<Class> getClassList() {
 		return classList;
 	}
 
@@ -120,89 +120,91 @@ public class Student {
 	 * @throws org.json.JSONException
 	 */
 	public int[][] loadGradeSummary() throws JSONException {
-		try {
-			String classId = ""
-					+ classList.getJSONObject(0).getInt("enrollmentId");
-			String termId = ""
-					+ classList.getJSONObject(0).getJSONArray("terms")
-							.getJSONObject(0).getInt("termId");
-
-			String url = "https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/GradeSummary.aspx?"
-					+ "&EnrollmentId="
-					+ classId
-					+ "&TermId="
-					+ termId
-					+ "&ReportType=0&StudentId=" + studentId;
-
-			HTTPResponse summary = Request.sendGet(url, session.cookies);
-			String response = summary.getData();
-			int responseCode = summary.getResponseCode();
-
-			if (responseCode != 200)
-				System.out.println("Response code: " + responseCode);
-
-			/*
-			 * puts averages in classList, under each term.
-			 */
-			Element doc = Jsoup.parse(response);
-			gradeSummary = Parser.gradeSummary(doc, classList);
-
-			matchClasses(gradeSummary);
-
-			for (int classIndex = 0; classIndex < gradeSummary.length; classIndex++) {
-				int jsonIndex = classMatch[classIndex];
-				JSONArray terms = classList.getJSONObject(jsonIndex)
-						.getJSONArray("terms");
-
-				int firstTermIndex = 0;
-				int lastTermIndex = 0;
-
-				if (terms.length() == 8) {
-					// Full year course
-					firstTermIndex = 0;
-					lastTermIndex = 7;
-				} else if (terms.length() == 4) {
-					if (terms.optJSONObject(0).optString("description")
-							.equals("1st Six Weeks")) {
-						// First semester course
-						firstTermIndex = 0;
-						lastTermIndex = 3;
-					} else {
-						// Second semester course
-						firstTermIndex = 4;
-						lastTermIndex = 7;
-					}
-				}
-
-				for (int termIndex = firstTermIndex; termIndex <= lastTermIndex; termIndex++) {
-					int arrayLocation = termIndex > 3 ? termIndex + 2
-							: termIndex + 1;
-					int average = gradeSummary[classIndex][arrayLocation];
-					if (average != NO_GRADES_ENTERED)
-						classList.getJSONObject(jsonIndex)
-								.getJSONArray("terms")
-								.getJSONObject(termIndex - firstTermIndex)
-								.put("average", average);
-				}
-
-				classList.getJSONObject(jsonIndex).put("firstSemesterAverage",
-						gradeSummary[classIndex][5]);
-				classList.getJSONObject(jsonIndex).put("secondSemesterAverage",
-						gradeSummary[classIndex][10]);
-			}
-
-			// Last updated time of summary --> goes in this awkward place
-			classList.getJSONObject(0).put("summaryLastUpdated",
-					new Instant().getMillis());
-
-			return gradeSummary;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		} catch (JSONException e) {
-			e.printStackTrace();
-			return null;
-		}
+		//FIXME: parse grade summary.
+		return null;
+//		try {
+//			String classId = ""
+//					+ classList.getJSONObject(0).getInt("enrollmentId");
+//			String termId = ""
+//					+ classList.getJSONObject(0).getJSONArray("terms")
+//							.getJSONObject(0).getInt("termId");
+//
+//			String url = "https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/GradeSummary.aspx?"
+//					+ "&EnrollmentId="
+//					+ classId
+//					+ "&TermId="
+//					+ termId
+//					+ "&ReportType=0&StudentId=" + studentId;
+//
+//			HTTPResponse summary = Request.sendGet(url, session.cookies);
+//			String response = summary.getData();
+//			int responseCode = summary.getResponseCode();
+//
+//			if (responseCode != 200)
+//				System.out.println("Response code: " + responseCode);
+//
+//			/*
+//			 * puts averages in classList, under each term.
+//			 */
+//			Element doc = Jsoup.parse(response);
+//			gradeSummary = Parser.gradeSummary(doc, classList);
+//
+//			matchClasses(gradeSummary);
+//
+//			for (int classIndex = 0; classIndex < gradeSummary.length; classIndex++) {
+//				int jsonIndex = classMatch[classIndex];
+//				JSONArray terms = classList.getJSONObject(jsonIndex)
+//						.getJSONArray("terms");
+//
+//				int firstTermIndex = 0;
+//				int lastTermIndex = 0;
+//
+//				if (terms.length() == 8) {
+//					// Full year course
+//					firstTermIndex = 0;
+//					lastTermIndex = 7;
+//				} else if (terms.length() == 4) {
+//					if (terms.optJSONObject(0).optString("description")
+//							.equals("1st Six Weeks")) {
+//						// First semester course
+//						firstTermIndex = 0;
+//						lastTermIndex = 3;
+//					} else {
+//						// Second semester course
+//						firstTermIndex = 4;
+//						lastTermIndex = 7;
+//					}
+//				}
+//
+//				for (int termIndex = firstTermIndex; termIndex <= lastTermIndex; termIndex++) {
+//					int arrayLocation = termIndex > 3 ? termIndex + 2
+//							: termIndex + 1;
+//					int average = gradeSummary[classIndex][arrayLocation];
+//					if (average != NO_GRADES_ENTERED)
+//						classList.getJSONObject(jsonIndex)
+//								.getJSONArray("terms")
+//								.getJSONObject(termIndex - firstTermIndex)
+//								.put("average", average);
+//				}
+//
+//				classList.getJSONObject(jsonIndex).put("firstSemesterAverage",
+//						gradeSummary[classIndex][5]);
+//				classList.getJSONObject(jsonIndex).put("secondSemesterAverage",
+//						gradeSummary[classIndex][10]);
+//			}
+//
+//			// Last updated time of summary --> goes in this awkward place
+//			classList.getJSONObject(0).put("summaryLastUpdated",
+//					new Instant().getMillis());
+//
+//			return gradeSummary;
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//			return null;
+//		} catch (JSONException e) {
+//			e.printStackTrace();
+//			return null;
+//		}
 	}
 
 	public int[] getClassIds() {

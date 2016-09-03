@@ -522,7 +522,8 @@ public class MainActivity extends ActionBarActivity implements
             bigLayout.addView(weekNames);
             int[] classMatch = session.getCurrentStudent().getClassMatch();
 
-            JSONArray classList = session.getCurrentStudent().getClassList();
+            // FIXME: Change class-list
+            //JSONArray classList = session.getCurrentStudent().getClassList();
 
             // TODO Will break for people who change courses in middle of
             // semester.
@@ -1158,6 +1159,7 @@ public class MainActivity extends ActionBarActivity implements
 
                 averages = new RelativeLayout[classCount];
 
+
                 JSONArray classList = session.getCurrentStudent()
                         .getClassList();
 
@@ -1181,16 +1183,17 @@ public class MainActivity extends ActionBarActivity implements
                             .get(session.studentIndex).getClassName(jsonIndex);
                     className.setText(name);
 
-                    // For 2nd-semester-only classes whose 4th six weeks is
+                    // For 2nd-semester-only classes whose 3rd ninth weeks is
                     // located as position 0
                     int avg;
                     if (classList.optJSONObject(jsonIndex)
-                            .optJSONArray("terms").length() <= 4)
+                            .optJSONArray("terms").length() <= 3)
                         avg = classList.optJSONObject(jsonIndex)
                                 .optJSONArray("terms")
-                                .optJSONObject(CURRENT_TERM_INDEX % 4)
+                                .optJSONObject(CURRENT_TERM_INDEX % 3)
                                 .optInt("average", -1);
                     else
+                        //TODO: Change classList to be a class, not a JSON object!!!!
                         avg = classList.optJSONObject(jsonIndex)
                                 .optJSONArray("terms")
                                 .optJSONObject(CURRENT_TERM_INDEX)
@@ -1212,6 +1215,7 @@ public class MainActivity extends ActionBarActivity implements
                     bigLayout.addView(averages[classIndex]);
                 }
 
+                //TODO: Extract or use current date.
                 TextView summaryLastUpdated = new MyTextView(getActivity());
                 String lastUpdatedString = DateHelper.timeSince(session
                         .getCurrentStudent().getClassList().optJSONObject(0)

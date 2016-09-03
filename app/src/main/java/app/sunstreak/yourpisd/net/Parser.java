@@ -406,56 +406,39 @@ public class Parser {
 		return studentName.text();
 	}
 
-	/**
-	 * 
-	 * @param html html source code of https://sso.portal.mypisd.net/cas/login?service=http%3A%2F%2Fportal.mypisd.net%2Fc%2Fportal%2Flogin
-	 * @return the value embedded in the <input type="hidden" name="lt" value=""> block
-	 */
-	public static String portalLt (String html) {
-		Element doc = Jsoup.parse(html);
-		Elements inputTags = doc.getElementsByTag("input");
-		//Shortcut
-		//		if (inputTags.get(4).attr("name").equals("lt"))
-		//			return inputTags.get(4).attr("value");
-		//		else {
-		for (Element tag : inputTags) {
-			if (tag.attr("name").equals("lt"))
-				return tag.attr("value");
-		}
-		//		}
-		return null;
-	}
-
 
 	/**
-	 * 
-	 * @param html the source code for ANY page in Gradebook (usually Default.aspx)
-	 * @return
+	 * Parses and returns a list of students' informations (name and INTERNAL student id) from the Gradebook.
+	 *
+	 * @param html the source code for ANY page in Gradebook (usually GradeSummary.aspx)
+	 * @return the list of students
 	 */
 	public static List<String[]> parseStudents (String html) {
-		List<String[]> list = new ArrayList<String[]>();
-
-		Element doc = Jsoup.parse(html);
-		Element studentList = doc.getElementById("ctl00_ctl00_ContentPlaceHolder_uxStudentlist");
-
-
-		// Only one student
-		if (studentList.text().isEmpty()) {
-			// {studentId, studentName}
-			list.add(new String[] {doc.getElementById("ctl00_ctl00_ContentPlaceHolder_uxStudentId").attr("value"), 
-					doc.getElementById("ctl00_ctl00_ContentPlaceHolder_uxMultiple").text()});
-			return list;
-		}
-		// Multiple students
-		else {
-			for (Element a : studentList.getElementsByTag("a")) {
-				String name = a.text();
-				String onClick = a.attr("onClick");
-				String studentId = onClick.substring(onClick.indexOf('\'') + 1, onClick.lastIndexOf('\''));
-				list.add(new String[] {studentId, name});
-			}
-			return list;
-		}
+		//FIXME: parsing students.
+//		List<String[]> list = new ArrayList<String[]>();
+//
+//		Element doc = Jsoup.parse(html);
+//		Element studentList = doc.getElementById("ctl00_ctl00_ContentPlaceHolder_uxStudentlist");
+//
+//
+//		// Only one student
+//		if (studentList.text().isEmpty()) {
+//			// {studentId, studentName}
+//			list.add(new String[] {doc.getElementById("ctl00_ctl00_ContentPlaceHolder_uxStudentId").attr("value"),
+//					doc.getElementById("ctl00_ctl00_ContentPlaceHolder_uxMultiple").text()});
+//			return list;
+//		}
+//		// Multiple students
+//		else {
+//			for (Element a : studentList.getElementsByTag("a")) {
+//				String name = a.text();
+//				String onClick = a.attr("onClick");
+//				String studentId = onClick.substring(onClick.indexOf('\'') + 1, onClick.lastIndexOf('\''));
+//				list.add(new String[] {studentId, name});
+//			}
+//			return list;
+//		}
+		return null;
 	}
 
 	public static String[] parseAssignment (String html) throws JSONException {

@@ -20,9 +20,9 @@ package app.sunstreak.yourpisd.net;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import android.graphics.Bitmap;
@@ -31,6 +31,8 @@ import app.sunstreak.yourpisd.util.HTTPResponse;
 import app.sunstreak.yourpisd.util.Request;
 
 public abstract class Session {
+	public static final String LOGOFF = "https://gradebook.pisd.edu/Pinnacle/Gradebook/Logon.aspx?Action=Logout";
+	public static final String LOGON = "https://gradebook.pisd.edu/pinnacle/gradebook/logon.aspx";
 
 	Domain domain;
 	String username;
@@ -46,7 +48,7 @@ public abstract class Session {
 	int editureLogin = 0;
 	int gradebookLogin = 0;
 
-	Set<String> cookies = new HashSet<String>();
+	Map<String, String> cookies = new HashMap<>();
 
 	String studentName = "";
 	Bitmap studentPictureBitmap;
@@ -106,18 +108,14 @@ public abstract class Session {
 	 * }
 	 */
 
+
 	/**
-	 * Logs in to Editure/New Age portal. Retrieves passthroughCredentials.
-	 * Precondition: username and password are defined.
-	 * 
-	 * @throws java.net.MalformedURLException
-	 * @throws IllegalUrlException
-	 * @throws java.io.IOException
-	 * @throws PISDException
-	 * @throws InterruptedException
-	 * @throws java.util.concurrent.ExecutionException
-	 * @return 1 if success, -1 if parent failure, -2 if student failure, 0 if
-	 *         domain value is not 0 or 1
+	 * This function logs in the student/ parent with their current credentials to Gradebook Pinnacle.
+	 * It then records session IDs via cookies.
+	 * Precondition: username and password are both defined.
+	 *
+	 * @return a status code (1 for no error, -1 for bad password, and -2 for server error.)
+	 * @throws IOException if an I/O error occurs while connecting to server.
 	 */
 	public abstract int login() throws MalformedURLException, IOException,
 			InterruptedException, ExecutionException;
@@ -165,10 +163,9 @@ public abstract class Session {
 	 * @param password
 	 * @return -10 for internet failure, -1 for other failure, 1 for success
 	 * @throws java.net.MalformedURLException
-	 * @throws IllegalUrlException
 	 * @throws java.io.IOException
-	 * @throws PISDException
 	 */
+	@Deprecated
 	public int loginGradebook(String userType, String uID, String email,
 			String password) throws MalformedURLException, IOException {
 

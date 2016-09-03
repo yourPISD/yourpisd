@@ -505,32 +505,22 @@ public class LoginActivity extends ActionBarActivity {
 				if (networkInfo != null && networkInfo.isConnected()) {
 					// Simulate network access.
 					session = Session.createSession(mEmail, mPassword);
-
 					((YPApplication)getApplication()).session = session;
 
-					// Update the loading screen: Signing into myPISD...
+					// Update the loading screen: Signing into with your credentials...
 					publishProgress(0);
 
 					int loginSuccess = session.login();
 					switch (loginSuccess) {
 					case -1: // Parent login error
-						return -1;	// Bad password display
 					case -2: // Server error
-						return -2; // Server error
+						return loginSuccess; // Server error
 					case 1:
 					default:
-						break;
 					}
 
-					// Update the loading screen: Signing into Gradebook...
-					publishProgress(1);
-
-					int gradebookLoginSuccess = session.tryLoginGradebook();
-					if (gradebookLoginSuccess != 1)
-						return gradebookLoginSuccess;
-
 					// Update the loading screen: Downloading class grades...
-					publishProgress(2);
+					publishProgress(1);
 
 					for (Student st : session.getStudents())
 						st.loadGradeSummary();
@@ -641,9 +631,8 @@ public class LoginActivity extends ActionBarActivity {
 		protected void onProgressUpdate(Integer... progress) {
 			int message;
 			switch (progress[0]) {
-			case 0:	message = R.string.login_progress_mypisd;			break;
-			case 1: message = R.string.login_progress_gradebook;		break;
-			case 2:	message = R.string.login_progress_downloading_data;	break;
+			case 0:	message = R.string.login_progress_login;			break;
+			case 1:	message = R.string.login_progress_downloading_data;	break;
 			default: /* Should not occur */	return;
 			}
 
