@@ -190,7 +190,6 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
     @Override
     protected void onPause() {
         super.onPause();
-
     }
 
 
@@ -420,7 +419,7 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
                 // Maybe the extra print time somehow fixes it...
                 //System.out.println(mClassGrade);
 
-                teacher.setText(session.getCurrentStudent().getClassList().getJSONObject(classIndex).optString("teacher"));
+                teacher.setText(session.getCurrentStudent().getClassList().get(classIndex).getTeacherName());
 
                 int avg = mClassGrade.optInt("average", -1);
                 if (avg != -1) {

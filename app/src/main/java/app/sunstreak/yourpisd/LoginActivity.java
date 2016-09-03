@@ -104,46 +104,41 @@ public class LoginActivity extends ActionBarActivity {
 	private TextView mLoginStatusMessageView;
 	private CheckBox mRememberPasswordCheckBox;
 	private CheckBox mAutoLoginCheckBox;
-    private int height;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		/******************
+		 * Load preferences and UI
+		 ******************/
 		super.onCreate(savedInstanceState);
+
+		//Set view
 		setContentView(R.layout.activity_login_new);
+
+		//Config toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
         }
-		final SharedPreferences sharedPrefs = getPreferences(Context.MODE_PRIVATE);
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        height = size.y;
+
+		//Obtain UI References
 		mLoginFormView = findViewById(R.id.login_form);
 		mLoginStatusView = (LinearLayout)findViewById(R.id.login_status);
 		mLoginStatusMessageView = (TextView) findViewById(R.id.login_status_message);
-		
-		if(DateHelper.isAprilFools())
-		{
-			LinearLayout container = (LinearLayout)mLoginFormView.findViewById(R.id.container);
-			ImageView logo = (ImageView)container.findViewById(R.id.logo);
-			InputStream is;
-			try {
-				is = getAssets().open("doge.png");
-				logo.setImageBitmap(BitmapFactory.decodeStream(is));
-				is.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		mEmailView = (EditText) findViewById(R.id.email);
+		mPasswordView = (EditText) findViewById(R.id.password);
+		mRememberPasswordCheckBox = (CheckBox) findViewById(R.id.remember_password);
+		mAutoLoginCheckBox = (CheckBox) findViewById(R.id.auto_login);
+
+		//Load preference data.
+		final SharedPreferences sharedPrefs = getPreferences(Context.MODE_PRIVATE);
 		mAutoLogin = sharedPrefs.getBoolean("auto_login", false);
-		System.out.println(mAutoLogin);
+		mRememberPassword = sharedPrefs.getBoolean("remember_password", false);
 
-		session = ((YPApplication)getApplication()).session;
-
+		//Load session data.
 		try {
 			boolean refresh = getIntent().getExtras().getBoolean("Refresh");
+			session = ((YPApplication)getApplication()).session;
 
 			if (refresh) {
 				mEmail = session.getUsername();
@@ -162,9 +157,8 @@ public class LoginActivity extends ActionBarActivity {
 			// Keep going.
 		}
 
-
-
-		if (sharedPrefs.getBoolean("patched", false)) {
+		//Remove unsecure password.
+		if (!sharedPrefs.getBoolean("patched", false)) {
 			SharedPreferences.Editor editor = sharedPrefs.edit();
 			editor.remove("password");
 			editor.putBoolean("patched", true);
@@ -172,7 +166,11 @@ public class LoginActivity extends ActionBarActivity {
 		}
 
 
-		if ( ! sharedPrefs.getBoolean("AcceptedUserAgreement", false) ) {
+		/******************
+		 * Setup GUI
+		 ******************/
+		//User agreement
+		if (!sharedPrefs.getBoolean("AcceptedUserAgreement", false) ) {
 
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle(getResources().getString(R.string.user_agreement_title));
@@ -190,7 +188,6 @@ public class LoginActivity extends ActionBarActivity {
 			builder.setNegativeButton("Disagree", new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					// Write your code here to invoke NO event
 					sharedPrefs.edit().putBoolean("AcceptedUserAgreement", false).commit();
 					Toast.makeText(LoginActivity.this, "Quitting app", Toast.LENGTH_SHORT).show();
 					finish();
@@ -201,38 +198,43 @@ public class LoginActivity extends ActionBarActivity {
 			alertDialog.show();
 		}
 
-		// Set up the remember_password CheckBox
-        mRememberPasswordCheckBox = (CheckBox) findViewById(R.id.remember_password);
-        mRememberPasswordCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                mRememberPassword = isChecked;
-            }
-        });
+		//April Fools
+		if(DateHelper.isAprilFools())
+		{
+			LinearLayout container = (LinearLayout)mLoginFormView.findViewById(R.id.container);
+			ImageView logo = (ImageView)container.findViewById(R.id.logo);
+			InputStream is;
+			try {
+				is = getAssets().open("doge.png");
+				logo.setImageBitmap(BitmapFactory.decodeStream(is));
+				is.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 
-		mRememberPassword = sharedPrefs.getBoolean("remember_password", false);
+		// Set up the Remember Password CheckBox
+		mRememberPasswordCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				mRememberPassword = isChecked;
+			}
+		});
 		mRememberPasswordCheckBox.setChecked(mRememberPassword);
 
-		// Set up the auto_login CheckBox
-		mAutoLoginCheckBox = (CheckBox) findViewById(R.id.auto_login);
+		// Set up the Auto Login CheckBox
 		mAutoLoginCheckBox.setChecked(mAutoLogin);
 		mAutoLoginCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton button, boolean isChecked) {
 				mAutoLogin = isChecked;
-				if (isChecked) {
-					mRememberPasswordCheckBox.setChecked(true);
-				}
+				mRememberPasswordCheckBox.setEnabled(!isChecked);
 			}
 
 		});
 
-		// Set up the login form.
-		mEmailView = (EditText) findViewById(R.id.email);
-
-		mPasswordView = (EditText) findViewById(R.id.password);
-		mPasswordView
-		.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+		//Setup password field
+		mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 			@Override
 			public boolean onEditorAction(TextView textView, int id,
 					KeyEvent keyEvent) {
@@ -244,30 +246,24 @@ public class LoginActivity extends ActionBarActivity {
 			}
 		});
 
-
 		//Load stored username/password
 		mEmailView.setText(sharedPrefs.getString("email", mEmail));
 		mPasswordView.setText(new String(Base64.decode(sharedPrefs.getString("e_password", "")
 				, Base64.DEFAULT )));
+
 		// If the password was not saved, give focus to the password.
 		if(mPasswordView.getText().equals(""))
 			mPasswordView.requestFocus();
 
-		mLoginFormView = findViewById(R.id.login_form);
-		mLoginStatusView = (LinearLayout)findViewById(R.id.login_status);
-		mLoginStatusMessageView = (TextView) findViewById(R.id.login_status_message);
-
-		findViewById(R.id.sign_in_button).setOnClickListener(
-				new View.OnClickListener() {
+		//Add listeners for submit button
+		View submit = findViewById(R.id.sign_in_button);
+		submit.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View view) {
-
-
 						attemptLogin();
 					}
 				});
-		findViewById(R.id.sign_in_button).setOnTouchListener(
-				new View.OnTouchListener() {
+		submit.setOnTouchListener(new View.OnTouchListener() {
 					@Override
 					public boolean onTouch(View v, MotionEvent event) {
 						InputMethodManager imm = 
@@ -276,7 +272,9 @@ public class LoginActivity extends ActionBarActivity {
 						return false;
 					}
 				});
+
 		mLoginFormView.setVisibility(View.VISIBLE);
+
 		// Login if auto-login is checked.
 		if (mAutoLogin)
 			attemptLogin();

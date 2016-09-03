@@ -23,7 +23,6 @@ import org.json.JSONArray;
 
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.FragmentTransaction;
 import android.content.Context;
@@ -85,8 +84,6 @@ import app.sunstreak.yourpisd.view.MyTextView;
 public class MainActivity extends ActionBarActivity implements
         ActionBar.TabListener {
 
-    public static boolean isTroll;
-
     public static final int CURRENT_TERM_INDEX = TermFinder
             .getCurrentTermIndex();
     static int classCount;
@@ -122,7 +119,7 @@ public class MainActivity extends ActionBarActivity implements
      */
     ViewPager mViewPager;
     // sections of the navigation drawer
-    public String[] mList = {"Profile", "Current Six Weeks", "Grade Overview"/*
+    public String[] mList = {"Profile", "Current Nine Weeks", "Grade Overview"/*
                                                                              * ,
 																			 * "Semester Goals"
 																			 */};
@@ -140,6 +137,7 @@ public class MainActivity extends ActionBarActivity implements
         if (toolbar != null) {
             setSupportActionBar(toolbar);
         }
+
         // Find the screen height/width
         DisplayMetrics displaymetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
@@ -180,6 +178,7 @@ public class MainActivity extends ActionBarActivity implements
         mViewPager.setAdapter(mSectionsPagerAdapter);
         //
         setUpMaterialTabs();
+
         // For parents with multiple students, show the profile cards first.
         // If we are coming back from ClassSwipeActivity, go to requested
         // section (should be section #1).

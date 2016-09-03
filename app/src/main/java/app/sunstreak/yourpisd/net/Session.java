@@ -18,73 +18,51 @@
 package app.sunstreak.yourpisd.net;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
+import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
-import android.graphics.Bitmap;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.FormElement;
 
-import app.sunstreak.yourpisd.util.HTTPResponse;
-import app.sunstreak.yourpisd.util.Request;
 
-public abstract class Session {
-	public static final String LOGOFF = "https://gradebook.pisd.edu/Pinnacle/Gradebook/Logon.aspx?Action=Logout";
-	public static final String LOGON = "https://gradebook.pisd.edu/pinnacle/gradebook/logon.aspx";
+public class Session {
+	public static final String GRADEBOOK_ROOT = "https://gradebook.pisd.edu/Pinnacle/Gradebook";
+	public static final String LOGOFF = GRADEBOOK_ROOT + "/Logon.aspx?Action=Logout";
+	public static final String LOGON = GRADEBOOK_ROOT + "/logon.aspx";
+	public static final SimpleDateFormat FULL_DATE_FORMAT = new SimpleDateFormat("EEE MMM dd yyyy H:mm:ss 'GMT'z", Locale.ENGLISH);
+				//Example: Sat Sep 03 2016 20:31:32 GMT-0500 (Central Daylight Time)
 
-	Domain domain;
-	String username;
-	String password;
-	String[] passthroughCredentials;
-	String[] gradebookCredentials;
+	private final String username;
+	private final String password;
+	private boolean loggedIn = false;
 
-	String pageUniqueId;
-	String viewState;
-	String eventValidation;
+	private final Map<String, String> cookies = new HashMap<>();
+	private Date expiration;
 
-	// 1= success. 0 = not tried; <0 = failure.
-	int editureLogin = 0;
-	int gradebookLogin = 0;
-
-	Map<String, String> cookies = new HashMap<>();
-
-	String studentName = "";
-	Bitmap studentPictureBitmap;
-
-	List<Student> students = new ArrayList<Student>();
+	List<Student> students = new ArrayList<>();
 	public int studentIndex = 0;
 	public boolean MULTIPLE_STUDENTS;
 
 	public static Session createSession(String username, String password) {
 		if (username.equals("test"))
 			return new TestSession();
-		else if (username.contains("@mypisd.net") || !username.contains("@"))
-			return new StudentSession(username, password);
 		else
-			return new ParentSession(username, password);
+			return new Session(username, password);
 	}
 
-	/*
-	 * public Session (Domain domain, String username, String password) {
-	 * this.domain = domain; this.username = username; this.password = password;
-	 * }
-	 * 
-	 * public Session (String username, String password) { this.username =
-	 * username; this.password = password;
-	 * 
-	 * // Find out whether student or parent using the username. if
-	 * (username.equals("test")) { this.domain = Domain.TEST; students = new
-	 * ArrayList<Student>(); //students = getTestStudents();
-	 * passthroughCredentials = new String[] {"", ""}; gradebookCredentials =
-	 * new String[] {"", ""}; MULTIPLE_STUDENTS = true; } else if
-	 * (username.contains("@mypisd.net") || !username.contains("@")) this.domain
-	 * = Domain.STUDENT; else this.domain = Domain.PARENT; }
-	 */
-
-	public Domain getDomain() {
-		return domain;
+	private Session(String username, String password) {
+		this.username = username;
+		this.password = password;
 	}
 
 	public String getUsername() {
@@ -95,163 +73,7 @@ public abstract class Session {
 		return password;
 	}
 
-	/*
-	 * public void clearData () { domain = null; username = null; password =
-	 * null; passthroughCredentials = null; gradebookCredentials = null;
-	 * pageUniqueId = null; editureLogin = 0; gradebookLogin = 0; cookies = new
-	 * ArrayList<String>();
-	 * 
-	 * studentName = ""; studentPictureBitmap = null;
-	 * 
-	 * students = new ArrayList<Student>(); studentIndex = 0;
-	 * 
-	 * }
-	 */
 
-
-	/**
-	 * This function logs in the student/ parent with their current credentials to Gradebook Pinnacle.
-	 * It then records session IDs via cookies.
-	 * Precondition: username and password are both defined.
-	 *
-	 * @return a status code (1 for no error, -1 for bad password, and -2 for server error.)
-	 * @throws IOException if an I/O error occurs while connecting to server.
-	 */
-	public abstract int login() throws MalformedURLException, IOException,
-			InterruptedException, ExecutionException;
-
-	public int tryLoginGradebook() throws IOException {
-		int loginAttempt = 0;
-
-		for (int counter = 0; counter < 7 && loginAttempt != 1; counter++) {
-
-			try {
-				// Only sleep extra if student account.
-				if (domain == Domain.STUDENT) {
-					System.out.println("sleeping 3.5s");
-					Thread.sleep(3500);
-				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-
-			loginAttempt = loginGradebook(passthroughCredentials[0],
-					passthroughCredentials[1], username, password);
-
-			// Internet connection lost
-			if (loginAttempt == -10)
-				return -3;
-		}
-
-		// If even 7 tries was not enough and still getting NotSet.
-		if (loginAttempt == -1) {
-			if (domain == Domain.STUDENT)
-				logout();
-			return -2;
-		}
-		return 1;
-	}
-
-	/**
-	 * Logs into Gradebook using PIV_Passthrough.aspx and receives classList
-	 * (from InternetViewerService.ashx/Init).
-	 * 
-	 * @param userType
-	 *            P (parent) or S (student)
-	 * @param uID
-	 * @param email
-	 * @param password
-	 * @return -10 for internet failure, -1 for other failure, 1 for success
-	 * @throws java.net.MalformedURLException
-	 * @throws java.io.IOException
-	 */
-	@Deprecated
-	public int loginGradebook(String userType, String uID, String email,
-			String password) throws MalformedURLException, IOException {
-
-		/*
-		 * ConnectivityManager connMgr = (ConnectivityManager)
-		 * application.getSystemService(Context.CONNECTIVITY_SERVICE);
-		 * NetworkInfo networkInfo = connMgr.getActiveNetworkInfo(); if
-		 * (networkInfo == null || !networkInfo.isConnected()) return -10;
-		 */
-
-		// commented request paramater is allowed for parent account, not
-		// allowed for student account. never required.
-		String url = "https://parentviewer.pisd.edu/EP/PIV_Passthrough.aspx?action=trans&uT="
-				+ userType + "&uID=" + uID /*
-											 * +
-											 * "&submit=Login+to+Parent+Viewer"
-											 */;
-		String postParams = "password=" + password + "&username=" + email;
-
-		HTTPResponse passthrough = Request.sendPost(url, postParams, cookies);
-
-		String response = passthrough.getData();
-		int responseCode = passthrough.getResponseCode();
-
-		String[] gradebookCredentials = Parser
-				.getGradebookCredentials(response);
-
-		/*
-		 * escapes if access not granted.
-		 */
-		if (Parser.accessGrantedGradebook(gradebookCredentials)) {
-			System.out.println("Gradebook access granted!");
-			gradebookLogin = 1;
-		} else {
-			System.out.println("Bad username/password 2!");
-			gradebookLogin--;
-			return -1;
-		}
-
-		postParams = "userId=" + gradebookCredentials[0] + "&password="
-				+ gradebookCredentials[1];
-
-		HTTPResponse link = Request
-				.sendPost(
-						"https://gradebook.pisd.edu/Pinnacle/Gradebook/link.aspx?target=InternetViewer",
-						postParams, cookies);
-
-		response = link.getData();
-		responseCode = link.getResponseCode();
-
-		// for teh cookiez
-		HTTPResponse defaultAspx = Request.sendPost(
-				"https://gradebook.pisd.edu/Pinnacle/Gradebook/Default.aspx",
-				postParams, cookies);
-
-		response = defaultAspx.getData();
-		responseCode = defaultAspx.getResponseCode();
-
-		for (String[] args : Parser.parseStudents(response)) {
-			students.add(new Student(Integer.parseInt(args[0]), args[1], this));
-		}
-
-		MULTIPLE_STUDENTS = students.size() > 1;
-
-		for (Student st : students) {
-			cookies.add("PinnacleWeb.StudentId=" + st.studentId);
-		}
-
-		/*
-		 * retrieves the pageUniqueID from html of link.aspx. retrieves the
-		 * student id from a cookie, PinnacleWeb.StudentId=###
-		 */
-		pageUniqueId = Parser.pageUniqueId(response);
-		// throws PISDException
-
-		if (pageUniqueId == null) {
-			System.out.println("Some error. pageUniqueId is null");
-			return -1;
-		}
-
-		for (Student st : students) {
-			st.loadClassList();
-		}
-
-		return 1;
-	}
 
 	/**
 	 * Temporary code. In use because login1.mypisd.net has an expired
@@ -272,32 +94,138 @@ public abstract class Session {
 	 * catch (Exception e) { } }
 	 */
 
-	public int getEditureLogin() {
-		return editureLogin;
-	}
-
-	public int getGradebookLogin() {
-		return gradebookLogin;
-	}
-
-	public String[] getGradebookCredentials() {
-		return gradebookCredentials;
-	}
-
-	public String[] getPassthroughCredentials() {
-		return passthroughCredentials;
-	}
-
 	public List<Student> getStudents() {
 		return students;
+	}
+
+	public Map<String, String> getCookies()
+	{
+		return cookies;
 	}
 
 	public Student getCurrentStudent() {
 		return students.get(studentIndex);
 	}
 
-	public boolean logout() {
-		return false;
+	/**
+	 * Checks the expiration of the current session
+	 * @return the status code (1 for good, -1 for bad password, -2 for server error).
+	 * @throws IOException
+     */
+	public int checkExpiration() throws IOException
+	{
+		if (!loggedIn || new Date().after(expiration))
+		{
+			int status = login();
+			if (status <= 0)
+				return status;
+		}
+
+		Document doc = Jsoup.connect(GRADEBOOK_ROOT + "/InternetViewer/GradeSummary.aspx").cookies(cookies).get();
+		//TODO: parse to see whether if we experience an error msg with connection.
+
+		return 1;
 	}
 
+
+	/**
+     * This function logs in the student/ parent with their current credentials to Gradebook Pinnacle.
+     * It then records session IDs and expiration time via cookies.
+     * Precondition: username and password are both defined.
+     *
+     * @return a status code (1 for no error, -1 for bad password, and -2 for server error.)
+     * @throws IOException if an I/O error occurs while connecting to server.
+     */
+    public int login() throws IOException
+    {
+        final URL LOAD_URL = new URL(LOGON);
+        final String USERNAME_FIELD = "ctl00$ContentPlaceHolder$Username";
+        final String PASSWORD_FIELD = "ctl00$ContentPlaceHolder$Password";
+
+        try
+        {
+            // Submitting form data.
+            Document html = Jsoup.parse(LOAD_URL, 60000);
+            FormElement form = (FormElement) html.getElementsByTag("form").get(0);
+            Connection conn = form.submit();
+
+            // Find username and password field.
+            Connection.KeyVal usernameField = null;
+            Connection.KeyVal passwordField = null;
+            for (Connection.KeyVal field : conn.request().data())
+                if (field.key().equals(USERNAME_FIELD))
+                    usernameField = field;
+                else if (field.key().equals(PASSWORD_FIELD))
+                    passwordField = field;
+
+            if (usernameField == null)
+            {
+                System.err.println("EXPECTED: Form field for username.");
+                return -2;
+            }
+
+            if (passwordField == null)
+            {
+                System.err.println("EXPECTED: Form field for password.");
+                return -2;
+            }
+
+            // Submit username and password
+            usernameField.value(username);
+            passwordField.value(password);
+            Connection.Response resp = conn.execute();
+
+            if (resp.url().equals(LOAD_URL))
+                return -1;
+            else
+            {
+                cookies.putAll(resp.cookies());
+				updateExpirationDate();
+
+				students.addAll(Parser.parseStudents(this, resp.body()));
+				MULTIPLE_STUDENTS = students.size() > 1;
+//				for (Student st : students) {
+//					cookies.add("PinnacleWeb.StudentId=" + st.studentId);
+//				}
+				for (Student st : students) {
+					st.loadClassList();
+				}
+				loggedIn = true;
+                return 1;
+            }
+        }
+        catch (SocketTimeoutException e)
+        {
+            e.printStackTrace();
+            return -2;
+        }
+    }
+
+	/**
+	 * Updates expiration dates for the current session.
+	 */
+	public void updateExpirationDate()
+	{
+		try {
+			expiration = FULL_DATE_FORMAT.parse(cookies.get("SessionReminder"));
+		} catch (ParseException e) {
+			System.err.println("Unable to parse expiration time-stamp");
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Logs out the user from their account, and resets cookies.
+     * @return true if we successfully logged out, false for an error.
+     */
+    public boolean logout() {
+        try {
+            boolean success = Jsoup.connect(LOGOFF).timeout(60000).cookies(cookies).execute()
+                    .statusCode() == 200;
+            cookies.clear();
+            return success;
+        } catch (IOException e) {
+            return false;
+        }
+    }
 }

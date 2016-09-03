@@ -16,6 +16,8 @@
  */
 
 package app.sunstreak.yourpisd.net;
+import android.support.annotation.NonNull;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -410,10 +412,12 @@ public class Parser {
 	/**
 	 * Parses and returns a list of students' informations (name and INTERNAL student id) from the Gradebook.
 	 *
+	 * @param sess the session loading the user.
 	 * @param html the source code for ANY page in Gradebook (usually GradeSummary.aspx)
 	 * @return the list of students
 	 */
-	public static List<String[]> parseStudents (String html) {
+	@NonNull
+	public static List<Student> parseStudents (Session sess, String html) {
 		//FIXME: parsing students.
 //		List<String[]> list = new ArrayList<String[]>();
 //
@@ -438,7 +442,7 @@ public class Parser {
 //			}
 //			return list;
 //		}
-		return null;
+		return new ArrayList<>();
 	}
 
 	public static String[] parseAssignment (String html) throws JSONException {

@@ -22,11 +22,13 @@ import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.joda.time.Instant;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 
@@ -42,7 +44,7 @@ public class Student {
 
 	public final int studentId;
 	public final String name;
-	JSONArray classList;
+	private final ArrayList<ClassReport> classList = new ArrayList<>();
 	int[][] gradeSummary;
 
 	private AttendanceData attendanceData;
@@ -69,34 +71,48 @@ public class Student {
 				+ tempName.substring(0, tempName.indexOf(","));
 	}
 
-	public void loadClassList() throws IOException {
-		// FIXME: redo loading class list.
-		String postParams = "{\"studentId\":\"" + studentId + "\"}";
-
-		ArrayList<String[]> requestProperties = new ArrayList<String[]>();
-		requestProperties
-				.add(new String[] { "Content-Type", "application/json" });
-
-		HTTPResponse init = Request
-				.sendPost(
-						"https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/InternetViewerService.ashx/Init?PageUniqueId="
-								+ session.pageUniqueId, session.cookies,
-						requestProperties, true, postParams);
-
-		String response = init.getData();
-		int responseCode = init.getResponseCode();
-
-		try {
-			classList = (new JSONArray(response)).getJSONObject(0)
-					.getJSONArray("classes");
-		} catch (JSONException e) {
-			e.printStackTrace();
-			System.out.println(response);
-		}
+	/**
+	 * Loads a GET request from a specified path and query info
+	 * @param path the path (beginning with a forward slash).
+	 * @param params parameter information to pass as query.
+	 * @throws IOException
+     */
+	private void request(String path, Map<String, String> params) throws IOException {
+		int status = session.checkExpiration();
+		//FIXME: report status code if any.
+		Connection.Response resp = Jsoup.connect(Session.GRADEBOOK_ROOT + path).cookies(session.getCookies()).data(params).execute();
 
 	}
 
-	public ArrayList<Class> getClassList() {
+	public void loadClassList() throws IOException {
+		// FIXME: redo loading class list.
+
+//		String postParams = "{\"studentId\":\"" + studentId + "\"}";
+//
+//		ArrayList<String[]> requestProperties = new ArrayList<String[]>();
+//		requestProperties
+//				.add(new String[] { "Content-Type", "application/json" });
+//
+//		HTTPResponse init = Request
+//				.sendPost(
+//						"https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/InternetViewerService.ashx/Init?PageUniqueId="
+//								+ session.pageUniqueId, session.cookies,
+//						requestProperties, true, postParams);
+//
+//		String response = init.getData();
+//		int responseCode = init.getResponseCode();
+//
+//		try {
+//			classList = (new JSONArray(response)).getJSONObject(0)
+//					.getJSONArray("classes");
+//		} catch (JSONException e) {
+//			e.printStackTrace();
+//			System.out.println(response);
+//		}
+
+	}
+
+	public ArrayList<ClassReport> getClassList() {
 		return classList;
 	}
 
@@ -115,9 +131,8 @@ public class Student {
 	}
 
 	/**
-	 * Uses internet every time.
-	 * 
-	 * @throws org.json.JSONException
+	 * Loads the grade summary for the student.
+	 *
 	 */
 	public int[][] loadGradeSummary() throws JSONException {
 		//FIXME: parse grade summary.
@@ -364,30 +379,12 @@ public class Student {
 					.optJSONObject(termIndex);
 
 		try {
-
 			int termId = getTermIds(classId)[termIndex];
-
 			html = getDetailedReport(classId, termId, studentId);
-
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (JSONException e) {
 			e.printStackTrace();
-		}
-
-		// Parse the teacher name if not already there.
-		try {
-			classList.getJSONObject(classIndex).getString("teacher");
-		} catch (JSONException e) {
-			// Teacher was not found.
-			String[] teacher = Parser.teacher(html);
-			try {
-				classList.getJSONObject(classIndex).put("teacher", teacher[0]);
-				classList.getJSONObject(classIndex).put("teacherEmail",
-						teacher[1]);
-			} catch (JSONException f) {
-				e.printStackTrace();
-			}
 		}
 
 		JSONObject classGrade;
