@@ -18,7 +18,9 @@
 package app.sunstreak.yourpisd;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -85,7 +87,6 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
     static ViewPager mViewPager;
 
     static int studentIndex;
-    static int receivedClassIndex;
     static int classCount;
     static int classesMade = 0;
     static int termNum;
@@ -111,10 +112,13 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
         spinner.setId(R.id.action_bar_spinner);
         spinner.getIndeterminateDrawable().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN);
         toolbar.addView(spinner);
-        receivedClassIndex = getIntent().getExtras().getInt("classIndex");
+
         classCount = getIntent().getExtras().getInt("classCount");
-        termNum = getIntent().getExtras().getInt("termIndex");
+        termNum = getIntent().getExtras().getInt("termNum");
         studentIndex = getIntent().getExtras().getInt("studentIndex");
+
+        int startIndex = 0;
+        int initialClassID = getIntent().getExtras().getInt("classID");
 
         setTitle(TermFinder.Term.values()[termNum].name);
 
@@ -131,6 +135,8 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
             args.putInt(DescriptionFragment.ARG_CLASS_ID, report.getClassID());
             Fragment fragment = new DescriptionFragment();
             fragment.setArguments(args);
+            if (report.getClassID() == initialClassID)
+                startIndex = mFragments.size();
             mFragments.add(fragment);
         }
 
@@ -150,10 +156,7 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
         }
 
         setUpMaterialTabs(names);
-        System.out.println("received class index = " + receivedClassIndex);
-        if (receivedClassIndex > 0 && receivedClassIndex < classesForTerm.size())
-            mViewPager.setCurrentItem(receivedClassIndex);
-        // otherwise, current item is defaulted to 0
+        mViewPager.setCurrentItem(startIndex);
 
 //		mViewPager.setOffscreenPageLimit(5);
 

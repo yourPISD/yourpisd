@@ -18,7 +18,9 @@
 package app.sunstreak.yourpisd;
 
 import java.util.Arrays;
+import java.util.List;
 
+import org.joda.time.DateTime;
 import org.json.JSONArray;
 
 import android.app.ActionBar;
@@ -72,6 +74,7 @@ import android.widget.TextView;
 
 import app.sunstreak.yourpisd.googleutil.SlidingTabLayout;
 import app.sunstreak.yourpisd.net.Session;
+import app.sunstreak.yourpisd.net.data.ClassReport;
 import app.sunstreak.yourpisd.net.data.Student;
 import app.sunstreak.yourpisd.util.DateHelper;
 import app.sunstreak.yourpisd.util.RandomStuff;
@@ -81,13 +84,12 @@ import app.sunstreak.yourpisd.view.MyTextView;
  * MainActivity displays the summary fragments which shows the user their average grade in each
  * class, profile card with gpa, and overall semester averages
  */
-public class MainActivity extends ActionBarActivity implements
-        ActionBar.TabListener {
+public class MainActivity extends ActionBarActivity {
 
     public static final int CURRENT_TERM_INDEX = TermFinder
             .getCurrentTermIndex();
     static int classCount;
-    static RelativeLayout[] averages;
+    static RelativeLayout[] layoutAverages;
     static int[] goals;
     static Session session;
     static Bitmap proPic;
@@ -151,10 +153,7 @@ public class MainActivity extends ActionBarActivity implements
         mSectionsPagerAdapter = new SectionsPagerAdapter(fm);
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
-        /*
-        Deprecated as of 1/13/2015. @Han Li
-         */
-//		setUpTabs();
+
         setUpNavigationDrawer();
         AppRater.app_launched(this);
         mFragments = new YPMainFragment[NUM_FRAGMENTS];
@@ -216,37 +215,13 @@ public class MainActivity extends ActionBarActivity implements
         slidingTabLayout.setViewPager(mViewPager);
     }
 
-    private void setUpTabs() {
-        final ActionBar actionBar = getActionBar();
-
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-        actionBar
-                .addTab(actionBar
-                        .newTab()
-                        .setText(
-                                getResources().getString(
-                                        R.string.main_section_0_title))
-                        .setTabListener(this));
-        actionBar.addTab(actionBar.newTab()
-                .setText(TermFinder.Term.values()[CURRENT_TERM_INDEX].name)
-                .setTabListener(this));
-        actionBar
-                .addTab(actionBar
-                        .newTab()
-                        .setText(
-                                getResources().getString(
-                                        R.string.main_section_2_title))
-                        .setTabListener(this));
-
-    }
-
     private void setUpNavigationDrawer() {
         // navigation drawer
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
         // Set the adapter for the list view
-        mDrawerList.setAdapter(new ArrayAdapter<String>(this,
+        mDrawerList.setAdapter(new ArrayAdapter<>(this,
                 R.layout.drawer_list, mList));
         class DrawerItemClickListener implements ListView.OnItemClickListener {
             @Override
@@ -268,25 +243,6 @@ public class MainActivity extends ActionBarActivity implements
                 GravityCompat.START);
 //		getActionBar().setDisplayHomeAsUpEnabled(true);
 //		getActionBar().setHomeButtonEnabled(true);
-    }
-
-    // fixed tab listener implemented
-    @Override
-    public void onTabReselected(Tab tab, FragmentTransaction ft) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onTabSelected(Tab tab, FragmentTransaction ft) {
-        mViewPager.setCurrentItem(tab.getPosition());
-
-    }
-
-    @Override
-    public void onTabUnselected(Tab tab, FragmentTransaction ft) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -462,9 +418,10 @@ public class MainActivity extends ActionBarActivity implements
     public static class SummaryFragment extends YPMainFragment {
 
         public static final String ARG_SEMESTER_NUM = "semester_number";
+        //TODO: change here.
         public static final String[][] COLUMN_HEADERS = {
-                {"1st", "2nd", "3rd", "Exam", "Avg"},
-                {"4th", "5th", "6th", "Exam", "Avg"}};
+                {"1st", "2nd", "Exam", "Avg"},
+                {"3rd", "4th", "Exam", "Avg"}};
         public static final String[] PAGE_TITLE = {"Fall Semester",
                 "Spring Semester"};
         public static final String[] PAGE_TITLE_SHORT = {"Fall", "Spring"};
@@ -519,86 +476,50 @@ public class MainActivity extends ActionBarActivity implements
             }
 
             bigLayout.addView(weekNames);
-            int[] classMatch = session.getCurrentStudent().getClassMatch();
 
-            // FIXME: Change class-list
-            //JSONArray classList = session.getCurrentStudent().getClassList();
+            final int termOff = ClassReport.SEMESTER_TERMS * semesterNum;
+            List<ClassReport> classList = session.getCurrentStudent().getClassesForTerm(termOff);
 
             // TODO Will break for people who change courses in middle of
             // semester.
-            int realClassIndex = 0;
+            for (ClassReport report : classList) {
+                View classSummary = inflater.inflate(R.layout.main_grade_summary_linear_layout,
+                        bigLayout, false);
+                TextView className = (TextView) classSummary.findViewById(R.id.class_name);
+                LinearLayout summary = (LinearLayout) classSummary.findViewById(R.id.layout_six_weeks_summary);
 
-            for (int classIndex = 0; classIndex < classCount; classIndex++) {
+                className.setText(report.getCourseName());
 
-                if (!session.getCurrentStudent().hasClassDuringSemester(
-                        classIndex, semesterNum))
-                    continue;
 
-                int jsonIndex = classMatch[classIndex];
-                View classSummary = inflater.inflate(
-                        R.layout.main_grade_summary_linear_layout, bigLayout,
-                        false);
-                TextView className = (TextView) classSummary
-                        .findViewById(R.id.class_name);
-                className.setText(session.getStudents()
-                        .get(session.studentIndex).getClassName(jsonIndex));
-
-                LinearLayout summary = (LinearLayout) classSummary
-                        .findViewById(R.id.layout_six_weeks_summary);
-
-                for (int termIndex = 4 * semesterNum; termIndex < 4 + 4 * semesterNum; termIndex++) {
-
+                for (int term = 0; term < ClassReport.SEMESTER_TERMS; term++) {
                     TextView termGrade = new MyTextView(getActivity());
                     termGrade.setTextSize(getResources().getDimension(
                             R.dimen.text_size_grade_overview_score));
                     termGrade.setClickable(true);
-
                     LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
                             ViewGroup.LayoutParams.WRAP_CONTENT,
                             ViewGroup.LayoutParams.WRAP_CONTENT,
                             1f);
                     termGrade.setTextSize(29);
-
                     termGrade.setLayoutParams(llp);
 
-                    int avg;
-                    JSONArray terms = classList.optJSONObject(jsonIndex)
-                            .optJSONArray("terms");
-                    if (terms.length() <= 4)
-                        avg = terms.optJSONObject(termIndex % 4).optInt(
-                                "average", -1);
-                    else
-                        avg = terms.optJSONObject(termIndex).optInt("average",
-                                -1);
+                    //TODO: do the following procedure for canceled classes, and no more.
+//                    termGrade.setBackgroundColor(getResources().getColor(
+//                            R.color.disabledCell));
+//                    termGrade.setClickable(false);
+                    int avg = -1;
+                    if (!report.isClassDisabledAtTerm(term + termOff))
+                        avg = report.getTerm(term + termOff).getGrade();
 
-                    if (avg == Student.CLASS_DISABLED_DURING_TERM) {
-                        termGrade.setBackgroundColor(getResources().getColor(
-                                R.color.disabledCell));
-                        termGrade.setClickable(false);
-                    } else {
-                        termGrade
-                                .setOnClickListener(new ClassSwipeOpenerListener(
-                                        session.studentIndex, realClassIndex,
-                                        termIndex));
-
-                        if (avg != -1)
-                            termGrade.setText(avg + "");
-                    }
-
+                    termGrade.setOnClickListener(new ClassSwipeOpenerListener(
+                            session.studentIndex, report.getClassID(), term));
+                    termGrade.setText(avg == -1 ? "" : avg + "");
                     termGrade.setGravity(Gravity.CENTER);
                     summary.addView(termGrade);
-
                 }
 
-                // Display the average.
-                int average;
-                if (semesterNum == 0)
-                    average = classList.optJSONObject(jsonIndex).optInt(
-                            "firstSemesterAverage", -1);
-                else
-                    average = classList.optJSONObject(jsonIndex).optInt(
-                            "secondSemesterAverage", -1);
-
+                // Display the sememster average.
+                int average = report.calculateAverage(semesterNum == 0);
                 if (average != -1) {
                     String averageText = Integer.toString(average);
 
@@ -617,10 +538,9 @@ public class MainActivity extends ActionBarActivity implements
 
                     summary.addView(averageGrade);
                 }
+
                 summary.setPadding(5, 0, 5, 0);
                 bigLayout.addView(classSummary);
-                realClassIndex++;
-
             }
             Button toggleSemester = new Button(getActivity());
 
@@ -689,13 +609,13 @@ public class MainActivity extends ActionBarActivity implements
         class ClassSwipeOpenerListener implements OnClickListener {
 
             int studentIndex;
-            int classIndex;
+            int classID;
             int termIndex;
 
-            ClassSwipeOpenerListener(int studentIndex, int classIndex,
+            ClassSwipeOpenerListener(int studentIndex, int classID,
                                      int termIndex) {
                 this.studentIndex = studentIndex;
-                this.classIndex = classIndex;
+                this.classID = classID;
                 this.termIndex = termIndex;
             }
 
@@ -705,8 +625,8 @@ public class MainActivity extends ActionBarActivity implements
                         ClassSwipeActivity.class);
                 intent.putExtra("studentIndex", this.studentIndex);
                 intent.putExtra("classCount", classCount);
-                intent.putExtra("classIndex", this.classIndex);
-                intent.putExtra("termIndex", this.termIndex);
+                intent.putExtra("classID", this.classID);
+                intent.putExtra("termNum", this.termIndex);
                 startActivity(intent);
             }
         }
@@ -873,6 +793,7 @@ public class MainActivity extends ActionBarActivity implements
         public static final String ARG_OBJECT = "object";
         private View rootView;
         private int position;
+        private int termNum = CURRENT_TERM_INDEX;
         LinearLayout[] profileCards;
         private boolean pictureNotLoaded = true;
 
@@ -1150,76 +1071,45 @@ public class MainActivity extends ActionBarActivity implements
                     bigLayout.addView(studentName);
                 }
 
-                int[] classMatch = session.getCurrentStudent().getClassMatch();
-
-                classCount = classMatch.length;
+                List<ClassReport> classList = session.getCurrentStudent().getClassesForTerm(termNum);
+                classCount = classList.size();
                 goals = new int[classCount];
                 Arrays.fill(goals, -1);
+                layoutAverages = new RelativeLayout[classCount];
 
-                averages = new RelativeLayout[classCount];
+                for (int i = 0; i < classCount; i++) {
+                    ClassReport report = classList.get(i);
 
-
-                JSONArray classList = session.getCurrentStudent()
-                        .getClassList();
-
-                int realClassIndex = 0;
-
-                for (int classIndex = 0; classIndex < classCount; classIndex++) {
-
-                    // Skip classes that don't exist in Semester 1 [Spring
-                    // Semester]
-                    if (!session.getCurrentStudent().hasClassDuringSemester(
-                            classIndex, 1))
+                    // Skip classes that don't exist in current term.
+                    // TODO: check if above comment is correct
+                    if (report.isClassDisabledAtTerm(termNum))
                         continue;
 
-                    int jsonIndex = classMatch[classIndex];
-
-                    averages[classIndex] = (RelativeLayout) inflater.inflate(
+                    layoutAverages[i] = (RelativeLayout) inflater.inflate(
                             R.layout.main_grade_summary, bigLayout, false);
-                    TextView className = (TextView) averages[classIndex]
-                            .findViewById(R.id.name);
-                    String name = session.getStudents()
-                            .get(session.studentIndex).getClassName(jsonIndex);
-                    className.setText(name);
+                    TextView className = (TextView) layoutAverages[i].findViewById(R.id.name);
+                    className.setText(report.getCourseName());
 
-                    // For 2nd-semester-only classes whose 3rd ninth weeks is
-                    // located as position 0
-                    int avg;
-                    if (classList.optJSONObject(jsonIndex)
-                            .optJSONArray("terms").length() <= 3)
-                        avg = classList.optJSONObject(jsonIndex)
-                                .optJSONArray("terms")
-                                .optJSONObject(CURRENT_TERM_INDEX % 3)
-                                .optInt("average", -1);
-                    else
-                        //TODO: Change classList to be a class, not a JSON object!!!!
-                        avg = classList.optJSONObject(jsonIndex)
-                                .optJSONArray("terms")
-                                .optJSONObject(CURRENT_TERM_INDEX)
-                                .optInt("average", -1);
+                    int avg = report.calculateAverage(termNum < ClassReport.SEMESTER_TERMS);
 
                     // Only set the grade text if the average is not empty
                     if (avg != Student.NO_GRADES_ENTERED) {
                         String average = avg + "";
-                        TextView grade = (TextView) averages[classIndex]
+                        TextView grade = (TextView) layoutAverages[i]
                                 .findViewById(R.id.grade);
                         grade.setText(average);
                     }
 
-                    averages[classIndex]
-                            .setOnClickListener(new ClassSwipeOpenerListener(
-                                    session.studentIndex, realClassIndex++,
+                    layoutAverages[i].setOnClickListener(new ClassSwipeOpenerListener(
+                                    session.studentIndex, i,
                                     CURRENT_TERM_INDEX));
 
-                    bigLayout.addView(averages[classIndex]);
+                    bigLayout.addView(layoutAverages[i]);
                 }
 
                 //TODO: Extract or use current date.
                 TextView summaryLastUpdated = new MyTextView(getActivity());
-                String lastUpdatedString = DateHelper.timeSince(session
-                        .getCurrentStudent().getClassList().optJSONObject(0)
-                        .optLong("summaryLastUpdated"));
-                summaryLastUpdated.setText(lastUpdatedString);
+                summaryLastUpdated.setText(DateHelper.timeSince(new DateTime()));
                 summaryLastUpdated.setPadding(10, 0, 0, 0);
                 bigLayout.addView(summaryLastUpdated);
 
@@ -1318,22 +1208,6 @@ public class MainActivity extends ActionBarActivity implements
     public void refresh() {
         this.mSectionsPagerAdapter.notifyDataSetChanged();
         invalidateOptionsMenu();
-    }
-
-    public int screenHeight() {
-        WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        return size.x;
-    }
-
-    public int screenWidth() {
-        WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        return size.y;
     }
 
     class StudentChooserListener implements OnMenuItemClickListener {

@@ -18,6 +18,7 @@ public class TermReport {
     private final Student student;
     private final ClassReport classGrades;
     private final int termID;
+    private final boolean exam;
     private int grade = -1;
     private ArrayList<GradeCategory> categories = new ArrayList<>();
     private ArrayList<Assignment> assignments = new ArrayList<>();
@@ -25,10 +26,11 @@ public class TermReport {
     private GregorianCalendar lastUpdate; //Time when we last update the detailed assignments
     private GregorianCalendar updateTime; //Time when we will need to update details again.
 
-    public TermReport(Student student, ClassReport classGrades, int termID) {
+    public TermReport(Student student, ClassReport classGrades, int termID, boolean exam) {
         this.student = student;
         this.classGrades = classGrades;
         this.termID = termID;
+        this.exam = exam;
     }
 
     public void loadReport(Session session) throws IOException {
@@ -45,6 +47,11 @@ public class TermReport {
             now.add(Calendar.HOUR, 1);
             updateTime = now;
         }
+    }
+
+    public boolean isExam()
+    {
+        return exam;
     }
 
     public List<GradeCategory> getCategories()

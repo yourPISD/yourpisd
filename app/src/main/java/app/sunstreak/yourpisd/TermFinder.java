@@ -29,10 +29,10 @@ public class TermFinder {
 	public enum Term {
 		TERM_0 ("1st Nine Weeks", "8/22/2016","10/14/2016"),
 		TERM_1 ("2nd Nine Weeks", "10/14/2016", "12/15/2016"),
-		TERM_3 ("1st Semester Exam", "12/15/2016", "1/3/2017"),
-		TERM_4 ("3rd Nine Weeks", "1/3/2017", "3/21/2017"),
-		TERM_5 ("4th Nine Weeks", "3/21/2017", "6/1/2017"),
-		TERM_7 ("2nd Semester Exam", "6/1/2017", "6/2/2017");
+		TERM_2 ("1st Semester Exam", "12/15/2016", "1/3/2017"),
+		TERM_3 ("3rd Nine Weeks", "1/3/2017", "3/21/2017"),
+		TERM_4 ("4th Nine Weeks", "3/21/2017", "6/1/2017"),
+		TERM_5 ("2nd Semester Exam", "6/1/2017", "6/2/2017");
 		
 		public final String name;
 		public Date startDate;

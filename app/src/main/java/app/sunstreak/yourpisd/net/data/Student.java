@@ -89,7 +89,7 @@ public class Student {
 
 	}
 
-	public ArrayList<ClassReport> getClassList() {
+	public List<ClassReport> getClassList() {
 		return classList;
 	}
 
@@ -130,122 +130,6 @@ public class Student {
 		return null;
 	}
 
-	public boolean hasGradeSummary() {
-		return classList.optJSONObject(0).optLong("summaryLastUpdated", -1) != -1;
-	}
-
-	// public int[][] getGradeSummary () {
-	//
-	// if (!hasGradeSummary())
-	// try {
-	// loadGradeSummary();
-	// } catch (JSONException e) {
-	// return null;
-	// }
-	// return gradeSummary;
-	// }
-
-	public boolean hasClassDuringSemester(int classIndex, int semesterIndex) {
-		if (gradeSummary == null)
-			throw new RuntimeException("Grade summary is null. "
-					+ "Operation hasClassDuringSemester() not allowed.");
-		// much cryptic. so obfuscate. sorry, i'll clean it up later
-		for (int i = 4 * semesterIndex + semesterIndex; i < 4 * semesterIndex + 4; i++)
-			if (gradeSummary[classIndex][i + 1] != CLASS_DISABLED_DURING_TERM)
-				return true;
-		return false;
-	}
-
-	public boolean hasClassGrade(int classIndex, int termIndex)
-			throws JSONException {
-
-		int termIndexOffset = 0;
-		if (gradeSummary[classIndex][3] == CLASS_DISABLED_DURING_TERM)
-			termIndexOffset = 4;
-
-		termIndex -= termIndexOffset;
-
-		if (classGrades.indexOfKey(classIndex) < 0)
-			return false;
-
-		JSONObject classGrade = classGrades.get(classIndex);
-		JSONArray terms = classGrade.getJSONArray("terms");
-		JSONObject term = terms.getJSONObject(termIndex);
-		long lastUpdated = term.optLong("lastUpdated", -1);
-
-		return lastUpdated != -1;
-	}
-
-//	public JSONObject getClassGrade(int classIndex, int termIndex)
-//			throws JSONException {
-//
-//		String html = "";
-//
-//		int classId = gradeSummary[classIndex][0];
-//		int termIndexOffset = 0;
-//		if (gradeSummary[classIndex][3] == CLASS_DISABLED_DURING_TERM)
-//			termIndexOffset = 4;
-//
-//		termIndex -= termIndexOffset;
-//
-//		if (hasClassGrade(classIndex, termIndex + termIndexOffset))
-//			return classGrades.get(classIndex).optJSONArray("terms")
-//					.optJSONObject(termIndex);
-//
-//		try {
-//			TermReport term = getTerm(classId,termIndex);
-//			//FIXME: calc detailed report here.
-//			html = getDetailedReport(classId, termId, studentId);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		} catch (JSONException e) {
-//			e.printStackTrace();
-//		}
-//
-//		JSONObject classGrade;
-//
-//		try {
-//			classGrade = new JSONObject(classList.getJSONObject(
-//					getClassMatch()[classIndex]).toString());
-//
-//			JSONArray termGrades = Parser.detailedReport(html);
-//			Object[] termCategory = Parser.termCategoryGrades(html);
-//
-//			JSONArray termCategoryGrades = (JSONArray) termCategory[0];
-//			if ((Integer) termCategory[1] != -1)
-//				classGrade.getJSONArray("terms").getJSONObject(termIndex)
-//						.put("average", termCategory[1]);
-//
-//			classGrade.getJSONArray("terms").getJSONObject(termIndex)
-//					.put("grades", termGrades);
-//			classGrade.getJSONArray("terms").getJSONObject(termIndex)
-//					.put("categoryGrades", termCategoryGrades);
-//
-//			Instant in = new Instant();
-//			// String time = in.toString();
-//			// System.out.println(time);
-//			classGrade.getJSONArray("terms").getJSONObject(termIndex)
-//					.put("lastUpdated", in.getMillis());
-//			// classGrade.getJSONArray("terms").getJSONObject(termIndex).put("lastUpdated",
-//			// "0");
-//
-//			// System.out.println("cg= " + classGrade);
-//
-//			if (classGrades.indexOfKey(classIndex) < 0)
-//				classGrades.put(classIndex, classGrade);
-//
-//			return classGrade.getJSONArray("terms").getJSONObject(termIndex);
-//
-//		} catch (JSONException e) {
-//			System.err.println("Error: Class index = " + classIndex
-//					+ "; JSON index = " + getClassMatch()[classIndex]
-//					+ "; TermReport index = " + termIndex + ".");
-//			e.printStackTrace();
-//			return null;
-//		}
-//
-//	}
-
 	public String getClassName(int classIndex) {
 		if (classList == null)
 			return "null";
@@ -257,13 +141,6 @@ public class Student {
 				e.printStackTrace();
 				return "jsonException";
 			}
-	}
-
-	public String getShortClassName(int classIndex) {
-		String name = getClassName(classIndex);
-		if (name.indexOf('(') != -1)
-			return name.substring(0, name.indexOf('('));
-		return name;
 	}
 
 	private void loadStudentPicture() {
@@ -284,10 +161,6 @@ public class Student {
 			loadStudentPicture();
 
 		return studentPictureBitmap;
-	}
-
-	public int[] getClassMatch() {
-		return classMatch;
 	}
 
 	public double getCumulativeGPA(float oldCumulativeGPA, float numCredits) {
