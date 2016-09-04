@@ -32,9 +32,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import app.sunstreak.yourpisd.net.data.ClassReport;
+import app.sunstreak.yourpisd.net.data.ParseException;
+import app.sunstreak.yourpisd.net.data.Student;
+import app.sunstreak.yourpisd.net.data.TermReport;
 
 
 public class Parser {
@@ -116,147 +121,16 @@ public class Parser {
 		throw new RuntimeException ("Student ID not found. Cookies: " + cookies.toString());
 	}
 
-	public static JSONArray detailedReport (String html) throws JSONException {
-		Element doc = Jsoup.parse(html);
-		//		System.out.println(html);
-		Element assignments = doc.getElementsByAttributeValue("id", "Assignments").get(0);
-		Elements tableRows = assignments.getElementsByTag("tbody").get(0).getElementsByTag("tr");
-
-		JSONArray grades = new JSONArray();
-
-		for (Element tr : tableRows) {
-			JSONObject assignment = new JSONObject();
-
-			Elements columns = tr.getElementsByTag("td");
-
-			for (int i = 0; i < columns.size(); i++) {
-				String value = columns.get(i).text();
-				// do not store empty values!
-				if (value.equals(""))
-					continue;
-				// first try to cast as int.
-				try {
-					assignment.putOpt(assignmentTableHeader(i), Integer.parseInt(value));
-					// if not int, try double
-				} catch (NumberFormatException e) {
-					try {
-						assignment.putOpt(assignmentTableHeader(i), Double.parseDouble(value));
-						// if not double, use string
-					} catch (NumberFormatException f) {
-						assignment.putOpt(assignmentTableHeader(i), value);
-					}
-				}
-			}
-
-			String assignmentDetailLink = tr.getElementsByTag("a").get(0).attr("href");
-			Matcher matcher = Pattern.compile(".+" +
-					"assignmentId=(\\d+)" +
-					"&H=S" +
-					"&GradebookId=(\\d+)" +
-					"&TermId=\\d+" +
-					"&StudentId=\\d+&")
-					.matcher(assignmentDetailLink);
-			matcher.find();
-			int assignmentId = Integer.parseInt(matcher.group(1));
-			int gradebookId = Integer.parseInt(matcher.group(2));
-			assignment.put("assignmentId", assignmentId);
-			assignment.put("gradebookId", gradebookId);
-			grades.put(assignment);
-		}
-		//		System.out.println((grades));
-		return grades;
-	}
-
 	/**
-	 * Reads assignment view page and returns teacher name.
-	 * 
-	 * Parses from this table:
-	 * 
-	 * <table id='classStandardInfo'> <tbody> <tr>  
-	 * <td>       <div class='classInfoHeader'>Kapur, Sidharth (226344)</div>2013-08-29   <td>    
-	 * <table>    
-	 * 		<tr>      <th style='width:1%'>Course:</th>      <td><a href='javascript:ClassDetails.getClassDetails(2976981);' id='ClassTitle'>CHEM  AP(00)</a></td></tr>    
-	 * 		<tr>      <th>Term:</th>      <td>1st Six Weeks</td>     </tr>
-	 * 		<tr>      <th>Teacher:</th>      <td><a href="mailto:Nicole.Lyssy@pisd.edu" title="Nicole.Lyssy@pisd.edu">Lyssy, Carol</a></td>     </tr>
-	 * </table>
-	 * <td>  </tr> </tbody></table>
-	 */
-	public static String[] teacher (String html)  {
-		Element doc = Jsoup.parse(html);
-		Element classStandardInfo = doc.getElementById("classStandardInfo");
-		// teacher is the third row in this table
-		Element teacher = classStandardInfo.getElementsByTag("table").get(0).getElementsByTag("tr").get(3).getElementsByTag("td").get(0);
-		//		System.out.println(teacher);
-		String email = "";
-		try {
-			email = teacher.getElementsByTag("a").get(0).attr("title");
-		} catch (IndexOutOfBoundsException e) {
-			// Senior release teacher have NO email. The <a> tag does not exist.
-		}
-		String teacherName = teacher.text();
-		return new String[] {teacherName, email};
-	}
-
-	public static Map<String, String> parseHiddenFields(String html) throws UnsupportedEncodingException{
-		Pattern hiddenField = Pattern.compile(
-				"<input type=\"hidden\" name=\"([A-Za-z0-9_/+=]+)\" id=\"[A-Za-z0-9_/+=]+\" value=\"([A-Za-z0-9_/+=]+)\"",
-				Pattern.CASE_INSENSITIVE);
-		Matcher matches = hiddenField.matcher(html);
-		Map<String, String> values = new HashMap<>();
-
-		while (matches.find())
-		{
-			values.put(URLEncoder.encode(matches.group(1), "UTF-8"),
-					URLEncoder.encode(matches.group(2), "UTF-8"));
-		}
-		return values;
-	}
-
-	public static Object[] termCategoryGrades (String html) throws JSONException {
-		JSONArray termCategoryGrades = new JSONArray();
-
-		Element doc = Jsoup.parse(html);
-		Element categoryTable = doc.getElementById("Category");
-		Elements rows = categoryTable.getElementsByTag("tbody").get(0).getElementsByTag("tr");
-
-
-
-		for (Element row : rows) {
-			JSONObject category = new JSONObject();
-			Elements columns = row.getElementsByTag("td");
-			for (int i = 0; i < columns.size(); i++) {
-
-				String value = columns.get(i).text();
-				// do not store empty values!
-				if (value.equals(""))
-					continue;
-				// first try to cast as int.
-				try {
-					category.putOpt(categoryTableHeader(i), Integer.parseInt(value));
-					// if not int, try double
-				} catch (NumberFormatException e) {
-					try {
-						category.putOpt(categoryTableHeader(i), Double.parseDouble(value));
-						// if not double, use string
-					} catch (NumberFormatException f) {
-						category.putOpt(categoryTableHeader(i), value);
-					}
-				}
-			}
-			termCategoryGrades.put(category);
-
-		}
-
-		// The average for the six weeks is 
-		int average = -1;
-		try {
-			Element finalGrade = doc.getElementById("finalGrade");
-			average = Integer.parseInt(finalGrade.getElementsByTag("td").get(3).text());
-		} catch (NullPointerException e) {
-			// Let average be -1
-		}
-
-		return new Object[] {termCategoryGrades, average};
+	 * Parses the term report (assignments for a class during a grading period).
+	 *
+	 * @param html text of detailed report
+	 * @param report the TermReport object to store the data into.
+     */
+	@NonNull
+	public static void parseTermReport(String html, TermReport report)
+	{
+		//TODO: parsing logic here..
 	}
 
 	/*
@@ -306,78 +180,17 @@ public class Parser {
 	}
 
 	/** Parses average of each term from GradeSummary.aspx.
-	 * NOTICE: Does not work for second semester classes in which the second semester schedule
-	 *  is different from the first semester schedule.
 	 * 
-	 * @param html source of GradeSummary.aspx
-	 * @param classList classList as returned by Init.aspx
-	 * @throws org.json.JSONException
-	 * @return 	 [
-	 * 		[classId, avg0, avg1, ...],
-	 * 		[classId, avg0, avg1, ...],
-	 * ]
+	 * @param html the html body of GradeSummary.aspx
+	 * @return a list of class reports
+	 * @throws ParseException if the html does not match expected format.
 	 */
-	public static int[][] gradeSummary (String html, JSONArray classList) {
-		Element doc = Jsoup.parse(html);
-		return gradeSummary(doc, classList);
-	}
-
-	/** Parses average of each term from GradeSummary.aspx.
-	 * NOTICE: Does not work for second semester classes in which the second semester schedule
-	 *  is different from the first semester schedule.
-	 * 
-	 * @param doc the Jsoup element of GradeSummary.aspx
-	 * @param classList classList as returned by Init.aspx
-	 * @throws org.json.JSONException
-	 * @return 	 [
-	 * 		[classId, avg0, avg1, ...],
-	 * 		[classId, avg0, avg1, ...],
-	 * ]
-	 */
-	public static int[][] gradeSummary (Element doc, JSONArray classList) {
-
-		List<int[]> gradeSummary = new ArrayList<int[]>();
-
-		Element reportTable = doc.getElementsByClass("reportTable").get(0).getElementsByTag("tbody").get(0);
-		Elements rows = reportTable.getElementsByTag("tr");
-		int rowIndex = 0;
-
-		while (rowIndex < rows.size() ) {
-
-			int[] classAverages = new int[11];
-			Arrays.fill(classAverages, -3);
-
-			Element row = rows.get(rowIndex);
-			Elements columns = row.getElementsByTag("td");
-
-			classAverages[0] = getClassId(row);
-
-			for (int col = 0; col < 10; col++) {
-				Element column = columns.get(col);
-				String text = column.text();
-
-				// -2 for disabled class
-				if (column.attr("class").equals("disabledCell"))
-					text = "-2";
-				classAverages[col+1] = text.equals("") ? -1 : Integer.parseInt(text);
-			}
-			gradeSummary.add( classAverages );
-			rowIndex++;
-		}
-
-		/*
-		 * [
-		 * 		[classId, avg0, avg1, ...],
-		 * 		[classId, avg0, avg1, ...],
-		 * ]
-		 */
-		int[][] result = new int[gradeSummary.size()][];
-		for (int i = 0; i < result.length; i++) {
-			result[i] = new int[gradeSummary.get(i).length];
-			for (int j = 0; j < result[i].length; j++)
-				result[i][j] = gradeSummary.get(i)[j];
-		}
-		return result;
+	@NonNull
+	public static List<ClassReport> parseGradeSummary(String html) throws ParseException{
+		Document doc = Jsoup.parse(html);
+		List<ClassReport> classes = new ArrayList<>();
+		//TODO: parse grade summary
+		return classes;
 	}
 
 	/**
@@ -445,24 +258,6 @@ public class Parser {
 		return new ArrayList<>();
 	}
 
-	public static String[] parseAssignment (String html) throws JSONException {
-		//Debug code
-		/*
-		Element doc = Jsoup.parse(html);
-		System.out.println(doc);
-		Element assignment = doc.getElementById("Assignment");
-		System.out.println(assignment);
-		Elements tds = assignment.getElementsByTag("td");
-		System.out.println(tds);
-		 */
-		Elements tds = Jsoup.parse(html).getElementById("Assignment").getElementsByTag("td");
-		//		JSONObject ass = new JSONObject();
-		//		ass.put("assignedDate", tds.get(3).text());
-		//		ass.put("dueDate", tds.get(5).text());
-		//		ass.put("weight", tds.get(9).text());
-		//	{assignedDate, dueDate, weight}
-		return new String[] {tds.get(3).text(), tds.get(5).text(), tds.get(9).text()};
-	}
 
 
 	public static String toTitleCase (String str) {

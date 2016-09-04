@@ -15,26 +15,23 @@
  *  along with yourPISD.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package app.sunstreak.yourpisd.net;
+package app.sunstreak.yourpisd.net.data;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import org.joda.time.Instant;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Element;
 
 import android.graphics.Bitmap;
-import android.util.SparseArray;
 
+import app.sunstreak.yourpisd.net.AttendanceData;
+import app.sunstreak.yourpisd.net.Parser;
+import app.sunstreak.yourpisd.net.Session;
 import app.sunstreak.yourpisd.util.HTTPResponse;
 import app.sunstreak.yourpisd.util.Request;
 
@@ -45,15 +42,9 @@ public class Student {
 	public final int studentId;
 	public final String name;
 	private final ArrayList<ClassReport> classList = new ArrayList<>();
-	int[][] gradeSummary;
 
 	private AttendanceData attendanceData;
 
-	int[] classIds;
-	int[] classMatch;
-	SparseArray<JSONObject> classGrades = new SparseArray<JSONObject>();
-	// Map<Integer[], JSONObject> classGrades = new HashMap<Integer[],
-	// JSONObject>();
 	Bitmap studentPictureBitmap;
 
 	public static final int CLASS_DISABLED_DURING_TERM = -2;
@@ -65,23 +56,9 @@ public class Student {
 		this.session = session;
 
 		this.studentId = studentId;
-		String tempName = studentName;
-		name = tempName.substring(tempName.indexOf(",") + 2,
-				tempName.indexOf("("))
-				+ tempName.substring(0, tempName.indexOf(","));
-	}
-
-	/**
-	 * Loads a GET request from a specified path and query info
-	 * @param path the path (beginning with a forward slash).
-	 * @param params parameter information to pass as query.
-	 * @throws IOException
-     */
-	private void request(String path, Map<String, String> params) throws IOException {
-		int status = session.checkExpiration();
-		//FIXME: report status code if any.
-		Connection.Response resp = Jsoup.connect(Session.GRADEBOOK_ROOT + path).cookies(session.getCookies()).data(params).execute();
-
+		name = studentName.substring(studentName.indexOf(",") + 2,
+				studentName.indexOf("("))
+				+ studentName.substring(0, studentName.indexOf(","));
 	}
 
 	public void loadClassList() throws IOException {
@@ -116,204 +93,41 @@ public class Student {
 		return classList;
 	}
 
-	public List<Integer> getClassesForTerm(int termIndex) {
-		List<Integer> classesForTerm = new ArrayList<Integer>();
-		if (gradeSummary == null)
+	public List<ClassReport> getClassesForTerm(int termNum) {
+		List<ClassReport> classesForTerm = new ArrayList<>();
+		if (classList.isEmpty())
 			throw new RuntimeException("Grade Summary has not been fetched.");
 
-		for (int classIndex = 0; classIndex < gradeSummary.length; classIndex++) {
-			// System.out.println(Arrays.toString(gradeSummary[classIndex]));
-			int termLocation = termIndex < 4 ? termIndex + 1 : termIndex + 2;
-			if (gradeSummary[classIndex][termLocation] != CLASS_DISABLED_DURING_TERM)
-				classesForTerm.add(classIndex);
+		for (ClassReport report : classList) {
+			if (!report.isClassDisabledAtTerm(termNum))
+				classesForTerm.add(report);
 		}
 		return classesForTerm;
 	}
 
 	/**
 	 * Loads the grade summary for the student.
-	 *
 	 */
-	public int[][] loadGradeSummary() throws JSONException {
-		//FIXME: parse grade summary.
-		return null;
-//		try {
-//			String classId = ""
-//					+ classList.getJSONObject(0).getInt("enrollmentId");
-//			String termId = ""
-//					+ classList.getJSONObject(0).getJSONArray("terms")
-//							.getJSONObject(0).getInt("termId");
-//
-//			String url = "https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/GradeSummary.aspx?"
-//					+ "&EnrollmentId="
-//					+ classId
-//					+ "&TermId="
-//					+ termId
-//					+ "&ReportType=0&StudentId=" + studentId;
-//
-//			HTTPResponse summary = Request.sendGet(url, session.cookies);
-//			String response = summary.getData();
-//			int responseCode = summary.getResponseCode();
-//
-//			if (responseCode != 200)
-//				System.out.println("Response code: " + responseCode);
-//
-//			/*
-//			 * puts averages in classList, under each term.
-//			 */
-//			Element doc = Jsoup.parse(response);
-//			gradeSummary = Parser.gradeSummary(doc, classList);
-//
-//			matchClasses(gradeSummary);
-//
-//			for (int classIndex = 0; classIndex < gradeSummary.length; classIndex++) {
-//				int jsonIndex = classMatch[classIndex];
-//				JSONArray terms = classList.getJSONObject(jsonIndex)
-//						.getJSONArray("terms");
-//
-//				int firstTermIndex = 0;
-//				int lastTermIndex = 0;
-//
-//				if (terms.length() == 8) {
-//					// Full year course
-//					firstTermIndex = 0;
-//					lastTermIndex = 7;
-//				} else if (terms.length() == 4) {
-//					if (terms.optJSONObject(0).optString("description")
-//							.equals("1st Six Weeks")) {
-//						// First semester course
-//						firstTermIndex = 0;
-//						lastTermIndex = 3;
-//					} else {
-//						// Second semester course
-//						firstTermIndex = 4;
-//						lastTermIndex = 7;
-//					}
-//				}
-//
-//				for (int termIndex = firstTermIndex; termIndex <= lastTermIndex; termIndex++) {
-//					int arrayLocation = termIndex > 3 ? termIndex + 2
-//							: termIndex + 1;
-//					int average = gradeSummary[classIndex][arrayLocation];
-//					if (average != NO_GRADES_ENTERED)
-//						classList.getJSONObject(jsonIndex)
-//								.getJSONArray("terms")
-//								.getJSONObject(termIndex - firstTermIndex)
-//								.put("average", average);
-//				}
-//
-//				classList.getJSONObject(jsonIndex).put("firstSemesterAverage",
-//						gradeSummary[classIndex][5]);
-//				classList.getJSONObject(jsonIndex).put("secondSemesterAverage",
-//						gradeSummary[classIndex][10]);
-//			}
-//
-//			// Last updated time of summary --> goes in this awkward place
-//			classList.getJSONObject(0).put("summaryLastUpdated",
-//					new Instant().getMillis());
-//
-//			return gradeSummary;
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//			return null;
-//		} catch (JSONException e) {
-//			e.printStackTrace();
-//			return null;
-//		}
+	public void loadGradeSummary() {
+		//FIXME: parse grade summary and put it in classList
 	}
 
-	public int[] getClassIds() {
-		if (classIds != null)
-			return classIds;
-
-		if (classList == null) {
-			System.err.println("You didn't login!");
-			return classIds;
-		}
-		try {
-			classIds = new int[classList.length()];
-			for (int i = 0; i < classList.length(); i++) {
-				classIds[i] = classList.getJSONObject(i).getInt("classId");
-			}
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		return classIds;
+	public TermReport getTerm(int classID, int termNum) throws JSONException {
+		ClassReport report = getClassReport(classID);
+		if (report != null)
+			return report.getTerm(termNum);
+		else
+			return null;
 	}
 
-	//
-	public int[] getTermIds(int classId) throws JSONException {
-		for (int i = 0; i < classList.length(); i++) {
-			if (classList.getJSONObject(i).getInt("classId") == classId) {
-				JSONArray terms = classList.getJSONObject(i).getJSONArray(
-						"terms");
-				int[] termIds = new int[terms.length()];
-				for (int j = 0; j < terms.length(); j++) {
-					termIds[j] = terms.getJSONObject(j).getInt("termId");
-				}
-				return termIds;
-			}
+	public ClassReport getClassReport(int classID) {
+		for (ClassReport report : classList) {
+			if (report.getClassID() == classID)
+				return report;
 		}
+
 		// if class not found.
 		return null;
-	}
-
-	public int getTermCount(int index) throws JSONException {
-		return classList.getJSONObject(index).getJSONArray("terms").length();
-	}
-
-	private String getDetailedReport(int classId, int termId, int studentId)
-			throws MalformedURLException, IOException {
-
-		String url = "https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/StudentAssignments.aspx?"
-				+ "&EnrollmentId="
-				+ classId
-				+ "&TermId="
-				+ termId
-				+ "&ReportType=0&StudentId=" + studentId;
-
-		HTTPResponse report = Request.sendGet(url, session.cookies);
-		String response = report.getData();
-		int responseCode = report.getResponseCode();
-
-		if (responseCode != 200) {
-			System.out.println("Response code: " + responseCode);
-		}
-		return response;
-	}
-
-	public String[] getAssignmentDetails(int classIndex, int termIndex,
-			int assignmentId) throws MalformedURLException, IOException,
-			JSONException {
-
-		// System.out.println(classList.getJSONObject(classMatch[classIndex]));
-
-		// TODO This is hardcoded and messy!
-		// Takes care of second semester classes that for some reason
-		// don't have a term index of 4-8, perhaps because they didn't
-		// exist in the fall semester.
-		if (classList.getJSONObject(classMatch[classIndex])
-				.getJSONArray("terms").length() <= termIndex)
-			termIndex -= 4;
-
-		HTTPResponse details = Request
-				.sendGet(
-						"https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/AssignmentDetail.aspx?"
-								+ "assignmentId="
-								+ assignmentId
-								+ "&H="
-								+ session.domain.hValue
-								+ "&GradebookId="
-								+ studentId
-								+ "&TermId="
-								+ classList
-										.getJSONObject(classMatch[classIndex])
-										.getJSONArray("terms")
-										.getJSONObject(termIndex)
-										.getInt("termId")
-								+ "&StudentId="
-								+ studentId + "&", session.cookies);
-		return Parser.parseAssignment(details.getData());
 	}
 
 	public boolean hasGradeSummary() {
@@ -362,74 +176,75 @@ public class Student {
 		return lastUpdated != -1;
 	}
 
-	public JSONObject getClassGrade(int classIndex, int termIndex)
-			throws JSONException {
-
-		String html = "";
-
-		int classId = gradeSummary[classIndex][0];
-		int termIndexOffset = 0;
-		if (gradeSummary[classIndex][3] == CLASS_DISABLED_DURING_TERM)
-			termIndexOffset = 4;
-
-		termIndex -= termIndexOffset;
-
-		if (hasClassGrade(classIndex, termIndex + termIndexOffset))
-			return classGrades.get(classIndex).optJSONArray("terms")
-					.optJSONObject(termIndex);
-
-		try {
-			int termId = getTermIds(classId)[termIndex];
-			html = getDetailedReport(classId, termId, studentId);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-
-		JSONObject classGrade;
-
-		try {
-			classGrade = new JSONObject(classList.getJSONObject(
-					getClassMatch()[classIndex]).toString());
-
-			JSONArray termGrades = Parser.detailedReport(html);
-			Object[] termCategory = Parser.termCategoryGrades(html);
-
-			JSONArray termCategoryGrades = (JSONArray) termCategory[0];
-			if ((Integer) termCategory[1] != -1)
-				classGrade.getJSONArray("terms").getJSONObject(termIndex)
-						.put("average", termCategory[1]);
-
-			classGrade.getJSONArray("terms").getJSONObject(termIndex)
-					.put("grades", termGrades);
-			classGrade.getJSONArray("terms").getJSONObject(termIndex)
-					.put("categoryGrades", termCategoryGrades);
-
-			Instant in = new Instant();
-			// String time = in.toString();
-			// System.out.println(time);
-			classGrade.getJSONArray("terms").getJSONObject(termIndex)
-					.put("lastUpdated", in.getMillis());
-			// classGrade.getJSONArray("terms").getJSONObject(termIndex).put("lastUpdated",
-			// "0");
-
-			// System.out.println("cg= " + classGrade);
-
-			if (classGrades.indexOfKey(classIndex) < 0)
-				classGrades.put(classIndex, classGrade);
-
-			return classGrade.getJSONArray("terms").getJSONObject(termIndex);
-
-		} catch (JSONException e) {
-			System.err.println("Error: Class index = " + classIndex
-					+ "; JSON index = " + getClassMatch()[classIndex]
-					+ "; Term index = " + termIndex + ".");
-			e.printStackTrace();
-			return null;
-		}
-
-	}
+//	public JSONObject getClassGrade(int classIndex, int termIndex)
+//			throws JSONException {
+//
+//		String html = "";
+//
+//		int classId = gradeSummary[classIndex][0];
+//		int termIndexOffset = 0;
+//		if (gradeSummary[classIndex][3] == CLASS_DISABLED_DURING_TERM)
+//			termIndexOffset = 4;
+//
+//		termIndex -= termIndexOffset;
+//
+//		if (hasClassGrade(classIndex, termIndex + termIndexOffset))
+//			return classGrades.get(classIndex).optJSONArray("terms")
+//					.optJSONObject(termIndex);
+//
+//		try {
+//			TermReport term = getTerm(classId,termIndex);
+//			//FIXME: calc detailed report here.
+//			html = getDetailedReport(classId, termId, studentId);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		} catch (JSONException e) {
+//			e.printStackTrace();
+//		}
+//
+//		JSONObject classGrade;
+//
+//		try {
+//			classGrade = new JSONObject(classList.getJSONObject(
+//					getClassMatch()[classIndex]).toString());
+//
+//			JSONArray termGrades = Parser.detailedReport(html);
+//			Object[] termCategory = Parser.termCategoryGrades(html);
+//
+//			JSONArray termCategoryGrades = (JSONArray) termCategory[0];
+//			if ((Integer) termCategory[1] != -1)
+//				classGrade.getJSONArray("terms").getJSONObject(termIndex)
+//						.put("average", termCategory[1]);
+//
+//			classGrade.getJSONArray("terms").getJSONObject(termIndex)
+//					.put("grades", termGrades);
+//			classGrade.getJSONArray("terms").getJSONObject(termIndex)
+//					.put("categoryGrades", termCategoryGrades);
+//
+//			Instant in = new Instant();
+//			// String time = in.toString();
+//			// System.out.println(time);
+//			classGrade.getJSONArray("terms").getJSONObject(termIndex)
+//					.put("lastUpdated", in.getMillis());
+//			// classGrade.getJSONArray("terms").getJSONObject(termIndex).put("lastUpdated",
+//			// "0");
+//
+//			// System.out.println("cg= " + classGrade);
+//
+//			if (classGrades.indexOfKey(classIndex) < 0)
+//				classGrades.put(classIndex, classGrade);
+//
+//			return classGrade.getJSONArray("terms").getJSONObject(termIndex);
+//
+//		} catch (JSONException e) {
+//			System.err.println("Error: Class index = " + classIndex
+//					+ "; JSON index = " + getClassMatch()[classIndex]
+//					+ "; TermReport index = " + termIndex + ".");
+//			e.printStackTrace();
+//			return null;
+//		}
+//
+//	}
 
 	public String getClassName(int classIndex) {
 		if (classList == null)
@@ -469,28 +284,6 @@ public class Student {
 			loadStudentPicture();
 
 		return studentPictureBitmap;
-	}
-
-	public void matchClasses(int[][] gradeSummary) {
-
-		getClassIds();
-
-		// int[][] gradeSummary = getGradeSummary();
-
-		int classCount = gradeSummary.length;
-
-		classMatch = new int[classCount];
-		int classesMatched = 0;
-
-		while (classesMatched < classCount) {
-			for (int i = 0; i < classIds.length; i++)
-				if (classIds[i] == gradeSummary[classesMatched][0]) {
-					classMatch[classesMatched] = i;
-					classesMatched++;
-					break;
-				}
-		}
-
 	}
 
 	public int[] getClassMatch() {
@@ -641,7 +434,7 @@ public class Student {
 						+ "AttendanceSummary.aspx?EnrollmentId="
 						+ classIds[0]
 						+ "&TermId="
-						+ getTermIds(classIds[0])
+						+ getTerm(classIds[0])
 						+ "&ReportType=0&StudentId=" + studentId;
 
 				HTTPResponse summaryWithBadData = Request.sendGet(url,
@@ -685,5 +478,6 @@ public class Student {
 		// TODO !!!
 		return null;
 	}
+
 
 }

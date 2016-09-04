@@ -2,6 +2,8 @@ package app.sunstreak.yourpisd.net;
 
 import java.util.ArrayList;
 
+import app.sunstreak.yourpisd.net.data.Student;
+
 public class TestSession extends Session {
 	public TestSession() {
 		domain = Domain.TEST;
@@ -139,7 +141,7 @@ public class TestSession extends Session {
 				return new int[] {0, 1, 2, 3, 4, 5, 6};
 			}
 
-			public int[] getTermIds(int classId) throws JSONException {
+			public int[] getTerm(int classId) throws JSONException {
 				return new int[] {0, 1, 2, 3, 4, 5};
 			}
 

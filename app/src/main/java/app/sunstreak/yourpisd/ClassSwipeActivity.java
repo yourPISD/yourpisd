@@ -28,7 +28,6 @@ import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.app.AlertDialog;
 import android.app.FragmentTransaction;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -38,7 +37,6 @@ import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -51,7 +49,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
@@ -61,7 +58,11 @@ import android.widget.TextView;
 
 import app.sunstreak.yourpisd.googleutil.SlidingTabLayout;
 import app.sunstreak.yourpisd.net.Session;
-import app.sunstreak.yourpisd.net.Student;
+import app.sunstreak.yourpisd.net.data.Assignment;
+import app.sunstreak.yourpisd.net.data.ClassReport;
+import app.sunstreak.yourpisd.net.data.GradeCategory;
+import app.sunstreak.yourpisd.net.data.Student;
+import app.sunstreak.yourpisd.net.data.TermReport;
 import app.sunstreak.yourpisd.util.DateHelper;
 
 
@@ -87,12 +88,12 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
     static int receivedClassIndex;
     static int classCount;
     static int classesMade = 0;
-    static int termIndex;
+    static int termNum;
     static boolean doneMakingClasses;
     static Session session;
 
     static Student student;
-    static List<Integer> classesForTerm;
+    static List<ClassReport> classesForTerm;
     public SlidingTabLayout slidingTabLayout;
     static Toolbar toolbar;
 
@@ -112,23 +113,22 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
         toolbar.addView(spinner);
         receivedClassIndex = getIntent().getExtras().getInt("classIndex");
         classCount = getIntent().getExtras().getInt("classCount");
-        termIndex = getIntent().getExtras().getInt("termIndex");
+        termNum = getIntent().getExtras().getInt("termIndex");
         studentIndex = getIntent().getExtras().getInt("studentIndex");
 
-        setTitle(TermFinder.Term.values()[termIndex].name);
+        setTitle(TermFinder.Term.values()[termNum].name);
 
         session = ((YPApplication) getApplication()).session;
 
         session.studentIndex = studentIndex;
         student = session.getCurrentStudent();
-        classesForTerm = student.getClassesForTerm(termIndex);
+        classesForTerm = student.getClassesForTerm(termNum);
 
-        System.out.println(classesForTerm);
-
-        mFragments = new ArrayList<Fragment>();
-        for (int i = 0; i < classesForTerm.size(); i++) {
+        mFragments = new ArrayList<>();
+        for (ClassReport report : classesForTerm) {
             Bundle args = new Bundle();
-            args.putInt(DescriptionFragment.ARG_SECTION_NUMBER, i);
+
+            args.putInt(DescriptionFragment.ARG_CLASS_ID, report.getClassID());
             Fragment fragment = new DescriptionFragment();
             fragment.setArguments(args);
             mFragments.add(fragment);
@@ -144,12 +144,12 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
-        ArrayList<String> temp = new ArrayList<>();
-        for (int classIndex : classesForTerm) {
-            temp.add(student.getClassName(student.getClassMatch()[classIndex]));
+        ArrayList<String> names = new ArrayList<>();
+        for (ClassReport report : classesForTerm) {
+            names.add(report.getCourseName());
         }
 
-        setUpMaterialTabs(temp);
+        setUpMaterialTabs(names);
         System.out.println("received class index = " + receivedClassIndex);
         if (receivedClassIndex > 0 && receivedClassIndex < classesForTerm.size())
             mViewPager.setCurrentItem(receivedClassIndex);
@@ -198,9 +198,9 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.class_swipe_actions, menu);
 
-        if (termIndex == 0)
+        if (termNum == 0)
             menu.findItem(R.id.previous_six_weeks).setEnabled(false);
-        else if (termIndex == 7)
+        else if (termNum == 7)
             menu.findItem(R.id.next_six_weeks).setEnabled(false);
 
         // Create list of students in Menu.
@@ -251,7 +251,7 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
                 intent.putExtra("classCount", classCount);
                 intent.putExtra("classIndex", mViewPager.getCurrentItem());
                 // Don't go into the negatives!
-                intent.putExtra("termIndex", Math.max(termIndex - 1, 0));
+                intent.putExtra("termIndex", Math.max(termNum - 1, 0));
                 startActivity(intent);
 
                 //			overridePendingTransition(R.anim.slide_in_down, R.anim.slide_out_up);
@@ -264,7 +264,7 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
                 intent.putExtra("classCount", classCount);
                 intent.putExtra("classIndex", mViewPager.getCurrentItem());
                 // Don't go too positive!
-                intent.putExtra("termIndex", Math.min(termIndex + 1, 7));
+                intent.putExtra("termIndex", Math.min(termNum + 1, 7));
                 startActivity(intent);
                 //			overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_down);
                 return true;
@@ -299,7 +299,7 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
         @Override
         public CharSequence getPageTitle(int position) {
             if (position < classesForTerm.size())
-                return student.getClassName(classesForTerm.get(position));
+                return classesForTerm.get(position).getCourseName();
             return "ERROR";
         }
     }
@@ -313,19 +313,18 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
          * The fragment argument representing the section number for this
          * fragment.
          */
-        public static final String ARG_SECTION_NUMBER = "section_number";
+        public static final String ARG_CLASS_ID = "class_id";
         public static final int ASSIGNMENT_NAME_ID = 2222;
 
-        private ClassGradeTask mClassGradeTask;
-        private int position;
-        private int classIndex;
-        private JSONObject mClassGrade;
+        private TermReportTask mTermReportTask;
+        private int classID;
+        private TermReport mTermReport;
         private View rootView;
 
         @Override
         public void onPause() {
-            if (mClassGradeTask != null)
-                mClassGradeTask.cancel(true);
+            if (mTermReportTask != null)
+                mTermReportTask.cancel(true);
             super.onPause();
         }
 
@@ -344,49 +343,47 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
                 startActivity(intent);
             }
 
-            position = getArguments().getInt(ARG_SECTION_NUMBER);
-            if (position < classesForTerm.size()) {
-                classIndex = classesForTerm.get(position);
-            } else
-                throw new RuntimeException("ClassSwipe tab position exceeds number of classes" +
-                        "during term.\nPosition = " + position + "; Number of classes = " +
-                        classesForTerm.size() + ".");
-
             rootView = inflater.inflate(R.layout.class_description, container, false);
 //			getActivity().setProgressBarIndeterminateVisibility(true);
             ((ProgressBar) toolbar.findViewById(R.id.action_bar_spinner)).setVisibility(View.VISIBLE);
 
-            mClassGradeTask = new ClassGradeTask();
-            mClassGradeTask.execute(classIndex, termIndex);
-
+            classID = getArguments().getInt(ARG_CLASS_ID);
+            ClassReport classReport = session.getCurrentStudent().getClassReport(classID);
+            mTermReport = classReport.getTerm(termNum);
+            mTermReportTask = new TermReportTask();
+            mTermReportTask.execute(mTermReport);
             return rootView;
         }
 
-
+        /**
+         * Task that loads a list of term-reports in the background, and shows the first term.
+         */
         @SuppressLint("ResourceAsColor")
-        public class ClassGradeTask extends AsyncTask<Integer, Void, JSONObject> {
+        public class TermReportTask extends AsyncTask<TermReport, Void, Void> {
 
             @Override
-            protected void onPostExecute(final JSONObject result) {
-                mClassGrade = result;
+            protected void onPostExecute(final Void result) {
                 setUiElements();
             }
 
             @Override
-            protected JSONObject doInBackground(Integer... integers) {
+            protected Void doInBackground(TermReport... loading) {
                 try {
-                    return session.getCurrentStudent().getClassGrade(integers[0], integers[1]);
+                    //FIXME: remove the getClassGrade
+                    for (TermReport t : loading)
+                        t.loadReport(session);
+                    mTermReport = loading[0];
                 } catch (Exception e) {
                     e.printStackTrace();
-                    return null;
                 }
+                return null;
             }
         }
 
         @SuppressWarnings("ResourceType")
         public void setUiElements() {
 //			getActivity().setProgressBarIndeterminateVisibility(false);
-            ((ProgressBar) toolbar.findViewById(R.id.action_bar_spinner)).setVisibility(View.INVISIBLE);
+            toolbar.findViewById(R.id.action_bar_spinner).setVisibility(View.INVISIBLE);
             toolbar.getTag(R.id.action_bar_spinner);
             RelativeLayout layout = (RelativeLayout) rootView.findViewById(R.id.info);
 
@@ -398,179 +395,132 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
 
             class AssignmentDetailListener implements OnClickListener {
 
-                int classIndex;
-                int termIndex;
-                int assignmentId;
+                private final Assignment view;
 
-                AssignmentDetailListener(int classIndex, int termIndex, int assignmentId) {
-                    this.classIndex = classIndex;
-                    this.termIndex = termIndex;
-                    this.assignmentId = assignmentId;
+                AssignmentDetailListener(Assignment view) {
+                    this.view = view;
                 }
 
                 @Override
                 public void onClick(View arg0) {
-                    new GradeDetailsTask().execute(classIndex, termIndex, assignmentId);
-                }
-            }
+                    // Display the information.
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setTitle(view.getName());
 
-            try {
-                // The following line prevents force close. Idk why.
-                // Maybe the extra print time somehow fixes it...
-                //System.out.println(mClassGrade);
-
-                teacher.setText(session.getCurrentStudent().getClassList().get(classIndex).getTeacherName());
-
-                int avg = mClassGrade.optInt("average", -1);
-                if (avg != -1) {
-                    String average = Integer.toString(avg);
-                    sixWeeksAverage.setText(average);
-                } else
-                    sixWeeksAverage.setVisibility(View.INVISIBLE);
-
-                // Add current student's name
-                if (session.MULTIPLE_STUDENTS) {
-                    LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    LinearLayout studentName = (LinearLayout) inflater.inflate(R.layout.main_student_name_if_multiple_students, layout, false);
-                    ((TextView) studentName.findViewById(R.id.name)).setText(session.getCurrentStudent().name);
-
-                    RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-                            LayoutParams.MATCH_PARENT,
-                            LayoutParams.WRAP_CONTENT);
-                    lp.addRule(RelativeLayout.BELOW, lastIdAdded);
-                    //noinspection ResourceType
-                    studentName.setId(id.student_name);
-                    lastIdAdded = studentName.getId();
-                    System.out.println("Student name box ID: " + lastIdAdded + ".");
-
-                    layout.addView(studentName, lp);
-                }
-
-                LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-
-                for (int category = 0;
-                     category < mClassGrade.getJSONArray("categoryGrades").length();
-                     category++) {
-                    LinearLayout card = new LinearLayout(getActivity());
-                    card.setOrientation(LinearLayout.VERTICAL);
-                    card.setBackgroundResource(R.drawable.card_custom);
-
-                    // Name of the category ("Daily Work", etc)
-                    String categoryName = mClassGrade.getJSONArray("categoryGrades").getJSONObject(category).getString("Category");
-
-                    // for every grade in this term [any category]
-                    for (int i = 0; i < mClassGrade.getJSONArray("grades").length(); i++) {
-                        // only if this grade is in the category which we're looking for
-                        if (mClassGrade.getJSONArray("grades").getJSONObject(i).getString("Category")
-                                .equals(categoryName)) {
-                            JSONObject grades = mClassGrade.getJSONArray("grades").getJSONObject(i);
-
-                            LinearLayout innerLayout = (LinearLayout) inflater.inflate(R.layout.class_swipe_grade_view, card, false);
-                            innerLayout.setId(grades.getInt("assignmentId"));
-
-                            TextView descriptionView = (TextView) innerLayout.findViewById(R.id.description);
-                            String description = grades.getString("Description");
-                            descriptionView.setText(description);
-                            descriptionView.setId(ASSIGNMENT_NAME_ID);
-
-                            TextView grade = (TextView) innerLayout.findViewById(R.id.grade);
-                            String gradeValue = grades.optString("Grade");
-                            grade.setText(gradeValue);
-
-                            innerLayout.setOnClickListener(new AssignmentDetailListener(classIndex, termIndex, innerLayout.getId()));
-
-                            card.addView(innerLayout);
-                        }
-
+                    StringBuilder msg = new StringBuilder();
+                    msg.append(view.getCategory().getType())
+                            .append("\nDue Date: " + DateHelper.daysRelative(view.getDueDate()))
+                            .append("\nWeight: x" + String.format("%.1f", view.getWeight()));
+                    try {
+                        builder.setMessage(msg.toString());
+                    } catch (Exception e) {
+                        return;
                     }
-                    // Create a category summary view
-                    LinearLayout categoryLayout = (LinearLayout) inflater.inflate(R.layout.class_swipe_category_card, card, false);
 
-                    TextView categoryNameView = (TextView) categoryLayout.findViewById(R.id.category_name);
-                    categoryNameView.setText(categoryName);
+                    builder.setCancelable(false)
+                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.dismiss();
+                                }
+                            });
+                    builder.create().show();
+                }
+            }
 
-                    TextView scoreView = (TextView) categoryLayout.findViewById(R.id.category_score);
-                    String categoryScore = mClassGrade.getJSONArray("categoryGrades")
-                            .getJSONObject(category).optString("Letter");
+            // The following line prevents force close. Idk why.
+            // Maybe the extra print time somehow fixes it...
+            //System.out.println(mClassGrade);
+            teacher.setText(session.getCurrentStudent().getClassReport(classID).getTeacherName());
+
+            int avg = mTermReport.getGrade();
+            if (avg >= 0) {
+                String average = Integer.toString(avg);
+                sixWeeksAverage.setText(average);
+            } else
+                sixWeeksAverage.setVisibility(View.INVISIBLE);
+
+            // Add current student's name
+            if (session.MULTIPLE_STUDENTS) {
+                LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                LinearLayout studentName = (LinearLayout) inflater.inflate(R.layout.main_student_name_if_multiple_students, layout, false);
+                ((TextView) studentName.findViewById(R.id.name)).setText(session.getCurrentStudent().name);
+
+                RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+                        LayoutParams.MATCH_PARENT,
+                        LayoutParams.WRAP_CONTENT);
+                lp.addRule(RelativeLayout.BELOW, lastIdAdded);
+                //noinspection ResourceType
+                studentName.setId(id.student_name);
+                lastIdAdded = studentName.getId();
+                System.out.println("Student name box ID: " + lastIdAdded + ".");
+
+                layout.addView(studentName, lp);
+            }
+
+            LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+
+            for (GradeCategory category : mTermReport.getCategories()) {
+                LinearLayout card = new LinearLayout(getActivity());
+                card.setOrientation(LinearLayout.VERTICAL);
+                card.setBackgroundResource(R.drawable.card_custom);
+
+                // Name of the category ("Daily Work", etc)
+                String categoryName = category.getType();
+
+                // for every grade in this term [any category]
+                for (Assignment grade : mTermReport.getAssignments()) {
+                    // only if this grade is in the category which we're looking for
+                    if (grade.getCategory().equals(category)) {
+                        LinearLayout innerLayout = (LinearLayout) inflater.inflate(R.layout.class_swipe_grade_view, card, false);
+
+                        TextView descriptionView = (TextView) innerLayout.findViewById(R.id.description);
+                        String description = grade.getName();
+                        descriptionView.setText(description);
+                        descriptionView.setId(ASSIGNMENT_NAME_ID);
+
+                        TextView txtGrade = (TextView) innerLayout.findViewById(R.id.grade);
+                        txtGrade.setText("" + grade.getGrade());
+
+                        innerLayout.setOnClickListener(new AssignmentDetailListener(grade));
+
+                        card.addView(innerLayout);
+                    }
+
+                }
+                /*********************
+                 * Create a category summary view
+                 ********************/
+                LinearLayout categoryLayout = (LinearLayout) inflater.inflate(R.layout.class_swipe_category_card, card, false);
+
+                TextView categoryNameView = (TextView) categoryLayout.findViewById(R.id.category_name);
+                categoryNameView.setText(categoryName);
+
+                TextView scoreView = (TextView) categoryLayout.findViewById(R.id.category_score);
+
+                int categoryScore = category.getGrade();
+                if (categoryScore < 0)
+                    scoreView.setText("");
+                else
                     scoreView.setText(categoryScore);
+                card.addView(categoryLayout);
 
-                    // Add the view to the card
-                    card.addView(categoryLayout);
+                /*********************
+                 * Animation
+                 *********************/
+                Animation animation = AnimationUtils.loadAnimation(getActivity(), R.anim.slide_from_down_rotate);
+                animation.setStartOffset(0);
 
-                    Animation animation = AnimationUtils.loadAnimation(getActivity(), R.anim.slide_from_down_rotate);
-                    animation.setStartOffset(0);
-
-                    card.setId(lastIdAdded + 1);
-                    RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-                            LayoutParams.MATCH_PARENT,
-                            LayoutParams.WRAP_CONTENT);
-                    lp.addRule(RelativeLayout.BELOW, lastIdAdded);
-                    layout.addView(card, lp);
-                    lastIdAdded = card.getId();
-                    System.out.println("Category: " + category + "; ID: " + lastIdAdded + ".");
-
-                    card.startAnimation(animation);
-
-                }
-
-            } catch (JSONException e) {
-                e.printStackTrace();
+                card.setId(lastIdAdded + 1);
+                RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+                        LayoutParams.MATCH_PARENT,
+                        LayoutParams.WRAP_CONTENT);
+                lp.addRule(RelativeLayout.BELOW, lastIdAdded);
+                layout.addView(card, lp);
+                lastIdAdded = card.getId();
+                card.startAnimation(animation);
             }
-
-        }
-
-        @SuppressWarnings("ResourceType")
-        class GradeDetailsTask extends AsyncTask<Integer, Integer, String> {
-
-            CharSequence title;
-
-            ProgressDialog dialog;
-
-            @Override
-            protected String doInBackground(Integer... params) {
-                title = ((TextView) rootView.findViewById(params[2]).findViewById(ASSIGNMENT_NAME_ID)).getText();
-                try {
-                    String[] array = session.getCurrentStudent().getAssignmentDetails(params[0], params[1], params[2]);
-                    return "Due date: " + array[0] + DateHelper.daysRelative(array[1]) + "\nWeight: " + array[2];
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    //cancel(true);
-                    return "Gradebook encountered an error.";
-                }
-            }
-
-            @Override
-            protected void onPreExecute() {
-                dialog = ProgressDialog.show(getActivity(), "",
-                        "Loading Grade Details", true);
-                dialog.show();
-            }
-
-            @Override
-            protected void onPostExecute(final String result) {
-                dialog.dismiss();
-
-                // Display the information.
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setTitle(title);
-
-                try {
-                    builder.setMessage(result);
-                } catch (Exception e) {
-                    return;
-                }
-
-                builder.setCancelable(false)
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.dismiss();
-                            }
-                        });
-                builder.create().show();
-            }
-
         }
     }
 

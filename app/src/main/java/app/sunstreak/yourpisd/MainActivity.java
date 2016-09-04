@@ -72,7 +72,7 @@ import android.widget.TextView;
 
 import app.sunstreak.yourpisd.googleutil.SlidingTabLayout;
 import app.sunstreak.yourpisd.net.Session;
-import app.sunstreak.yourpisd.net.Student;
+import app.sunstreak.yourpisd.net.data.Student;
 import app.sunstreak.yourpisd.util.DateHelper;
 import app.sunstreak.yourpisd.util.RandomStuff;
 import app.sunstreak.yourpisd.view.MyTextView;

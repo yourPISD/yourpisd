@@ -34,6 +34,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.FormElement;
 
+import app.sunstreak.yourpisd.net.data.Student;
+
 
 public class Session {
 	public static final String GRADEBOOK_ROOT = "https://gradebook.pisd.edu/Pinnacle/Gradebook";
@@ -73,7 +75,28 @@ public class Session {
 		return password;
 	}
 
+	/**
+	 * Loads a GET request from a specified path and query info
+	 * @param path the path (beginning with a forward slash).
+	 * @param params parameter information to pass as query.
+	 * @return the body string, or null if error occurs.
+	 * @throws IOException
+	 */
+	public String request(String path, Map<String, String> params) throws IOException {
+		if (checkExpiration() != 1)
+			return null;
 
+		Connection conn = Jsoup.connect(Session.GRADEBOOK_ROOT + path).cookies(getCookies());
+		if (params != null)
+			conn.data(params);
+
+		Connection.Response resp = conn.execute();
+
+		if (resp.statusCode() == 200)
+			return resp.body();
+		else
+			return null;
+	}
 
 	/**
 	 * Temporary code. In use because login1.mypisd.net has an expired
