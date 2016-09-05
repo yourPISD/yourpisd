@@ -51,7 +51,7 @@ public class ClassReport {
         }
 
         if (weight == 0)
-            return Student.NO_GRADES_ENTERED;
+            return -1;
         else
             return (int)Math.round(grade / weight);
     }
