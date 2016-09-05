@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -66,14 +67,76 @@ public class Parser {
 	 */
 	@NonNull
 	public static void parseGradeSummary(String html, Map<Integer, ClassReport> classes) {
-//		if (html == null)
-//			return;
-//		Document doc = Jsoup.parse(html);
+		if (html == null)
+			return;
+		Document doc = Jsoup.parse(html);
+		if (doc == null)
+			return;
+		Element main = doc.getElementById("Main").getElementById("Content");
 
-		//TODO: parse grade summary
+		// For each year
+		// TODO: test next year
+		Elements years = main.getElementById("ContentMain").getElementsByClass("calendar");
+		for (Element year : years)
+		{
+			// For each terms
+			// TODO: test after 9 weeks
+			Elements terms = year.getElementsByClass("term");
+			for (Element term : terms)
+			{
+				Elements termName = term.getElementsByTag("h2");
+				if (termName.isEmpty())
+					continue;
+
+				// Term date
+				//System.out.println(termName.get(0).getElementsByClass("term").html() + " of " + termName.get(0).getElementsByClass("year").html());
+				//System.out.println();
+
+				// For each course
+				Elements courses = term.children().get(1).children().get(0).children();
+				for (Element course : courses)
+				{
+					Elements courseMain = course.getElementsByTag("tr").get(0).children();
+
+
+
+					// Period number
+					String period = courseMain.get(0).html();
+					if (period.isEmpty())
+						period = "0";
+
+					// Course name
+					String name = courseMain.get(1).children().get(0).children().get(0).html();
+
+					String temp = courseMain.get(1).children().get(0).children().get(0).attr("abs:href");
+					int courseId = Integer.parseInt(temp.substring(temp.indexOf("=") + 1, temp.indexOf("&")));
+					// Teacher name
+					String teacher = courseMain.get(1).children().get(1).getElementsByClass("teacher").get(0).html();
+					// Course grade (might be empty string if no grade) - formatted as number + %
+					int grade;
+					if (courseMain.get(2).children().isEmpty())
+						grade = 100; //TODO: what grade if no grades are assigned???
+					else
+					{
+						String teemp = courseMain.get(2).children().get(0).children().get(0).children().get(0).html();
+						grade = Integer.parseInt(teemp.substring(0, teemp.length() - 1));
+					}
+
+					ClassReport report = new ClassReport(courseId, name);
+					report.setPeriodNum(Integer.parseInt(period));
+					report.setTeacherName(teacher);
+
+					TermReport termReport = new TermReport(null, report, 0, false);
+					report.setTerm(0, termReport);
+					termReport.setGrade(grade);
+					classes.put(report.getClassID(), report);
+				}
+			}
+		}
+
 		//Testing
-		Object[][] rawData = {
-				{1235, 1, "Evans, Gary", "Bio AP", 97},
+		/*Object[][] rawData = {
+				{1235, 1, "Evans, Gary", "Bio AP", 96},
 				{1236, 2, "Evans, Gary", "Bio Lab H", 97},
 				{1237, 3, "Nancy, Carolyn", "Calculus BC", 95},
 				{1238, 4, "Lee, Sarah", "Computer Science AP", 89},
@@ -91,7 +154,7 @@ public class Parser {
 			report.setTerm(0, term);
 			term.setGrade((int) classData[4]);
 			classes.put(report.getClassID(), report);
-		}
+		}*/
 	}
 
 
