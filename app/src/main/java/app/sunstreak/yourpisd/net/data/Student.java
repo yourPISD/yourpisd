@@ -22,8 +22,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import android.graphics.Bitmap;
 
@@ -52,12 +54,12 @@ public class Student {
 				|| className.contains("MATH STDY IB"))
 			return 4.5;
 
-		String[] split = className.split("[\\s()\\d\\/]+");
+		String[] split = className.split("[\\s()\\d/]+");
 
-		for (int i = 0; i < split.length; i++) {
-			if (split[i].equals("AP") || split[i].equals("IB"))
+		for (String aSplit : split) {
+			if (aSplit.equals("AP") || aSplit.equals("IB"))
 				return 5;
-			if (split[i].equals("H") || split[i].equals("IH"))
+			if (aSplit.equals("H") || aSplit.equals("IH"))
 				return 4.5;
 		}
 		return 4;
@@ -70,20 +72,6 @@ public class Student {
 		name = studentName.substring(studentName.indexOf(",") + 2,
 				studentName.indexOf("("))
 				+ studentName.substring(0, studentName.indexOf(","));
-	}
-
-	public List<ClassReport> getClassList() {
-		ArrayList<ClassReport> list = new ArrayList<>(classes.values());
-		Collections.sort(list, new Comparator<ClassReport>() {
-			@Override
-			public int compare(ClassReport a, ClassReport b) {
-				if (a.getPeriodNum() == b.getPeriodNum())
-					return a.getCourseName().compareTo(b.getCourseName());
-				else
-					return a.getPeriodNum() - b.getPeriodNum();
-			}
-		});
-		return list;
 	}
 
 	public List<ClassReport> getClassesForTerm(int termNum) {
@@ -123,23 +111,45 @@ public class Student {
 		return classes.get(classID);
 	}
 
-	private void loadStudentPicture() {
-		session.request("common/picture.ashx")
-		ArrayList<String[]> requestProperties = new ArrayList<String[]>();
+	public DateTime getLastUpdated() {
+		return lastUpdated;
+	}
+
+	//TODO: don't use Request class.
+	private void loadStudentPicture() throws IOException{
+		Set<String> cookies = new HashSet<>();
+		Map<String, String> cookieMap = session.getCookies();
+
+		for (Map.Entry<String, String> cookie : cookieMap.entrySet())
+		{
+			cookies.add(cookie.getKey() + "=" + cookie.getValue());
+		}
+
+		ArrayList<String[]> requestProperties = new ArrayList<>();
 		requestProperties.add(new String[] { "Content-Type", "image/jpeg" });
 
 		Object[] response = Request.getBitmap(
-				"https://gradebook.pisd.edu/Pinnacle/Gradebook/common/picture.ashx?studentId="
-						+ studentId, session.cookies, requestProperties, true);
+				"https://gradebook.pisd.edu/Pinnacle/Gradebook/common/picture.ashx?student="
+						+ studentId, cookies, requestProperties, true);
 
-		studentPictureBitmap = (Bitmap) response[0];
-		int responseCode = (Integer) response[1];
-		// cookies = cookies;
+		studentPictureBitmap = response == null ? null : (Bitmap) response[0];
+
+		for (String cookieStr : cookies)
+		{
+			String[] parts = cookieStr.split("=", 2);
+			cookieMap.put(parts[0], parts[1]);
+		}
 	}
 
 	public Bitmap getStudentPicture() {
 		if (studentPictureBitmap == null)
-			loadStudentPicture();
+			try {
+				loadStudentPicture();
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
 
 		return studentPictureBitmap;
 	}
@@ -188,7 +198,7 @@ public class Student {
 
 
 	public static double gpaDifference(int grade) {
-		if (grade == NO_GRADES_ENTERED)
+		if (grade < 0)
 			return Double.NaN;
 
 		if (grade <= 100 & grade >= 97)

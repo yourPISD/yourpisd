@@ -21,12 +21,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.joda.time.DateTime;
-import org.json.JSONArray;
 
-import android.app.ActionBar;
-import android.app.ActionBar.Tab;
 import android.app.AlertDialog;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -34,7 +30,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.Point;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -50,7 +45,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -59,7 +53,6 @@ import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -75,7 +68,6 @@ import android.widget.TextView;
 import app.sunstreak.yourpisd.googleutil.SlidingTabLayout;
 import app.sunstreak.yourpisd.net.Session;
 import app.sunstreak.yourpisd.net.data.ClassReport;
-import app.sunstreak.yourpisd.net.data.Student;
 import app.sunstreak.yourpisd.util.DateHelper;
 import app.sunstreak.yourpisd.util.RandomStuff;
 import app.sunstreak.yourpisd.view.MyTextView;
@@ -92,14 +84,12 @@ public class MainActivity extends ActionBarActivity {
     static RelativeLayout[] layoutAverages;
     static int[] goals;
     static Session session;
-    static Bitmap proPic;
     static int SCREEN_HEIGHT;
     static int SCREEN_WIDTH;
 
     static SummaryFragment mSummaryFragment;
     static YPMainFragment[] mFragments;
     public static final int NUM_FRAGMENTS = 3;
-    public static final int NUM_SUMMARY_FRAGMENTS = 2;
     public static final int SUMMARY_FRAGMENT_POSITION = 2;
     public static final int ATTENDANCE_FRAGMENT_POSITION = 3;
     static int currentSummaryFragment;
@@ -597,8 +587,7 @@ public class MainActivity extends ActionBarActivity {
 
             TextView summaryLastUpdated = new MyTextView(getActivity());
             String lastUpdatedString = DateHelper.timeSince(session
-                    .getCurrentStudent().getClassList().optJSONObject(0)
-                    .optLong("summaryLastUpdated"));
+                    .getCurrentStudent().getLastUpdated());
             summaryLastUpdated.setText(lastUpdatedString);
             summaryLastUpdated.setPadding(10, 0, 0, 0);
             bigLayout.addView(summaryLastUpdated);
@@ -1093,7 +1082,7 @@ public class MainActivity extends ActionBarActivity {
                     int avg = report.calculateAverage(termNum < ClassReport.SEMESTER_TERMS);
 
                     // Only set the grade text if the average is not empty
-                    if (avg != Student.NO_GRADES_ENTERED) {
+                    if (avg >= 0) {
                         String average = avg + "";
                         TextView grade = (TextView) layoutAverages[i]
                                 .findViewById(R.id.grade);
@@ -1145,7 +1134,6 @@ public class MainActivity extends ActionBarActivity {
                 ImageView profilePic = (ImageView) profileCards[taskStudentIndex]
                         .findViewById(R.id.profilePic);
                 profilePic.setImageBitmap(result);
-
                 pictureNotLoaded = false;
             }
         }

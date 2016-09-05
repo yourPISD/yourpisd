@@ -56,10 +56,7 @@ public class Session {
 	public boolean MULTIPLE_STUDENTS;
 
 	public static Session createSession(String username, String password) {
-		if (username.equals("test"))
-			return new TestSession();
-		else
-			return new Session(username, password);
+		return new Session(username, password);
 	}
 
 	private Session(String username, String password) {
