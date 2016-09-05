@@ -56,6 +56,24 @@ public class ClassReport {
             return (int)Math.round(grade / weight);
     }
 
+    public double getMaxGPA() {
+        String className = getCourseName().toUpperCase();
+
+        if (className.contains("PHYS IB SL")
+                || className.contains("MATH STDY IB"))
+            return 4.5;
+
+        String[] split = className.split("[\\s()\\d/]+");
+
+        for (int i = 0; i < split.length; i++) {
+            if (split[i].equals("AP") || split[i].equals("IB"))
+                return 5;
+            if (split[i].equals("H") || split[i].equals("IH"))
+                return 4.5;
+        }
+        return 4;
+    }
+
     public void setTerm(int termNum, TermReport term)
     {
         terms[termNum] = term;

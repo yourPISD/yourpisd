@@ -18,21 +18,19 @@
 package app.sunstreak.yourpisd.net.data;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.Map;
 
 import android.graphics.Bitmap;
 
-import app.sunstreak.yourpisd.net.AttendanceData;
+import org.joda.time.DateTime;
+
 import app.sunstreak.yourpisd.net.Parser;
 import app.sunstreak.yourpisd.net.Session;
-import app.sunstreak.yourpisd.util.HTTPResponse;
 import app.sunstreak.yourpisd.util.Request;
 
 public class Student {
@@ -41,16 +39,29 @@ public class Student {
 
 	public final int studentId;
 	public final String name;
-	private final ArrayList<ClassReport> classList = new ArrayList<>();
+	private final Map<Integer, ClassReport> classes = new HashMap<>();
 
-	private AttendanceData attendanceData;
+	private DateTime lastUpdated = null;
 
 	Bitmap studentPictureBitmap;
 
-	public static final int CLASS_DISABLED_DURING_TERM = -2;
-	public static final int NO_GRADES_ENTERED = -1;
-	public static final String[] SEMESTER_AVERAGE_KEY = {
-			"firstSemesterAverage", "secondSemesterAverage" };
+	public static double maxGPA(String className) {
+		className = className.toUpperCase();
+
+		if (className.contains("PHYS IB SL")
+				|| className.contains("MATH STDY IB"))
+			return 4.5;
+
+		String[] split = className.split("[\\s()\\d\\/]+");
+
+		for (int i = 0; i < split.length; i++) {
+			if (split[i].equals("AP") || split[i].equals("IB"))
+				return 5;
+			if (split[i].equals("H") || split[i].equals("IH"))
+				return 4.5;
+		}
+		return 4;
+	}
 
 	public Student(int studentId, String studentName, Session session) {
 		this.session = session;
@@ -61,89 +72,59 @@ public class Student {
 				+ studentName.substring(0, studentName.indexOf(","));
 	}
 
-	public void loadClassList() throws IOException {
-		// FIXME: redo loading class list.
-
-//		String postParams = "{\"studentId\":\"" + studentId + "\"}";
-//
-//		ArrayList<String[]> requestProperties = new ArrayList<String[]>();
-//		requestProperties
-//				.add(new String[] { "Content-Type", "application/json" });
-//
-//		HTTPResponse init = Request
-//				.sendPost(
-//						"https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/InternetViewerService.ashx/Init?PageUniqueId="
-//								+ session.pageUniqueId, session.cookies,
-//						requestProperties, true, postParams);
-//
-//		String response = init.getData();
-//		int responseCode = init.getResponseCode();
-//
-//		try {
-//			classList = (new JSONArray(response)).getJSONObject(0)
-//					.getJSONArray("classes");
-//		} catch (JSONException e) {
-//			e.printStackTrace();
-//			System.out.println(response);
-//		}
-
-	}
-
 	public List<ClassReport> getClassList() {
-		return classList;
+		ArrayList<ClassReport> list = new ArrayList<>(classes.values());
+		Collections.sort(list, new Comparator<ClassReport>() {
+			@Override
+			public int compare(ClassReport a, ClassReport b) {
+				if (a.getPeriodNum() == b.getPeriodNum())
+					return a.getCourseName().compareTo(b.getCourseName());
+				else
+					return a.getPeriodNum() - b.getPeriodNum();
+			}
+		});
+		return list;
 	}
 
 	public List<ClassReport> getClassesForTerm(int termNum) {
 		List<ClassReport> classesForTerm = new ArrayList<>();
-		if (classList.isEmpty())
+		if (lastUpdated == null)
 			throw new RuntimeException("Grade Summary has not been fetched.");
 
-		for (ClassReport report : classList) {
+		for (ClassReport report : classes.values()) {
 			if (!report.isClassDisabledAtTerm(termNum))
 				classesForTerm.add(report);
 		}
+		Collections.sort(classesForTerm, new Comparator<ClassReport>() {
+			@Override
+			public int compare(ClassReport a, ClassReport b) {
+				if (a.getPeriodNum() == b.getPeriodNum())
+					return a.getCourseName().compareTo(b.getCourseName());
+				else
+					return a.getPeriodNum() - b.getPeriodNum();
+			}
+		});
 		return classesForTerm;
 	}
 
 	/**
 	 * Loads the grade summary for the student.
 	 */
-	public void loadGradeSummary() {
-		//FIXME: parse grade summary and put it in classList
-	}
-
-	public TermReport getTerm(int classID, int termNum) throws JSONException {
-		ClassReport report = getClassReport(classID);
-		if (report != null)
-			return report.getTerm(termNum);
-		else
-			return null;
+	public void loadGradeSummary() throws IOException
+	{
+		//FIXME: parse grade summary
+		Map<String, String> params = new HashMap<>();
+		params.put("Student", ""+studentId);
+		Parser.parseGradeSummary(session.request("InternetViewer/GradeSummary.aspx", params), classes);
+		lastUpdated = new DateTime();
 	}
 
 	public ClassReport getClassReport(int classID) {
-		for (ClassReport report : classList) {
-			if (report.getClassID() == classID)
-				return report;
-		}
-
-		// if class not found.
-		return null;
-	}
-
-	public String getClassName(int classIndex) {
-		if (classList == null)
-			return "null";
-		else
-			try {
-				return Parser.toTitleCase(classList.getJSONObject(classIndex)
-						.getString("title"));
-			} catch (JSONException e) {
-				e.printStackTrace();
-				return "jsonException";
-			}
+		return classes.get(classID);
 	}
 
 	private void loadStudentPicture() {
+		session.request("common/picture.ashx")
 		ArrayList<String[]> requestProperties = new ArrayList<String[]>();
 		requestProperties.add(new String[] { "Content-Type", "image/jpeg" });
 
@@ -173,79 +154,38 @@ public class Student {
 	}
 
 	public int getNumCredits(int semesterIndex) {
-		if (classMatch == null)
-			return -2;
-
-		int pointCount = 0;
-
-		for (int classIndex = 0; classIndex < classMatch.length; classIndex++) {
-			int jsonIndex = classMatch[classIndex];
-			int grade = classList.optJSONObject(jsonIndex).optInt(
-					SEMESTER_AVERAGE_KEY[semesterIndex]);
-
-			if (!(grade == NO_GRADES_ENTERED || grade == CLASS_DISABLED_DURING_TERM))
-				pointCount++;
-		}
-		return pointCount;
+		return getClassesForTerm(semesterIndex * ClassReport.SEMESTER_TERMS).size();
 	}
 
 	public double getGPA(int semesterIndex) {
 
-		if (classMatch == null)
-			return -2;
-
 		double pointSum = 0;
 		int pointCount = 0;
 
-		for (int classIndex = 0; classIndex < classMatch.length; classIndex++) {
+		for (ClassReport report : getClassesForTerm(semesterIndex * ClassReport.SEMESTER_TERMS)) {
+			int grade = report.calculateAverage(semesterIndex == 0);
 
-			int jsonIndex = classMatch[classIndex];
-
-			int grade = classList.optJSONObject(jsonIndex).optInt(
-					SEMESTER_AVERAGE_KEY[semesterIndex]);
-
-			if (grade == NO_GRADES_ENTERED
-					|| grade == CLASS_DISABLED_DURING_TERM)
-				continue;
-			// Failed class
-			if (grade < 70) {
-				// Do not increment pointSum because the student received a GPA
-				// of 0.
-				pointCount++;
-			} else {
-				double classGPA = maxGPA(classIndex) - gpaDifference(grade);
+			if (grade >= 70)
+			{
+				//Passing class.
+				double classGPA = maxGPA(report.getCourseName()) - gpaDifference(grade);
 				pointSum += classGPA;
 				pointCount++;
 			}
+			else if (grade >= 0)
+			{
+				//Failing class
+				pointCount++;
+			}
+			//No grade.
 		}
-		try {
-			return pointSum / pointCount;
-		} catch (ArithmeticException e) {
+		if (pointCount == 0)
 			return Double.NaN;
-		}
+		else
+			return pointSum / pointCount;
 	}
 
-	public double maxGPA(int classIndex) {
-		return maxGPA(getClassName(classMatch[classIndex]));
-	}
 
-	public static double maxGPA(String className) {
-		className = className.toUpperCase();
-
-		if (className.contains("PHYS IB SL")
-				|| className.contains("MATH STDY IB"))
-			return 4.5;
-
-		String[] split = className.split("[\\s()\\d\\/]+");
-
-		for (int i = 0; i < split.length; i++) {
-			if (split[i].equals("AP") || split[i].equals("IB"))
-				return 5;
-			if (split[i].equals("H") || split[i].equals("IH"))
-				return 4.5;
-		}
-		return 4;
-	}
 
 	public static double gpaDifference(int grade) {
 		if (grade == NO_GRADES_ENTERED)
@@ -276,81 +216,16 @@ public class Student {
 		return -1;
 	}
 
-	public int examScoreRequired(int classIndex, int gradeDesired) {
-		if (classMatch == null)
-			throw new RuntimeException("Class match is null!");
-		try {
-			double sum = 0;
-			for (int i = 0; i < 3; i++) {
-				sum += classList.getJSONObject(classMatch[classIndex])
-						.getJSONArray("terms").getJSONObject(i)
-						.getInt("average");
-			}
-			sum = (gradeDesired - 0.5) * 4 - sum;
-			return (int) Math.ceil(sum);
-		} catch (Exception e) {
-			// Not enough grades for calculation
-			return -1;
-		}
-	}
-
-	public boolean hasAttendanceData() {
-		return attendanceData != null;
-	}
-
-	public AttendanceData loadAttendanceSummary() throws IOException,
-			JSONException {
-		final int MAX_TRIES = 5;
-		for (int i = 0; i < MAX_TRIES; i++) {
-			try {
-				String url = "https://gradebook.pisd.edu/Pinnacle/Gradebook/InternetViewer/"
-						+ "AttendanceSummary.aspx?EnrollmentId="
-						+ classIds[0]
-						+ "&TermId="
-						+ getTerm(classIds[0])
-						+ "&ReportType=0&StudentId=" + studentId;
-
-				HTTPResponse summaryWithBadData = Request.sendGet(url,
-						session.cookies);
-				String html = summaryWithBadData.getData();
-				int responseCode = summaryWithBadData.getResponseCode();
-
-				AttendanceData sumWithBadData = new AttendanceData(session,
-						html);
-
-				String postParams = "__VIEWSTATE="
-						+ session.viewState
-						+ "&__EVENTVALIDATION="
-						+ session.eventValidation
-						+ "&ctl00%24ctl00%24ContentPlaceHolder%24uxStudentId="
-						+ studentId
-						+ "&ctl00%24ctl00%24ContentPlaceHolder%24ContentPane%24dateCtrl="
-						+ AttendanceData.START_OF_SPRING_SEMESTER
-						+ "&ctl00%24ctl00%24ContentPlaceHolder%24ContentPane%24uxEndDate="
-						+ AttendanceData.END_OF_SPRING_SEMESTER
-						+ "&PageUniqueId="
-						+ URLEncoder.encode(session.pageUniqueId, "UTF-8");
-				HTTPResponse attendanceSummaryReq = Request.sendPost(url,
-						postParams, session.cookies);
-
-				html = attendanceSummaryReq.getData();
-				responseCode = attendanceSummaryReq.getResponseCode();
-
-				if (responseCode != 200)
-					throw new IOException("Response code of " + responseCode
-							+ " when loading attendance summary.");
-
-				attendanceData = new AttendanceData(session, html);
-				attendanceData.parseDetailedView();
-
-				return attendanceData;
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		// TODO !!!
-		return null;
-	}
+//	public int examScoreRequired(int classIndex, int gradeDesired) {
+//			double sum = 0;
+//			for (int i = 0; i < 3; i++) {
+//				sum += classes.getJSONObject(classMatch[classIndex])
+//						.getJSONArray("terms").getJSONObject(i)
+//						.getInt("average");
+//			}
+//			sum = (gradeDesired - 0.5) * 4 - sum;
+//			return (int) Math.ceil(sum);
+//	}
 
 
 }

@@ -207,12 +207,7 @@ public class Session {
 
 				students.addAll(Parser.parseStudents(this, resp.body()));
 				MULTIPLE_STUDENTS = students.size() > 1;
-//				for (Student st : students) {
-//					cookies.add("PinnacleWeb.StudentId=" + st.studentId);
-//				}
-				for (Student st : students) {
-					st.loadClassList();
-				}
+
 				loggedIn = true;
                 return 1;
             }
