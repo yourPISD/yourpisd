@@ -134,6 +134,8 @@ public class Parser {
 			}
 		}
 
+		//Log.v("parseTag",classes.toString());
+
 		//Testing
 		/*Object[][] rawData = {
 				{1235, 1, "Evans, Gary", "Bio AP", 96},
@@ -168,9 +170,18 @@ public class Parser {
 	@NonNull
 	public static List<Student> parseStudents (Session sess, String html) {
 		//FIXME: parsing students.
-		//Testing data
+		if (html == null)
+			return null;
+		Document doc = Jsoup.parse(html);
+		if (doc == null)
+			return null;
+		Element main = doc.getElementById("Main").getElementById("Navigation").getElementsByTag("li").get(0);
+
+		//main.getElementById("ContentHeader").getElementsByClass("container").get(0).getElementsByTag("h2").get(0).html();
+
+		//TODO multiple students
 		ArrayList<Student> students = new ArrayList<>();
-		Student single = new Student(1111, "Doe, John C. (245643)", sess);
+		Student single = new Student(1111, main.html(), sess); //TODO fix id
 		students.add(single);
 		return students;
 	}
