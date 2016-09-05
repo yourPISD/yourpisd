@@ -147,8 +147,9 @@ public class MainActivity extends ActionBarActivity {
         setUpNavigationDrawer();
         AppRater.app_launched(this);
         mFragments = new YPMainFragment[NUM_FRAGMENTS];
-        // Opens Spring semester summary by default.
-        currentSummaryFragment = 1;
+
+        //Using current term, determine which semester to open first.
+        currentSummaryFragment = (TermFinder.getCurrentTermIndex() < ClassReport.SEMESTER_TERMS) ? 0 : 1;
 
         for (int position = 0; position < NUM_FRAGMENTS; position++) {
             if (position == SUMMARY_FRAGMENT_POSITION) {
@@ -178,7 +179,7 @@ public class MainActivity extends ActionBarActivity {
             else
                 mViewPager.setCurrentItem(0);
         }
-        // Otherwise, show the current six weeks grades list.
+        // Otherwise, show the current nine weeks grades list.
         else
             mViewPager.setCurrentItem(1);
 
@@ -294,6 +295,7 @@ public class MainActivity extends ActionBarActivity {
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.log_out:
+                session.logout();
                 session = null;
                 // attendanceTask.cancel(true);
                 // attendanceTask = null;
@@ -308,9 +310,10 @@ public class MainActivity extends ActionBarActivity {
                 startActivity(intent);
                 return true;
             case R.id.credits:
+                System.out.println("SHOWING CREDITS");
                 Intent intentCred1 = new Intent(this, CreditActivity.class);
                 startActivity(intentCred1);
-                return true;
+                throw new Error();
             // case R.id.refresh:
             // dg.clearData();
             // Intent intentR = new Intent(this, LoginActivity.class);
@@ -447,31 +450,28 @@ public class MainActivity extends ActionBarActivity {
             }
             LinearLayout weekNames = new LinearLayout(getActivity());
             weekNames.setBackgroundResource(R.drawable.card_custom);
-            TextView[] weeks = new MyTextView[5];
+            TextView[] terms = new MyTextView[COLUMN_HEADERS[semesterNum].length];
             weekNames.setGravity(Gravity.CENTER);
 
-            for (int i = 0; i < weeks.length; i++) {
-                weeks[i] = new MyTextView(getActivity());
-                weeks[i].setTextSize(getResources().getDimension(
+            for (int i = 0; i < terms.length; i++) {
+                terms[i] = new MyTextView(getActivity());
+                terms[i].setTextSize(getResources().getDimension(
                         R.dimen.text_size_grade_overview_header));
-                weeks[i].setText(COLUMN_HEADERS[semesterNum][i]);
+                terms[i].setText(COLUMN_HEADERS[semesterNum][i]);
 
                 LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
                         ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-                weeks[i].setLayoutParams(llp);
-                weeks[i].setTextSize(18);
-                weeks[i].setGravity(Gravity.CENTER);
-                weekNames.addView(weeks[i]);
+                terms[i].setLayoutParams(llp);
+                terms[i].setTextSize(18);
+                terms[i].setGravity(Gravity.CENTER);
+                weekNames.addView(terms[i]);
             }
 
             bigLayout.addView(weekNames);
 
             final int termOff = ClassReport.SEMESTER_TERMS * semesterNum;
-            List<ClassReport> classList = session.getCurrentStudent().getClassesForTerm(termOff);
-
-            // TODO Will break for people who change courses in middle of
-            // semester.
+            List<ClassReport> classList = session.getCurrentStudent().getSemesterClasses(semesterNum == 0);
             for (ClassReport report : classList) {
                 View classSummary = inflater.inflate(R.layout.main_grade_summary_linear_layout,
                         bigLayout, false);
@@ -532,8 +532,13 @@ public class MainActivity extends ActionBarActivity {
                 summary.setPadding(5, 0, 5, 0);
                 bigLayout.addView(classSummary);
             }
-            Button toggleSemester = new Button(getActivity());
 
+            View glue = new View(getActivity());
+            glue.setLayoutParams(new LinearLayout.LayoutParams(0,20,1f));
+            bigLayout.addView(glue);
+            bigLayout.setWeightSum(1);
+
+            Button toggleSemester = new Button(getActivity());
 //            toggleSemester.setBackgroundResource(R.drawable.card_click_blue);
             toggleSemester.setText("View "
                     + PAGE_TITLE[Math.abs(currentSummaryFragment - 1)]);
@@ -566,19 +571,19 @@ public class MainActivity extends ActionBarActivity {
                             .setCustomAnimations(R.anim.slide_in_up,
                                     R.anim.slide_out_down)
 
-                                    // Replace any fragments currently in the container
-                                    // view with a fragment
-                                    // representing the next page (indicated by the
-                                    // just-incremented currentPage
-                                    // variable).
+                            // Replace any fragments currently in the container
+                            // view with a fragment
+                            // representing the next page (indicated by the
+                            // just-incremented currentPage
+                            // variable).
                             .replace(R.id.fragment_holder, newFragment)
 
-                                    // Add this transaction to the back stack, allowing
-                                    // users to press Back
-                                    // to get to the front of the card.
+                            // Add this transaction to the back stack, allowing
+                            // users to press Back
+                            // to get to the front of the card.
 //                            .addToBackStack(null)
 
-                                    // Commit the transaction.
+                            // Commit the transaction.
                             .commit();
                     mSummaryFragment = newFragment;
                 }
@@ -592,6 +597,12 @@ public class MainActivity extends ActionBarActivity {
             summaryLastUpdated.setPadding(10, 0, 0, 0);
             bigLayout.addView(summaryLastUpdated);
 
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(0,0);
+            params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 1);
+            params.addRule(RelativeLayout.ALIGN_PARENT_TOP, 1);
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 1);
+            params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 1);
+            rootView.setLayoutParams(params);
             return rootView;
         }
 
@@ -1090,8 +1101,8 @@ public class MainActivity extends ActionBarActivity {
                     }
 
                     layoutAverages[i].setOnClickListener(new ClassSwipeOpenerListener(
-                                    session.studentIndex, i,
-                                    CURRENT_TERM_INDEX));
+                            session.studentIndex, i,
+                            CURRENT_TERM_INDEX));
 
                     bigLayout.addView(layoutAverages[i]);
                 }

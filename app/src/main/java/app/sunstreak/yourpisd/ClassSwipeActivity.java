@@ -18,18 +18,10 @@
 package app.sunstreak.yourpisd;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
-import android.app.ActionBar;
-import android.app.ActionBar.Tab;
 import android.app.AlertDialog;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -69,7 +61,7 @@ import app.sunstreak.yourpisd.util.DateHelper;
 
 
 @SuppressLint("ValidFragment")
-public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.TabListener {
+public class ClassSwipeActivity extends ActionBarActivity {
     static List<Fragment> mFragments;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -117,13 +109,11 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
         termNum = getIntent().getExtras().getInt("termNum");
         studentIndex = getIntent().getExtras().getInt("studentIndex");
 
-        int startIndex = 0;
-        int initialClassID = getIntent().getExtras().getInt("classID");
+        int startIndex = getIntent().getExtras().getInt("classIndex");
 
         setTitle(TermFinder.Term.values()[termNum].name);
 
         session = ((YPApplication) getApplication()).session;
-
         session.studentIndex = studentIndex;
         student = session.getCurrentStudent();
         classesForTerm = student.getClassesForTerm(termNum);
@@ -135,10 +125,11 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
             args.putInt(DescriptionFragment.ARG_CLASS_ID, report.getClassID());
             Fragment fragment = new DescriptionFragment();
             fragment.setArguments(args);
-            if (report.getClassID() == initialClassID)
-                startIndex = mFragments.size();
             mFragments.add(fragment);
         }
+
+        if (startIndex >= mFragments.size() || startIndex < 0)
+            startIndex = 0;
 
         // Create the adapter that will return a fragment for each of the
         // primary sections of the app.
@@ -156,8 +147,11 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
         }
 
         setUpMaterialTabs(names);
-        mViewPager.setCurrentItem(startIndex);
 
+        if (mFragments.size() > 0)
+            mViewPager.setCurrentItem(startIndex);
+        else
+            spinner.setVisibility(View.INVISIBLE);
 //		mViewPager.setOffscreenPageLimit(5);
 
     }
@@ -169,25 +163,6 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
         slidingTabLayout.setSelectedIndicatorColors(getResources().getColor(R.color.white));
         slidingTabLayout.customTitle(temp);
         slidingTabLayout.setViewPager(mViewPager);
-    }
-
-    //fixed tab listener implemented
-    @Override
-    public void onTabReselected(Tab tab, FragmentTransaction ft) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onTabSelected(Tab tab, FragmentTransaction ft) {
-        mViewPager.setCurrentItem(tab.getPosition());
-
-    }
-
-    @Override
-    public void onTabUnselected(Tab tab, FragmentTransaction ft) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -202,9 +177,9 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
         getMenuInflater().inflate(R.menu.class_swipe_actions, menu);
 
         if (termNum == 0)
-            menu.findItem(R.id.previous_six_weeks).setEnabled(false);
-        else if (termNum == 7)
-            menu.findItem(R.id.next_six_weeks).setEnabled(false);
+            menu.findItem(R.id.previous_term).setEnabled(false);
+        else if (termNum == ClassReport.NUM_TERMS - 1)
+            menu.findItem(R.id.next_term).setEnabled(false);
 
         // Create list of students in Menu.
         if (session.MULTIPLE_STUDENTS) {
@@ -226,11 +201,11 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         Intent intent;
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.log_out:
+                session.logout();
                 SharedPreferences.Editor editor = getPreferences(Context.MODE_PRIVATE).edit();
                 editor.putBoolean("auto_login", false);
                 editor.commit();
@@ -247,27 +222,27 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
 			finish();
 			return true;
 			 */
-            case R.id.previous_six_weeks:
+            case R.id.previous_term:
                 intent = new Intent(this, ClassSwipeActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.putExtra("studentIndex", studentIndex);
                 intent.putExtra("classCount", classCount);
                 intent.putExtra("classIndex", mViewPager.getCurrentItem());
                 // Don't go into the negatives!
-                intent.putExtra("termIndex", Math.max(termNum - 1, 0));
+                intent.putExtra("termNum", Math.max(termNum - 1, 0));
                 startActivity(intent);
 
                 //			overridePendingTransition(R.anim.slide_in_down, R.anim.slide_out_up);
 
                 return true;
-            case R.id.next_six_weeks:
+            case R.id.next_term:
                 intent = new Intent(this, ClassSwipeActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.putExtra("studentIndex", studentIndex);
                 intent.putExtra("classCount", classCount);
                 intent.putExtra("classIndex", mViewPager.getCurrentItem());
                 // Don't go too positive!
-                intent.putExtra("termIndex", Math.min(termNum + 1, 7));
+                intent.putExtra("termNum", Math.min(termNum + 1, ClassReport.NUM_TERMS - 1));
                 startActivity(intent);
                 //			overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_down);
                 return true;
@@ -372,7 +347,6 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
             @Override
             protected Void doInBackground(TermReport... loading) {
                 try {
-                    //FIXME: remove the getClassGrade
                     for (TermReport t : loading)
                         t.loadReport(session);
                     mTermReport = loading[0];
@@ -544,9 +518,7 @@ public class ClassSwipeActivity extends ActionBarActivity implements ActionBar.T
             Intent intent = new Intent(ClassSwipeActivity.this, MainActivity.class);
             intent.putExtra("mainActivitySection", 1);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
             startActivity(intent);
-
             return true;
 
         }

@@ -21,6 +21,6 @@
     <string name="default_description">Description</string>
     <string name="default_category_name">Category Name</string>
     
-    <string name="previous_six_weeks">Previous Six Weeks</string>
-    <string name="next_six_weeks">Next Six Weeks</string>
+    <string name="previous_term">Previous Nine Weeks</string>
+    <string name="next_term">Next Nine Weeks</string>
 </resources>

@@ -66,7 +66,32 @@ public class Parser {
 	 */
 	@NonNull
 	public static void parseGradeSummary(String html, Map<Integer, ClassReport> classes) {
-		Document doc = Jsoup.parse(html);
+//		if (html == null)
+//			return;
+//		Document doc = Jsoup.parse(html);
+
+		Object[][] rawData = {
+				{1235, 1, "Evans, Gary", "Bio AP", 97},
+				{1236, 2, "Evans, Gary", "Bio Lab H", 97},
+				{1237, 3, "Nancy, Carolyn", "Calculus BC", 95},
+				{1238, 4, "Lee, Sarah", "Computer Science AP", 89},
+				{1239, 5, "Simoul, Bryan", "AP US History", 90},
+				{1240, 6, "Gray, Stephen", "English 3 AP", 92},
+				{1241, 7, "Brians, Emily", "Physics H", 95},
+		};
+
+		for (Object[] classData : rawData)
+		{
+			ClassReport report = new ClassReport((int)classData[0], (String) classData[3]);
+			report.setPeriodNum((int)classData[1]);
+			report.setTeacherName((String) classData[2]);
+
+			TermReport term = new TermReport(null, report, 0, false);
+			report.setTerm(0, term);
+			term.setGrade((int) classData[4]);
+			classes.put(report.getClassID(), report);
+		}
+
 		//TODO: parse grade summary
 	}
 
@@ -104,7 +129,10 @@ public class Parser {
 //			}
 //			return list;
 //		}
-		return new ArrayList<>();
+		ArrayList<Student> students = new ArrayList<>();
+		Student single = new Student(1111, "Doe, John C. (245643)", sess);
+		students.add(single);
+		return students;
 	}
 
 

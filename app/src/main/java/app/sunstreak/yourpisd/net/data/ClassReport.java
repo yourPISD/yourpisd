@@ -13,9 +13,9 @@ public class ClassReport {
     private String courseName;
     private String teacherName;
 
-
-    public ClassReport(int classID) {
+    public ClassReport(int classID, String courseName) {
         this.classID = classID;
+        this.courseName = courseName;
     }
 
     public TermReport getTerm(int termNum)
@@ -45,8 +45,9 @@ public class ClassReport {
             TermReport term = terms[i + off];
             if (term != null)
             {
-                grade += term.getGrade(); //TODO: compute grade.
-                weight += term.isExam() ? EXAM_WEIGHT : TERM_WEIGHT;
+                double termWeight = term.isExam() ? EXAM_WEIGHT : TERM_WEIGHT;
+                grade += term.getGrade() * termWeight; //TODO: compute grade.
+                weight += termWeight;
             }
         }
 

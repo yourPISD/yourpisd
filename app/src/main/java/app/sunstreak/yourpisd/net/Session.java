@@ -30,6 +30,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.jsoup.Connection;
+import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.FormElement;
@@ -87,12 +88,19 @@ public class Session {
 		if (params != null)
 			conn.data(params);
 
-		Connection.Response resp = conn.execute();
-
-		if (resp.statusCode() == 200)
-			return resp.body();
-		else
+		try
+		{
+			Connection.Response resp = conn.execute();
+			if (resp.statusCode() == 200)
+				return resp.body();
+			else
+				return null;
+		}
+		catch (HttpStatusException e)
+		{
 			return null;
+		}
+
 	}
 
 	/**
@@ -134,16 +142,13 @@ public class Session {
      */
 	public int checkExpiration() throws IOException
 	{
-		if (!loggedIn || new Date().after(expiration))
+		if (Jsoup.connect(GRADEBOOK_ROOT + "/InternetViewer/GradeSummary.aspx").cookies(cookies)
+				.execute().url().toExternalForm().equalsIgnoreCase(LOGON))
 		{
 			int status = login();
 			if (status <= 0)
 				return status;
 		}
-
-		Document doc = Jsoup.connect(GRADEBOOK_ROOT + "/InternetViewer/GradeSummary.aspx").cookies(cookies).get();
-		//TODO: parse to see whether if we experience an error msg with connection.
-
 		return 1;
 	}
 
@@ -222,7 +227,8 @@ public class Session {
 	public void updateExpirationDate()
 	{
 		try {
-			expiration = FULL_DATE_FORMAT.parse(cookies.get("SessionReminder"));
+			if (cookies.containsKey("SessionReminder"))
+				expiration = FULL_DATE_FORMAT.parse(cookies.get("SessionReminder"));
 		} catch (ParseException e) {
 			System.err.println("Unable to parse expiration time-stamp");
 			e.printStackTrace();

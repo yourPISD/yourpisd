@@ -35,14 +35,12 @@ public class TermReport {
 
     public void loadReport(Session session) throws IOException {
         GregorianCalendar now = new GregorianCalendar();
-
-        updateTime.add(Calendar.HOUR, 1);
         if (lastUpdate == null || updateTime == null || updateTime.before(now)) {
             Map<String, String> params = new HashMap<>();
-            params.put("Student", "" + student.studentId);
+            params.put("Student", "" + (student == null ? 0 : student.studentId));
             params.put("Enrollment", "" + classGrades.getClassID());
             params.put("Term", "" + termID);
-            Parser.parseTermReport(session.request("/InternetViewer/StudentAssignments.aspx", params), this);
+            //Parser.parseTermReport(session.request("/InternetViewer/StudentAssignments.aspx", params), this);
             lastUpdate = (GregorianCalendar) now.clone();
             now.add(Calendar.HOUR, 1);
             updateTime = now;

@@ -93,7 +93,7 @@ public class AppRater {
             	dialog.dismiss();
           }});
 
-                
-        dialog.show();        
+        //TODO: change this
+        //dialog.show();
     }
 }

@@ -100,9 +100,8 @@ public class Student {
 	 */
 	public void loadGradeSummary() throws IOException
 	{
-		//FIXME: parse grade summary
 		Map<String, String> params = new HashMap<>();
-		params.put("Student", ""+studentId);
+		params.put("Student", "" + studentId);
 		Parser.parseGradeSummary(session.request("InternetViewer/GradeSummary.aspx", params), classes);
 		lastUpdated = new DateTime();
 	}
@@ -113,6 +112,38 @@ public class Student {
 
 	public DateTime getLastUpdated() {
 		return lastUpdated;
+	}
+
+	public List<ClassReport> getSemesterClasses(boolean fall) {
+
+		List<ClassReport> classesForSemester = new ArrayList<>();
+		if (lastUpdated == null)
+			throw new RuntimeException("Grade Summary has not been fetched.");
+
+		int termOffset = fall ? 0 : ClassReport.SEMESTER_TERMS;
+		for (ClassReport report : classes.values()) {
+			boolean found = false;
+			for (int term = 0; term < ClassReport.SEMESTER_TERMS; term++)
+			{
+				if (!report.isClassDisabledAtTerm(term + termOffset))
+				{
+					found = true;
+					break;
+				}
+			}
+			if (found)
+				classesForSemester.add(report);
+		}
+		Collections.sort(classesForSemester, new Comparator<ClassReport>() {
+			@Override
+			public int compare(ClassReport a, ClassReport b) {
+				if (a.getPeriodNum() == b.getPeriodNum())
+					return a.getCourseName().compareTo(b.getCourseName());
+				else
+					return a.getPeriodNum() - b.getPeriodNum();
+			}
+		});
+		return classesForSemester;
 	}
 
 	//TODO: don't use Request class.

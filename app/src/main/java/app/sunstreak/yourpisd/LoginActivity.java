@@ -330,9 +330,6 @@ public class LoginActivity extends ActionBarActivity {
 			editor.putBoolean("auto_login", mAutoLogin);
 			editor.commit();
 
-			// Modified from default.
-
-
 			showProgress(true);
 			mAuthTask = new UserLoginTask();
 			mAuthTask.execute((Void) null);
@@ -493,6 +490,7 @@ public class LoginActivity extends ActionBarActivity {
 					// Simulate network access.
 					session = Session.createSession(mEmail, mPassword);
 					((YPApplication)getApplication()).session = session;
+					System.out.println("Logging in");
 
 					// Update the loading screen: Signing into with your credentials...
 					publishProgress(0);
