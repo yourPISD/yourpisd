@@ -122,7 +122,7 @@ public class LoginActivity extends ActionBarActivity {
 		//Load preference data.
 		final SharedPreferences sharedPrefs = getPreferences(Context.MODE_PRIVATE);
 		mAutoLogin = sharedPrefs.getBoolean("auto_login", false);
-		mRememberPassword = sharedPrefs.getBoolean("remember_password", false);
+		mRememberPassword = mAutoLogin || sharedPrefs.getBoolean("remember_password", false);
 
 		//Load session data.
 		try {
@@ -218,6 +218,8 @@ public class LoginActivity extends ActionBarActivity {
 			public void onCheckedChanged(CompoundButton button, boolean isChecked) {
 				mAutoLogin = isChecked;
 				mRememberPasswordCheckBox.setEnabled(!isChecked);
+				if (isChecked)
+					mRememberPassword = true;
 			}
 
 		});
@@ -325,7 +327,8 @@ public class LoginActivity extends ActionBarActivity {
 			SharedPreferences sharedPrefs = this.getPreferences(Context.MODE_PRIVATE);
 			SharedPreferences.Editor editor = sharedPrefs.edit();
 			editor.putString("email", mEmail);
-			editor.putString("e_password", mRememberPassword? encryptedPass: "");
+			mRememberPassword |= mAutoLogin;
+			editor.putString("e_password", mRememberPassword ? encryptedPass: "");
 			editor.putBoolean("remember_password", mRememberPassword);
 			editor.putBoolean("auto_login", mAutoLogin);
 			editor.commit();
@@ -490,7 +493,6 @@ public class LoginActivity extends ActionBarActivity {
 					// Simulate network access.
 					session = Session.createSession(mEmail, mPassword);
 					((YPApplication)getApplication()).session = session;
-					System.out.println("Logging in");
 
 					// Update the loading screen: Signing into with your credentials...
 					publishProgress(0);

@@ -295,8 +295,9 @@ public class MainActivity extends ActionBarActivity {
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.log_out:
-                session.logout();
-                session = null;
+                UserLogoutTask logout = new UserLogoutTask();
+                logout.execute(session);
+                ((YPApplication)getApplication()).session = session = null;
                 // attendanceTask.cancel(true);
                 // attendanceTask = null;
                 Editor editor = getSharedPreferences(
@@ -322,6 +323,15 @@ public class MainActivity extends ActionBarActivity {
             // startActivity(intentR);
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public static class UserLogoutTask extends AsyncTask<Session, Void, Void>{
+
+        @Override
+        protected Void doInBackground(Session... sessions) {
+            sessions[0].logout();
+            return null;
         }
     }
 

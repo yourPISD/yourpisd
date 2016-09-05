@@ -205,7 +205,11 @@ public class ClassSwipeActivity extends ActionBarActivity {
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.log_out:
-                session.logout();
+                MainActivity.UserLogoutTask logout = new MainActivity.UserLogoutTask();
+                ((YPApplication)getApplication()).session = session = null;
+                logout.execute(session);
+
+                //TODO: logout on MainActivity instead
                 SharedPreferences.Editor editor = getPreferences(Context.MODE_PRIVATE).edit();
                 editor.putBoolean("auto_login", false);
                 editor.commit();
