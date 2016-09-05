@@ -70,6 +70,8 @@ public class Parser {
 //			return;
 //		Document doc = Jsoup.parse(html);
 
+		//TODO: parse grade summary
+		//Testing
 		Object[][] rawData = {
 				{1235, 1, "Evans, Gary", "Bio AP", 97},
 				{1236, 2, "Evans, Gary", "Bio Lab H", 97},
@@ -80,10 +82,9 @@ public class Parser {
 				{1241, 7, "Brians, Emily", "Physics H", 95},
 		};
 
-		for (Object[] classData : rawData)
-		{
-			ClassReport report = new ClassReport((int)classData[0], (String) classData[3]);
-			report.setPeriodNum((int)classData[1]);
+		for (Object[] classData : rawData) {
+			ClassReport report = new ClassReport((int) classData[0], (String) classData[3]);
+			report.setPeriodNum((int) classData[1]);
 			report.setTeacherName((String) classData[2]);
 
 			TermReport term = new TermReport(null, report, 0, false);
@@ -91,8 +92,6 @@ public class Parser {
 			term.setGrade((int) classData[4]);
 			classes.put(report.getClassID(), report);
 		}
-
-		//TODO: parse grade summary
 	}
 
 
@@ -106,56 +105,11 @@ public class Parser {
 	@NonNull
 	public static List<Student> parseStudents (Session sess, String html) {
 		//FIXME: parsing students.
-//		List<String[]> list = new ArrayList<String[]>();
-//
-//		Element doc = Jsoup.parse(html);
-//		Element studentList = doc.getElementById("ctl00_ctl00_ContentPlaceHolder_uxStudentlist");
-//
-//
-//		// Only one student
-//		if (studentList.text().isEmpty()) {
-//			// {studentId, studentName}
-//			list.add(new String[] {doc.getElementById("ctl00_ctl00_ContentPlaceHolder_uxStudentId").attr("value"),
-//					doc.getElementById("ctl00_ctl00_ContentPlaceHolder_uxMultiple").text()});
-//			return list;
-//		}
-//		// Multiple students
-//		else {
-//			for (Element a : studentList.getElementsByTag("a")) {
-//				String name = a.text();
-//				String onClick = a.attr("onClick");
-//				String studentId = onClick.substring(onClick.indexOf('\'') + 1, onClick.lastIndexOf('\''));
-//				list.add(new String[] {studentId, name});
-//			}
-//			return list;
-//		}
+		//Testing data
 		ArrayList<Student> students = new ArrayList<>();
 		Student single = new Student(1111, "Doe, John C. (245643)", sess);
 		students.add(single);
 		return students;
-	}
-
-
-
-	public static String toTitleCase (String str) {
-		StringBuilder sb = new StringBuilder(str.length());
-		boolean capitalize = false;
-		for (int charNum = 0; charNum < str.length(); charNum++) {
-
-			capitalize = (charNum == 0 ||
-					! Character.isLetter(str.charAt(charNum - 1)) ||
-					( str.substring(charNum - 1, charNum + 1).equals("AP") ||
-							str.substring(charNum - 1, charNum + 1).equals("IB") ||
-							str.substring(charNum - 1, charNum + 1).equals("IH")) &&
-							(charNum + 2 >= str.length() || ! Character.isLetter(str.charAt(charNum + 1)) )
-					);
-
-			if (capitalize)
-				sb.append(Character.toUpperCase(str.charAt(charNum)));
-			else
-				sb.append(Character.toLowerCase(str.charAt(charNum)));
-		}
-		return sb.toString();
 	}
 
 

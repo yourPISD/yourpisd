@@ -40,7 +40,7 @@ public class TermReport {
             params.put("Student", "" + (student == null ? 0 : student.studentId));
             params.put("Enrollment", "" + classGrades.getClassID());
             params.put("Term", "" + termID);
-            //Parser.parseTermReport(session.request("/InternetViewer/StudentAssignments.aspx", params), this);
+            Parser.parseTermReport(session.request("/InternetViewer/StudentAssignments.aspx", params), this);
             lastUpdate = (GregorianCalendar) now.clone();
             now.add(Calendar.HOUR, 1);
             updateTime = now;
