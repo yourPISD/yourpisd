@@ -19,15 +19,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/previous_six_weeks"
+        android:id="@+id/previous_term"
         android:icon="@drawable/ic_action_prev"
         android:showAsAction="ifRoom"
-        android:title="@string/previous_six_weeks"/>
+        android:title="@string/previous_term"/>
     <item
-        android:id="@+id/next_six_weeks"
+        android:id="@+id/next_term"
         android:icon="@drawable/ic_action_next"
         android:showAsAction="ifRoom"
-        android:title="@string/next_six_weeks"/>
+        android:title="@string/next_term"/>
     <!--  
     <item
         android:id="@+id/refresh"

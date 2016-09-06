@@ -87,22 +87,27 @@ public class DateHelper {
 	 */
 	public static String daysRelative (String date) {
 		DateTime dt = dtf.parseDateTime(date);
+		return daysRelative(dt);
+	}
+
+	public static String daysRelative (DateTime dt)
+	{
 		while (dt.isBefore(startOfSchoolYear))
 			dt = dt.plusYears(1);
-		
+
 		// if today
 		if (dt.toLocalDate().isEqual(new LocalDate()))
 			return "(today)";
-		
+
 		Period pd;
 		if (dt.isBeforeNow())
 			pd = new Interval(dt, new LocalDate().toDateTimeAtStartOfDay()).toPeriod();
 		else
 			pd = new Interval(new LocalDate().toDateTimeAtStartOfDay(), dt).toPeriod();
 		StringBuilder sb = new StringBuilder("\n(");
-		
+
 		int compare = dt.compareTo(new DateTime());
-		
+
 		sb.append(pf.print(pd));
 		// Compare to now.
 		if (dt.isBeforeNow())
@@ -111,7 +116,7 @@ public class DateHelper {
 			sb.append(" from now)");
 		return sb.toString();
 	}
-	
+
 	public static String toHumanDate (String webDate) {
 		return webFormat.parseDateTime(webDate).toString(humanFormat);
 	}

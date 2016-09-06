@@ -25,16 +25,14 @@ import java.util.Locale;
 
 public class TermFinder {
 
-	// TODO Hardcoded for 2013-2014 school year
+	// TODO Hardcoded for 2016-2017 school year
 	public enum Term {
-		TERM_0 ("1st Six Weeks", "8/25/2014","9/30/2014"),
-		TERM_1 ("2nd Six Weeks", "9/30/2014", "11/5/2014"),
-		TERM_2 ("3rd Six Weeks", "11/5/2014", "12/19/2014"),
-		TERM_3 ("1st Semester Exam", "12/19/2014", "1/6/2015"),
-		TERM_4 ("4th Six Weeks", "1/6/2015", "2/20/2015"),
-		TERM_5 ("5th Six Weeks", "2/20/2015", "4/17/2015"),
-		TERM_6 ("6th Six Weeks", "4/17/2015", "6/5/2015"),
-		TERM_7 ("2nd Semester Exam", "6/5/2015", "6/6/2015");
+		TERM_0 ("1st Nine Weeks", "8/22/2016","10/14/2016"),
+		TERM_1 ("2nd Nine Weeks", "10/14/2016", "12/15/2016"),
+		TERM_2 ("1st Semester Exam", "12/15/2016", "1/3/2017"),
+		TERM_3 ("3rd Nine Weeks", "1/3/2017", "3/21/2017"),
+		TERM_4 ("4th Nine Weeks", "3/21/2017", "6/1/2017"),
+		TERM_5 ("2nd Semester Exam", "6/1/2017", "6/2/2017");
 		
 		public final String name;
 		public Date startDate;
@@ -56,12 +54,19 @@ public class TermFinder {
 	public static int getCurrentTermIndex() {
 		
 		Date d = Calendar.getInstance().getTime();
-		
-		for (int i = 0; i < Term.values().length; i++) {
-			if (d.compareTo(Term.values()[i].startDate) >= 0 && d.compareTo(Term.values()[i].endDate) <= 0)
+		Term[] vals = Term.values();
+
+		if (d.compareTo(vals[0].startDate) < 0)
+			return 0;
+		else if (d.compareTo(vals[vals.length - 1].startDate) > 0)
+			return vals.length - 1;
+
+		for (int i = 0; i < vals.length; i++) {
+			if (d.compareTo(vals[i].startDate) >= 0 && d.compareTo(vals[i].endDate) <= 0)
 				return i;
 		}
-		
+
+		//Shouldn't get over here.
 		return 0;
 	}
 	

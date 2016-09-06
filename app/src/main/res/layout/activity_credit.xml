@@ -49,15 +49,26 @@
             android:textSize="20sp" />
 
         <TextView
+            android:id="@+id/credit_update_developers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-light"
+            android:text="@string/credit_update_developers"
+            android:textSize="20sp"
+            android:layout_below="@+id/credit_developers"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp"/>
+
+        <TextView
             android:id="@+id/credit_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignLeft="@id/credit_developers"
-            android:layout_below="@id/credit_developers"
-            android:layout_marginTop="27dp"
             android:fontFamily="sans-serif-light"
             android:text="@string/credit_icon"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"/>
 
         <TextView
             android:id="@+id/copyright"
