@@ -69,15 +69,16 @@ public class DateHelper {
 		Period pd = new Interval(dt.getMillis(), Instant.now().getMillis()).toPeriod();
 		if (pd.getDays() > 0) {
 			sb.append(pd.getDays());
-			return sb.append(" days ago").toString();
+			return sb.append(pd.getDays() == 1 ? " day ago" : " days ago").toString();
 		}
 		if (pd.getHours() > 0)
-			sb.append(pd.getHours() + "hours ");
-		if (pd.getMinutes() > 0) {
-			sb.append(pd.getMinutes() + " minutes");
+			sb.append(pd.getHours()).append(pd.getHours() == 1 ? " hour " : " hours ");
+		if (pd.getMinutes() > 0)
+			sb.append(pd.getMinutes()).append(pd.getMinutes() == 1 ? " minute" : " minutes");
+		if (pd.getHours() > 0 || pd.getMinutes() > 0)
 			return sb.append(" ago").toString();
-		}
-		return sb.append("less than a minute ago").toString();
+		else
+			return sb.append("less than a minute ago").toString();
 
 	}
 	/**
