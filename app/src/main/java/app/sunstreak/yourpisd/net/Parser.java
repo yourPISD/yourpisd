@@ -63,13 +63,17 @@ public class Parser {
 		if (doc == null)
 			return;
 		Element main = doc.getElementById("Main").getElementById("Content").getElementById("ContentMain");
-		Elements categories = main.getElementsByTag("tBody").get(0).children();
 
-		for (Element category : categories)
+		Element categoryTable = main.getElementById("Categories");
+		if (categoryTable != null && categoryTable.children().size() > 0)
 		{
-			report.getCategories().add(new GradeCategory(category.getElementsByClass("description").get(0).html().split("\n")[0].trim(), Integer.parseInt(category.getElementsByClass("percent").get(0).html().replaceAll("[^0-9]", "")) * 0.01 ));
-			report.getCategories().get(report.getCategories().size() - 1).setGrade(Integer.parseInt(category.getElementsByClass("letter").get(1).child(0).child(0).child(0).html().replace("%", "")));
-			//Log.d("testTag", report.getCategories().get(report.getCategories().size() - 1).getGrade() + " " + report.getCategories().get(report.getCategories().size() - 1).getWeight() + " " + report.getCategories().get(report.getCategories().size() - 1).getType());
+			//For each <TR> element
+			for (Element category : categoryTable.children().get(0).children())
+			{
+				report.getCategories().add(new GradeCategory(category.getElementsByClass("description").get(0).html().split("\n")[0].trim(), Integer.parseInt(category.getElementsByClass("percent").get(0).html().replaceAll("[^0-9]", "")) * 0.01 ));
+				report.getCategories().get(report.getCategories().size() - 1).setGrade(Integer.parseInt(category.getElementsByClass("letter").get(1).child(0).child(0).child(0).html().replace("%", "")));
+				//Log.d("testTag", report.getCategories().get(report.getCategories().size() - 1).getGrade() + " " + report.getCategories().get(report.getCategories().size() - 1).getWeight() + " " + report.getCategories().get(report.getCategories().size() - 1).getType());
+			}
 		}
 	}
 
