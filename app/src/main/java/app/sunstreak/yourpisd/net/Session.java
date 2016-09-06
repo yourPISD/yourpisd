@@ -42,8 +42,9 @@ public class Session {
 	public static final String GRADEBOOK_ROOT = "https://gradebook.pisd.edu/Pinnacle/Gradebook";
 	public static final String LOGOFF = GRADEBOOK_ROOT + "/Logon.aspx?Action=Logout";
 	public static final String LOGON = GRADEBOOK_ROOT + "/logon.aspx";
+
+	// Example: Sat Sep 03 2016 20:31:32 GMT-0500 (Central Daylight Time)
 	public static final SimpleDateFormat FULL_DATE_FORMAT = new SimpleDateFormat("EEE MMM dd yyyy H:mm:ss 'GMT'z", Locale.ENGLISH);
-				//Example: Sat Sep 03 2016 20:31:32 GMT-0500 (Central Daylight Time)
 
 	private final String username;
 	private final String password;
@@ -100,25 +101,6 @@ public class Session {
 		}
 
 	}
-
-	/**
-	 * Temporary code. In use because login1.mypisd.net has an expired
-	 * certificate. with new portal website, should not be necessary.
-	 */
-	/*
-	 * public static void acceptAllCertificates() { TrustManager[] trustAllCerts
-	 * = new TrustManager[]{ new X509TrustManager() { public
-	 * java.security.cert.X509Certificate[] getAcceptedIssuers() { return null;
-	 * } public void checkClientTrusted( java.security.cert.X509Certificate[]
-	 * certs, String authType) { } public void checkServerTrusted(
-	 * java.security.cert.X509Certificate[] certs, String authType) { } } };
-	 * 
-	 * // Install the all-trusting trust manager try { SSLContext sc =
-	 * SSLContext.getInstance("SSL"); sc.init(null, trustAllCerts, new
-	 * java.security.SecureRandom());
-	 * HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory()); }
-	 * catch (Exception e) { } }
-	 */
 
 	public List<Student> getStudents() {
 		return students;
