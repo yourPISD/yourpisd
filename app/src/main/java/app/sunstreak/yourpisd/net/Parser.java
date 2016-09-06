@@ -29,6 +29,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.util.Log;
+import app.sunstreak.yourpisd.net.data.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,11 +37,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-
-import app.sunstreak.yourpisd.net.data.ClassReport;
-import app.sunstreak.yourpisd.net.data.ParseException;
-import app.sunstreak.yourpisd.net.data.Student;
-import app.sunstreak.yourpisd.net.data.TermReport;
 
 
 public class Parser {
@@ -57,7 +53,22 @@ public class Parser {
 	@NonNull
 	public static void parseTermReport(String html, TermReport report)
 	{
-		//TODO: parsing logic here..
+		if (html == null) {
+			System.err.println("No html for parsing detailed grade summary");
+			return;
+		}
+		Document doc = Jsoup.parse(html);
+		if (doc == null)
+			return;
+		Element main = doc.getElementById("Main").getElementById("Content").getElementById("ContentMain");
+		Elements categories = main.getElementsByTag("tBody").get(0).children();
+
+		for (Element category : categories)
+		{
+			report.getCategories().add(new GradeCategory(category.getElementsByClass("description").get(0).html().split("\n")[0].trim(), Integer.parseInt(category.getElementsByClass("percent").get(0).html().replaceAll("[^0-9]", "")) * 0.01 ));
+			report.getCategories().get(report.getCategories().size() - 1).setGrade(Integer.parseInt(category.getElementsByClass("letter").get(1).child(0).child(0).child(0).html().replace("%", "")));
+			//Log.d("testTag", report.getCategories().get(report.getCategories().size() - 1).getGrade() + " " + report.getCategories().get(report.getCategories().size() - 1).getWeight() + " " + report.getCategories().get(report.getCategories().size() - 1).getType());
+		}
 	}
 
 	/** Parses average of each term from GradeSummary.aspx.
