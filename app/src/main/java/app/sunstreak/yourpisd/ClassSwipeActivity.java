@@ -1,24 +1,4 @@
-/**
- * This file is part of yourPISD.
- *
- *  yourPISD is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  yourPISD is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with yourPISD.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 package app.sunstreak.yourpisd;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -49,6 +29,9 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import app.sunstreak.yourpisd.googleutil.SlidingTabLayout;
 import app.sunstreak.yourpisd.net.Session;
@@ -206,7 +189,7 @@ public class ClassSwipeActivity extends ActionBarActivity {
         switch (item.getItemId()) {
             case R.id.log_out:
                 MainActivity.UserLogoutTask logout = new MainActivity.UserLogoutTask();
-                ((YPApplication)getApplication()).session = session = null;
+                ((YPApplication) getApplication()).session = session = null;
                 logout.execute(session);
 
                 //TODO: logout on MainActivity instead
@@ -219,7 +202,7 @@ public class ClassSwipeActivity extends ActionBarActivity {
                 startActivity(intent);
                 return true;
             /*
-		case R.id.refresh:
+        case R.id.refresh:
 			Intent refreshIntent = new Intent(this, LoginActivity.class);
 			refreshIntent.putExtra("Refresh", true);
 			startActivity(refreshIntent);

@@ -18,18 +18,15 @@ public class ClassReport {
         this.courseName = courseName;
     }
 
-    public TermReport getTerm(int termNum)
-    {
+    public TermReport getTerm(int termNum) {
         return terms[termNum];
     }
 
-    public boolean isClassDisabledAtTerm(int termNum)
-    {
+    public boolean isClassDisabledAtTerm(int termNum) {
         return terms[termNum] == null;
     }
 
-    public int calculateAverage(boolean fallSem)
-    {
+    public int calculateAverage(boolean fallSem) {
         //TODO: find the average? and correct weighting
         final double TERM_WEIGHT = .4;
         final double EXAM_WEIGHT = .2;
@@ -40,11 +37,9 @@ public class ClassReport {
 
         double grade = 0;
         double weight = 0;
-        for (int i = 0; i < SEMESTER_TERMS; i++)
-        {
+        for (int i = 0; i < SEMESTER_TERMS; i++) {
             TermReport term = terms[i + off];
-            if (term != null)
-            {
+            if (term != null) {
                 double termWeight = term.isExam() ? EXAM_WEIGHT : TERM_WEIGHT;
                 grade += term.getGrade() * termWeight; //TODO: compute grade.
                 weight += termWeight;
@@ -54,7 +49,7 @@ public class ClassReport {
         if (weight == 0)
             return -1;
         else
-            return (int)Math.round(grade / weight);
+            return (int) Math.round(grade / weight);
     }
 
     public double getMaxGPA() {
@@ -75,8 +70,7 @@ public class ClassReport {
         return 4;
     }
 
-    public void setTerm(int termNum, TermReport term)
-    {
+    public void setTerm(int termNum, TermReport term) {
         terms[termNum] = term;
     }
 
