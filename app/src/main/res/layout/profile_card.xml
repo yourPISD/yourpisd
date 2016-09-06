@@ -42,24 +42,24 @@
             android:id="@+id/name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
             android:textSize="22sp"
-            android:paddingTop="5dp"/>
+            android:paddingTop="5dp"
+            android:gravity="left"/>
 
         <app.sunstreak.yourpisd.view.MyTextView
             android:id="@+id/gpaFall"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textSize="22sp" />
+            android:textSize="22sp"
+            android:gravity="left"/>
 
         <app.sunstreak.yourpisd.view.MyTextView
             android:id="@+id/gpaSpring"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
+            android:gravity="left"
             android:textSize="22sp"
-            android:paddingTop="5dp"/>
+            android:paddingBottom="5dp"/>
 
     </LinearLayout>
 
