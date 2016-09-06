@@ -56,13 +56,8 @@ public class Request {
 
 			URL obj = new URL(url);
 
-			URLConnection conn = obj.openConnection();
-
-			if (isSecure) {
-				((HttpsURLConnection) conn).setRequestMethod("GET");
-			} else {
-				((HttpURLConnection) conn).setRequestMethod("GET");
-			}
+			HttpURLConnection conn = ((HttpURLConnection) conn)obj.openConnection();
+			conn.setRequestMethod("GET");
 
 			conn.setUseCaches(false); // what does this do?
 
@@ -77,12 +72,7 @@ public class Request {
 				conn.setRequestProperty("Cookie", cookieRequest);
 			}
 
-			int responseCode;
-			if (isSecure) {
-				responseCode = ((HttpsURLConnection) conn).getResponseCode();
-			} else {
-				responseCode = ((HttpURLConnection) conn).getResponseCode();
-			}
+			int responseCode = conn.getResponseCode();
 
 			for (HttpCookie c : cs.getCookies()) {
 				cookies.add(c.toString());
