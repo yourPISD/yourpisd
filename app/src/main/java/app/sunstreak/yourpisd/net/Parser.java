@@ -89,8 +89,18 @@ public class Parser {
 					continue;
 
 				// Term date
-				//System.out.println(termName.get(0).getElementsByClass("term").html() + " of " + termName.get(0).getElementsByClass("year").html());
-				//System.out.println();
+				String tempDate = termName.get(0).getElementsByClass("term").html();
+				int termDate = 0;
+				if (tempDate.equalsIgnoreCase("2nd Nine Weeks"))
+					termDate = 1;
+				else if (tempDate.equalsIgnoreCase("1st Semester Exam")) // TODO: test when nearby exams
+					termDate = 2;
+				else if (tempDate.equalsIgnoreCase("3rd Nine Weeks"))
+					termDate = 3;
+				else if (tempDate.equalsIgnoreCase("4th Nine Weeks"))
+					termDate = 4;
+				else if (tempDate.equalsIgnoreCase("2nd Semester Exam"))
+					termDate = 5;
 
 				// For each course
 				Elements courses = term.children().get(1).children().get(0).children();
@@ -126,8 +136,8 @@ public class Parser {
 					report.setPeriodNum(Integer.parseInt(period));
 					report.setTeacherName(teacher);
 
-					TermReport termReport = new TermReport(null, report, 0, false);
-					report.setTerm(0, termReport);
+					TermReport termReport = new TermReport(null, report, termDate, false);
+					report.setTerm(termDate, termReport);
 					termReport.setGrade(grade);
 					classes.put(report.getClassID(), report);
 				}
