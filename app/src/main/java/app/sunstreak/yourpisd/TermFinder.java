@@ -27,47 +27,29 @@ public class TermFinder {
 
 	// TODO Hardcoded for 2016-2017 school year
 	public enum Term {
-		TERM_0 ("1st Nine Weeks", "8/22/2016","10/14/2016"),
-		TERM_1 ("2nd Nine Weeks", "10/14/2016", "12/15/2016"),
-		TERM_2 ("1st Semester Exam", "12/15/2016", "1/3/2017"),
-		TERM_3 ("3rd Nine Weeks", "1/3/2017", "3/21/2017"),
-		TERM_4 ("4th Nine Weeks", "3/21/2017", "6/1/2017"),
-		TERM_5 ("2nd Semester Exam", "6/1/2017", "6/2/2017");
+		TERM_0 ("1st Nine Weeks"),
+		TERM_1 ("2nd Nine Weeks"),
+		TERM_2 ("1st Semester Exam"),
+		TERM_3 ("3rd Nine Weeks"),
+		TERM_4 ("4th Nine Weeks"),
+		TERM_5 ("2nd Semester Exam");
 		
 		public final String name;
-		public Date startDate;
-		public Date endDate;
 
-		private Term (String name, String startDate, String endDate) {
+		private Term (String name) {
 			this.name = name;
-			try {
-				this.startDate = dfm.parse(startDate);
-				this.endDate = dfm.parse(endDate);
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
 		}
 	}
-	
-	public static final SimpleDateFormat dfm = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
+
+	private static int termIndex = 0;
+
+	public static void setCurrentTermIndex(int termIndex)
+	{
+		TermFinder.termIndex = termIndex;
+	}
 
 	public static int getCurrentTermIndex() {
-		
-		Date d = Calendar.getInstance().getTime();
-		Term[] vals = Term.values();
-
-		if (d.compareTo(vals[0].startDate) < 0)
-			return 0;
-		else if (d.compareTo(vals[vals.length - 1].startDate) > 0)
-			return vals.length - 1;
-
-		for (int i = 0; i < vals.length; i++) {
-			if (d.compareTo(vals[i].startDate) >= 0 && d.compareTo(vals[i].endDate) <= 0)
-				return i;
-		}
-
-		//Shouldn't get over here.
-		return 0;
+		return termIndex;
 	}
 	
 }

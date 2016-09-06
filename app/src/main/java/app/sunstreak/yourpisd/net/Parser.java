@@ -29,6 +29,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.util.Log;
+
+import app.sunstreak.yourpisd.TermFinder;
 import app.sunstreak.yourpisd.net.data.*;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -87,84 +89,82 @@ public class Parser {
 			return;
 		Element main = doc.getElementById("Main").getElementById("Content");
 
-		// For each year
 		// TODO: test next year
 		Elements years = main.getElementById("ContentMain").getElementsByClass("calendar");
-		for (Element year : years)
+
+		// For each terms
+		// TODO: test after 9 weeks
+		int maxTermNum = 0;
+		Elements terms = years.get(0).getElementsByClass("term");
+		for (Element term : terms)
 		{
-			// For each terms
-			// TODO: test after 9 weeks
-			Elements terms = year.getElementsByClass("term");
-			for (Element term : terms)
+			Elements termName = term.getElementsByTag("h2");
+			if (termName.isEmpty())
+				continue;
+
+			//Search term name in the list of terms
+			String tempDate = termName.get(0).getElementsByClass("term").html();
+			int termNum = 0;
+			for (TermFinder.Term t : TermFinder.Term.values())
 			{
-				Elements termName = term.getElementsByTag("h2");
-				if (termName.isEmpty())
-					continue;
-
-				//Term Date
-				String tempDate = termName.get(0).getElementsByClass("term").html();
-				int termNum = 0;
-				if (tempDate.equalsIgnoreCase("2nd Nine Weeks"))
-					termNum = 1;
-				else if (tempDate.equalsIgnoreCase("1st Semester Exam")) // TODO: test when nearby exams
-					termNum = 2;
-				else if (tempDate.equalsIgnoreCase("3rd Nine Weeks"))
-					termNum = 3;
-				else if (tempDate.equalsIgnoreCase("4th Nine Weeks"))
-					termNum = 4;
-				else if (tempDate.equalsIgnoreCase("2nd Semester Exam"))
-					termNum = 5;
-
-				// For each course
-				Elements courses = term.children().get(1).children().get(0).children();
-				for (Element course : courses)
-				{
-					Elements courseMain = course.getElementsByTag("tr").get(0).children();
-
-					// Period number
-					String period = courseMain.get(0).html();
-					if (period.isEmpty())
-						period = "0";
-
-					// Course name
-					Element courseInfo = courseMain.get(1).children().get(0).children().get(0);
-					String name = courseInfo.html();
-					String query = courseInfo.attr("href").split("\\?", 2)[1];
-					String[] parts = query.split("[&=]");
-					//Parse course and term id
-					int courseID = -1;
-					int termID = -1;
-					for (int i = 0; i < parts.length - 1; i+=2)
-					{
-						if (parts[i].equalsIgnoreCase("Enrollment"))
-							courseID = Integer.parseInt(parts[i+1]);
-						if (parts[i].equalsIgnoreCase("Term"))
-							termID = Integer.parseInt(parts[i+1]);
-					}
-
-					// Teacher name
-					String teacher = courseMain.get(1).children().get(1).getElementsByClass("teacher").get(0).html();
-					// Course grade (might be empty string if no grade) - formatted as number + %
-					int grade;
-					if (courseMain.get(2).children().isEmpty())
-						grade = -1; //No grade exists.
-					else
-					{
-						String teemp = courseMain.get(2).children().get(0).children().get(0).children().get(0).html();
-						grade = Integer.parseInt(teemp.substring(0, teemp.length() - 1));
-					}
-
-					ClassReport report = new ClassReport(courseID, name);
-					report.setPeriodNum(Integer.parseInt(period));
-					report.setTeacherName(teacher);
-
-					TermReport termReport = new TermReport(null, report, termID, false);
-					report.setTerm(termNum, termReport);
-					termReport.setGrade(grade);
-					classes.put(report.getClassID(), report);
+				if (t.name.equalsIgnoreCase(tempDate)) {
+					termNum = t.ordinal();
+					break;
 				}
 			}
+			maxTermNum = Math.max(maxTermNum, termNum);
+
+			// For each course
+			Elements courses = term.children().get(1).children().get(0).children();
+			for (Element course : courses)
+			{
+				Elements courseMain = course.getElementsByTag("tr").get(0).children();
+
+				// Period number
+				String period = courseMain.get(0).html();
+				if (period.isEmpty())
+					period = "0";
+
+				// Course name
+				Element courseInfo = courseMain.get(1).children().get(0).children().get(0);
+				String name = courseInfo.html();
+				String query = courseInfo.attr("href").split("\\?", 2)[1];
+				String[] parts = query.split("[&=]");
+				//Parse course and term id
+				int courseID = -1;
+				int termID = -1;
+				for (int i = 0; i < parts.length - 1; i+=2)
+				{
+					if (parts[i].equalsIgnoreCase("Enrollment"))
+						courseID = Integer.parseInt(parts[i+1]);
+					if (parts[i].equalsIgnoreCase("Term"))
+						termID = Integer.parseInt(parts[i+1]);
+				}
+
+				// Teacher name
+				String teacher = courseMain.get(1).children().get(1).getElementsByClass("teacher").get(0).html();
+				// Course grade (might be empty string if no grade) - formatted as number + %
+				int grade;
+				if (courseMain.get(2).children().isEmpty())
+					grade = -1; //No grade exists.
+				else
+				{
+					String teemp = courseMain.get(2).children().get(0).children().get(0).children().get(0).html();
+					grade = Integer.parseInt(teemp.substring(0, teemp.length() - 1));
+				}
+
+				ClassReport report = new ClassReport(courseID, name);
+				report.setPeriodNum(Integer.parseInt(period));
+				report.setTeacherName(teacher);
+
+				TermReport termReport = new TermReport(null, report, termID, false);
+				report.setTerm(termNum, termReport);
+				termReport.setGrade(grade);
+				classes.put(report.getClassID(), report);
+			}
 		}
+
+		TermFinder.setCurrentTermIndex(maxTermNum);
 
 		//Log.v("parseTag",classes.toString());
 

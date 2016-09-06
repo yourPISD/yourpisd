@@ -484,7 +484,7 @@ public class ClassSwipeActivity extends ActionBarActivity {
                 if (categoryScore < 0)
                     scoreView.setText("");
                 else
-                    scoreView.setText(categoryScore);
+                    scoreView.setText("" + categoryScore);
                 card.addView(categoryLayout);
 
                 /*********************
