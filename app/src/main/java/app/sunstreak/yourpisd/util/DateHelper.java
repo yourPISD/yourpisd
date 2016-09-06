@@ -74,9 +74,9 @@ public class DateHelper {
 		if (pd.getHours() > 0)
 			sb.append(pd.getHours()).append(pd.getHours() == 1 ? " hour " : " hours ");
 		if (pd.getMinutes() > 0)
-			sb.append(pd.getMinutes()).append(pd.getMinutes() == 1 ? " minute" : " minutes");
+			sb.append(pd.getMinutes()).append(pd.getMinutes() == 1 ? " minute " : " minutes ");
 		if (pd.getHours() > 0 || pd.getMinutes() > 0)
-			return sb.append(" ago").toString();
+			return sb.append("ago").toString();
 		else
 			return sb.append("less than a minute ago").toString();
 
