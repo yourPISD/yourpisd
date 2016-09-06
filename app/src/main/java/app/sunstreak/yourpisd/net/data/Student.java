@@ -102,7 +102,7 @@ public class Student {
 	{
 		Map<String, String> params = new HashMap<>();
 		params.put("Student", "" + studentId);
-		Parser.parseGradeSummary(session.request("InternetViewer/GradeSummary.aspx", params), classes);
+		Parser.parseGradeSummary(session.request("/InternetViewer/GradeSummary.aspx", params), classes);
 		lastUpdated = new DateTime();
 	}
 

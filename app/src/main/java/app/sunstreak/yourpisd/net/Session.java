@@ -91,13 +91,11 @@ public class Session {
 		try
 		{
 			Connection.Response resp = conn.execute();
-			if (resp.statusCode() == 200)
-				return resp.body();
-			else
-				return null;
+			return resp.body();
 		}
 		catch (HttpStatusException e)
 		{
+			e.printStackTrace();
 			return null;
 		}
 

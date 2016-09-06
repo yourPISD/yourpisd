@@ -67,8 +67,10 @@ public class Parser {
 	 */
 	@NonNull
 	public static void parseGradeSummary(String html, Map<Integer, ClassReport> classes) {
-		if (html == null)
+		if (html == null) {
+			System.err.println("No html for parsing grade summary");
 			return;
+		}
 		Document doc = Jsoup.parse(html);
 		if (doc == null)
 			return;
@@ -117,15 +119,15 @@ public class Parser {
 
 					// Course name
 					String name = courseMain.get(1).children().get(0).children().get(0).html();
-
 					String temp = courseMain.get(1).children().get(0).children().get(0).attr("abs:href");
 					int courseId = Integer.parseInt(temp.substring(temp.indexOf("=") + 1, temp.indexOf("&")));
+
 					// Teacher name
 					String teacher = courseMain.get(1).children().get(1).getElementsByClass("teacher").get(0).html();
 					// Course grade (might be empty string if no grade) - formatted as number + %
 					int grade;
 					if (courseMain.get(2).children().isEmpty())
-						grade = 100; //TODO: what grade if no grades are assigned???
+						grade = -1; //No grade exists.
 					else
 					{
 						String teemp = courseMain.get(2).children().get(0).children().get(0).children().get(0).html();
@@ -179,7 +181,6 @@ public class Parser {
 	 */
 	@NonNull
 	public static List<Student> parseStudents (Session sess, String html) {
-		//FIXME: parsing students.
 		if (html == null)
 			return null;
 		Document doc = Jsoup.parse(html);
@@ -191,7 +192,8 @@ public class Parser {
 
 		//TODO multiple students
 		ArrayList<Student> students = new ArrayList<>();
-		Student single = new Student(1111, main.html(), sess); //TODO fix id
+		Element singleID = doc.getElementById("ctl00_ctl00_ContentPlaceHolder_uxStudentId");
+		Student single = new Student(Integer.parseInt(singleID.attr("value")), main.html(), sess);
 		students.add(single);
 		return students;
 	}
