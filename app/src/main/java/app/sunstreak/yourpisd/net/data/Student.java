@@ -22,18 +22,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
 
 import org.joda.time.DateTime;
+import org.jsoup.Connection;
+import org.jsoup.HttpStatusException;
+import org.jsoup.Jsoup;
 
 import app.sunstreak.yourpisd.net.Parser;
 import app.sunstreak.yourpisd.net.Session;
-import app.sunstreak.yourpisd.util.Request;
 
 public class Student {
 
@@ -146,29 +148,18 @@ public class Student {
 		return classesForSemester;
 	}
 
-	//TODO: don't use Request class.
-	private void loadStudentPicture() throws IOException{
-		Set<String> cookies = new HashSet<>();
-		Map<String, String> cookieMap = session.getCookies();
-
-		for (Map.Entry<String, String> cookie : cookieMap.entrySet())
+	private void loadStudentPicture() throws IOException {
+		try
 		{
-			cookies.add(cookie.getKey() + "=" + cookie.getValue());
+			byte[] data = Jsoup.connect("https://gradebook.pisd.edu/Pinnacle/Gradebook/common/picture.ashx")
+					.method(Connection.Method.GET).data("studentId", "" + studentId)
+					.cookies(session.getCookies()).ignoreContentType(true).execute().bodyAsBytes();
+
+			studentPictureBitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
 		}
-
-		ArrayList<String[]> requestProperties = new ArrayList<>();
-		requestProperties.add(new String[] { "Content-Type", "image/jpeg" });
-
-		Object[] response = Request.getBitmap(
-				"https://gradebook.pisd.edu/Pinnacle/Gradebook/common/picture.ashx?student="
-						+ studentId, cookies, requestProperties, true);
-
-		studentPictureBitmap = response == null ? null : (Bitmap) response[0];
-
-		for (String cookieStr : cookies)
+		catch (HttpStatusException ex)
 		{
-			String[] parts = cookieStr.split("=", 2);
-			cookieMap.put(parts[0], parts[1]);
+			ex.printStackTrace();
 		}
 	}
 
@@ -181,7 +172,6 @@ public class Student {
 			{
 				e.printStackTrace();
 			}
-
 		return studentPictureBitmap;
 	}
 

@@ -43,7 +43,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:textSize="22sp" />
+            android:textSize="22sp"
+            android:paddingTop="5dp"/>
 
         <app.sunstreak.yourpisd.view.MyTextView
             android:id="@+id/gpaFall"
@@ -57,7 +58,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:textSize="22sp" />
+            android:textSize="22sp"
+            android:paddingTop="5dp"/>
 
     </LinearLayout>
 
