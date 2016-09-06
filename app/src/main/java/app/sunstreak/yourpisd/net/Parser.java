@@ -90,19 +90,19 @@ public class Parser {
 				if (termName.isEmpty())
 					continue;
 
-				// Term date
+				//Term Date
 				String tempDate = termName.get(0).getElementsByClass("term").html();
-				int termDate = 0;
+				int termNum = 0;
 				if (tempDate.equalsIgnoreCase("2nd Nine Weeks"))
-					termDate = 1;
+					termNum = 1;
 				else if (tempDate.equalsIgnoreCase("1st Semester Exam")) // TODO: test when nearby exams
-					termDate = 2;
+					termNum = 2;
 				else if (tempDate.equalsIgnoreCase("3rd Nine Weeks"))
-					termDate = 3;
+					termNum = 3;
 				else if (tempDate.equalsIgnoreCase("4th Nine Weeks"))
-					termDate = 4;
+					termNum = 4;
 				else if (tempDate.equalsIgnoreCase("2nd Semester Exam"))
-					termDate = 5;
+					termNum = 5;
 
 				// For each course
 				Elements courses = term.children().get(1).children().get(0).children();
@@ -110,17 +110,26 @@ public class Parser {
 				{
 					Elements courseMain = course.getElementsByTag("tr").get(0).children();
 
-
-
 					// Period number
 					String period = courseMain.get(0).html();
 					if (period.isEmpty())
 						period = "0";
 
 					// Course name
-					String name = courseMain.get(1).children().get(0).children().get(0).html();
-					String temp = courseMain.get(1).children().get(0).children().get(0).attr("abs:href");
-					int courseId = Integer.parseInt(temp.substring(temp.indexOf("=") + 1, temp.indexOf("&")));
+					Element courseInfo = courseMain.get(1).children().get(0).children().get(0);
+					String name = courseInfo.html();
+					String query = courseInfo.attr("href").split("\\?", 2)[1];
+					String[] parts = query.split("[&=]");
+					//Parse course and term id
+					int courseID = -1;
+					int termID = -1;
+					for (int i = 0; i < parts.length - 1; i+=2)
+					{
+						if (parts[i].equalsIgnoreCase("Enrollment"))
+							courseID = Integer.parseInt(parts[i+1]);
+						if (parts[i].equalsIgnoreCase("Term"))
+							termID = Integer.parseInt(parts[i+1]);
+					}
 
 					// Teacher name
 					String teacher = courseMain.get(1).children().get(1).getElementsByClass("teacher").get(0).html();
@@ -134,12 +143,12 @@ public class Parser {
 						grade = Integer.parseInt(teemp.substring(0, teemp.length() - 1));
 					}
 
-					ClassReport report = new ClassReport(courseId, name);
+					ClassReport report = new ClassReport(courseID, name);
 					report.setPeriodNum(Integer.parseInt(period));
 					report.setTeacherName(teacher);
 
-					TermReport termReport = new TermReport(null, report, termDate, false);
-					report.setTerm(termDate, termReport);
+					TermReport termReport = new TermReport(null, report, termID, false);
+					report.setTerm(termNum, termReport);
 					termReport.setGrade(grade);
 					classes.put(report.getClassID(), report);
 				}
