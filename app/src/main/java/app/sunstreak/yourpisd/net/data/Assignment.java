@@ -2,8 +2,6 @@ package app.sunstreak.yourpisd.net.data;
 
 import org.joda.time.DateTime;
 
-import java.util.Date;
-
 /**
  * This represents one class assignment.
  */

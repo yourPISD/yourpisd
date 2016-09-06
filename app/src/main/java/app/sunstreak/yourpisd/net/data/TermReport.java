@@ -47,13 +47,11 @@ public class TermReport {
         }
     }
 
-    public boolean isExam()
-    {
+    public boolean isExam() {
         return exam;
     }
 
-    public List<GradeCategory> getCategories()
-    {
+    public List<GradeCategory> getCategories() {
         return categories;
     }
 
