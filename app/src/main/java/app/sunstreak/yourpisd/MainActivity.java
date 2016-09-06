@@ -12,6 +12,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -878,8 +879,6 @@ public class MainActivity extends ActionBarActivity {
 
                     profileCards[i] = (LinearLayout) inflater.inflate(
                             R.layout.profile_card, bigLayout, false);
-                    ImageView profilePic = (ImageView) profileCards[i]
-                            .findViewById(R.id.profilePic);
                     TextView name = (TextView) profileCards[i]
                             .findViewById(R.id.name);
                     name.setText(session.getStudents().get(i).name);
@@ -918,10 +917,6 @@ public class MainActivity extends ActionBarActivity {
                     if (pictureNotLoaded) {
                         StudentPictureTask spTask = new StudentPictureTask();
                         spTask.execute(i);
-                    } else {
-                        Drawable picture = new BitmapDrawable(getResources(),
-                                pics[i]);
-                        profilePic.setImageDrawable(picture);
                     }
 
                     RelativeLayout gpaCalc = (RelativeLayout) inflater.inflate(
@@ -1117,8 +1112,6 @@ public class MainActivity extends ActionBarActivity {
             return rootView;
         }
 
-        static Bitmap[] pics = new Bitmap[session.getStudents().size()];
-
         public class StudentPictureTask extends
                 AsyncTask<Integer, Void, Bitmap> {
 
@@ -1127,10 +1120,9 @@ public class MainActivity extends ActionBarActivity {
             @Override
             protected Bitmap doInBackground(Integer... args) {
                 taskStudentIndex = args[0];
-                pics[taskStudentIndex] = session.getStudents()
+                Bitmap profile = session.getStudents()
                         .get(taskStudentIndex).getStudentPicture();
-                return session.getStudents().get(taskStudentIndex)
-                        .getStudentPicture();
+                return profile;
             }
 
             @Override
@@ -1167,7 +1159,7 @@ public class MainActivity extends ActionBarActivity {
                             .setBackgroundResource(R.drawable.card_click_blue);
                 else
                     profileCards[i]
-                            .setBackgroundResource(R.drawable.card_click_blue);
+                            .setBackgroundResource(R.drawable.card_blue); //TODO: is this correct?
             }
         }
 
