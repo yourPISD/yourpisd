@@ -472,6 +472,7 @@ public class MainActivity extends ActionBarActivity {
 
             bigLayout.addView(weekNames);
 
+            //TODO: reload semester grades.
             final int termOff = ClassReport.SEMESTER_TERMS * semesterNum;
             List<ClassReport> classList = session.getCurrentStudent().getSemesterClasses(semester);
             for (ClassReport report : classList) {
@@ -783,8 +784,7 @@ public class MainActivity extends ActionBarActivity {
     // }
 
     /**
-     * A dummy fragment representing a section of the app, but that simply
-     * displays dummy text.
+     * A fragment that displays the profile page or the current term grades
      */
     public static class MainActivityFragment extends YPMainFragment {
         /**

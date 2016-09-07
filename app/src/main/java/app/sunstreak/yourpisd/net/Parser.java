@@ -106,6 +106,7 @@ public class Parser {
                 String name = courseInfo.html();
                 String query = courseInfo.attr("href").split("\\?", 2)[1];
                 String[] parts = query.split("[&=]");
+
                 //Parse course and term id
                 int courseID = -1;
                 int termID = -1;
@@ -116,53 +117,41 @@ public class Parser {
                         termID = Integer.parseInt(parts[i + 1]);
                 }
 
-                // Teacher name
-                String teacher = courseMain.get(1).children().get(1).getElementsByClass("teacher").get(0).html();
-                // Course grade (might be empty string if no grade) - formatted as number + %
+                //Add new class report as needed.
+                ClassReport report;
+                if (classes.containsKey(courseID))
+                    report = classes.get(courseID);
+                else{
+                    // Teacher name
+                    String teacher = courseMain.get(1).children().get(1).getElementsByClass("teacher").get(0).html();
+                    report = new ClassReport(courseID, name);
+                    report.setPeriodNum(Integer.parseInt(period));
+                    report.setTeacherName(teacher);
+                    classes.put(courseID, report);
+                }
+
+                //Create a new term as needed.
+                TermReport termReport = report.getTerm(termNum);
+                if (termReport == null)
+                {
+                    termReport = new TermReport(null, report, termID, false);
+                    report.setTerm(termNum, termReport);
+                    classes.put(report.getClassID(), report);
+                }
+
+                // Course grade for a term (might be empty string if no grade) - formatted as number + %
                 int grade;
                 if (courseMain.get(2).children().isEmpty())
                     grade = -1; //No grade exists.
                 else {
-                    String teemp = courseMain.get(2).children().get(0).children().get(0).children().get(0).html();
-                    grade = Integer.parseInt(teemp.substring(0, teemp.length() - 1));
+                    String gradeString = courseMain.get(2).children().get(0).children().get(0).children().get(0).html();
+                    grade = Integer.parseInt(gradeString.substring(0, gradeString.length() - 1));
                 }
-
-                ClassReport report = new ClassReport(courseID, name);
-                report.setPeriodNum(Integer.parseInt(period));
-                report.setTeacherName(teacher);
-
-                TermReport termReport = new TermReport(null, report, termID, false);
-                report.setTerm(termNum, termReport);
                 termReport.setGrade(grade);
-                classes.put(report.getClassID(), report);
             }
         }
 
         TermFinder.setCurrentTermIndex(maxTermNum);
-
-        //Log.v("parseTag",classes.toString());
-
-        //Testing
-        /*Object[][] rawData = {
-				{1235, 1, "Evans, Gary", "Bio AP", 96},
-				{1236, 2, "Evans, Gary", "Bio Lab H", 97},
-				{1237, 3, "Nancy, Carolyn", "Calculus BC", 95},
-				{1238, 4, "Lee, Sarah", "Computer Science AP", 89},
-				{1239, 5, "Simoul, Bryan", "AP US History", 90},
-				{1240, 6, "Gray, Stephen", "English 3 AP", 92},
-				{1241, 7, "Brians, Emily", "Physics H", 95},
-		};
-
-		for (Object[] classData : rawData) {
-			ClassReport report = new ClassReport((int) classData[0], (String) classData[3]);
-			report.setPeriodNum((int) classData[1]);
-			report.setTeacherName((String) classData[2]);
-
-			TermReport term = new TermReport(null, report, 0, false);
-			report.setTerm(0, term);
-			term.setGrade((int) classData[4]);
-			classes.put(report.getClassID(), report);
-		}*/
     }
 
 
