@@ -1,5 +1,11 @@
 package app.sunstreak.yourpisd;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+
+import org.joda.time.DateTime;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -414,6 +420,7 @@ public class MainActivity extends ActionBarActivity {
         public static final String[] PAGE_TITLE_SHORT = {"Fall", "Spring"};
         private View rootView;
         private int semesterNum;
+        private Semester semester;
 
         @Override
         public String getPageTitle() {
@@ -426,6 +433,7 @@ public class MainActivity extends ActionBarActivity {
 
             Bundle args = getArguments();
             semesterNum = args.getInt(ARG_SEMESTER_NUM);
+            semester = semesterNum == 0 ? Semester.FALL : Semester.SPRING;
 
             rootView = inflater.inflate(R.layout.tab_summary, container, false);
 
@@ -465,7 +473,7 @@ public class MainActivity extends ActionBarActivity {
             bigLayout.addView(weekNames);
 
             final int termOff = ClassReport.SEMESTER_TERMS * semesterNum;
-            List<ClassReport> classList = session.getCurrentStudent().getSemesterClasses(semesterNum == 0);
+            List<ClassReport> classList = session.getCurrentStudent().getSemesterClasses(semester);
             for (ClassReport report : classList) {
                 View classSummary = inflater.inflate(R.layout.main_grade_summary_linear_layout,
                         bigLayout, false);
@@ -503,7 +511,7 @@ public class MainActivity extends ActionBarActivity {
                 }
 
                 // Display the sememster average.
-                int average = report.calculateAverage(semesterNum == 0);
+                int average = report.calculateAverage(semester);
                 if (average != -1) {
                     String averageText = Integer.toString(average);
 
@@ -882,28 +890,19 @@ public class MainActivity extends ActionBarActivity {
                     TextView name = (TextView) profileCards[i]
                             .findViewById(R.id.name);
                     name.setText(session.getStudents().get(i).name);
-                    int lastId = R.id.name;
-
-                    for (int semesterNum = 0; semesterNum < 2; semesterNum++) {
+                    for (Semester sem : Semester.values()) {
                         final double gpaValue = session.getStudents().get(i)
-                                .getGPA(semesterNum);
+                                .getGPA(sem);
 
-                        if (!Double.isNaN(gpaValue)) {
-                            TextView gpa;
-                            if (semesterNum == 0) {
-                                gpa = (TextView) profileCards[i]
-                                        .findViewById(R.id.gpaFall);
-
-                            } else
-                                gpa = (TextView) profileCards[i]
-                                        .findViewById(R.id.gpaSpring);
-                            gpa.setText(String
-                                    .format("%s GPA: %.4f",
-                                            SummaryFragment.PAGE_TITLE_SHORT[semesterNum],
+                        TextView txtGPA = (TextView) profileCards[i].findViewById(
+                                sem == Semester.FALL ? R.id.gpaFall : R.id.gpaSpring);
+                        if (!Double.isNaN(gpaValue))
+                            txtGPA.setText(String.format("%s GPA: %.4f",
+                                            SummaryFragment.PAGE_TITLE_SHORT[sem.ordinal()],
                                             gpaValue));
-
-                            lastId = gpa.getId();
-                        }
+                        else
+                            txtGPA.setText(String.format("%s GPA: ---",
+                                    SummaryFragment.PAGE_TITLE_SHORT[sem.ordinal()]));
                     }
 
                     // profileCards[i].addView(profilePic);
@@ -1078,7 +1077,8 @@ public class MainActivity extends ActionBarActivity {
                     TextView className = (TextView) layoutAverages[i].findViewById(R.id.name);
                     className.setText(report.getCourseName());
 
-                    int avg = report.calculateAverage(termNum < ClassReport.SEMESTER_TERMS);
+                    Semester sem = Semester.findSemester(termNum);
+                    int avg = report.calculateAverage(sem);
 
                     // Only set the grade text if the average is not empty
                     if (avg >= 0) {

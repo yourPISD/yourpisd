@@ -1,6 +1,8 @@
 package app.sunstreak.yourpisd.net.data;
 
 
+import app.sunstreak.yourpisd.Semester;
+
 public class ClassReport {
     //TODO: teacher email
     public static int SEMESTER_TERMS = 3;
@@ -26,14 +28,12 @@ public class ClassReport {
         return terms[termNum] == null;
     }
 
-    public int calculateAverage(boolean fallSem) {
+    public int calculateAverage(Semester sem){
         //TODO: find the average? and correct weighting
         final double TERM_WEIGHT = .4;
         final double EXAM_WEIGHT = .2;
 
-        int off = 0;
-        if (!fallSem)
-            off += SEMESTER_TERMS;
+        int off = sem.ordinal() * SEMESTER_TERMS;
 
         double grade = 0;
         double weight = 0;

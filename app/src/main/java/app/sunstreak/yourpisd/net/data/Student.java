@@ -8,6 +8,7 @@ import org.jsoup.Connection;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 
+import app.sunstreak.yourpisd.Semester;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,7 +16,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import app.sunstreak.yourpisd.net.Parser;
 import app.sunstreak.yourpisd.net.Session;
 
@@ -82,7 +82,8 @@ public class Student {
     /**
      * Loads the grade summary for the student.
      */
-    public void loadGradeSummary() throws IOException {
+    public void loadGradeSummary() throws IOException
+    {
         Map<String, String> params = new HashMap<>();
         params.put("Student", "" + studentId);
         Parser.parseGradeSummary(session.request("/InternetViewer/GradeSummary.aspx", params), classes);
@@ -97,17 +98,19 @@ public class Student {
         return lastUpdated;
     }
 
-    public List<ClassReport> getSemesterClasses(boolean fall) {
+    public List<ClassReport> getSemesterClasses(Semester sem) {
 
         List<ClassReport> classesForSemester = new ArrayList<>();
         if (lastUpdated == null)
             throw new RuntimeException("Grade Summary has not been fetched.");
 
-        int termOffset = fall ? 0 : ClassReport.SEMESTER_TERMS;
+        int termOffset = sem == Semester.FALL ? 0 : ClassReport.SEMESTER_TERMS;
         for (ClassReport report : classes.values()) {
             boolean found = false;
-            for (int term = 0; term < ClassReport.SEMESTER_TERMS; term++) {
-                if (!report.isClassDisabledAtTerm(term + termOffset)) {
+            for (int term = 0; term < ClassReport.SEMESTER_TERMS; term++)
+            {
+                if (!report.isClassDisabledAtTerm(term + termOffset))
+                {
                     found = true;
                     break;
                 }
@@ -128,13 +131,16 @@ public class Student {
     }
 
     private void loadStudentPicture() throws IOException {
-        try {
+        try
+        {
             byte[] data = Jsoup.connect("https://gradebook.pisd.edu/Pinnacle/Gradebook/common/picture.ashx")
                     .method(Connection.Method.GET).data("studentId", "" + studentId)
                     .cookies(session.getCookies()).ignoreContentType(true).execute().bodyAsBytes();
 
             studentPictureBitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-        } catch (HttpStatusException ex) {
+        }
+        catch (HttpStatusException ex)
+        {
             ex.printStackTrace();
         }
     }
@@ -143,7 +149,9 @@ public class Student {
         if (studentPictureBitmap == null)
             try {
                 loadStudentPicture();
-            } catch (IOException e) {
+            }
+            catch (IOException e)
+            {
                 e.printStackTrace();
             }
         return studentPictureBitmap;
@@ -151,31 +159,48 @@ public class Student {
 
     public double getCumulativeGPA(float oldCumulativeGPA, float numCredits) {
         // Averages given GPA with spring semester grades.
-        int SPRING_SEMESTER = 1;
-        double oldSum = (double) oldCumulativeGPA * (double) numCredits;
-        double newNumCredits = numCredits + getNumCredits(SPRING_SEMESTER);
-        return (getGPA(SPRING_SEMESTER) * getNumCredits(SPRING_SEMESTER) + oldSum)
-                / newNumCredits;
+
+        double totalSum = (double) oldCumulativeGPA * (double) numCredits;
+        double newCredits = numCredits;
+
+        double fallCredits = getNumCredits(Semester.FALL);
+        double fallSum = getGPA(Semester.FALL) * fallCredits;
+        double springCredits = getNumCredits(Semester.SPRING);
+        double springSum = getGPA(Semester.SPRING) * springCredits;
+
+        if (!Double.isNaN(fallSum)) {
+            newCredits += fallCredits;
+            totalSum += fallSum;
+        }
+
+        if (!Double.isNaN(springSum)) {
+            newCredits += springCredits;
+            totalSum += springSum;
+        }
+
+        return totalSum / newCredits;
     }
 
-    public int getNumCredits(int semesterIndex) {
-        return getClassesForTerm(semesterIndex * ClassReport.SEMESTER_TERMS).size();
+    public double getNumCredits(Semester sem) {
+        return getSemesterClasses(sem).size() * .5;
     }
 
-    public double getGPA(int semesterIndex) {
-
+    public double getGPA(Semester sem) {
         double pointSum = 0;
         int pointCount = 0;
 
-        for (ClassReport report : getClassesForTerm(semesterIndex * ClassReport.SEMESTER_TERMS)) {
-            int grade = report.calculateAverage(semesterIndex == 0);
+        for (ClassReport report : getSemesterClasses(sem)) {
+            int grade = report.calculateAverage(sem);
 
-            if (grade >= 70) {
+            if (grade >= 70)
+            {
                 //Passing class.
                 double classGPA = maxGPA(report.getCourseName()) - gpaDifference(grade);
                 pointSum += classGPA;
                 pointCount++;
-            } else if (grade >= 0) {
+            }
+            else if (grade >= 0)
+            {
                 //Failing class
                 pointCount++;
             }
@@ -186,7 +211,6 @@ public class Student {
         else
             return pointSum / pointCount;
     }
-
 
     public static double gpaDifference(int grade) {
         if (grade < 0)
@@ -217,16 +241,16 @@ public class Student {
         return -1;
     }
 
-//	public int examScoreRequired(int classIndex, int gradeDesired) {
-//			double sum = 0;
-//			for (int i = 0; i < 3; i++) {
-//				sum += classes.getJSONObject(classMatch[classIndex])
-//						.getJSONArray("terms").getJSONObject(i)
-//						.getInt("average");
-//			}
-//			sum = (gradeDesired - 0.5) * 4 - sum;
-//			return (int) Math.ceil(sum);
-//	}
+//    public int examScoreRequired(int classIndex, int gradeDesired) {
+//            double sum = 0;
+//            for (int i = 0; i < 3; i++) {
+//                sum += classes.getJSONObject(classMatch[classIndex])
+//                        .getJSONArray("terms").getJSONObject(i)
+//                        .getInt("average");
+//            }
+//            sum = (gradeDesired - 0.5) * 4 - sum;
+//            return (int) Math.ceil(sum);
+//    }
 
 
 }
