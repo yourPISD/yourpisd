@@ -1,23 +1,6 @@
-/*
- * Copyright 2014 Google Inc. All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package app.sunstreak.yourpisd.googleutil;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -83,6 +66,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
     private final SlidingTabStrip mTabStrip;
     private ArrayList<String> titleArray = new ArrayList<String>();
     private boolean useCustom = false;
+
     public SlidingTabLayout(Context context) {
         this(context, null);
     }
@@ -107,7 +91,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
 
     /**
      * Set the custom {@link TabColorizer} to be used.
-     *
+     * <p>
      * If you only require simple custmisation then you can use
      * {@link #setSelectedIndicatorColors(int...)} to achieve
      * similar effects.
@@ -143,7 +127,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
      * Set the custom layout to be inflated for the tab views.
      *
      * @param layoutResId Layout id to be inflated
-     * @param textViewId id of the {@link android.widget.TextView} in the inflated view
+     * @param textViewId  id of the {@link android.widget.TextView} in the inflated view
      */
     public void setCustomTabView(int layoutResId, int textViewId) {
         mTabViewLayoutId = layoutResId;
@@ -216,10 +200,9 @@ public class SlidingTabLayout extends HorizontalScrollView {
                 lp.width = 0;
                 lp.weight = 1;
             }
-            if(!useCustom)
+            if (!useCustom)
                 tabTitleView.setText(adapter.getPageTitle(i));
-            else
-            {
+            else {
                 tabTitleView.setText(titleArray.get(i));
             }
             tabTitleView.setTextColor(getResources().getColor(R.color.white));
@@ -329,12 +312,11 @@ public class SlidingTabLayout extends HorizontalScrollView {
             }
         }
     }
-    public void customTitle(ArrayList<String> title)
-    {
-        for(int i = 0; i< title.size(); i++)
-        {
+
+    public void customTitle(ArrayList<String> title) {
+        for (int i = 0; i < title.size(); i++) {
             titleArray.add(title.get(i));
         }
-        useCustom= true;
+        useCustom = true;
     }
 }

@@ -1,20 +1,3 @@
-/**
- * This file is part of yourPISD.
- *
- *  yourPISD is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  yourPISD is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with yourPISD.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 package app.sunstreak.yourpisd;
 
 import java.util.Arrays;
@@ -40,11 +23,11 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
@@ -66,6 +49,11 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import org.joda.time.DateTime;
+
+import java.util.Arrays;
+import java.util.List;
 
 import app.sunstreak.yourpisd.googleutil.SlidingTabLayout;
 import app.sunstreak.yourpisd.net.Session;
@@ -299,7 +287,7 @@ public class MainActivity extends ActionBarActivity {
             case R.id.log_out:
                 UserLogoutTask logout = new UserLogoutTask();
                 logout.execute(session);
-                ((YPApplication)getApplication()).session = session = null;
+                ((YPApplication) getApplication()).session = session = null;
                 // attendanceTask.cancel(true);
                 // attendanceTask = null;
                 Editor editor = getSharedPreferences(
@@ -317,18 +305,18 @@ public class MainActivity extends ActionBarActivity {
                 Intent intentCred1 = new Intent(this, CreditActivity.class);
                 startActivity(intentCred1);
                 throw new Error();
-            // case R.id.refresh:
-            // dg.clearData();
-            // Intent intentR = new Intent(this, LoginActivity.class);
-            // intentR.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            // intentR.putExtra("Refresh", true);
-            // startActivity(intentR);
+                // case R.id.refresh:
+                // dg.clearData();
+                // Intent intentR = new Intent(this, LoginActivity.class);
+                // intentR.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                // intentR.putExtra("Refresh", true);
+                // startActivity(intentR);
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    public static class UserLogoutTask extends AsyncTask<Session, Void, Void>{
+    public static class UserLogoutTask extends AsyncTask<Session, Void, Void> {
 
         @Override
         protected Void doInBackground(Session... sessions) {
@@ -548,7 +536,7 @@ public class MainActivity extends ActionBarActivity {
             }
 
             View glue = new View(getActivity());
-            glue.setLayoutParams(new LinearLayout.LayoutParams(0,20,1f));
+            glue.setLayoutParams(new LinearLayout.LayoutParams(0, 20, 1f));
             bigLayout.addView(glue);
             bigLayout.setWeightSum(1);
 
@@ -611,7 +599,7 @@ public class MainActivity extends ActionBarActivity {
             summaryLastUpdated.setPadding(10, 0, 0, 0);
             bigLayout.addView(summaryLastUpdated);
 
-            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(0,0);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(0, 0);
             params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 1);
             params.addRule(RelativeLayout.ALIGN_PARENT_TOP, 1);
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 1);
@@ -863,7 +851,7 @@ public class MainActivity extends ActionBarActivity {
             }
 
             // Semester Goals : Shall remain dormant until May 2014.
-			/*
+            /*
 			 * // Load saved goals. goals = new
 			 * int[dg.getCurrentStudent().getClassMatch().length];
 			 * Arrays.fill(goals, -1); SharedPreferences sharedPrefs =
