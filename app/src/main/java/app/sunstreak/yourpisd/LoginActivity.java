@@ -169,19 +169,19 @@ public class LoginActivity extends ActionBarActivity {
             alertDialog.show();
         }
 
-        //April Fools
-        if (DateHelper.isAprilFools()) {
-            LinearLayout container = (LinearLayout) mLoginFormView.findViewById(R.id.container);
-            ImageView logo = (ImageView) container.findViewById(R.id.logo);
-            InputStream is;
-            try {
-                is = getAssets().open("doge.png");
-                logo.setImageBitmap(BitmapFactory.decodeStream(is));
-                is.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        //April Fools -- Broken...
+//        if (DateHelper.isAprilFools()) {
+//            LinearLayout container = (LinearLayout) mLoginFormView.findViewById(R.id.container);
+//            ImageView logo = (ImageView) container.findViewById(R.id.logo);
+//            InputStream is;
+//            try {
+//                is = getAssets().open("doge.png");
+//                logo.setImageBitmap(BitmapFactory.decodeStream(is));
+//                is.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
 
         // Set up the Remember Password CheckBox
         mRememberPasswordCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
