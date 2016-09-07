@@ -797,7 +797,6 @@ public class MainActivity extends ActionBarActivity {
         private int position;
         private int termNum = CURRENT_TERM_INDEX;
         LinearLayout[] profileCards;
-        private boolean pictureNotLoaded = true;
 
         @Override
         public String getPageTitle() {
@@ -913,10 +912,8 @@ public class MainActivity extends ActionBarActivity {
 
                     bigLayout.addView(profileCards[i]);
 
-                    if (pictureNotLoaded) {
-                        StudentPictureTask spTask = new StudentPictureTask();
-                        spTask.execute(i);
-                    }
+                    StudentPictureTask spTask = new StudentPictureTask();
+                    spTask.execute(i);
 
                     RelativeLayout gpaCalc = (RelativeLayout) inflater.inflate(
                             R.layout.main_gpa_calc, bigLayout, false);
@@ -1130,7 +1127,6 @@ public class MainActivity extends ActionBarActivity {
                 ImageView profilePic = (ImageView) profileCards[taskStudentIndex]
                         .findViewById(R.id.profilePic);
                 profilePic.setImageBitmap(result);
-                pictureNotLoaded = false;
             }
         }
 
