@@ -304,7 +304,6 @@ public class MainActivity extends ActionBarActivity {
                 System.out.println("SHOWING CREDITS");
                 Intent intentCred1 = new Intent(this, CreditActivity.class);
                 startActivity(intentCred1);
-                throw new Error();
                 // case R.id.refresh:
                 // dg.clearData();
                 // Intent intentR = new Intent(this, LoginActivity.class);
