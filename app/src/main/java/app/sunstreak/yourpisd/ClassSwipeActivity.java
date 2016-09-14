@@ -363,7 +363,7 @@ public class ClassSwipeActivity extends ActionBarActivity {
                     builder.setTitle(view.getName());
 
                     StringBuilder msg = new StringBuilder();
-                    msg.append(view.getCategory().getType())
+                    msg.append(view.getCategory() == null ? "No category" : view.getCategory().getType())
                             .append("\nDue Date: " + DateHelper.daysRelative(view.getDueDate()))
                             .append("\nWeight: x" + String.format("%.1f", view.getWeight()));
                     try {
@@ -415,8 +415,17 @@ public class ClassSwipeActivity extends ActionBarActivity {
 
             LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
+            boolean hasNoCategoryGrades = false;
+            for (Assignment grade : mTermReport.getAssignments())
+                if (grade.getCategory().getType().equals(GradeCategory.NO_CATEGORY))
+                {
+                    hasNoCategoryGrades = true;
+                    break;
+                }
 
             for (GradeCategory category : mTermReport.getCategories()) {
+                if (category.getType().equals(GradeCategory.NO_CATEGORY) && !hasNoCategoryGrades)
+                    continue;
                 LinearLayout card = new LinearLayout(getActivity());
                 card.setOrientation(LinearLayout.VERTICAL);
                 card.setBackgroundResource(R.drawable.card_custom);
@@ -427,7 +436,7 @@ public class ClassSwipeActivity extends ActionBarActivity {
                 // for every grade in this term [any category]
                 for (Assignment grade : mTermReport.getAssignments()) {
                     // only if this grade is in the category which we're looking for
-                    if (grade.getCategory().equals(category)) {
+                    if (category.equals(grade.getCategory())) {
                         LinearLayout innerLayout = (LinearLayout) inflater.inflate(R.layout.class_swipe_grade_view, card, false);
 
                         TextView descriptionView = (TextView) innerLayout.findViewById(R.id.description);

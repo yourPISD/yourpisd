@@ -4,6 +4,8 @@ package app.sunstreak.yourpisd.net.data;
  * Represents a grade category
  */
 public class GradeCategory {
+    public static String NO_CATEGORY = "No category";
+
     private final String type;
     private final double weight;
     private int grade = -1;

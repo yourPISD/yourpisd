@@ -39,19 +39,22 @@ public class Parser {
         Element main = doc.getElementById("Main").getElementById("Content").getElementById("ContentMain");
 
         //refill grade categories and assignments
-        report.getCategories().clear();
+        List<GradeCategory> categories = report.getCategories();
+        categories.clear();
         report.getAssignments().clear();
 
         Element categoryTable = main.getElementById("Categories");
         if (categoryTable != null && categoryTable.children().size() > 0) {
             //For each <TR> element
             for (Element category : categoryTable.children().get(0).children()) {
-                report.getCategories().add(new GradeCategory(category.getElementsByClass("description").get(0).html().split("\n")[0].trim(), Integer.parseInt(category.getElementsByClass("percent").get(0).html().replaceAll("[^0-9]", "")) * 0.01));
-                report.getCategories().get(report.getCategories().size() - 1).setGrade(Integer.parseInt(category.getElementsByClass("letter").get(1).child(0).child(0).child(0).html().replace("%", "")));
+                categories.add(new GradeCategory(category.getElementsByClass("description").get(0).html().split("\n")[0].trim(), Integer.parseInt(category.getElementsByClass("percent").get(0).html().replaceAll("[^0-9]", "")) * 0.01));
+                categories.get(categories.size() - 1).setGrade(Integer.parseInt(category.getElementsByClass("letter").get(1).child(0).child(0).child(0).html().replace("%", "")));
                 //Log.d("testTag", report.getCategories().get(report.getCategories().size() - 1).getGrade() + " " + report.getCategories().get(report.getCategories().size() - 1).getWeight() + " " + report.getCategories().get(report.getCategories().size() - 1).getType());
             }
-
         }
+
+        GradeCategory noCategory = new GradeCategory(GradeCategory.NO_CATEGORY, 0);
+        categories.add(noCategory); //Put no-category grades at the end (if there are any).
 
         Element assignments = main.getElementById("Assignments");
         if (assignments != null && assignments.children().size() > 0)
@@ -65,33 +68,29 @@ public class Parser {
             {
                 String name = org.jsoup.parser.Parser.unescapeEntities(assignment.getElementsByClass("title").get(0).html().replaceAll("&amp;", "&"), true);
 
-                GradeCategory category = report.getCategories().get(0);
-                String temp = "";
-                try
+                Elements divCategory = assignment.getElementsByClass("category");
+                GradeCategory category = noCategory;
+                if (!divCategory.isEmpty())
                 {
-                    temp = assignment.getElementsByClass("category").get(0).html();
-                } catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-                for (GradeCategory cc : report.getCategories())
-                {
-                    if (cc.getType().equals(temp ))
+                    String catName = divCategory.get(0).html();
+                    for (GradeCategory cc : categories)
                     {
-                        category = cc;
-                        break;
+                        if (cc.getType().equals(catName))
+                        {
+                            category = cc;
+                            break;
+                        }
                     }
                 }
 
                 final int year = 2016; //TODO: year of fall semester
                 final String[] months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-                try
+
+                Elements spanDate = assignment.getElementsByClass("m");
+                if (!spanDate.isEmpty())
                 {
-                    month = Arrays.asList(months).indexOf(assignment.getElementsByClass("m").get(0).html()) + 1;
-                    day = Integer.parseInt(assignment.getElementsByClass("m").get(0).parent().html().replaceAll("[^0-9]", ""));
-                } catch (Exception e)
-                {
-                    //e.printStackTrace();
+                    month = Arrays.asList(months).indexOf(spanDate.get(0).html()) + 1;
+                    day = Integer.parseInt(spanDate.get(0).parent().html().replaceAll("[^0-9]", ""));
                 }
                 DateTime date = new DateTime(year, month, day, 0, 0);
                 if (date.getMonthOfYear() < 7) //spring semester
@@ -106,7 +105,7 @@ public class Parser {
                 else
                     newAssignment.setWeight(Double.parseDouble(weight.get(0).html().replaceAll("[^0-9]", "")));
 
-                temp = assignment.getElementsByClass("points").get(0).html();
+                String temp = assignment.getElementsByClass("points").get(0).html();
                 if (temp.isEmpty())
                     newAssignment.setGrade(-1); //TODO: Grade doesn't exist
                 else
