@@ -66,7 +66,14 @@ public class Parser {
                 String name = assignment.getElementsByClass("title").get(0).html();
 
                 GradeCategory category = report.getCategories().get(0);
-                String temp = assignment.getElementsByClass("category").get(0).html();
+                String temp = "";
+                try
+                {
+                    temp = assignment.getElementsByClass("category").get(0).html();
+                } catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
                 for (GradeCategory cc : report.getCategories())
                 {
                     if (cc.getType().equals(temp ))
