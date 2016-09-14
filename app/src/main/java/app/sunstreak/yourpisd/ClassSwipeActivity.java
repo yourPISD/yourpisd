@@ -436,7 +436,7 @@ public class ClassSwipeActivity extends ActionBarActivity {
                         descriptionView.setId(ASSIGNMENT_NAME_ID);
 
                         TextView txtGrade = (TextView) innerLayout.findViewById(R.id.grade);
-                        txtGrade.setText("" + (grade.getGrade() == -1 ? "" : String.format("%.0f", grade.getGrade())));
+                        txtGrade.setText(grade.getGrade() == -1 ? "" : String.format("%.0f", grade.getGrade()));
 
                         innerLayout.setOnClickListener(new AssignmentDetailListener(grade));
 
