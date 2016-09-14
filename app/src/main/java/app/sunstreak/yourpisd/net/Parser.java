@@ -63,7 +63,7 @@ public class Parser {
             //for each assignment
             for (Element assignment : assignments.children().get(0).children())
             {
-                String name = assignment.getElementsByClass("title").get(0).html();
+                String name = org.jsoup.parser.Parser.unescapeEntities(assignment.getElementsByClass("title").get(0).html().replaceAll("&amp;", "&"), true);
 
                 GradeCategory category = report.getCategories().get(0);
                 String temp = "";
