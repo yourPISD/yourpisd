@@ -16,12 +16,8 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
+import android.view.*;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -29,18 +25,13 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import app.sunstreak.yourpisd.googleutil.SlidingTabLayout;
+import app.sunstreak.yourpisd.net.Session;
+import app.sunstreak.yourpisd.net.data.*;
+import app.sunstreak.yourpisd.util.DateHelper;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import app.sunstreak.yourpisd.googleutil.SlidingTabLayout;
-import app.sunstreak.yourpisd.net.Session;
-import app.sunstreak.yourpisd.net.data.Assignment;
-import app.sunstreak.yourpisd.net.data.ClassReport;
-import app.sunstreak.yourpisd.net.data.GradeCategory;
-import app.sunstreak.yourpisd.net.data.Student;
-import app.sunstreak.yourpisd.net.data.TermReport;
-import app.sunstreak.yourpisd.util.DateHelper;
 
 
 @SuppressLint("ValidFragment")
@@ -445,7 +436,7 @@ public class ClassSwipeActivity extends ActionBarActivity {
                         descriptionView.setId(ASSIGNMENT_NAME_ID);
 
                         TextView txtGrade = (TextView) innerLayout.findViewById(R.id.grade);
-                        txtGrade.setText("" + grade.getGrade());
+                        txtGrade.setText("" + (grade.getGrade() == -1 ? "" : String.format("%.0f", grade.getGrade())));
 
                         innerLayout.setOnClickListener(new AssignmentDetailListener(grade));
 
