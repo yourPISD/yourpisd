@@ -1,21 +1,18 @@
 package app.sunstreak.yourpisd.net;
 
 import android.support.annotation.NonNull;
-
+import app.sunstreak.yourpisd.TermFinder;
+import app.sunstreak.yourpisd.net.data.*;
+import org.joda.time.DateTime;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import app.sunstreak.yourpisd.TermFinder;
-import app.sunstreak.yourpisd.net.data.ClassReport;
-import app.sunstreak.yourpisd.net.data.GradeCategory;
-import app.sunstreak.yourpisd.net.data.Student;
-import app.sunstreak.yourpisd.net.data.TermReport;
 
 
 public class Parser {
@@ -41,6 +38,10 @@ public class Parser {
             return;
         Element main = doc.getElementById("Main").getElementById("Content").getElementById("ContentMain");
 
+        //refill grade categories and assignments
+        report.getCategories().clear();
+        report.getAssignments().clear();
+
         Element categoryTable = main.getElementById("Categories");
         if (categoryTable != null && categoryTable.children().size() > 0) {
             //For each <TR> element
@@ -48,6 +49,66 @@ public class Parser {
                 report.getCategories().add(new GradeCategory(category.getElementsByClass("description").get(0).html().split("\n")[0].trim(), Integer.parseInt(category.getElementsByClass("percent").get(0).html().replaceAll("[^0-9]", "")) * 0.01));
                 report.getCategories().get(report.getCategories().size() - 1).setGrade(Integer.parseInt(category.getElementsByClass("letter").get(1).child(0).child(0).child(0).html().replace("%", "")));
                 //Log.d("testTag", report.getCategories().get(report.getCategories().size() - 1).getGrade() + " " + report.getCategories().get(report.getCategories().size() - 1).getWeight() + " " + report.getCategories().get(report.getCategories().size() - 1).getType());
+            }
+
+        }
+
+        Element assignments = main.getElementById("Assignments");
+        if (assignments != null && assignments.children().size() > 0)
+        {
+            //an assignment doesn't have to have a due date. If it doesn't, use the last parsed due date
+            int month = 1;
+            int day = 1;
+
+            //for each assignment
+            for (Element assignment : assignments.children().get(0).children())
+            {
+                String name = assignment.getElementsByClass("title").get(0).html();
+
+                GradeCategory category = report.getCategories().get(0);
+                String temp = assignment.getElementsByClass("category").get(0).html();
+                for (GradeCategory cc : report.getCategories())
+                {
+                    if (cc.getType().equals(temp ))
+                    {
+                        category = cc;
+                        break;
+                    }
+                }
+
+                final int year = 2016; //TODO: year of fall semester
+                final String[] months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+                try
+                {
+                    month = Arrays.asList(months).indexOf(assignment.getElementsByClass("m").get(0).html()) + 1;
+                    day = Integer.parseInt(assignment.getElementsByClass("m").get(0).parent().html().replaceAll("[^0-9]", ""));
+                } catch (Exception e)
+                {
+                    //e.printStackTrace();
+                }
+                DateTime date = new DateTime(year, month, day, 0, 0);
+                if (date.getMonthOfYear() < 7) //spring semester
+                    date.plusYears(1);
+
+                Assignment newAssignment = new Assignment(name, category, date);
+                report.getAssignments().add(newAssignment);
+
+                Elements weight = assignment.getElementsByClass("weight");
+                if (weight.isEmpty())
+                    newAssignment.setWeight(1);
+                else
+                    newAssignment.setWeight(Double.parseDouble(weight.get(0).html().replaceAll("[^0-9]", "")));
+
+                temp = assignment.getElementsByClass("points").get(0).html();
+                if (temp.isEmpty())
+                    newAssignment.setGrade(-1); //TODO: Grade doesn't exist
+                else
+                    newAssignment.setGrade(Double.parseDouble(temp));
+
+                newAssignment.setMaxGrade(Double.parseDouble(assignment.getElementsByClass("max").get(0).html()));
+
+
+                //Log.d("testTag", "\n" + name + " === " + "\n");
             }
         }
     }
