@@ -31,7 +31,7 @@ public class Student {
 
     Bitmap studentPictureBitmap;
 
-    public static double maxGPA(String className) {
+    public static double getMaxGPA(String className) {
         className = className.toUpperCase();
 
         if (className.contains("PHYS IB SL")
@@ -195,7 +195,7 @@ public class Student {
             if (grade >= 70)
             {
                 //Passing class.
-                double classGPA = maxGPA(report.getCourseName()) - gpaDifference(grade);
+                double classGPA = getMaxGPA(report.getCourseName()) - gpaDifference(grade);
                 pointSum += classGPA;
                 pointCount++;
             }

@@ -107,7 +107,7 @@ public class Parser {
 
                 String temp = assignment.getElementsByClass("points").get(0).html();
                 if (temp.isEmpty())
-                    newAssignment.setGrade(-1); //TODO: Grade doesn't exist
+                    newAssignment.setGrade(-1);
                 else
                     newAssignment.setGrade(Double.parseDouble(temp));
 
@@ -187,15 +187,18 @@ public class Parser {
                 //Add new class report as needed.
                 ClassReport report;
                 if (classes.containsKey(courseID))
+                {
                     report = classes.get(courseID);
+                    report.setCourseName(name);
+                }
                 else{
-                    // Teacher name
-                    String teacher = courseMain.get(1).children().get(1).getElementsByClass("teacher").get(0).html();
                     report = new ClassReport(courseID, name);
-                    report.setPeriodNum(Integer.parseInt(period));
-                    report.setTeacherName(teacher);
                     classes.put(courseID, report);
                 }
+
+                String teacher = courseMain.get(1).children().get(1).getElementsByClass("teacher").get(0).html();
+                report.setPeriodNum(Integer.parseInt(period));
+                report.setTeacherName(teacher);
 
                 //Create a new term as needed.
                 TermReport termReport = report.getTerm(termNum);

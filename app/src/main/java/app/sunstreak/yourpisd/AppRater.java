@@ -57,8 +57,12 @@ public class AppRater {
         dialog.setButton(DialogInterface.BUTTON_POSITIVE, RATE_YOUR_PISD, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int id) {
-                mContext.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + APP_PNAME)));
+                if (editor != null) {
+                    editor.putBoolean("dontshowagain", true);
+                    editor.commit();
+                }
                 dialog.dismiss();
+                mContext.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + APP_PNAME)));
             }
         });
 
@@ -81,7 +85,6 @@ public class AppRater {
             }
         });
 
-        //TODO: change this
-        //dialog.show();
+        dialog.show();
     }
 }

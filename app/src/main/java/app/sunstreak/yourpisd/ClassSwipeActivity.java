@@ -53,9 +53,7 @@ public class ClassSwipeActivity extends ActionBarActivity {
     static ViewPager mViewPager;
 
     static int studentIndex;
-    static int classesMade = 0;
     static int termNum;
-    static boolean doneMakingClasses;
     static Session session;
 
     static Student student;
@@ -85,6 +83,11 @@ public class ClassSwipeActivity extends ActionBarActivity {
         setTitle(TermFinder.Term.values()[termNum].name);
 
         session = ((YPApplication) getApplication()).session;
+        if (session == null)
+        {
+            logout(false);
+            return;
+        }
         session.studentIndex = studentIndex;
         student = session.getCurrentStudent();
         classesForTerm = student.getClassesForTerm(termNum);
@@ -171,23 +174,50 @@ public class ClassSwipeActivity extends ActionBarActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        Intent intent;
-        // Handle item selection
-        switch (item.getItemId()) {
-            case R.id.log_out:
-                MainActivity.UserLogoutTask logout = new MainActivity.UserLogoutTask();
-                ((YPApplication) getApplication()).session = session = null;
-                logout.execute(session);
+    protected void onRestart() {
+        super.onRestart();
+        logout(false);
+    }
 
-                //TODO: logout on MainActivity instead
-                SharedPreferences.Editor editor = getPreferences(Context.MODE_PRIVATE).edit();
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        logout(false);
+    }
+
+    private void logout(boolean userIntervention)
+    {
+        if (session != null)
+        {
+            MainActivity.UserLogoutTask logout = new MainActivity.UserLogoutTask();
+            logout.execute(session);
+            ((YPApplication) getApplication()).session = session = null;
+
+            if (userIntervention)
+            {
+                SharedPreferences.Editor editor = getSharedPreferences(
+                        "LoginActivity", Context.MODE_PRIVATE).edit();
                 editor.putBoolean("auto_login", false);
                 editor.commit();
-                intent = new Intent(this, LoginActivity.class);
-                // Clear all activities between this and LoginActivity
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
+            }
+        }
+
+        SharedPreferences.Editor editor = getPreferences(Context.MODE_PRIVATE).edit();
+        editor.putBoolean("auto_login", false);
+        editor.commit();
+        Intent intent = new Intent(this, LoginActivity.class);
+        // Clear all activities between this and LoginActivity
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.log_out: //TODO: add logout button
+                logout(true);
                 return true;
             /*
         case R.id.refresh:
@@ -198,7 +228,7 @@ public class ClassSwipeActivity extends ActionBarActivity {
 			return true;
 			 */
             case R.id.previous_term:
-                intent = new Intent(this, ClassSwipeActivity.class);
+                Intent intent = new Intent(this, ClassSwipeActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.putExtra("studentIndex", studentIndex);
                 intent.putExtra("classIndex", mViewPager.getCurrentItem());
@@ -358,6 +388,7 @@ public class ClassSwipeActivity extends ActionBarActivity {
 
                     StringBuilder msg = new StringBuilder();
                     msg.append(view.getCategory() == null ? "No category" : view.getCategory().getType())
+                            .append("\nMax Grade: " + String.format("%.1f", view.getMaxGrade()))
                             .append("\nDue Date: " + DateHelper.daysRelative(view.getDueDate()))
                             .append("\nWeight: x" + String.format("%.1f", view.getWeight()));
                     try {

@@ -4,14 +4,12 @@ package app.sunstreak.yourpisd.net.data;
 import app.sunstreak.yourpisd.Semester;
 
 public class ClassReport {
-    //TODO: teacher email
     public static int SEMESTER_TERMS = 3;
     public static int NUM_TERMS = SEMESTER_TERMS * 2;
 
     private final int classID; //Unique ID that identifies which class this is.
     private final TermReport terms[] = new TermReport[NUM_TERMS]; //Terms in this Class.
     private int periodNum;
-    private int average = -1;
     private String courseName;
     private String teacherName;
 
@@ -50,24 +48,6 @@ public class ClassReport {
             return -1;
         else
             return (int) Math.round(grade / weight);
-    }
-
-    public double getMaxGPA() {
-        String className = getCourseName().toUpperCase();
-
-        if (className.contains("PHYS IB SL")
-                || className.contains("MATH STDY IB"))
-            return 4.5;
-
-        String[] split = className.split("[\\s()\\d/]+");
-
-        for (int i = 0; i < split.length; i++) {
-            if (split[i].equals("AP") || split[i].equals("IB"))
-                return 5;
-            if (split[i].equals("H") || split[i].equals("IH"))
-                return 4.5;
-        }
-        return 4;
     }
 
     public void setTerm(int termNum, TermReport term) {

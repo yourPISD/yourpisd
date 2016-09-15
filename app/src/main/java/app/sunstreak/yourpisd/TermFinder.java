@@ -2,7 +2,6 @@ package app.sunstreak.yourpisd;
 
 public class TermFinder {
 
-    // TODO Hardcoded for 2016-2017 school year
     public enum Term {
         TERM_0("1st Nine Weeks"),
         TERM_1("2nd Nine Weeks"),
@@ -13,7 +12,7 @@ public class TermFinder {
 
         public final String name;
 
-        private Term(String name) {
+        Term(String name) {
             this.name = name;
         }
     }

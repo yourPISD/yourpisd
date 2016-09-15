@@ -22,7 +22,7 @@ public class Testing {
     public static void main(String[] args) {
         /*
 		for (String s : classes)
-			System.out.println(s + "\t\t" + Student.maxGPA(s));
+			System.out.println(s + "\t\t" + Student.getMaxGPA(s));
 		*/
 		
 		/*

@@ -11,9 +11,6 @@ import java.util.Map;
 import app.sunstreak.yourpisd.net.Parser;
 import app.sunstreak.yourpisd.net.Session;
 
-/**
- * Created by Henry on 9/3/2016.
- */
 public class TermReport {
     private final Student student;
     private final ClassReport classGrades;
@@ -53,10 +50,6 @@ public class TermReport {
 
     public List<GradeCategory> getCategories() {
         return categories;
-    }
-
-    public Student getStudent() {
-        return student;
     }
 
     public int getGrade() {

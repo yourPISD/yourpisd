@@ -109,6 +109,18 @@ public class MainActivity extends ActionBarActivity {
     public Toolbar toolbar;
 
     @Override
+    protected void onRestart() {
+        super.onRestart();
+        logout(false);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        logout(false);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -126,10 +138,9 @@ public class MainActivity extends ActionBarActivity {
         session = ((YPApplication) getApplication()).session;
         if (session == null)
         {
-            logout();
+            logout(false);
             return;
         }
-
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the app.
@@ -278,7 +289,7 @@ public class MainActivity extends ActionBarActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-    private void logout()
+    private void logout(boolean userIntervention)
     {
         if (session != null)
         {
@@ -286,10 +297,13 @@ public class MainActivity extends ActionBarActivity {
             logout.execute(session);
             ((YPApplication) getApplication()).session = session = null;
 
-            Editor editor = getSharedPreferences(
-                    "LoginActivity", Context.MODE_PRIVATE).edit();
-            editor.putBoolean("auto_login", false);
-            editor.commit();
+            if (userIntervention)
+            {
+                Editor editor = getSharedPreferences(
+                        "LoginActivity", Context.MODE_PRIVATE).edit();
+                editor.putBoolean("auto_login", false);
+                editor.commit();
+            }
         }
         // attendanceTask.cancel(true);
         // attendanceTask = null;
@@ -310,7 +324,7 @@ public class MainActivity extends ActionBarActivity {
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.log_out:
-                logout();
+                logout(true);
                 return true;
             case R.id.credits:
                 System.out.println("SHOWING CREDITS");
@@ -331,7 +345,8 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         protected Void doInBackground(Session... sessions) {
-            sessions[0].logout();
+            if (sessions[0] != null)
+                sessions[0].logout();
             return null;
         }
     }
@@ -423,7 +438,6 @@ public class MainActivity extends ActionBarActivity {
     public static class SummaryFragment extends YPMainFragment {
 
         public static final String ARG_SEMESTER_NUM = "semester_number";
-        //TODO: change here.
         public static final String[][] COLUMN_HEADERS = {
                 {"1st", "2nd", "Exam", "Avg"},
                 {"3rd", "4th", "Exam", "Avg"}};
