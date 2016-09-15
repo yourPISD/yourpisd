@@ -68,9 +68,6 @@ import app.sunstreak.yourpisd.view.MyTextView;
  */
 public class MainActivity extends ActionBarActivity {
 
-    public static final int CURRENT_TERM_INDEX = TermFinder
-            .getCurrentTermIndex();
-    static int classCount;
     static RelativeLayout[] layoutAverages;
     static int[] goals;
     static Session session;
@@ -125,7 +122,14 @@ public class MainActivity extends ActionBarActivity {
         getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
         SCREEN_HEIGHT = displaymetrics.heightPixels;
         SCREEN_WIDTH = displaymetrics.widthPixels;
+
         session = ((YPApplication) getApplication()).session;
+        if (session == null)
+        {
+            logout();
+            return;
+        }
+
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the app.
@@ -274,6 +278,27 @@ public class MainActivity extends ActionBarActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
+    private void logout()
+    {
+        if (session != null)
+        {
+            UserLogoutTask logout = new UserLogoutTask();
+            logout.execute(session);
+            ((YPApplication) getApplication()).session = session = null;
+
+            Editor editor = getSharedPreferences(
+                    "LoginActivity", Context.MODE_PRIVATE).edit();
+            editor.putBoolean("auto_login", false);
+            editor.commit();
+        }
+        // attendanceTask.cancel(true);
+        // attendanceTask = null;
+
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Pass the event to ActionBarDrawerToggle, if it returns
@@ -285,20 +310,7 @@ public class MainActivity extends ActionBarActivity {
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.log_out:
-                UserLogoutTask logout = new UserLogoutTask();
-                logout.execute(session);
-                ((YPApplication) getApplication()).session = session = null;
-                // attendanceTask.cancel(true);
-                // attendanceTask = null;
-                Editor editor = getSharedPreferences(
-                        "LoginActivity", Context.MODE_PRIVATE).edit();
-                editor.putBoolean("auto_login", false);
-                editor.commit();
-
-                Intent intent = new Intent(this, LoginActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.putExtra("show", true);
-                startActivity(intent);
+                logout();
                 return true;
             case R.id.credits:
                 System.out.println("SHOWING CREDITS");
@@ -363,7 +375,8 @@ public class MainActivity extends ActionBarActivity {
                     return
                             getResources().getString(R.string.main_section_0_title);
                 case 1:
-                    return TermFinder.Term.values()[CURRENT_TERM_INDEX].name;
+                    return TermFinder.Term.values()[TermFinder
+                            .getCurrentTermIndex()].name;
                 case 2:
                     return getResources().getString(R.string.main_section_2_title);
                 case 3:
@@ -474,6 +487,7 @@ public class MainActivity extends ActionBarActivity {
             //TODO: reload semester grades.
             final int termOff = ClassReport.SEMESTER_TERMS * semesterNum;
             List<ClassReport> classList = session.getCurrentStudent().getSemesterClasses(semester);
+            int i = 0;
             for (ClassReport report : classList) {
                 View classSummary = inflater.inflate(R.layout.main_grade_summary_linear_layout,
                         bigLayout, false);
@@ -503,8 +517,19 @@ public class MainActivity extends ActionBarActivity {
                     if (!report.isClassDisabledAtTerm(term + termOff))
                         avg = report.getTerm(term + termOff).getGrade();
 
-                    termGrade.setOnClickListener(new ClassSwipeOpenerListener(
-                            session.studentIndex, report.getClassID(), term));
+                    final int classIndex = i;
+                    final int termIndex = term;
+                    termGrade.setOnClickListener(new OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent(getActivity(),
+                                    ClassSwipeActivity.class);
+                            intent.putExtra("studentIndex", session.studentIndex);
+                            intent.putExtra("classIndex", classIndex);
+                            intent.putExtra("termNum", termIndex);
+                            startActivity(intent);
+                        }
+                    });
                     termGrade.setText(avg == -1 ? "" : avg + "");
                     termGrade.setGravity(Gravity.CENTER);
                     summary.addView(termGrade);
@@ -533,11 +558,12 @@ public class MainActivity extends ActionBarActivity {
 
                 summary.setPadding(5, 0, 5, 0);
                 bigLayout.addView(classSummary);
+                i++;
             }
 
-            View glue = new View(getActivity());
-            glue.setLayoutParams(new LinearLayout.LayoutParams(0, 20, 1f));
-            bigLayout.addView(glue);
+            View empty = new View(getActivity());
+            empty.setLayoutParams(new LinearLayout.LayoutParams(0, 20, 1f));
+            bigLayout.addView(empty);
             bigLayout.setWeightSum(1);
 
             Button toggleSemester = new Button(getActivity());
@@ -607,32 +633,6 @@ public class MainActivity extends ActionBarActivity {
             rootView.setLayoutParams(params);
             return rootView;
         }
-
-        class ClassSwipeOpenerListener implements OnClickListener {
-
-            int studentIndex;
-            int classID;
-            int termIndex;
-
-            ClassSwipeOpenerListener(int studentIndex, int classID,
-                                     int termIndex) {
-                this.studentIndex = studentIndex;
-                this.classID = classID;
-                this.termIndex = termIndex;
-            }
-
-            @Override
-            public void onClick(View arg0) {
-                Intent intent = new Intent(getActivity(),
-                        ClassSwipeActivity.class);
-                intent.putExtra("studentIndex", this.studentIndex);
-                intent.putExtra("classCount", classCount);
-                intent.putExtra("classID", this.classID);
-                intent.putExtra("termNum", this.termIndex);
-                startActivity(intent);
-            }
-        }
-
     }
 
     // public static class AttendanceFragment extends YPMainFragment {
@@ -794,7 +794,8 @@ public class MainActivity extends ActionBarActivity {
         public static final String ARG_OBJECT = "object";
         private View rootView;
         private int position;
-        private int termNum = CURRENT_TERM_INDEX;
+        private int termNum = TermFinder
+                .getCurrentTermIndex();
         LinearLayout[] profileCards;
 
         @Override
@@ -805,7 +806,8 @@ public class MainActivity extends ActionBarActivity {
                 }
 
                 case 1:
-                    return TermFinder.Term.values()[CURRENT_TERM_INDEX].name;
+                    return TermFinder.Term.values()[TermFinder
+                            .getCurrentTermIndex()].name;
                 // case 2: return
                 // getResources().getString(R.string.main_section_2_title);
                 // case 3: return
@@ -1055,7 +1057,7 @@ public class MainActivity extends ActionBarActivity {
                 }
 
                 List<ClassReport> classList = session.getCurrentStudent().getClassesForTerm(termNum);
-                classCount = classList.size();
+                int classCount = classList.size();
                 goals = new int[classCount];
                 Arrays.fill(goals, -1);
                 layoutAverages = new RelativeLayout[classCount];
@@ -1084,9 +1086,19 @@ public class MainActivity extends ActionBarActivity {
                         grade.setText(average);
                     }
 
-                    layoutAverages[i].setOnClickListener(new ClassSwipeOpenerListener(
-                            session.studentIndex, i,
-                            CURRENT_TERM_INDEX));
+                    final int ind = i;
+                    layoutAverages[i].setOnClickListener(new OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent(getActivity(),
+                                    ClassSwipeActivity.class);
+                            intent.putExtra("studentIndex", session.studentIndex);
+                            intent.putExtra("classIndex", ind);
+                            intent.putExtra("termNum", TermFinder
+                                    .getCurrentTermIndex());
+                            startActivity(intent);
+                        }
+                    });
 
                     bigLayout.addView(layoutAverages[i]);
                 }
@@ -1155,31 +1167,6 @@ public class MainActivity extends ActionBarActivity {
                 else
                     profileCards[i]
                             .setBackgroundResource(R.drawable.card_blue); //TODO: is this correct?
-            }
-        }
-
-        class ClassSwipeOpenerListener implements OnClickListener {
-
-            int studentIndex;
-            int classIndex;
-            int termIndex;
-
-            ClassSwipeOpenerListener(int studentIndex, int classIndex,
-                                     int termIndex) {
-                this.studentIndex = studentIndex;
-                this.classIndex = classIndex;
-                this.termIndex = termIndex;
-            }
-
-            @Override
-            public void onClick(View arg0) {
-                Intent intent = new Intent(getActivity(),
-                        ClassSwipeActivity.class);
-                intent.putExtra("studentIndex", this.studentIndex);
-                intent.putExtra("classCount", classCount);
-                intent.putExtra("classIndex", this.classIndex);
-                intent.putExtra("termIndex", this.termIndex);
-                startActivity(intent);
             }
         }
     }

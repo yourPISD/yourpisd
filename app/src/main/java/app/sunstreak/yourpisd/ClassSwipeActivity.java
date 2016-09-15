@@ -53,7 +53,6 @@ public class ClassSwipeActivity extends ActionBarActivity {
     static ViewPager mViewPager;
 
     static int studentIndex;
-    static int classCount;
     static int classesMade = 0;
     static int termNum;
     static boolean doneMakingClasses;
@@ -79,11 +78,9 @@ public class ClassSwipeActivity extends ActionBarActivity {
         spinner.getIndeterminateDrawable().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN);
         toolbar.addView(spinner);
 
-        classCount = getIntent().getExtras().getInt("classCount");
-        termNum = getIntent().getExtras().getInt("termNum");
         studentIndex = getIntent().getExtras().getInt("studentIndex");
-
         int startIndex = getIntent().getExtras().getInt("classIndex");
+        termNum = getIntent().getExtras().getInt("termNum");
 
         setTitle(TermFinder.Term.values()[termNum].name);
 
@@ -204,7 +201,6 @@ public class ClassSwipeActivity extends ActionBarActivity {
                 intent = new Intent(this, ClassSwipeActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.putExtra("studentIndex", studentIndex);
-                intent.putExtra("classCount", classCount);
                 intent.putExtra("classIndex", mViewPager.getCurrentItem());
                 // Don't go into the negatives!
                 intent.putExtra("termNum", Math.max(termNum - 1, 0));
@@ -217,7 +213,6 @@ public class ClassSwipeActivity extends ActionBarActivity {
                 intent = new Intent(this, ClassSwipeActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.putExtra("studentIndex", studentIndex);
-                intent.putExtra("classCount", classCount);
                 intent.putExtra("classIndex", mViewPager.getCurrentItem());
                 // Don't go too positive!
                 intent.putExtra("termNum", Math.min(termNum + 1, ClassReport.NUM_TERMS - 1));
@@ -295,7 +290,6 @@ public class ClassSwipeActivity extends ActionBarActivity {
 
                 Intent intent = new Intent(getActivity(), LoginActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.putExtra("show", true);
                 startActivity(intent);
             }
 

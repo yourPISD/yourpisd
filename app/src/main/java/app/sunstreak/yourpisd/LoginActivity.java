@@ -112,7 +112,7 @@ public class LoginActivity extends ActionBarActivity {
             boolean refresh = getIntent().getExtras().getBoolean("Refresh");
             session = ((YPApplication) getApplication()).session;
 
-            if (refresh) {
+            if (refresh && session != null) {
                 mEmail = session.getUsername();
                 mPassword = session.getPassword();
                 showProgress(true);
