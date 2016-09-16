@@ -46,7 +46,11 @@
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-light"
             android:text="@string/credit_developers"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            android:layout_below="@+id/textView"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="10dp"/>
 
         <TextView
             android:id="@+id/credit_update_developers"
@@ -66,9 +70,10 @@
             android:fontFamily="sans-serif-light"
             android:text="@string/credit_icon"
             android:textSize="20sp"
-            android:layout_centerVertical="true"
+            android:layout_alignParentTop="false"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"/>
+            android:layout_alignParentStart="true"
+            android:layout_above="@+id/logo"/>
 
         <TextView
             android:id="@+id/copyright"
@@ -85,11 +90,24 @@
             android:id="@+id/logo"
             android:layout_width="150dp"
             android:layout_height="150dp"
-            android:layout_below="@id/credit_icon"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="46dp"
             android:scaleType="fitCenter"
-            android:src="@drawable/logotext" />
+            android:src="@drawable/logotext"
+            android:layout_above="@+id/copyright"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/app_version_name"
+            android:id="@+id/textView"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignWithParentIfMissing="false"
+            android:layout_alignParentRight="true"
+            android:textSize="30sp"
+            />
 
     </RelativeLayout>
 </LinearLayout>
