@@ -501,24 +501,8 @@ public class LoginActivity extends ActionBarActivity {
 
 
             Intent startMain = new Intent(LoginActivity.this, MainActivity.class);
-
             finish();
             startActivity(startMain);
-//            ActivityOptionsCompat options = ActivityOptionsCompat
-//                    .makeSceneTransitionAnimation(activity, transitionView, DetailActivity.EXTRA_IMAGE);
-//            ActivityCompat.startActivity(activity, new Intent(activity, DetailActivity.class), options.toBundle());
-            //			overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-
-            // What's the purpose of the sleep below?
-            // Commented out 30 December 2013 by Sidharth
-            /*
-            try {
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-
-			}
-			 */
-
             return 1;
         }
 

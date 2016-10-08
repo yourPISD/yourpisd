@@ -111,13 +111,10 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onRestart() {
         super.onRestart();
-        logout(false);
-    }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        logout(false);
+        //Login if session has been cleared.
+        if (((YPApplication) getApplication()).session == null)
+            login(false);
     }
 
     @Override
@@ -138,7 +135,7 @@ public class MainActivity extends ActionBarActivity {
         session = ((YPApplication) getApplication()).session;
         if (session == null)
         {
-            logout(false);
+            login(false);
             return;
         }
 
@@ -272,7 +269,7 @@ public class MainActivity extends ActionBarActivity {
         getMenuInflater().inflate(R.menu.main_activity, menu);
 
         // Create list of students in Menu.
-        if (session.MULTIPLE_STUDENTS) {
+        if (session != null && session.MULTIPLE_STUDENTS) {
             for (int i = 0; i < session.getStudents().size(); i++) {
                 String name = session.getStudents().get(i).name;
                 MenuItem item = menu.add(name);
@@ -289,28 +286,47 @@ public class MainActivity extends ActionBarActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-    private void logout(boolean userIntervention)
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        //Only log out if we are not exiting internally.
+        YPApplication app = (YPApplication)getApplication();
+        if (app.startingInternal)
+            app.startingInternal = false;
+        else
+            logout();
+    }
+
+    private void logout()
     {
         if (session != null)
         {
             UserLogoutTask logout = new UserLogoutTask();
             logout.execute(session);
             ((YPApplication) getApplication()).session = session = null;
+        }
+    }
 
-            if (userIntervention)
-            {
-                Editor editor = getSharedPreferences(
-                        "LoginActivity", Context.MODE_PRIVATE).edit();
-                editor.putBoolean("auto_login", false);
-                editor.commit();
-            }
+    private void login(boolean userIntervention)
+    {
+        logout();
+
+        if (userIntervention)
+        {
+            Editor editor = getSharedPreferences(
+                    "LoginActivity", Context.MODE_PRIVATE).edit();
+            editor.putBoolean("auto_login", false);
+            editor.commit();
         }
         // attendanceTask.cancel(true);
         // attendanceTask = null;
 
         Intent intent = new Intent(this, LoginActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
+        finish();
     }
 
     @Override
@@ -320,16 +336,18 @@ public class MainActivity extends ActionBarActivity {
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
-        // Handle your other action bar items...
+
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.log_out:
-                logout(true);
+                login(true);
                 return true;
             case R.id.credits:
-                System.out.println("SHOWING CREDITS");
+                ((YPApplication)getApplication()).startingInternal = true;
                 Intent intentCred1 = new Intent(this, CreditActivity.class);
+                ((YPApplication)getApplication()).startingInternal = true;
                 startActivity(intentCred1);
+                return true;
                 // case R.id.refresh:
                 // dg.clearData();
                 // Intent intentR = new Intent(this, LoginActivity.class);
@@ -467,6 +485,7 @@ public class MainActivity extends ActionBarActivity {
                     .findViewById(R.id.container);
 
             // Add current student's name
+            // TODO: session might break here?
             if (session.MULTIPLE_STUDENTS) {
                 LinearLayout studentName = (LinearLayout) inflater.inflate(
                         R.layout.main_student_name_if_multiple_students,
@@ -541,6 +560,7 @@ public class MainActivity extends ActionBarActivity {
                             intent.putExtra("studentIndex", session.studentIndex);
                             intent.putExtra("classIndex", classIndex);
                             intent.putExtra("termNum", termIndex);
+                            ((YPApplication)getActivity().getApplication()).startingInternal = true;
                             startActivity(intent);
                         }
                     });
@@ -836,7 +856,7 @@ public class MainActivity extends ActionBarActivity {
                                  Bundle savedInstanceState) {
 
             // [Hopefully] to prevent force closes.
-            if (session.getStudents().size() == 0) {
+            if (session != null && session.getStudents().size() == 0) {
                 session = null;
                 Editor editor = getActivity()
                         .getSharedPreferences("LoginActivity",
@@ -845,8 +865,9 @@ public class MainActivity extends ActionBarActivity {
                 editor.commit();
 
                 Intent intent = new Intent(getActivity(), LoginActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.putExtra("show", true);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                        Intent.FLAG_ACTIVITY_NEW_TASK);
+                ((YPApplication)getActivity().getApplication()).startingInternal = true;
                 startActivity(intent);
             }
 
@@ -878,260 +899,261 @@ public class MainActivity extends ActionBarActivity {
 
             rootView = inflater.inflate(tabLayout, container, false);
 
-            if (position == 0) {
+            if (session == null)
+                return rootView;
 
-                LinearLayout bigLayout = (LinearLayout) rootView
-                        .findViewById(R.id.overall);
+            switch (position) {
+                case 0:
+                    LinearLayout bigLayout = (LinearLayout) rootView
+                            .findViewById(R.id.overall);
 
-                if (session.MULTIPLE_STUDENTS) {
-                    TextView instructions = new MyTextView(getActivity());
-                    LinearLayout instruct = new LinearLayout(getActivity());
+                    if (session.MULTIPLE_STUDENTS) {
+                        TextView instructions = new MyTextView(getActivity());
+                        LinearLayout instruct = new LinearLayout(getActivity());
 
-                    instructions.setPadding(15, 15, 15, 15);
-                    instructions.setText(R.string.welcome_multiple_students);
-                    instruct.setBackgroundResource(R.drawable.card_custom);
-                    instruct.addView(instructions);
-                    bigLayout.addView(instruct, 1);
-                }
-
-                profileCards = new LinearLayout[session.getStudents().size()];
-
-                for (int i = 0; i < session.getStudents().size(); i++) {
-
-
-                    profileCards[i] = (LinearLayout) inflater.inflate(
-                            R.layout.profile_card, bigLayout, false);
-                    TextView name = (TextView) profileCards[i]
-                            .findViewById(R.id.name);
-                    name.setText(session.getStudents().get(i).name);
-                    for (Semester sem : Semester.values()) {
-                        final double gpaValue = session.getStudents().get(i)
-                                .getGPA(sem);
-
-                        TextView txtGPA = (TextView) profileCards[i].findViewById(
-                                sem == Semester.FALL ? R.id.gpaFall : R.id.gpaSpring);
-                        if (!Double.isNaN(gpaValue))
-                            txtGPA.setText(String.format("%s GPA: %.4f",
-                                            SummaryFragment.PAGE_TITLE_SHORT[sem.ordinal()],
-                                            gpaValue));
-                        else
-                            txtGPA.setText(String.format("%s GPA: ---",
-                                    SummaryFragment.PAGE_TITLE_SHORT[sem.ordinal()]));
+                        instructions.setPadding(15, 15, 15, 15);
+                        instructions.setText(R.string.welcome_multiple_students);
+                        instruct.setBackgroundResource(R.drawable.card_custom);
+                        instruct.addView(instructions);
+                        bigLayout.addView(instruct, 1);
                     }
 
-                    // profileCards[i].addView(profilePic);
-                    // profileCards[i].addView(name, lpName);
-                    // profileCards[i].setOnClickListener(new
-                    // StudentChooserListener(i));
-                    // profileCards[i].setBackgroundResource(R.drawable.card_custom);
+                    profileCards = new LinearLayout[session.getStudents().size()];
 
-                    bigLayout.addView(profileCards[i]);
+                    for (int i = 0; i < session.getStudents().size(); i++) {
 
-                    StudentPictureTask spTask = new StudentPictureTask();
-                    spTask.execute(i);
 
-                    RelativeLayout gpaCalc = (RelativeLayout) inflater.inflate(
-                            R.layout.main_gpa_calc, bigLayout, false);
-                    final TextView actualGPA = (TextView) gpaCalc
-                            .findViewById(R.id.actualGPA);
+                        profileCards[i] = (LinearLayout) inflater.inflate(
+                                R.layout.profile_card, bigLayout, false);
+                        TextView name = (TextView) profileCards[i]
+                                .findViewById(R.id.name);
+                        name.setText(session.getStudents().get(i).name);
+                        for (Semester sem : Semester.values()) {
+                            final double gpaValue = session.getStudents().get(i)
+                                    .getGPA(sem);
 
-                    Button calculate = (Button) gpaCalc
-                            .findViewById(R.id.calculate);
+                            TextView txtGPA = (TextView) profileCards[i].findViewById(
+                                    sem == Semester.FALL ? R.id.gpaFall : R.id.gpaSpring);
+                            if (!Double.isNaN(gpaValue))
+                                txtGPA.setText(String.format("%s GPA: %.4f",
+                                                SummaryFragment.PAGE_TITLE_SHORT[sem.ordinal()],
+                                                gpaValue));
+                            else
+                                txtGPA.setText(String.format("%s GPA: ---",
+                                        SummaryFragment.PAGE_TITLE_SHORT[sem.ordinal()]));
+                        }
 
-                    final EditText oldCumulativeGPA = (EditText) gpaCalc
-                            .findViewById(R.id.cumulativeGPA);
+                        // profileCards[i].addView(profilePic);
+                        // profileCards[i].addView(name, lpName);
+                        // profileCards[i].setOnClickListener(new
+                        // StudentChooserListener(i));
+                        // profileCards[i].setBackgroundResource(R.drawable.card_custom);
 
-                    final EditText numCredits = (EditText) gpaCalc
-                            .findViewById(R.id.numCredits);
+                        bigLayout.addView(profileCards[i]);
 
-                    SharedPreferences sharedPrefs = getActivity()
-                            .getPreferences(Context.MODE_PRIVATE);
-                    float spGPA = sharedPrefs
-                            .getFloat("oldCumulativeGPA"
+                        StudentPictureTask spTask = new StudentPictureTask();
+                        spTask.execute(i);
+
+                        RelativeLayout gpaCalc = (RelativeLayout) inflater.inflate(
+                                R.layout.main_gpa_calc, bigLayout, false);
+                        final TextView actualGPA = (TextView) gpaCalc
+                                .findViewById(R.id.actualGPA);
+
+                        Button calculate = (Button) gpaCalc
+                                .findViewById(R.id.calculate);
+
+                        final EditText oldCumulativeGPA = (EditText) gpaCalc
+                                .findViewById(R.id.cumulativeGPA);
+
+                        final EditText numCredits = (EditText) gpaCalc
+                                .findViewById(R.id.numCredits);
+
+                        SharedPreferences sharedPrefs = getActivity()
+                                .getPreferences(Context.MODE_PRIVATE);
+                        float spGPA = sharedPrefs
+                                .getFloat("oldCumulativeGPA"
+                                                + session.getStudents().get(i).studentId,
+                                        Float.NaN);
+
+                        if (!Float.isNaN(spGPA)) {
+                            oldCumulativeGPA.setText(Float.toString(spGPA));
+                            float spCredits = sharedPrefs.getFloat("numCredits"
                                             + session.getStudents().get(i).studentId,
                                     Float.NaN);
-
-                    if (!Float.isNaN(spGPA)) {
-                        oldCumulativeGPA.setText(Float.toString(spGPA));
-                        float spCredits = sharedPrefs.getFloat("numCredits"
-                                        + session.getStudents().get(i).studentId,
-                                Float.NaN);
-                        if (!Float.isNaN(spCredits)) {
-                            numCredits.setText(Float.toString(spCredits));
-                            double cumGPA = session.getStudents().get(i)
-                                    .getCumulativeGPA(spGPA, spCredits);
-                            actualGPA.setText(String.format("%.4f", cumGPA));
+                            if (!Float.isNaN(spCredits)) {
+                                numCredits.setText(Float.toString(spCredits));
+                                double cumGPA = session.getStudents().get(i)
+                                        .getCumulativeGPA(spGPA, spCredits);
+                                actualGPA.setText(String.format("%.4f", cumGPA));
+                            }
                         }
-                    }
-                    final int studentIndex = i;
-                    calculate.setOnClickListener(new OnClickListener() {
+                        final int studentIndex = i;
+                        calculate.setOnClickListener(new OnClickListener() {
 
-                        private final int mStudentIndex = studentIndex;
+                            private final int mStudentIndex = studentIndex;
 
-                        @Override
-                        public void onClick(View bigLayout) {
-                            float oldGPA;
-                            float cred;
-                            try {
-                                oldGPA = Float.parseFloat(oldCumulativeGPA
-                                        .getText().toString());
-                            } catch (NumberFormatException e) {
-                                oldGPA = 0;
+                            @Override
+                            public void onClick(View bigLayout) {
+                                float oldGPA;
+                                float cred;
+                                try {
+                                    oldGPA = Float.parseFloat(oldCumulativeGPA
+                                            .getText().toString());
+                                } catch (NumberFormatException e) {
+                                    oldGPA = 0;
+                                }
+                                try {
+                                    cred = Float.parseFloat(numCredits.getText()
+                                            .toString());
+                                } catch (NumberFormatException e) {
+                                    cred = 0;
+                                }
+
+                                if ((oldGPA + "").equals("0.0")
+                                        || (cred + "").equals("0.0"))
+                                    actualGPA.setText("Please Fill Out the Above");
+                                else {
+                                    SharedPreferences sharedPrefs = getActivity()
+                                            .getPreferences(Context.MODE_PRIVATE);
+                                    Editor editor = sharedPrefs.edit();
+                                    editor.putFloat(
+                                            "oldCumulativeGPA"
+                                                    + session.getStudents().get(
+                                                    mStudentIndex).studentId,
+                                            oldGPA);
+                                    editor.putFloat(
+                                            "numCredits"
+                                                    + session.getStudents().get(
+                                                    mStudentIndex).studentId,
+                                            cred);
+                                    editor.commit();
+                                    double legitGPA = session.getStudents()
+                                            .get(studentIndex)
+                                            .getCumulativeGPA(oldGPA, cred);
+                                    actualGPA.setText(String.format("%.4f",
+                                            legitGPA));
+                                }
+
+                                // Hide the keyboard
+                                InputMethodManager imm = (InputMethodManager) getActivity()
+                                        .getSystemService(
+                                                Context.INPUT_METHOD_SERVICE);
+                                imm.hideSoftInputFromWindow(
+                                        numCredits.getWindowToken(), 0);
                             }
-                            try {
-                                cred = Float.parseFloat(numCredits.getText()
-                                        .toString());
-                            } catch (NumberFormatException e) {
-                                cred = 0;
+                        });
+                        ImageButton help = (ImageButton) gpaCalc
+                                .findViewById(R.id.help);
+                        help.setOnClickListener(new OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(
+                                        getActivity());
+                                builder.setTitle("Help");
+
+                                try {
+                                    builder.setMessage(R.string.gpa_help);
+                                } catch (Exception e) {
+                                    return;
+                                }
+
+                                builder.setCancelable(false).setPositiveButton(
+                                        "OK",
+                                        new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(
+                                                    DialogInterface dialog, int id) {
+                                                dialog.dismiss();
+                                            }
+                                        });
+                                AlertDialog diag = builder.create();
+                                diag.show();
                             }
-
-                            if ((oldGPA + "").equals("0.0")
-                                    || (cred + "").equals("0.0"))
-                                actualGPA.setText("Please Fill Out the Above");
-                            else {
-                                SharedPreferences sharedPrefs = getActivity()
-                                        .getPreferences(Context.MODE_PRIVATE);
-                                Editor editor = sharedPrefs.edit();
-                                editor.putFloat(
-                                        "oldCumulativeGPA"
-                                                + session.getStudents().get(
-                                                mStudentIndex).studentId,
-                                        oldGPA);
-                                editor.putFloat(
-                                        "numCredits"
-                                                + session.getStudents().get(
-                                                mStudentIndex).studentId,
-                                        cred);
-                                editor.commit();
-                                double legitGPA = session.getStudents()
-                                        .get(studentIndex)
-                                        .getCumulativeGPA(oldGPA, cred);
-                                actualGPA.setText(String.format("%.4f",
-                                        legitGPA));
-                            }
-
-                            // Hide the keyboard
-                            InputMethodManager imm = (InputMethodManager) getActivity()
-                                    .getSystemService(
-                                            Context.INPUT_METHOD_SERVICE);
-                            imm.hideSoftInputFromWindow(
-                                    numCredits.getWindowToken(), 0);
-                        }
-                    });
-                    ImageButton help = (ImageButton) gpaCalc
-                            .findViewById(R.id.help);
-                    help.setOnClickListener(new OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(
-                                    getActivity());
-                            builder.setTitle("Help");
-
-                            try {
-                                builder.setMessage(R.string.gpa_help);
-                            } catch (Exception e) {
-                                return;
-                            }
-
-                            builder.setCancelable(false).setPositiveButton(
-                                    "OK",
-                                    new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(
-                                                DialogInterface dialog, int id) {
-                                            dialog.dismiss();
-                                        }
-                                    });
-                            AlertDialog diag = builder.create();
-                            diag.show();
-                        }
-                    });
-                    bigLayout.addView(gpaCalc);
-                }
-
-                if (session.MULTIPLE_STUDENTS)
-                    colorStudents();
-
-            }
-
-            if (position == 1) {
-
-                LinearLayout bigLayout = (LinearLayout) rootView
-                        .findViewById(R.id.container);
-
-                // Add current student's name
-                if (session.MULTIPLE_STUDENTS) {
-                    LinearLayout studentName = (LinearLayout) inflater.inflate(
-                            R.layout.main_student_name_if_multiple_students,
-                            bigLayout, false);
-                    ((TextView) studentName.findViewById(R.id.name))
-                            .setText(session.getStudents().get(
-                                    session.studentIndex).name);
-                    bigLayout.addView(studentName);
-                }
-
-                List<ClassReport> classList = session.getCurrentStudent().getClassesForTerm(termNum);
-                int classCount = classList.size();
-                goals = new int[classCount];
-                Arrays.fill(goals, -1);
-                layoutAverages = new RelativeLayout[classCount];
-
-                for (int i = 0; i < classCount; i++) {
-                    ClassReport report = classList.get(i);
-
-                    // Skip classes that don't exist in current term.
-                    // TODO: check if above comment is correct
-                    if (report.isClassDisabledAtTerm(termNum))
-                        continue;
-
-                    layoutAverages[i] = (RelativeLayout) inflater.inflate(
-                            R.layout.main_grade_summary, bigLayout, false);
-                    TextView className = (TextView) layoutAverages[i].findViewById(R.id.name);
-                    className.setText(report.getCourseName());
-
-                    Semester sem = Semester.findSemester(termNum);
-                    int avg = report.calculateAverage(sem);
-
-                    // Only set the grade text if the average is not empty
-                    if (avg >= 0) {
-                        String average = avg + "";
-                        TextView grade = (TextView) layoutAverages[i]
-                                .findViewById(R.id.grade);
-                        grade.setText(average);
+                        });
+                        bigLayout.addView(gpaCalc);
                     }
 
-                    final int ind = i;
-                    layoutAverages[i].setOnClickListener(new OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Intent intent = new Intent(getActivity(),
-                                    ClassSwipeActivity.class);
-                            intent.putExtra("studentIndex", session.studentIndex);
-                            intent.putExtra("classIndex", ind);
-                            intent.putExtra("termNum", TermFinder
-                                    .getCurrentTermIndex());
-                            startActivity(intent);
+                    if (session.MULTIPLE_STUDENTS)
+                        colorStudents();
+
+                    return rootView;
+                case 1:
+                    bigLayout = (LinearLayout) rootView
+                            .findViewById(R.id.container);
+
+                    // Add current student's name
+                    if (session.MULTIPLE_STUDENTS) {
+                        LinearLayout studentName = (LinearLayout) inflater.inflate(
+                                R.layout.main_student_name_if_multiple_students,
+                                bigLayout, false);
+                        ((TextView) studentName.findViewById(R.id.name))
+                                .setText(session.getStudents().get(
+                                        session.studentIndex).name);
+                        bigLayout.addView(studentName);
+                    }
+
+                    List<ClassReport> classList = session.getCurrentStudent().getClassesForTerm(termNum);
+                    int classCount = classList.size();
+                    goals = new int[classCount];
+                    Arrays.fill(goals, -1);
+                    layoutAverages = new RelativeLayout[classCount];
+
+                    for (int i = 0; i < classCount; i++) {
+                        ClassReport report = classList.get(i);
+
+                        // Skip classes that don't exist in current term.
+                        // TODO: check if above comment is correct
+                        if (report.isClassDisabledAtTerm(termNum))
+                            continue;
+
+                        layoutAverages[i] = (RelativeLayout) inflater.inflate(
+                                R.layout.main_grade_summary, bigLayout, false);
+                        TextView className = (TextView) layoutAverages[i].findViewById(R.id.name);
+                        className.setText(report.getCourseName());
+
+                        Semester sem = Semester.findSemester(termNum);
+                        int avg = report.calculateAverage(sem);
+
+                        // Only set the grade text if the average is not empty
+                        if (avg >= 0) {
+                            String average = avg + "";
+                            TextView grade = (TextView) layoutAverages[i]
+                                    .findViewById(R.id.grade);
+                            grade.setText(average);
                         }
-                    });
 
-                    bigLayout.addView(layoutAverages[i]);
-                }
+                        final int ind = i;
+                        layoutAverages[i].setOnClickListener(new OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(getActivity(),
+                                        ClassSwipeActivity.class);
+                                intent.putExtra("studentIndex", session.studentIndex);
+                                intent.putExtra("classIndex", ind);
+                                intent.putExtra("termNum", TermFinder
+                                        .getCurrentTermIndex());
+                                ((YPApplication)getActivity().getApplication()).startingInternal = true;
+                                startActivity(intent);
+                            }
+                        });
 
-                //TODO: Extract or use current date.
-                TextView summaryLastUpdated = new MyTextView(getActivity());
-                summaryLastUpdated.setText(DateHelper.timeSince(new DateTime()));
-                summaryLastUpdated.setPadding(10, 0, 0, 0);
-                bigLayout.addView(summaryLastUpdated);
+                        bigLayout.addView(layoutAverages[i]);
+                    }
 
-                return rootView;
-            }
+                    //TODO: Extract or use current date.
+                    TextView summaryLastUpdated = new MyTextView(getActivity());
+                    summaryLastUpdated.setText(DateHelper.timeSince(new DateTime()));
+                    summaryLastUpdated.setPadding(10, 0, 0, 0);
+                    bigLayout.addView(summaryLastUpdated);
 
-            if (position == 2) {
-                throw new RuntimeException(
+                    return rootView;
+                case 2:
+                    throw new RuntimeException(
                         "This position should instantiated as SummaryFragment,"
                                 + " not MainActivityFragment.");
+                default:
+                    throw new InternalError("Illegal index");
             }
-            return rootView;
         }
 
         public class StudentPictureTask extends
@@ -1141,6 +1163,8 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             protected Bitmap doInBackground(Integer... args) {
+                if (session == null)
+                    return null;
                 taskStudentIndex = args[0];
                 Bitmap profile = session.getStudents()
                         .get(taskStudentIndex).getStudentPicture();
@@ -1155,24 +1179,9 @@ public class MainActivity extends ActionBarActivity {
             }
         }
 
-        class StudentChooserListener implements OnClickListener {
-            int studentIndex;
-
-            StudentChooserListener(int studentIndex) {
-                this.studentIndex = studentIndex;
-            }
-
-            @Override
-            public void onClick(View v) {
-                session.studentIndex = this.studentIndex;
-                colorStudents();
-
-                ((MainActivity) getActivity()).refresh();
-            }
-
-        }
-
         public void colorStudents() {
+            if (session == null)
+                return;
             for (int i = 0; i < profileCards.length; i++) {
                 // Display the chosen student in a different color.
                 if (i == session.studentIndex)
@@ -1200,8 +1209,8 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         public boolean onMenuItemClick(MenuItem arg0) {
-            session.studentIndex = this.studentIndex;
-
+            if (session != null)
+                session.studentIndex = this.studentIndex;
             refresh();
             return true;
         }

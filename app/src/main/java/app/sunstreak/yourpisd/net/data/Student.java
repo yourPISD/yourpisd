@@ -134,7 +134,7 @@ public class Student {
         try
         {
             byte[] data = Jsoup.connect("https://gradebook.pisd.edu/Pinnacle/Gradebook/common/picture.ashx")
-                    .method(Connection.Method.GET).data("studentId", "" + studentId)
+                    .timeout(60000).method(Connection.Method.GET).data("studentId", "" + studentId)
                     .cookies(session.getCookies()).ignoreContentType(true).execute().bodyAsBytes();
 
             studentPictureBitmap = BitmapFactory.decodeByteArray(data, 0, data.length);

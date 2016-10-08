@@ -85,7 +85,7 @@ public class ClassSwipeActivity extends ActionBarActivity {
         session = ((YPApplication) getApplication()).session;
         if (session == null)
         {
-            logout(false);
+            login(false);
             return;
         }
         session.studentIndex = studentIndex;
@@ -144,6 +144,23 @@ public class ClassSwipeActivity extends ActionBarActivity {
         super.onPause();
     }
 
+    @Override
+    public void onBackPressed() {
+        ((YPApplication)getApplication()).startingInternal = true;
+        super.onBackPressed();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        //Only log out if we are not exiting internally.
+        YPApplication app = (YPApplication)getApplication();
+        if (app.startingInternal)
+            app.startingInternal = false;
+        else
+            logout();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -156,7 +173,7 @@ public class ClassSwipeActivity extends ActionBarActivity {
             menu.findItem(R.id.next_term).setEnabled(false);
 
         // Create list of students in Menu.
-        if (session.MULTIPLE_STUDENTS) {
+        if (session != null && session.MULTIPLE_STUDENTS) {
             for (int i = 0; i < session.getStudents().size(); i++) {
                 String name = session.getStudents().get(i).name;
                 MenuItem item = menu.add(name);
@@ -176,39 +193,39 @@ public class ClassSwipeActivity extends ActionBarActivity {
     @Override
     protected void onRestart() {
         super.onRestart();
-        logout(false);
+
+        //Login if session has been cleared.
+        if (((YPApplication) getApplication()).session == null)
+            login(false);
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        logout(false);
+    private void login(boolean userIntervention)
+    {
+        logout();
+
+        if (userIntervention)
+        {
+            SharedPreferences.Editor editor = getSharedPreferences(
+                    "LoginActivity", Context.MODE_PRIVATE).edit();
+            editor.putBoolean("auto_login", false);
+            editor.commit();
+        }
+
+        //Make loginactivity as root.
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 
-    private void logout(boolean userIntervention)
+    private void logout()
     {
         if (session != null)
         {
             MainActivity.UserLogoutTask logout = new MainActivity.UserLogoutTask();
             logout.execute(session);
             ((YPApplication) getApplication()).session = session = null;
-
-            if (userIntervention)
-            {
-                SharedPreferences.Editor editor = getSharedPreferences(
-                        "LoginActivity", Context.MODE_PRIVATE).edit();
-                editor.putBoolean("auto_login", false);
-                editor.commit();
-            }
         }
-
-        SharedPreferences.Editor editor = getPreferences(Context.MODE_PRIVATE).edit();
-        editor.putBoolean("auto_login", false);
-        editor.commit();
-        Intent intent = new Intent(this, LoginActivity.class);
-        // Clear all activities between this and LoginActivity
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
     }
 
 
@@ -217,7 +234,7 @@ public class ClassSwipeActivity extends ActionBarActivity {
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.log_out: //TODO: add logout button
-                logout(true);
+                login(true);
                 return true;
             /*
         case R.id.refresh:
@@ -234,6 +251,7 @@ public class ClassSwipeActivity extends ActionBarActivity {
                 intent.putExtra("classIndex", mViewPager.getCurrentItem());
                 // Don't go into the negatives!
                 intent.putExtra("termNum", Math.max(termNum - 1, 0));
+                ((YPApplication)getApplication()).startingInternal = true;
                 startActivity(intent);
 
                 //			overridePendingTransition(R.anim.slide_in_down, R.anim.slide_out_up);
@@ -246,6 +264,7 @@ public class ClassSwipeActivity extends ActionBarActivity {
                 intent.putExtra("classIndex", mViewPager.getCurrentItem());
                 // Don't go too positive!
                 intent.putExtra("termNum", Math.min(termNum + 1, ClassReport.NUM_TERMS - 1));
+                ((YPApplication)getApplication()).startingInternal = true;
                 startActivity(intent);
                 //			overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_down);
                 return true;
@@ -312,18 +331,22 @@ public class ClassSwipeActivity extends ActionBarActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            if (session.getStudents().size() == 0) {
+            if (session != null && session.getStudents().size() == 0) {
                 session = null;
                 SharedPreferences.Editor editor = getActivity().getSharedPreferences("LoginActivity", Context.MODE_PRIVATE).edit();
                 editor.putBoolean("auto_login", false);
                 editor.commit();
 
                 Intent intent = new Intent(getActivity(), LoginActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                        Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
             }
 
             rootView = inflater.inflate(R.layout.class_description, container, false);
+            if (session == null)
+                return rootView;
+
 //			getActivity().setProgressBarIndeterminateVisibility(true);
             ((ProgressBar) toolbar.findViewById(R.id.action_bar_spinner)).setVisibility(View.VISIBLE);
 
@@ -433,7 +456,6 @@ public class ClassSwipeActivity extends ActionBarActivity {
                 //noinspection ResourceType
                 studentName.setId(id.student_name);
                 lastIdAdded = studentName.getId();
-                System.out.println("Student name box ID: " + lastIdAdded + ".");
 
                 layout.addView(studentName, lp);
             }
@@ -530,6 +552,7 @@ public class ClassSwipeActivity extends ActionBarActivity {
             Intent intent = new Intent(ClassSwipeActivity.this, MainActivity.class);
             intent.putExtra("mainActivitySection", 1);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            ((YPApplication)getApplication()).startingInternal = true;
             startActivity(intent);
             return true;
 

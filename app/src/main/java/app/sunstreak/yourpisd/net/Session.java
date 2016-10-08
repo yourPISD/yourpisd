@@ -68,7 +68,8 @@ public class Session {
         if (checkExpiration() != 1)
             return null;
 
-        Connection conn = Jsoup.connect(Session.GRADEBOOK_ROOT + path).cookies(getCookies());
+        Connection conn = Jsoup.connect(Session.GRADEBOOK_ROOT + path)
+                .timeout(60000).cookies(getCookies());
         if (params != null)
             conn.data(params);
 
@@ -101,7 +102,7 @@ public class Session {
      */
     public int checkExpiration() throws IOException {
         if (Jsoup.connect(GRADEBOOK_ROOT + "/InternetViewer/GradeSummary.aspx").cookies(cookies)
-                .execute().url().toExternalForm().equalsIgnoreCase(LOGON)) {
+                .timeout(60000).execute().url().toExternalForm().equalsIgnoreCase(LOGON)) {
             int status = login();
             if (status <= 0)
                 return status;
