@@ -464,7 +464,7 @@ public class LoginActivity extends ActionBarActivity {
             // Lock screen orientation to prevent onCreateView() being called.
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-            if (mEmail.indexOf("@") != -1 && mEmail.toUpperCase().endsWith("@MYPISD.NET"))
+            if (mEmail.indexOf("@") != -1 && !mEmail.toUpperCase().endsWith("@MYPISD.NET"))
                 return -4;
 
             try {
