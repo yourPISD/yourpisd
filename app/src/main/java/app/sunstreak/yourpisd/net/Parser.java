@@ -106,13 +106,26 @@ public class Parser {
                     newAssignment.setWeight(Double.parseDouble(weight.get(0).html().replaceAll("[^0-9]", "")));
 
                 String temp = assignment.getElementsByClass("points").get(0).html();
-                if (temp.isEmpty())
+                try
+                {
+                    if (temp.isEmpty())
+                        newAssignment.setGrade(-1);
+                    else
+                        newAssignment.setGrade(Double.parseDouble(temp));
+                }
+                catch (NumberFormatException e)
+                {
                     newAssignment.setGrade(-1);
-                else
-                    newAssignment.setGrade(Double.parseDouble(temp));
+                }
 
-                newAssignment.setMaxGrade(Double.parseDouble(assignment.getElementsByClass("max").get(0).html()));
-
+                try
+                {
+                    newAssignment.setMaxGrade(Double.parseDouble(assignment.getElementsByClass("max").get(0).html()));
+                }
+                catch (NumberFormatException e)
+                {
+                    newAssignment.setMaxGrade(0);
+                }
 
                 //Log.d("testTag", "\n" + name + " === " + "\n");
             }
@@ -215,7 +228,14 @@ public class Parser {
                     grade = -1; //No grade exists.
                 else {
                     String gradeString = courseMain.get(2).children().get(0).children().get(0).children().get(0).html();
-                    grade = Integer.parseInt(gradeString.substring(0, gradeString.length() - 1));
+                    try
+                    {
+                        grade = Integer.parseInt(gradeString.substring(0, gradeString.length() - 1));
+                    }
+                    catch (NumberFormatException e)
+                    {
+                        grade = -1;
+                    }
                 }
                 termReport.setGrade(grade);
             }
