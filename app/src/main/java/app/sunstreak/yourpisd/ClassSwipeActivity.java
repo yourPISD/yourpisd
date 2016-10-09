@@ -348,7 +348,7 @@ public class ClassSwipeActivity extends ActionBarActivity {
                 return rootView;
 
 //			getActivity().setProgressBarIndeterminateVisibility(true);
-            ((ProgressBar) toolbar.findViewById(R.id.action_bar_spinner)).setVisibility(View.VISIBLE);
+            toolbar.findViewById(R.id.action_bar_spinner).setVisibility(View.VISIBLE);
 
             classID = getArguments().getInt(ARG_CLASS_ID);
             ClassReport classReport = session.getCurrentStudent().getClassReport(classID);

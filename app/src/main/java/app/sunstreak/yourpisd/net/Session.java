@@ -152,7 +152,7 @@ public class Session {
             // Submit username and password
             usernameField.value(username);
             passwordField.value(password);
-            Connection.Response resp = conn.execute();
+            Connection.Response resp = conn.timeout(60000).execute();
 
             if (resp.url().equals(LOAD_URL))
                 return -1;

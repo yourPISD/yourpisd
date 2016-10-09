@@ -485,7 +485,8 @@ public class MainActivity extends ActionBarActivity {
                     .findViewById(R.id.container);
 
             // Add current student's name
-            // TODO: session might break here?
+            if (session == null)
+                return rootView;
             if (session.MULTIPLE_STUDENTS) {
                 LinearLayout studentName = (LinearLayout) inflater.inflate(
                         R.layout.main_student_name_if_multiple_students,
@@ -1168,6 +1169,13 @@ public class MainActivity extends ActionBarActivity {
                 taskStudentIndex = args[0];
                 Bitmap profile = session.getStudents()
                         .get(taskStudentIndex).getStudentPicture();
+
+                DisplayMetrics metrics = new DisplayMetrics();
+                getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+                double scale = 70.0 * metrics.density / profile.getWidth();
+                profile = Bitmap.createScaledBitmap(profile, (int)(scale * profile.getWidth()),
+                        (int)(scale * profile.getHeight()), false);
                 return profile;
             }
 

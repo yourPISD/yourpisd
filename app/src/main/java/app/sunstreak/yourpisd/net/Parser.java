@@ -246,7 +246,9 @@ public class Parser {
         //TODO multiple students
         ArrayList<Student> students = new ArrayList<>();
         Element singleID = doc.getElementById("ctl00_ctl00_ContentPlaceHolder_uxStudentId");
-        Student single = new Student(Integer.parseInt(singleID.attr("value")), main.html(), sess);
+        Element singleImage = doc.getElementById("ctl00_ctl00_ContentPlaceHolder_uxStudentPhoto");
+        String photoID = singleImage.attr("src").split("studentId=")[1];
+        Student single = new Student(Integer.parseInt(singleID.attr("value")), photoID, main.html(), sess);
         students.add(single);
         return students;
     }

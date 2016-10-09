@@ -25,6 +25,7 @@ public class Student {
 
     public final int studentId;
     public final String name;
+    private final String photoId;
     private final Map<Integer, ClassReport> classes = new HashMap<>();
 
     private DateTime lastUpdated = null;
@@ -49,9 +50,9 @@ public class Student {
         return 4;
     }
 
-    public Student(int studentId, String studentName, Session session) {
+    public Student(int studentId, String photoId, String studentName, Session session) {
         this.session = session;
-
+        this.photoId = photoId;
         this.studentId = studentId;
         name = studentName.substring(studentName.indexOf(",") + 2,
                 studentName.indexOf("("))
@@ -134,7 +135,7 @@ public class Student {
         try
         {
             byte[] data = Jsoup.connect("https://gradebook.pisd.edu/Pinnacle/Gradebook/common/picture.ashx")
-                    .timeout(60000).method(Connection.Method.GET).data("studentId", "" + studentId)
+                    .timeout(60000).method(Connection.Method.GET).data("studentId", photoId)
                     .cookies(session.getCookies()).ignoreContentType(true).execute().bodyAsBytes();
 
             studentPictureBitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
