@@ -18,7 +18,7 @@
 
 <resources>
 
-    <string name="app_version_name">yourPISD v4.0.1-alpha</string>
+    <string name="app_version_name">yourPISD v4.0.2</string>
     <string name="credit_developers">Original app developed by Han Li and Sidharth Kapur from Plano West Senior High School, Plano, TX.</string>
     <string name="credit_update_developers">App updated to new GradeBook client by Henry Wang and Gahwon Lee, also from Plano West High School.</string>
     <string name="credit_icon">Special thanks to Richard Wang for the icon.</string>

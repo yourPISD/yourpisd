@@ -141,7 +141,7 @@ public class LoginActivity extends ActionBarActivity {
          * Setup GUI
          ******************/
         //User agreement
-        if (!sharedPrefs.getBoolean("AcceptedUserAgreement", false)) {
+        if (!sharedPrefs.getBoolean("AcceptedUserAgreement2", false)) {
 
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(getResources().getString(R.string.user_agreement_title));
@@ -150,7 +150,7 @@ public class LoginActivity extends ActionBarActivity {
             builder.setPositiveButton("Agree", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    sharedPrefs.edit().putBoolean("AcceptedUserAgreement", true).commit();
+                    sharedPrefs.edit().putBoolean("AcceptedUserAgreement2", true).commit();
                     dialog.cancel();
                 }
             });
@@ -159,7 +159,7 @@ public class LoginActivity extends ActionBarActivity {
             builder.setNegativeButton("Disagree", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    sharedPrefs.edit().putBoolean("AcceptedUserAgreement", false).commit();
+                    sharedPrefs.edit().putBoolean("AcceptedUserAgreement2", false).commit();
                     Toast.makeText(LoginActivity.this, "Quitting app", Toast.LENGTH_SHORT).show();
                     finish();
                 }
@@ -464,6 +464,9 @@ public class LoginActivity extends ActionBarActivity {
             // Lock screen orientation to prevent onCreateView() being called.
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
+            if (mEmail.indexOf("@") != -1 && mEmail.toUpperCase().endsWith("@MYPISD.NET"))
+                return -4;
+
             try {
                 ConnectivityManager connMgr = (ConnectivityManager)
                         getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -478,9 +481,9 @@ public class LoginActivity extends ActionBarActivity {
 
                     int loginSuccess = session.login();
                     switch (loginSuccess) {
-                        case -1: // Parent login error
+                        case -1: // login error
                         case -2: // Server error
-                            return loginSuccess; // Server error
+                            return loginSuccess;
                         case 1:
                         default:
                     }
@@ -566,7 +569,12 @@ public class LoginActivity extends ActionBarActivity {
                                     .text("No internet connection found! Please find a connection and try again."));
                     break;
                 }
-
+                case -4: { //Parent login not supported
+                    SnackbarManager.show(
+                            Snackbar.with(LoginActivity.this).type(SnackbarType.MULTI_LINE)
+                                    .text("Sorry. Currently we do not support parent accounts."));
+                    break;
+                }
             }
 
         }
