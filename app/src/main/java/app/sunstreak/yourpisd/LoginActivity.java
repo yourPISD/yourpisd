@@ -143,7 +143,7 @@ public class LoginActivity extends ActionBarActivity {
         //User agreement
         if (!sharedPrefs.getBoolean("AcceptedUserAgreement2", false)) {
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialog);
             builder.setTitle(getResources().getString(R.string.user_agreement_title));
             builder.setMessage(getResources().getString(R.string.user_agreement));
             // Setting Positive "Yes" Button
@@ -165,8 +165,10 @@ public class LoginActivity extends ActionBarActivity {
                 }
             });
 
-            AlertDialog alertDialog = builder.create();
-            alertDialog.show();
+            AlertDialog dlg = builder.create();
+            if (Build.VERSION.SDK_INT < 21)
+                dlg.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            dlg.show();
         }
 
         //April Fools -- Broken...

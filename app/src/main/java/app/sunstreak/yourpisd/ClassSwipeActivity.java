@@ -3,12 +3,14 @@ package app.sunstreak.yourpisd;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -406,7 +408,8 @@ public class ClassSwipeActivity extends ActionBarActivity {
                 @Override
                 public void onClick(View arg0) {
                     // Display the information.
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(),
+                            R.style.AlertDialog);
                     builder.setTitle(view.getName());
 
                     StringBuilder msg = new StringBuilder();
@@ -427,7 +430,10 @@ public class ClassSwipeActivity extends ActionBarActivity {
                                     dialog.dismiss();
                                 }
                             });
-                    builder.create().show();
+                    AlertDialog dlg = builder.create();
+                    if (Build.VERSION.SDK_INT < 21)
+                        dlg.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+                    dlg.show();
                 }
             }
 

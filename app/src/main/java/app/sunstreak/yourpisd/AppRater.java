@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 
 public class AppRater {
     private static final String RATE_YOUR_PISD = "Rate yourPISD";
@@ -49,7 +50,7 @@ public class AppRater {
     }
 
     public static void showRateDialog(final Context mContext, final SharedPreferences.Editor editor) {
-        final AlertDialog dialog = new AlertDialog.Builder(mContext).create();
+        final AlertDialog dialog = new AlertDialog.Builder(mContext, R.style.AlertDialog).create();
         dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
         dialog.setTitle("Rate " + APP_TITLE);
@@ -85,6 +86,8 @@ public class AppRater {
             }
         });
 
+        if (Build.VERSION.SDK_INT < 21)
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         dialog.show();
     }
 }

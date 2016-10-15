@@ -38,6 +38,6 @@
     <color name="red">#CC0000</color>
     <color name="transparent">#00000000</color>
     <color name="yellow">#FF8800</color>
-
     <color name="disabledCell">#F0F0F0</color>
+    <color name="topeka_accent">#00d1bf</color>
 </resources>

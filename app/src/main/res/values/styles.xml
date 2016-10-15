@@ -71,6 +71,9 @@
         </item>
     </style>
 
+    <style name="AlertDialog" parent="@android:style/Theme.Holo.Light.Dialog">
+    </style>
+
     <style name="ActionBar.Solid.Bluetheme" parent="@android:style/Widget.Holo.Light.ActionBar.Solid">
         <item name="android:background">@drawable/ab_solid_bluetheme</item>
         <item name="android:backgroundStacked">@drawable/ab_stacked_solid_bluetheme</item>

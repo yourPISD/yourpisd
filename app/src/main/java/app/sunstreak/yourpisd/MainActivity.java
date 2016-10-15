@@ -1049,7 +1049,7 @@ public class MainActivity extends ActionBarActivity {
                             @Override
                             public void onClick(View v) {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(
-                                        getActivity());
+                                        getActivity(), R.style.AlertDialog);
                                 builder.setTitle("Help");
 
                                 try {
@@ -1067,8 +1067,10 @@ public class MainActivity extends ActionBarActivity {
                                                 dialog.dismiss();
                                             }
                                         });
-                                AlertDialog diag = builder.create();
-                                diag.show();
+                                AlertDialog dlg = builder.create();
+                                if (Build.VERSION.SDK_INT < 21)
+                                    dlg.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+                                dlg.show();
                             }
                         });
                         bigLayout.addView(gpaCalc);
