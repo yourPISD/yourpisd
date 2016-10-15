@@ -1112,9 +1112,7 @@ public class MainActivity extends ActionBarActivity {
                         TextView className = (TextView) layoutAverages[i].findViewById(R.id.name);
                         className.setText(report.getCourseName());
 
-                        Semester sem = Semester.findSemester(termNum);
-                        int avg = report.calculateAverage(sem);
-
+                        int avg = report.getTerm(termNum).getGrade();
                         // Only set the grade text if the average is not empty
                         if (avg >= 0) {
                             String average = avg + "";

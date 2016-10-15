@@ -37,7 +37,7 @@ public class ClassReport {
         double weight = 0;
         for (int i = 0; i < SEMESTER_TERMS; i++) {
             TermReport term = terms[i + off];
-            if (term != null) {
+            if (term != null && term.getGrade() >= 0) {
                 double termWeight = term.isExam() ? EXAM_WEIGHT : TERM_WEIGHT;
                 grade += term.getGrade() * termWeight; //TODO: compute grade.
                 weight += termWeight;
