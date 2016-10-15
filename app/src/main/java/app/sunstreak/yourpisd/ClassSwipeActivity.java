@@ -28,6 +28,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import app.sunstreak.yourpisd.googleutil.SlidingTabLayout;
+import app.sunstreak.yourpisd.net.Parser;
 import app.sunstreak.yourpisd.net.Session;
 import app.sunstreak.yourpisd.net.data.*;
 import app.sunstreak.yourpisd.util.DateHelper;
@@ -498,7 +499,7 @@ public class ClassSwipeActivity extends ActionBarActivity {
                         descriptionView.setId(ASSIGNMENT_NAME_ID);
 
                         TextView txtGrade = (TextView) innerLayout.findViewById(R.id.grade);
-                        txtGrade.setText(grade.getGrade() == -1 ? "" : String.format("%.0f", grade.getGrade()));
+                        txtGrade.setText(Parser.gradeToString(grade.getGrade(), false));
 
                         innerLayout.setOnClickListener(new AssignmentDetailListener(grade));
 

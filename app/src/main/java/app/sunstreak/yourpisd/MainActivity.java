@@ -56,6 +56,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import app.sunstreak.yourpisd.googleutil.SlidingTabLayout;
+import app.sunstreak.yourpisd.net.Parser;
 import app.sunstreak.yourpisd.net.Session;
 import app.sunstreak.yourpisd.net.data.ClassReport;
 import app.sunstreak.yourpisd.util.DateHelper;
@@ -565,7 +566,7 @@ public class MainActivity extends ActionBarActivity {
                             startActivity(intent);
                         }
                     });
-                    termGrade.setText(avg == -1 ? "" : avg + "");
+                    termGrade.setText(Parser.gradeToString(avg, false));
                     termGrade.setGravity(Gravity.CENTER);
                     summary.addView(termGrade);
                 }
@@ -573,7 +574,7 @@ public class MainActivity extends ActionBarActivity {
                 // Display the sememster average.
                 int average = report.calculateAverage(semester);
                 if (average != -1) {
-                    String averageText = Integer.toString(average);
+                    String averageText = Parser.gradeToString(average, false);
 
                     TextView averageGrade = new MyTextView(getActivity());
                     LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(

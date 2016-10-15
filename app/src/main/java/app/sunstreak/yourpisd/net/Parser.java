@@ -22,6 +22,26 @@ public class Parser {
     }
 
     /**
+     * Displays a grade based on what the grade is. If the grade is -1, nothing is printed
+     * If the grade is -2, an "X" is printed.
+     *
+     * @param grade the grade to print out
+     * @param decimal whether to print out 3 decimal places.
+     * @return the grade as a string
+     */
+    public static String gradeToString(double grade, boolean decimal)
+    {
+        if (grade == -1)
+            return "";
+        else if (grade == -2)
+            return "X";
+        else if (decimal)
+            return String.format("%.3f", grade);
+        else
+            return String.format("%.0f", grade);
+    }
+
+    /**
      * Parses the term report (assignments for a class during a grading period).
      *
      * @param html text of detailed report
@@ -108,7 +128,11 @@ public class Parser {
                 String temp = assignment.getElementsByClass("points").get(0).html();
                 try
                 {
-                    if (temp.isEmpty())
+                    if (temp.equalsIgnoreCase("X"))
+                        newAssignment.setGrade(-2);
+                    else if (temp.equalsIgnoreCase("Z"))
+                        newAssignment.setGrade(0);
+                    else if (temp.isEmpty())
                         newAssignment.setGrade(-1);
                     else
                         newAssignment.setGrade(Double.parseDouble(temp));
