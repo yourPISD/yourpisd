@@ -176,7 +176,6 @@ public class Parser {
         Elements years = main.getElementById("ContentMain").getElementsByClass("calendar");
 
         // For each terms
-        // TODO: test after 9 weeks
         int maxTermNum = 0;
         Elements terms = years.get(0).getElementsByClass("term");
         for (Element term : terms) {
@@ -187,9 +186,11 @@ public class Parser {
             //Search term name in the list of terms
             String tempDate = termName.get(0).getElementsByClass("term").html();
             int termNum = 0;
+            boolean isExam = false;
             for (TermFinder.Term t : TermFinder.Term.values()) {
                 if (t.name.equalsIgnoreCase(tempDate)) {
                     termNum = t.ordinal();
+                    isExam = t.isExam();
                     break;
                 }
             }
@@ -241,7 +242,7 @@ public class Parser {
                 TermReport termReport = report.getTerm(termNum);
                 if (termReport == null)
                 {
-                    termReport = new TermReport(null, report, termID, false);
+                    termReport = new TermReport(report, termID, isExam);
                     report.setTerm(termNum, termReport);
                     classes.put(report.getClassID(), report);
                 }

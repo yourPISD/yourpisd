@@ -15,6 +15,11 @@ public class TermFinder {
         Term(String name) {
             this.name = name;
         }
+
+        public boolean isExam()
+        {
+            return name.contains("Semester Exam");
+        }
     }
 
     private static int termIndex = 0;
@@ -26,5 +31,6 @@ public class TermFinder {
     public static int getCurrentTermIndex() {
         return termIndex;
     }
+
 
 }

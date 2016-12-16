@@ -27,7 +27,6 @@ public class ClassReport {
     }
 
     public int calculateAverage(Semester sem){
-        //TODO: find the average? and correct weighting
         final double TERM_WEIGHT = .4;
         final double EXAM_WEIGHT = .2;
 
@@ -39,7 +38,7 @@ public class ClassReport {
             TermReport term = terms[i + off];
             if (term != null && term.getGrade() >= 0) {
                 double termWeight = term.isExam() ? EXAM_WEIGHT : TERM_WEIGHT;
-                grade += term.getGrade() * termWeight; //TODO: compute grade.
+                grade += term.getGrade() * termWeight;
                 weight += termWeight;
             }
         }

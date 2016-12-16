@@ -12,7 +12,6 @@ import app.sunstreak.yourpisd.net.Parser;
 import app.sunstreak.yourpisd.net.Session;
 
 public class TermReport {
-    private final Student student;
     private final ClassReport classGrades;
     private final int termID;
     private final boolean exam;
@@ -23,8 +22,7 @@ public class TermReport {
     private GregorianCalendar lastUpdate; //Time when we last update the detailed assignments
     private GregorianCalendar updateTime; //Time when we will need to update details again.
 
-    public TermReport(Student student, ClassReport classGrades, int termID, boolean exam) {
-        this.student = student;
+    public TermReport(ClassReport classGrades, int termID, boolean exam) {
         this.classGrades = classGrades;
         this.termID = termID;
         this.exam = exam;
@@ -34,7 +32,7 @@ public class TermReport {
         GregorianCalendar now = new GregorianCalendar();
         if (lastUpdate == null || updateTime == null || updateTime.before(now)) {
             Map<String, String> params = new HashMap<>();
-            params.put("Student", "" + (student == null ? 0 : student.studentId));
+            params.put("Student", "" + (session.getCurrentStudent().studentId));
             params.put("Enrollment", "" + classGrades.getClassID());
             params.put("Term", "" + termID);
             Parser.parseTermReport(session.request("/InternetViewer/StudentAssignments.aspx", params), this);

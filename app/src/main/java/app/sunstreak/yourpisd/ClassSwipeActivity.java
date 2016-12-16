@@ -80,7 +80,6 @@ public class ClassSwipeActivity extends ActionBarActivity {
         toolbar.addView(spinner);
 
         studentIndex = getIntent().getExtras().getInt("studentIndex");
-        int startIndex = getIntent().getExtras().getInt("classIndex");
         termNum = getIntent().getExtras().getInt("termNum");
 
         setTitle(TermFinder.Term.values()[termNum].name);
@@ -105,12 +104,17 @@ public class ClassSwipeActivity extends ActionBarActivity {
             mFragments.add(fragment);
         }
 
-        if (startIndex >= mFragments.size() || startIndex < 0)
-            startIndex = 0;
+        int openClassID = getIntent().getExtras().getInt("classID", 0);
+        int startIndex = 0;
+        for (int i = 0; i < classesForTerm.size(); i++) {
+            if (openClassID == classesForTerm.get(i).getClassID()) {
+                startIndex = i;
+                break;
+            }
+        }
 
         // Create the adapter that will return a fragment for each of the
         // primary sections of the app.
-
         mSectionsPagerAdapter = new SectionsPagerAdapter(
                 getSupportFragmentManager(), mFragments);
 
@@ -235,6 +239,12 @@ public class ClassSwipeActivity extends ActionBarActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
+
+        int classID = 0;
+        Fragment page = mSectionsPagerAdapter.getItem(mViewPager.getCurrentItem());
+        if (page instanceof DescriptionFragment)
+            classID = ((DescriptionFragment) page).classID;
+
         switch (item.getItemId()) {
             case R.id.log_out: //TODO: add logout button
                 login(true);
@@ -251,7 +261,7 @@ public class ClassSwipeActivity extends ActionBarActivity {
                 Intent intent = new Intent(this, ClassSwipeActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.putExtra("studentIndex", studentIndex);
-                intent.putExtra("classIndex", mViewPager.getCurrentItem());
+                intent.putExtra("classID", classID);
                 // Don't go into the negatives!
                 intent.putExtra("termNum", Math.max(termNum - 1, 0));
                 ((YPApplication)getApplication()).startingInternal = true;
@@ -264,7 +274,7 @@ public class ClassSwipeActivity extends ActionBarActivity {
                 intent = new Intent(this, ClassSwipeActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.putExtra("studentIndex", studentIndex);
-                intent.putExtra("classIndex", mViewPager.getCurrentItem());
+                intent.putExtra("classID", classID);
                 // Don't go too positive!
                 intent.putExtra("termNum", Math.min(termNum + 1, ClassReport.NUM_TERMS - 1));
                 ((YPApplication)getApplication()).startingInternal = true;

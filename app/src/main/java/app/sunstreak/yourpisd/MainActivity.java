@@ -522,7 +522,6 @@ public class MainActivity extends ActionBarActivity {
             //TODO: reload semester grades.
             final int termOff = ClassReport.SEMESTER_TERMS * semesterNum;
             List<ClassReport> classList = session.getCurrentStudent().getSemesterClasses(semester);
-            int i = 0;
             for (ClassReport report : classList) {
                 View classSummary = inflater.inflate(R.layout.main_grade_summary_linear_layout,
                         bigLayout, false);
@@ -552,15 +551,15 @@ public class MainActivity extends ActionBarActivity {
                     if (!report.isClassDisabledAtTerm(term + termOff))
                         avg = report.getTerm(term + termOff).getGrade();
 
-                    final int classIndex = i;
                     final int termIndex = term;
+                    final int curClassID = report.getClassID();
                     termGrade.setOnClickListener(new OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             Intent intent = new Intent(getActivity(),
                                     ClassSwipeActivity.class);
                             intent.putExtra("studentIndex", session.studentIndex);
-                            intent.putExtra("classIndex", classIndex);
+                            intent.putExtra("classID", curClassID);
                             intent.putExtra("termNum", termIndex);
                             ((YPApplication)getActivity().getApplication()).startingInternal = true;
                             startActivity(intent);
@@ -594,7 +593,6 @@ public class MainActivity extends ActionBarActivity {
 
                 summary.setPadding(5, 0, 5, 0);
                 bigLayout.addView(classSummary);
-                i++;
             }
 
             View empty = new View(getActivity());
@@ -1124,14 +1122,14 @@ public class MainActivity extends ActionBarActivity {
                             grade.setText(average);
                         }
 
-                        final int ind = i;
+                        final int curClassID = report.getClassID();
                         layoutAverages[i].setOnClickListener(new OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 Intent intent = new Intent(getActivity(),
                                         ClassSwipeActivity.class);
                                 intent.putExtra("studentIndex", session.studentIndex);
-                                intent.putExtra("classIndex", ind);
+                                intent.putExtra("classID", curClassID);
                                 intent.putExtra("termNum", TermFinder
                                         .getCurrentTermIndex());
                                 ((YPApplication)getActivity().getApplication()).startingInternal = true;
